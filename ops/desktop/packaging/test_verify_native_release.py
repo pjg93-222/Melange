@@ -424,6 +424,54 @@ class NativeFixture(unittest.TestCase):
                 if not (self.client / name).exists():
                     (self.client / name).write_bytes(b"reviewed builtin installer source")
             builtin_report = n.verify(args)
+            builtin_bytes = sum(map(len, self.payload.values()))
+            # The original runtime remains old; the independently inspected
+            # archive and frozen bootstrap must contain the reviewed replacement.
+            relative = "resources/runtime/melange/bootstrap/terrier_standalone.py"
+            old, new = b"old reviewed bootstrap", b"new reviewed bootstrap"
+            self.write_files(self.program, {relative: old})
+            self.payload[relative] = new
+            packaging = self.client.parent / "packaging"
+            (packaging / "build_runtime.py").write_text("BOOTSTRAP_FILES=('desktop_backend.py','terrier_standalone.py')\n")
+            (packaging / "terrier_standalone.py").write_bytes(new)
+            provenance_relative = "resources/runtime/melange/source-provenance.json"
+            old_provenance = b'{"retained":"previous inspected provenance"}'
+            self.write_files(self.program, {provenance_relative: old_provenance})
+            provenance = {"schemaVersion": 1, "app": args.app, "version": args.version,
+                "sourceCommit": args.source_commit, "commonClientCommit": args.client_commit, "bootstrapCommit": args.client_commit,
+                "previousRuntimeProvenanceSha256": hashlib.sha256(old_provenance).hexdigest(),
+                "sourceOrigin": {"kind": "retained-verified-export", "baseSourceCommit": args.source_commit, "sourceFileCount": 1}}
+            provenance_bytes = json.dumps(provenance).encode()
+            (self.staged.parent / "source-provenance.json").write_bytes(provenance_bytes)
+            self.payload[provenance_relative] = provenance_bytes
+            manifest = self.root / "source-overlay/manifest.json"
+            self.write_files(manifest.parent / "files", {relative: new, provenance_relative: provenance_bytes})
+            manifest.write_text(json.dumps({"schemaVersion": 1, "appId": args.app, "version": args.version,
+                "clientCommit": args.client_commit, "sourceCommit": args.source_commit,
+                "files": [{"path": name, "bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
+                          for name, raw in ((relative, new), (provenance_relative, provenance_bytes))]}))
+            args.source_overlay = str(manifest)
+            args.output = str(self.root / "inspection-source-overlay")
+            source_report = n.verify(args)
+            self.assertEqual(source_report["status"], "passed")
+            self.assertEqual((self.program / relative).read_bytes(), old)
+            self.assertEqual(source_report["sourceOverlay"]["sha256"], n.legacy.digest(manifest))
+            for label, target, raw, failure in (
+                    ("overlay", manifest.parent / "files" / relative, b"changed after extraction", "overlay bytes differ"),
+                    ("base", self.program / relative, b"changed retained base", "Final signed program input"),
+                    ("extra", manifest.parent / "files/extra.py", b"unexpected closure", "inventory is not closed")):
+                def mutate(items, output, **kwargs):
+                    rows = signatures(items, output, **kwargs)
+                    if any(key.startswith("app/") for key in items):
+                        target.write_bytes(raw)
+                    return rows
+                args.output = str(self.root / ("inspection-source-mutation-" + label))
+                with mock.patch.object(n.legacy, "signatures", side_effect=mutate), self.assertRaisesRegex(n.Refused, failure):
+                    n.verify(args)
+                if label == "extra":
+                    target.unlink()
+                else:
+                    target.write_bytes(new if label == "overlay" else old)
         self.assertEqual(report["status"], "passed")
         self.assertEqual(report["freeFloorGiB"], 16)
         self.assertTrue(report["completeNativeCensus"])
@@ -436,7 +484,169 @@ class NativeFixture(unittest.TestCase):
         self.assertEqual(builtin_report["nsisPluginCount"], 0)
         self.assertEqual(builtin_report["completeNativeCount"], 4)
         self.assertEqual(builtin_report["nsisPluginContract"]["files"], [])
-        self.assertEqual(builtin_report["extractedBytes"], sum(map(len, self.payload.values())))
+        self.assertEqual(builtin_report["extractedBytes"], builtin_bytes)
+
+
+class SourceOverlayFixture(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.program = self.root / "base"
+        self.name = "resources/runtime/terrier/sources/server/research/street_views.py"
+        self.manifest = self.root / "overlay/manifest.json"
+        self.data = b"reviewed new guard\n"
+        NativeFixture.write_files(self.program, {self.name: b"old guard", "vendor.dll": pe(b"retained vendor")})
+        NativeFixture.write_files(self.manifest.parent / "files", {self.name: self.data})
+        self.value = {"schemaVersion": 1, "appId": "terrier", "version": "1.0.31",
+            "clientCommit": "a" * 40, "sourceCommit": "b" * 40,
+            "files": [{"path": self.name, "bytes": len(self.data), "sha256": hashlib.sha256(self.data).hexdigest()}]}
+        self.save()
+
+    def save(self):
+        self.manifest.write_text(json.dumps(self.value))
+
+    def run_overlay(self):
+        return n.source_overlays(*n.scan(self.program), "terrier", "1.0.31", self.manifest, "a" * 40, "b" * 40)
+
+    def test_exact_replacement_preserves_base_and_vendor_census(self):
+        original = n.scan(self.program)
+        files, pes, mapping, inputs, binding = self.run_overlay()
+        self.assertEqual(pes, original[1])
+        self.assertEqual(mapping["vendor.dll"], original[2]["vendor.dll"])
+        self.assertEqual(set(mapping), set(original[2]))
+        self.assertEqual(mapping[self.name]["sha256"], hashlib.sha256(self.data).hexdigest())
+        self.assertEqual((self.program / self.name).read_bytes(), b"old guard")
+        self.assertEqual(len(inputs), 2)
+        self.assertEqual(binding["sourceCommit"], "b" * 40)
+
+    def test_frozen_commit_version_and_app_must_match(self):
+        for key, value in (("clientCommit", "c" * 40), ("sourceCommit", "d" * 40), ("version", "1.0.30"), ("appId", "melange")):
+            with self.subTest(key=key):
+                old = self.value[key]
+                self.value[key] = value
+                self.save()
+                with self.assertRaisesRegex(n.Refused, "identity differs"):
+                    self.run_overlay()
+                self.value[key] = old
+
+    def test_paths_are_exact_and_closed_without_new_or_vendor_members(self):
+        for name in ("../outside.py", "C:/outside.py", self.name.upper(), self.name.replace("/", "\\"),
+                     "resources/runtime/mentat/sources/server/research/street_views.py", "vendor.dll",
+                     "resources/runtime/terrier/bootstrap/terrier_standalone.py"):
+            with self.subTest(path=name):
+                self.value["files"][0]["path"] = name
+                self.save()
+                with self.assertRaisesRegex(n.Refused, "Invalid source overlay member"):
+                    self.run_overlay()
+
+    def test_duplicate_member_unknown_field_and_boolean_size_are_refused(self):
+        self.value["files"].append(dict(self.value["files"][0]))
+        self.save()
+        with self.assertRaisesRegex(n.Refused, "Invalid source overlay member"):
+            self.run_overlay()
+        self.value["files"].pop()
+        self.value["files"][0]["bytes"] = True
+        self.save()
+        with self.assertRaisesRegex(n.Refused, "Invalid source overlay member"):
+            self.run_overlay()
+        self.value["unexpected"] = "authority"
+        self.save()
+        with self.assertRaisesRegex(n.Refused, "identity differs"):
+            self.run_overlay()
+
+    def test_changed_bytes_and_extra_files_are_refused(self):
+        source = self.manifest.parent / "files" / self.name
+        source.write_bytes(b"tampered source")
+        with self.assertRaisesRegex(n.Refused, "bytes differ"):
+            self.run_overlay()
+        source.write_bytes(self.data)
+        (self.manifest.parent / "files/extra.py").write_bytes(b"extra")
+        with self.assertRaisesRegex(n.Refused, "inventory is not closed"):
+            self.run_overlay()
+
+    def test_header_identified_native_image_under_python_name_is_refused(self):
+        raw = pe(b"disguised image")
+        (self.manifest.parent / "files" / self.name).write_bytes(raw)
+        self.value["files"][0].update(bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest())
+        self.save()
+        with self.assertRaisesRegex(n.Refused, "native images"):
+            self.run_overlay()
+
+    def test_hardlinked_input_is_refused(self):
+        os.link(self.manifest.parent / "files" / self.name, self.root / "alias.py")
+        with self.assertRaisesRegex(n.Refused, "physical"):
+            self.run_overlay()
+
+    def test_duplicate_json_properties_are_refused(self):
+        self.manifest.write_text('{"schemaVersion":1,' + json.dumps(self.value)[1:])
+        with self.assertRaisesRegex(n.Refused, "Duplicate source overlay property"):
+            self.run_overlay()
+
+    def composite_provenance(self):
+        original = n.scan(self.program)[2]
+        final = self.run_overlay()[2]
+        prefix = "resources/runtime/terrier/"
+        old = b'{"sourceCommit":"' + b"c" * 40 + b'"}'
+        original[prefix + "source-provenance.json"] = {"sha256": hashlib.sha256(old).hexdigest(), "size": len(old)}
+        proof = {"status": "passed", "provenanceKind": "composite-retained-export-plus-exact-git-override",
+            "baseSourceCommit": "c" * 40, "overrideSourceCommit": "b" * 40, "sharedBootstrapCommit": "d" * 40,
+            "changedGitPaths": ["server/research/street_views.py"], "sourceFileCount": 1, "gitBackedFileCount": 1,
+            "retainedExportFileCount": 0, "override": {"bytes": len(self.data), "sha256": hashlib.sha256(self.data).hexdigest()},
+            "files": [{"path": "server/research/street_views.py", "origin": "git-blob", "matchesPublished30Native": True,
+                       "bytes": len(b"old guard"), "baseSha256": hashlib.sha256(b"old guard").hexdigest(),
+                       "effectiveSha256": hashlib.sha256(self.data).hexdigest()}]}
+        proof_path = self.root / "origin-proof.json"
+        proof_path.write_text(json.dumps(proof))
+        provenance = {"schemaVersion": 1, "app": "terrier", "version": "1.0.31", "sourceCommit": "b" * 40,
+            "commonClientCommit": "a" * 40, "bootstrapCommit": "a" * 40,
+            "previousRuntimeProvenanceSha256": hashlib.sha256(old).hexdigest(),
+            "sourceOrigin": {"kind": proof["provenanceKind"], "baseSourceCommit": "c" * 40,
+                "proofSha256": n.legacy.digest(proof_path), "sharedBootstrapSourceCommit": "d" * 40,
+                "sourceFileCount": 1, "gitBackedFileCount": 1, "retainedExportFileCount": 0}}
+        stage = self.root / "stage/sources"
+        stage.mkdir(parents=True)
+        expected = stage.parent / "source-provenance.json"
+        def save():
+            expected.write_text(json.dumps(provenance))
+            final[prefix + "source-provenance.json"] = {"sha256": n.legacy.digest(expected), "size": expected.stat().st_size}
+        save()
+        args = dict(app="terrier", version="1.0.31", client_commit="a" * 40, source_commit="b" * 40,
+            staged=stage, program_map=final, original_reference=original, origin_proof=proof_path)
+        return args, provenance, proof, proof_path, save
+
+    def test_composite_provenance_binds_origin_proof_and_exact_source_map(self):
+        args, provenance, proof, proof_path, save = self.composite_provenance()
+        result = n.source_provenance(**args)
+        self.assertEqual(result["kind"], "composite-retained-export-plus-exact-git-override")
+        self.assertEqual(result["originProofSha256"], n.legacy.digest(proof_path))
+        args["program_map"][self.name] = {"size": len(self.data), "sha256": "0" * 64}
+        with self.assertRaisesRegex(n.Refused, "differs from packaged source"):
+            n.source_provenance(**args)
+
+    def test_old_or_misleading_provenance_cannot_pass_with_correct_source_manifest(self):
+        args, provenance, proof, proof_path, save = self.composite_provenance()
+        args["program_map"]["resources/runtime/terrier/source-provenance.json"] = args["original_reference"]["resources/runtime/terrier/source-provenance.json"]
+        with self.assertRaisesRegex(n.Refused, "differs from gated provenance"):
+            n.source_provenance(**args)
+        save()
+        provenance["sourceOrigin"]["kind"] = "clean-git-export"
+        save()
+        with self.assertRaisesRegex(n.Refused, "origin identity differs"):
+            n.source_provenance(**args)
+
+    def test_origin_proof_mutation_missing_proof_and_wrong_counts_are_refused(self):
+        args, provenance, proof, proof_path, save = self.composite_provenance()
+        with self.assertRaisesRegex(n.Refused, "proof is required"):
+            n.source_provenance(**dict(args, origin_proof=None))
+        proof_path.write_text(json.dumps(proof) + "\n")
+        with self.assertRaisesRegex(n.Refused, "origin identity differs"):
+            n.source_provenance(**args)
+        provenance["sourceOrigin"]["proofSha256"] = n.legacy.digest(proof_path)
+        provenance["sourceOrigin"]["retainedExportFileCount"] = 1
+        save()
+        with self.assertRaisesRegex(n.Refused, "origin counts differ"):
+            n.source_provenance(**args)
 
 
 if __name__ == "__main__":

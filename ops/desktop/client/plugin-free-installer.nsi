@@ -162,17 +162,9 @@ Section "${PF_PRODUCT}"
   ClearErrors
   SetOutPath "$INSTDIR"
   IfErrors extraction_failed
-  ; Overlay exclusions are checked for ambiguous nested names by the packager.
-  File /r /x "${PF_EXE}" /x "app.asar" "${PF_PROGRAM}\*"
-  IfErrors extraction_failed
-  SetOutPath "$INSTDIR"
-  IfErrors extraction_failed
-  File /oname=${PF_EXE} "${PF_EXECUTABLE_SOURCE}"
-  IfErrors extraction_failed
-  SetOutPath "$INSTDIR\resources"
-  IfErrors extraction_failed
-  File /oname=app.asar "${PF_ASAR_SOURCE}"
-  IfErrors extraction_failed
+  ; The producer emits one exact physical input per normalized payload path.
+  ; Each File and SetOutPath has its own extraction-error check.
+  !include "${PF_PAYLOAD_INCLUDE}"
   SetOutPath "$INSTDIR"
   ; Only a fully extracted version can become the next-login update receiver.
   SetDetailsPrint both

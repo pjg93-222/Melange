@@ -144,6 +144,121 @@ def reference_overlays(files, pes, mapping, app, *, executable=None, asar=None):
     return files, pes, mapping
 
 
+def source_overlays(files, pes, mapping, app, version, manifest_file, client_commit, source_commit):
+    """Independently bind the narrowly reviewed non-native source replacements.
+
+    The original base stays untouched. Actual extracted sources and bootstrap
+    still have to equal the separately gated source tree and frozen tooling.
+    """
+    if manifest_file is None:
+        return files, pes, mapping, {}, None
+    manifest_file = Path(manifest_file).absolute()
+    require(physical(manifest_file).st_size <= 65536, "Source overlay manifest is too large")
+    def unique_object(pairs):
+        value = {}
+        for key, item in pairs:
+            require(key not in value, "Duplicate source overlay property")
+            value[key] = item
+        return value
+    manifest = json.loads(manifest_file.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
+    require(isinstance(manifest, dict) and set(manifest) == {"schemaVersion", "appId", "version", "clientCommit", "sourceCommit", "files"}
+            and type(manifest["schemaVersion"]) is int and manifest["schemaVersion"] == 1
+            and manifest["appId"] == app and manifest["version"] == version
+            and manifest["clientCommit"] == client_commit and manifest["sourceCommit"] == source_commit
+            and all(isinstance(value, str) and re.fullmatch(r"[a-f0-9]{40}", value) for value in (client_commit, source_commit)),
+            "Source overlay identity differs from frozen release")
+    rows = manifest["files"]
+    require(isinstance(rows, list) and 1 <= len(rows) <= 5, "Invalid source overlay member count")
+    prefix = "resources/runtime/" + app + "/"
+    allowed = {prefix + name for name in ("bootstrap/terrier_standalone.py", "bootstrap/module_application_inventory.py",
+                                          "source-inventory.json", "source-provenance.json")}
+    if app == "terrier":
+        allowed.add(prefix + "sources/server/research/street_views.py")
+    root = manifest_file.parent / "files"
+    overlay_files, overlay_pes, overlay_map = scan(root)
+    require(not overlay_pes, "Source overlays cannot contain native images")
+    files, pes, mapping = dict(files), set(pes), dict(mapping)
+    seen, inputs = set(), {}
+    for row in rows:
+        require(isinstance(row, dict) and set(row) == {"path", "bytes", "sha256"}, "Invalid source overlay member")
+        name = row["path"]
+        require(isinstance(name, str) and name in allowed and name not in seen and name in files and name not in pes
+                and type(row["bytes"]) is int and 0 <= row["bytes"] <= 16 * 1024**2
+                and isinstance(row["sha256"], str) and re.fullmatch(r"[a-f0-9]{64}", row["sha256"]),
+                "Invalid source overlay member")
+        seen.add(name)
+        require(overlay_map.get(name) == {"sha256": row["sha256"], "size": row["bytes"]}, "Source overlay bytes differ")
+        source = overlay_files[name]
+        with source.open("rb") as stream:
+            require(stream.read(2) != b"MZ", "Source overlays cannot contain native images")
+        files[name], mapping[name] = source, overlay_map[name]
+        inputs[str(source)] = snapshot(source)
+    require(set(overlay_files) == seen, "Source overlay file inventory is not closed")
+    inputs[str(manifest_file)] = snapshot(manifest_file)
+    return files, pes, mapping, inputs, {"path": str(manifest_file), "sha256": inputs[str(manifest_file)][-1],
+        "clientCommit": client_commit, "sourceCommit": source_commit, "files": rows}
+
+
+def source_provenance(*, app, version, client_commit, source_commit, staged, program_map, original_reference, origin_proof=None):
+    """Bind packaged provenance to the independent gated stage and source origins."""
+    expected = staged.parent / "source-provenance.json"
+    info = physical(expected)
+    prefix = "resources/runtime/" + app + "/"
+    expected_hash = legacy.digest(expected)
+    require(program_map.get(prefix + "source-provenance.json") == {"sha256": expected_hash, "size": info.st_size},
+            "Packaged source provenance differs from gated provenance")
+    value = json.loads(expected.read_text(encoding="utf-8"))
+    require(isinstance(value, dict) and value.get("schemaVersion") == 1 and value.get("app") == app
+            and value.get("version") == version and value.get("sourceCommit") == source_commit
+            and value.get("commonClientCommit") == value.get("bootstrapCommit") == client_commit,
+            "Source provenance differs from frozen identities")
+    previous = original_reference.get(prefix + "source-provenance.json")
+    require(previous is not None and value.get("previousRuntimeProvenanceSha256") == previous["sha256"],
+            "Source provenance does not bind retained provenance")
+    origin = value.get("sourceOrigin")
+    require(isinstance(origin, dict), "Explicit retained/composite source origin required")
+    sources = {name[len(prefix + "sources/"):]: row for name, row in program_map.items() if name.startswith(prefix + "sources/")}
+    retained = {name[len(prefix + "sources/"):]: row for name, row in original_reference.items() if name.startswith(prefix + "sources/")}
+    require(set(sources) == set(retained), "Source overlay changed the retained source closure")
+    proof_hash = None
+    if app != "terrier":
+        require(origin.get("kind") == "retained-verified-export" and origin.get("baseSourceCommit") == source_commit
+                and origin.get("sourceFileCount") == len(sources) and sources == retained,
+                "Retained source provenance differs from exact base sources")
+    else:
+        require(origin_proof is not None, "Terrier composite source origin proof is required")
+        proof_path = Path(origin_proof).absolute()
+        physical(proof_path)
+        proof_hash = legacy.digest(proof_path)
+        proof = json.loads(proof_path.read_text(encoding="utf-8"))
+        require(origin.get("kind") == proof.get("provenanceKind") == "composite-retained-export-plus-exact-git-override"
+                and proof.get("status") == "passed" and origin.get("proofSha256") == proof_hash
+                and proof.get("overrideSourceCommit") == source_commit
+                and origin.get("baseSourceCommit") == proof.get("baseSourceCommit")
+                and origin.get("sharedBootstrapSourceCommit") == proof.get("sharedBootstrapCommit")
+                and proof.get("changedGitPaths") == ["server/research/street_views.py"],
+                "Terrier composite source origin identity differs")
+        rows = proof.get("files")
+        require(isinstance(rows, list) and len(rows) == len(sources), "Incomplete composite source origins")
+        seen, counts = set(), {"git-blob": 0, "retained-approved-export-not-tracked-in-git": 0}
+        for row in rows:
+            name = row.get("path")
+            require(name in sources and name not in seen and row.get("origin") in counts
+                    and row.get("matchesPublished30Native") is True
+                    and retained[name] == {"sha256": row.get("baseSha256"), "size": row.get("bytes")},
+                    "Composite source origin differs from retained base")
+            seen.add(name)
+            counts[row["origin"]] += 1
+            size = proof["override"]["bytes"] if name == "server/research/street_views.py" else row["bytes"]
+            require(sources[name] == {"sha256": row.get("effectiveSha256"), "size": size},
+                    "Composite source origin differs from packaged source")
+        for field, count in (("sourceFileCount", len(sources)), ("gitBackedFileCount", counts["git-blob"]),
+                             ("retainedExportFileCount", counts["retained-approved-export-not-tracked-in-git"])):
+            require(origin.get(field) == proof.get(field) == count, "Composite source origin counts differ")
+    return {"sha256": expected_hash, "kind": origin["kind"], "originProofSha256": proof_hash,
+            "sourceFileCount": len(sources)}
+
+
 def reader_capabilities(seven):
     info = legacy.run([seven, "i"]).decode("utf-8", "strict")
     require(re.search(r"\bNsis\s+nsis\b", info, re.IGNORECASE), "A full NSIS-capable 7-Zip reader is required")
@@ -389,7 +504,12 @@ def verify(args):
     output, installer = Path(args.output).absolute(), Path(args.installer).absolute()
     program, client, staged = (Path(value).absolute() for value in (args.program_directory, args.client, args.staged_sources))
     overlays = {"executable": getattr(args, "app_executable", None), "asar": getattr(args, "app_asar", None)}
-    require(installer_format == "builtin-nsis-v1" or not any(overlays.values()), "Reference overlays require the built-in installer format")
+    source_overlay = getattr(args, "source_overlay", None)
+    require(installer_format == "builtin-nsis-v1" or not (any(overlays.values()) or source_overlay), "Reference overlays require the built-in installer format")
+    if source_overlay:
+        overlay_root = Path(source_overlay).absolute().parent
+        require(not overlay_root.is_relative_to(program) and not program.is_relative_to(overlay_root),
+                "Source overlay must be outside the retained base")
     seven = Path(args.seven_zip).resolve(strict=True)  # known tool cache may have a legitimate parent redirect
     tool_inputs = [seven]
     if seven.with_suffix(".dll").exists():
@@ -408,10 +528,17 @@ def verify(args):
     output.mkdir()
     paths = [installer, receipt_path, trust, *tool_inputs, Path(__file__), HERE / "verify_signed_release.py", HERE / "no_uninstaller_contract.py",
              *(Path(value).absolute() for value in overlays.values() if value)]
+    if source_overlay:
+        paths.append(staged.parent / "source-provenance.json")
+        if getattr(args, "source_origin_proof", None):
+            paths.append(Path(args.source_origin_proof).absolute())
     inputs = {str(file): snapshot(file) for file in paths}
     reference_files, reference_pes, reference = scan(program)
     original_reference = dict(reference)
     reference_files, reference_pes, reference = reference_overlays(reference_files, reference_pes, reference, args.app, **overlays)
+    reference_files, reference_pes, reference, source_inputs, source_binding = source_overlays(
+        reference_files, reference_pes, reference, args.app, args.version, source_overlay, args.client_commit, args.source_commit)
+    inputs.update(source_inputs)
     report = {"schemaVersion": 1, "status": "failed", "appId": args.app, "version": args.version,
               "clientCommit": args.client_commit, "sourceCommit": args.source_commit,
               "originalSourceExport": args.source,
@@ -420,6 +547,7 @@ def verify(args):
               "freeFloorGiB": args.free_floor_gib,
               "archiveReader": reader, "installerFormat": installer_format,
               "referenceOverlays": {name: str(Path(value).absolute()) for name, value in overlays.items() if value},
+              "sourceOverlay": source_binding,
               "runtimeExecution": "not performed", "recipientPolicyAcceptance": "not tested"}
     with locked_input(installer), contextlib.ExitStack() as locks:
         for file in tool_inputs:
@@ -449,6 +577,9 @@ def verify(args):
         verify_asar_integrity(app_files[PRODUCTS[args.app] + ".exe"], asar_header_hash)
         source_evidence, package = verify_sources(app=args.app, version=args.version, program_files=app_files,
             program_map=app_map, members=members, client=client, staged=staged, trust=trust, installer_format=installer_format)
+        provenance_binding = source_provenance(app=args.app, version=args.version, client_commit=args.client_commit,
+            source_commit=args.source_commit, staged=staged, program_map=app_map, original_reference=original_reference,
+            origin_proof=getattr(args, "source_origin_proof", None)) if source_overlay else None
         absence = contract.verify_without_uninstaller(installer=installer, package_json=package,
             nsis_files=nsis_files, app_files=app_files, asar_members=members, signing_receipt=receipt_path)
         receipt = json.loads(receipt_path.read_text(encoding="utf-8-sig"))
@@ -465,10 +596,20 @@ def verify(args):
         if outer != extracted:
             same_tree(scan(outer)[2], nsis_map, "Final NSIS container")
         same_tree(scan(program)[2], original_reference, "Final signed program input")
+        if source_overlay:
+            _, _, final_reference, final_source_inputs, final_binding = source_overlays(
+                reference_files, reference_pes, reference, args.app, args.version, source_overlay, args.client_commit, args.source_commit)
+            require(final_reference == reference and final_source_inputs == source_inputs and final_binding == source_binding,
+                    "Source overlay changed during verification")
         final_sources, _ = verify_sources(app=args.app, version=args.version, program_files=app_files,
             program_map=app_map, members=legacy.asar(app_files["resources/app.asar"])[1], client=client, staged=staged, trust=trust,
             installer_format=installer_format)
         require(final_sources == source_evidence, "Frozen source inputs changed during verification")
+        if source_overlay:
+            require(source_provenance(app=args.app, version=args.version, client_commit=args.client_commit,
+                source_commit=args.source_commit, staged=staged, program_map=app_map, original_reference=original_reference,
+                origin_proof=getattr(args, "source_origin_proof", None)) == provenance_binding,
+                "Source provenance changed during verification")
         for file, before in inputs.items():
             require(snapshot(file) == before, "Verification input changed: " + file)
         plugins = [] if installer_format == "builtin-nsis-v1" else sorted(NATIVE_PLUGINS)
@@ -478,6 +619,7 @@ def verify(args):
             embeddedAsarIntegrityVerified=True, asarHeaderSha256=asar_header_hash,
             completeNativeCensus=True, desktopUninstaller=False,
             noUninstaller=absence, sourceEvidence=source_evidence, applicationFiles=app_map, nsisFiles=nsis_map,
+            sourceProvenance=provenance_binding,
             nativeSignatureRows=rows, inputFilesUnchanged=True)
     return report
 
@@ -499,6 +641,8 @@ def main(argv=None):
     parser.add_argument("--source", help="Original frozen source export (provenance; transformed bytes use --staged-sources)")
     parser.add_argument("--app-executable", help="Explicit signed main-executable overlay used by the built-in installer")
     parser.add_argument("--app-asar", help="Explicit ASAR overlay used by the built-in installer")
+    parser.add_argument("--source-overlay", help="Closed, replacement-only source/bootstrap overlay manifest; vendor/native changes are forbidden")
+    parser.add_argument("--source-origin-proof", help="Independent composite origin proof required for a Terrier source overlay")
     parser.add_argument("--installer-format", choices=INSTALLER_FORMATS, default="legacy-nsis-v1",
                         help="explicit native payload layout; builtin layout forbids external installer plugins")
     parser.add_argument("--free-floor-gib", type=free_floor_gib, default=32,
