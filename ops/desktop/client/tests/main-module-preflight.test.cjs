@@ -44,7 +44,7 @@ function fixture(appId,{settings,role='owner',portable=false,suspended=false,acc
  return {launch:context.module.exports,context,events,authorized,started,resumed,revealed,approved,get selected(){return selected;}};
 }
 function assertPreflightFailure(f){
- assert.deepEqual(f.events,['read','failed','status','setup']);
+ assert.deepEqual(f.events,['read','status','loading','failed','setup']);
  assert.equal(f.authorized.length,0);assert.equal(f.started.length,0);assert.equal(f.context.openingAccess,false);
 }
 
@@ -84,7 +84,7 @@ test('Terrier rereads configuration after district settlement instead of launchi
 test('the fresh configuration is checked again before district preparation if it changes during access work',async()=>{
  const f=fixture('terrier',{afterSettle:previous=>({...previous,ownerGitHubModuleData:false})});
  await assert.rejects(f.launch(false),/GitHub module data startup is unavailable/);
- assert.deepEqual(f.events,['read','ensureAccess','settleDistrict','authorizeAvailable','read','failed','status','setup']);
+ assert.deepEqual(f.events,['read','ensureAccess','settleDistrict','authorizeAvailable','read','status','loading','failed','setup']);
  assert.equal(f.authorized.length,0);assert.equal(f.started.length,0);assert.equal(f.context.openingAccess,false);
 });
 
@@ -98,12 +98,27 @@ for(const fromAccess of [false,true]){
 
 test('backend startup errors still use the same failure UI and clear openingAccess',async()=>{
  const f=fixture('melange',{startupError:true});await assert.rejects(f.launch(false),/Synthetic backend startup failure/);
- assert.deepEqual(f.events.slice(-3),['failed','status','setup']);assert.equal(f.events.includes('accessUI'),false);assert.equal(f.context.openingAccess,false);
+ assert.deepEqual(f.events.slice(-4),['status','loading','failed','setup']);assert.equal(f.events.includes('accessUI'),false);assert.equal(f.context.openingAccess,false);
+});
+
+test('an exited backend replaces the loading text before deferred update-failure reporting',async()=>{
+ const f=fixture('mentat',{startupError:true}),messages=[];let finish;
+ const report=new Promise(resolve=>{finish=resolve;});
+ f.context.loadingStatus=async message=>{messages.push(message);f.events.push('loading');};
+ f.context.updater.markApplicationFailed=async()=>{f.events.push('failed');await report;};
+ const rejected=assert.rejects(f.launch(false),/Synthetic backend startup failure/);
+ try{
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.deepEqual(messages,['Application startup failed. Check local logs.']);
+  assert.deepEqual(f.events.slice(-3),['status','loading','failed']);
+  assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('setup'),false);
+ }finally{finish();}
+ await rejected;assert.equal(f.events.at(-1),'setup');assert.equal(f.context.openingAccess,false);
 });
 
 test('portable preflight failure preserves startup UI without marking an update failed',async()=>{
  const f=fixture('melange',{portable:true,settings:{dataDirectory:'synthetic-original-workspace',ownerGitHubModuleData:null}});
- await assert.rejects(f.launch(false),/GitHub module data startup is unavailable/);assert.deepEqual(f.events,['read','status','setup']);
+ await assert.rejects(f.launch(false),/GitHub module data startup is unavailable/);assert.deepEqual(f.events,['read','status','loading','setup']);
 });
 
 test('an already suspended lifecycle keeps the existing startup-failure suppression',async()=>{
@@ -142,7 +157,7 @@ test('actual main passes the fresh post-access selection to the production-disab
 test('module-bound health refusal in actual main uses the existing startup failure UI and never marks ready',async t=>{
  const native=startupFixture(t,{changeBoundary:boundary=>{boundary.verifyHealth=async()=>false;}}),approval=await native.data.options.authorize();
  const f=fixture('mentat',{settings:native.selected,nativeFixture:native,approval});await assert.rejects(f.launch(false),/Module startup is unavailable/);
- assert.deepEqual(f.events.slice(-3),['failed','status','setup']);assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('accessUI'),false);assert.equal(native.data.journal.active,null);
+ assert.deepEqual(f.events.slice(-4),['status','loading','failed','setup']);assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('accessUI'),false);assert.equal(native.data.journal.active,null);
 });
 
 for(const appId of ['melange','mentat']){

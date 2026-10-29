@@ -125,3 +125,9 @@ Open 27 and let its startup check discover signed 28; **Check for updates** can 
 Every published installer passed native package inspection and actual hosted-byte SHA-256/size readback. The actual packaged 27 receivers also discovered and verified 28 through the anonymous signed GitHub metadata path. These are distinct checks: the metadata smoke does not install or relaunch the app. A full work-PC update/recovery cycle, Electron UI and physical Windows lock/unlock acceptance remain unconfirmed. Source review remains in draft PR #102, stacked on unmerged #99.
 
 Known follow-up, still unfixed in 27/28: reopening an already-running older workspace can retire a staged newer public catalogue, causing one repeat download on the next fresh start. A focused reproduction used the frozen provider and startup function with signed test fixtures, without app/backend launch or network access. Unchanged current sequence 1 data cannot trigger this condition.
+
+### Startup fixes for 1.0.29
+
+Mentat's reconstructed workspace now identifies both the installed code directory and the selected data directory. An upgrade creates its own code links instead of rejecting the previous installation's links. Existing workspaces and selected data remain in place; an unexpected link inside the selected workspace still fails closed. The client and backend application inventories include the changed bootstrap.
+
+The shared loading page displays a backend startup failure immediately. A health response that arrives after the backend exits cannot establish readiness. Once the interface opens successfully, the receiver schedules signed local installation confirmation immediately instead of waiting for its next fifteen-minute timer. Checks remain serialized, and a startup failure during installer verification prevents confirmation. Local confirmation can complete while GitHub is unavailable; remote status still reports the connection failure.

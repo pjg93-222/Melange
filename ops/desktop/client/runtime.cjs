@@ -114,7 +114,7 @@ class Runtime {
     try{
       if(moduleInput){setActiveModule(this,moduleInput,child);moduleInput.claimChild(child);check();await writeModuleFrame(child,moduleInput.frame(roots),moduleInput.signal);check();}
       const deadline=Date.now()+(moduleInput?moduleInput.startupTimeoutMs:120000);
-      while(Date.now()<deadline){check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');const ready=await health(this.origin,this.token,appId);check();if(ready&&(!moduleInput||matchesModuleHealth(this,ready))){this.launchPath=ready.launchPath;this.configuration=configuration;return this.origin;}await new Promise(r=>setTimeout(r,250));}
+      while(Date.now()<deadline){check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');const ready=await health(this.origin,this.token,appId);check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');if(ready&&(!moduleInput||matchesModuleHealth(this,ready))){this.launchPath=ready.launchPath;this.configuration=configuration;return this.origin;}await new Promise(r=>setTimeout(r,250));}
       throw new Error('Application startup timed out. See backend.log.');
     }catch(error){
       // Module teardown follows the coordinator's protected provider drain.

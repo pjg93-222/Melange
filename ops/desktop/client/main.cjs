@@ -144,7 +144,7 @@ const launch=require('./single-launch.cjs').singleLaunch(async function launchOn
 async function launchAuthorized(fromAccess){
  background=false;
  let generation=accessLifecycle?.generation;
- const failStartup=async error=>{if(accessLifecycle?.suspended)return;try{if(!portable)await updater.markApplicationFailed();}catch{}updateStatus('Application startup failed. Check local logs.');await showSetup();throw error;};
+ const failStartup=async error=>{if(accessLifecycle?.suspended)return;const message='Application startup failed. Check local logs.';updateStatus(message);await loadingStatus(message);try{if(!portable)await updater.markApplicationFailed();}catch{}await showSetup();throw error;};
  try{refuseModuleDataSettings(runtime.configuration||read('settings.json'));}catch(error){await failStartup(error);return;}
  try{const gate=await ensureAccess();if(generation===undefined)generation=accessLifecycle.generation;await settleDistrict(gate);await require('./access-gate.cjs').authorizeAvailable(gate,async state=>{if(state.phase==='revoked')await onRevoked();});}catch{if(runtime.child&&!accessLifecycle?.suspended)await accessLifecycle?.suspend('locked');if(accessGate?.accepted?.revoked)await dropDistrictData();if(fromAccess)throw new Error('Access is not ready');window.hide();await showAccess();return;}
  if(closing||generation!==accessLifecycle.generation)return;
@@ -277,7 +277,7 @@ async function checkUpdates({manual=false}={}){
   let enrollmentDeferred=false;
   try{if(githubConfig)await require('./github-source.cjs').enrollGitHub({appId:definition.id,publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp[definition.id],config:githubConfig,load:loadEnrollment,save:saveEnrollment});else await accessOperation(async()=>{const gate=await ensureAccess();await enrollApproved({client:gate.client,version:app.getVersion(),load:loadEnrollment,save:saveEnrollment});});}
   catch{enrollmentDeferred=true;}
-  if(manual&&githubSource)await githubSource.refreshDiscovery();
+  if(manual&&githubSource){await githubSource.refreshDiscovery();if(updater.checkPromise)await updater.checkPromise;}
   await updater.check();
   if(enrollmentDeferred&&!fs.existsSync(file(enrollmentFile))){updateStatus(githubConfig?'GitHub update initialization is pending. The receiver retries when packaged verification keys and protected local storage are available.':'Automatic update enrollment is pending. The receiver retries when the approved server and protected credentials are available.');updateGitHubStatus('Update deferred: update setup is unavailable. Retrying automatically.');}
   if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked')await onRevoked();if(accessWindow&&!accessWindow.isDestroyed())accessWindow.webContents.send('desktop-access:status',state);}catch{}

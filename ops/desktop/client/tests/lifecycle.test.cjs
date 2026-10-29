@@ -111,6 +111,42 @@ test('interrupted activation suspends repeated installation and retains recovera
   f.envelope=f.sign('1.1.1',2);await next.check();assert.equal(f.state.pending.version,'1.1.1');assert.equal(f.state.pending.phase,'prepared');
 });
 
+for(const offline of [false,true])test('healthy startup confirms its signed local installer automatically'+(offline?' without GitHub availability':''),async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';f.offline=offline;let verified=0;
+  const next=f.client('Fixture Publisher',{verifyNativePackage:async()=>{verified++;}});
+  next.markApplicationReady();
+  // Observe the automatically scheduled check; do not invoke a manual check.
+  await new Promise(queueMicrotask);assert.ok(next.checkPromise);await next.checkPromise;
+  assert.equal(verified,1);assert.equal(f.state.pending,null);assert.equal(f.state.installed.version,'1.1.0');
+  assert.equal(f.state.installedVersion,'1.1.0');assert.equal(f.state.previous.version,'1.0.0');assert.equal(f.downloads,1);
+  assert.match(f.status.at(-1),offline?/Update deferred: offline/:/Already current/);
+});
+
+test('readiness during a check queues confirmation behind that same serialized operation',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();f.version='1.1.0';
+  let entered,release,held=false,verifications=0;
+  const waiting=new Promise(resolve=>{entered=resolve;}),resume=new Promise(resolve=>{release=resolve;});
+  const next=f.client('Fixture Publisher',{verifyNativePackage:async()=>{verifications++;}}),request=next.request;
+  next.request=async(...args)=>{if(args[1].includes('/updates?')&&!held){held=true;entered();await resume;}return request(...args);};
+  const checking=next.check();await waiting;next.markApplicationReady();next.markApplicationReady();
+  assert.equal(next.check(),checking,'Concurrent checks must join the running operation');
+  assert.equal(f.state.pending.phase,'activating');assert.equal(verifications,0);
+  release();await checking;
+  assert.equal(verifications,1);assert.equal(f.state.pending,null);assert.equal(f.state.installed.version,'1.1.0');
+  assert.equal(f.state.previous.version,'1.0.0');assert.equal(next.busy,false);
+});
+
+test('startup failure during automatic native verification cannot confirm stale readiness',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();f.version='1.1.0';f.seed=f.envelope;
+  let entered,release;const waiting=new Promise(resolve=>{entered=resolve;}),resume=new Promise(resolve=>{release=resolve;});
+  const next=f.client('Fixture Publisher',{verifyNativePackage:async()=>{entered();await resume;}});
+  next.markApplicationReady();await waiting;const checking=next.checkPromise;
+  await next.markApplicationFailed();release();await checking;
+  assert.equal(next.applicationReady,false);assert.equal(f.state.pending.phase,'failed');assert.equal(f.state.installed.version,'1.0.0');
+  assert.notEqual(f.state.installedVersion,'1.1.0');assert.equal(f.downloads,1);
+});
+
 test('installed status requires backend readiness and preserves previous authorized package',async t=>{
   const f=fixture(t),client=f.client();await client.check();await client.activateAfterClose();
   f.version='1.1.0';const next=f.client();await next.check();assert.equal(f.state.pending.version,'1.1.0');assert.equal(f.state.installed.version,'1.0.0');

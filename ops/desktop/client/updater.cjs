@@ -33,6 +33,7 @@ class DesktopUpdater {
     this.request=options.request||jsonRequest;this.download=options.download||downloadVerified;
     this.verifyNativePackage=options.verifyNativePackage||verifyWindowsPackage;
     this.makeFeed=options.makeFeed||verifiedFeed;this.busy=false;this.feed=null;this.ready=null;
+    this.checkPromise=null;this.startupConfirmationRequested=false;this.startupConfirmationQueued=false;
     this.autoUpdater.autoDownload=false;this.autoUpdater.autoInstallOnAppQuit=false;
     this.autoUpdater.allowDowngrade=false;this.autoUpdater.disableDifferentialDownload=true;
     this.autoUpdater.disableWebInstaller=true;
@@ -239,7 +240,7 @@ class DesktopUpdater {
       this.writeState({...latest,recovery,...(latest.pending&&latest.pending.version!==this.version?{pending:null}:{})});await this.prepareRecovery(enrollment,recovery);
       this.onStatus('Previous authorized version '+target.version+' is verified. Close this app to restore its program files; local data stays in place.');
       return target.version;
-    }finally{this.busy=false;}
+    }finally{this.busy=false;this.queueStartupConfirmation();}
   }
   async recover(enrollment){
     let state=this.readState();const recovery=state.recovery;
@@ -275,9 +276,16 @@ class DesktopUpdater {
       // is not verified, but still waits for a successful local startup.
       const {path:cached,manifest}=this.packageOf(pending),legacy=this.legacyUserData&&path.join(this.legacyUserData,'updates',String(manifest.sequence),manifest.package.name);
       const installer=[cached,legacy].find(file=>file&&fs.existsSync(file));
-      if(!this.applicationReady&&installer!==legacy){const notice='Updated app awaits a successful local startup.';this.onStatus(notice);return notice;}
+      const legacyInstall=Boolean(legacy&&installer===legacy);
+      if(!this.applicationReady&&!legacyInstall){const notice='Updated app awaits a successful local startup.';this.onStatus(notice);return notice;}
       const verified=verifyEnvelope(pending.envelope,enrollment,this.identity(),state);
       if(installer)await this.verifyNativeFile(installer,verified.manifest);
+      // Startup may fail while the retained installer's signature/hash is awaited.
+      // Never overwrite that newer failure or a replaced transaction with stale readiness.
+      state=this.readState();
+      if(!state.pending||state.pending.version!==this.version||state.pending.phase==='failed'||
+        state.suspendedVersions?.includes(this.version)||envelopeHash(state.pending.envelope)!==verified.manifestHash)return;
+      if(!this.applicationReady&&!legacyInstall){const notice='Updated app awaits a successful local startup.';this.onStatus(notice);return notice;}
       this.writeState({...state,previous:state.installed||state.previous||null,installed:{...pending,phase:'installed'},pending:null,installedVersion:this.version,...(state.startupPendingVersion?{startupPendingVersion:null}:{})});
       // Only now, with pending cleared, keep the verified legacy copy at the current path too, so a later offline rollback to
       // this release finds it; a pending release is therefore never at both paths. Every later use re-verifies the copy, and a
@@ -299,8 +307,19 @@ class DesktopUpdater {
     catch(error){this.ready=null;const notice='Staged update '+pending.version+' was not prepared: '+error.message;this.onStatus(notice);return notice;}
     this.onStatus('Verified update '+pending.version+' waits for this app to close.'+(this.publisherWarning?' '+this.publisherWarning:''));
   }
-  async check(){
-    if(this.busy||this.osShutdown)return;this.busy=true;
+  check(){
+    if(this.checkPromise)return this.checkPromise;
+    if(this.busy||this.osShutdown)return Promise.resolve();
+    this.busy=true;
+    this.checkPromise=Promise.resolve().then(async()=>{
+      do{
+        this.startupConfirmationRequested=false;
+        await this.checkOnce();
+      }while(this.startupConfirmationRequested&&this.applicationReady&&!this.osShutdown);
+    }).finally(()=>{this.busy=false;this.checkPromise=null;this.queueStartupConfirmation();});
+    return this.checkPromise;
+  }
+  async checkOnce(){
     let enrollment;
     try {
       this.onStatus('Checking for updates…');
@@ -337,12 +356,27 @@ class DesktopUpdater {
       this.onStatus('Update '+m.version+' verified. Installs after you close this app.'+(this.publisherWarning?' '+this.publisherWarning:''));
       await this.report(enrollment,'downloaded');
     }catch(error){this.onStatus(this.ready?'Update check deferred. Verified update remains staged; local app remains available.':'Update deferred: '+error.message);
-    }finally{this.busy=false;}
+    }
+  }
+  queueStartupConfirmation(){
+    if(!this.startupConfirmationRequested||this.startupConfirmationQueued||this.busy||this.osShutdown||!this.applicationReady)return;
+    this.startupConfirmationQueued=true;
+    queueMicrotask(()=>{
+      this.startupConfirmationQueued=false;
+      if(this.startupConfirmationRequested&&!this.busy&&!this.osShutdown&&this.applicationReady)this.check().catch(()=>{});
+    });
   }
   markApplicationReady(){
+    const becameReady=!this.applicationReady;
     this.applicationReady=true;
     // Keep-2 pruning and legacy program-folder cleanup (DL-spec 2.5, 2.6): once per run, after a successful launch, never fatal.
     if(this.installLayout&&!this.layoutSwept){this.layoutSwept=true;try{Promise.resolve(this.installLayout.sweep(this.readState())).catch(()=>{});}catch{}}
+    if(becameReady){try{
+      const state=this.readState(),recovery=state.recovery;
+      if(this.startupPending(state)||(recovery?.target.version===this.version&&!['completed','failed'].includes(recovery.phase))){
+        this.startupConfirmationRequested=true;this.queueStartupConfirmation();
+      }
+    }catch{}}
   }
   async markApplicationFailed(){
     this.applicationReady=false;this.ready=null;
@@ -423,6 +457,6 @@ class DesktopUpdater {
     }catch(error){this.activationFailure=error;this.onStatus('Update activation refused: '+error.message);return false;}
   }
   suspendInstallation(){this.osShutdown=true;this.autoUpdater.autoInstallOnAppQuit=false;}
-  close(){this.feed?.close();this.feed=null;}
+  close(){this.startupConfirmationRequested=false;this.feed?.close();this.feed=null;}
 }
 module.exports={DesktopUpdater,verifiedFeed};

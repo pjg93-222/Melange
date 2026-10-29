@@ -5,7 +5,7 @@ const read=name=>fs.readFileSync(path.join(__dirname,'..',name),'utf8');
 // gate every install; the Windows certificate store and Authenticode chain are not consulted.
 test('updates are checked unconditionally and the Authenticode chain checks are skipped',()=>{
  const main=read('main.cjs');
- assert.match(main,/catch\{enrollmentDeferred=true;\}\r?\n\s*if\(manual&&githubSource\)await githubSource\.refreshDiscovery\(\);\r?\n\s*await updater\.check\(\);/);
+ assert.match(main,/catch\{enrollmentDeferred=true;\}\r?\n\s*if\(manual&&githubSource\)\{await githubSource\.refreshDiscovery\(\);if\(updater\.checkPromise\)await updater\.checkPromise;\}\r?\n\s*await updater\.check\(\);/);
  assert.doesNotMatch(main,/publisher-trust|publisherTrusted|trustPublisher|trustUpdates|trust-updates|offerUpdateTrust|UPDATES_UNTRUSTED|updatesTrusted|Turn on updates/);
  // The installer publisher check is not disabled: updater.cjs uses its default, native-signature.cjs, which pins the
  // signer thumbprint to the signed manifest's publisherThumbprints (tests/publisher-thumbprint.test.cjs).
@@ -32,6 +32,16 @@ test('failed manual refresh reports deferral and cannot be overwritten by cached
  const {context,calls}=checkerFixture(async()=>{throw new Error('network unavailable');});await context.check({manual:true});
  assert.equal(calls.includes('check'),false);assert.ok(calls.some(value=>/Update deferred.*Refresh deferred/.test(value)));
  assert.equal(context.checkingUpdates,false);
+});
+test('manual discovery is checked after an active automatic startup confirmation completes',async()=>{
+ let release;const pending=new Promise(resolve=>{release=resolve;});
+ const {context,calls}=checkerFixture();
+ context.updater.checkPromise=pending.then(()=>{context.updater.checkPromise=null;calls.push('confirmed');});
+ const manual=context.check({manual:true});await new Promise(setImmediate);
+ assert.equal(calls.includes('refresh'),true);assert.equal(calls.includes('check'),false);
+ release();await manual;
+ assert.ok(calls.indexOf('confirmed')<calls.indexOf('check'));
+ assert.equal(calls.filter(value=>value==='check').length,1);
 });
 test('repeated manual clicks share the active check and do not start concurrent refreshes',async()=>{
  let release,entered;const started=new Promise(resolve=>{entered=resolve;});
