@@ -32,7 +32,7 @@ class DistrictTransition{
  cancel(){this.generation++;}
  async suspend(){this.cancel();this.pendingReady=null;for(const item of this.pool.values())item.runtime.requestsAllowed=false;if(this.starting&&this.starting!==this.current())await this.starting.stop();await this.clearInactive();}
  async clearInactive(){const active=this.current();for(const [id,item]of this.pool){if(item.runtime!==active){item.runtime.requestsAllowed=false;await item.runtime.stop();this.pool.delete(id);}}}
- async stopAll(){this.cancel();const runtimes=new Set([this.current(),this.starting,...Array.from(this.pool.values(),item=>item.runtime)]);this.pool.clear();await Promise.all(Array.from(runtimes,runtime=>runtime?.stop()));}
+ async stopAll(){this.cancel();const runtimes=new Set([this.current(),this.starting,...Array.from(this.pool.values(),item=>item.runtime)]);const results=await Promise.allSettled(Array.from(runtimes,async runtime=>{if(!runtime)return;await runtime.stop();for(const [id,item]of this.pool)if(item.runtime===runtime)this.pool.delete(id);}));const failed=results.find(result=>result.status==='rejected');if(failed)throw failed.reason;}
  async prune(){const active=this.current();for(const [id,item]of this.pool){if(item.runtime!==active&&(this.pool.size>this.maxWarm||this.freeMemory()<2*1024**3)){item.runtime.requestsAllowed=false;await item.runtime.stop();this.pool.delete(id);}}}
  remember(configuration,runtime){this.pool.delete(configuration.district);this.pool.set(configuration.district,{runtime,fingerprint:this.fingerprint(configuration)});}
  rendererReady(){const operation=this.pendingReady;if(!operation||operation.district!==this.read().district)return;operation.readyAt=performance.now();if(operation.committed){this.pendingReady=null;this.mark(operation,'renderer-ready',{cacheHit:operation.cacheHit});}}
@@ -52,8 +52,8 @@ class DistrictTransition{
    if(effective.district!==selected.district)throw new Error('District verification returned a different district.');
    this.mark(operation,'data-verified');
    const remembered=this.pool.get(district);target=remembered?.runtime;
-   if(target&&remembered.fingerprint!==this.fingerprint(effective)){this.pool.delete(district);await target.stop();target=null;}
-   if(target&&!target.child){this.pool.delete(district);await target.stop();target=null;}
+   if(target&&remembered.fingerprint!==this.fingerprint(effective)){await target.stop();this.pool.delete(district);target=null;}
+   if(target&&!target.child){await target.stop();this.pool.delete(district);target=null;}
    if(!target){await this.prune();check();target=this.createRuntime();}else operation.cacheHit=true;
    // Runtime.start freshly authorizes both new and retained backends.
    const candidateFingerprint=this.fingerprint(effective);
@@ -84,7 +84,10 @@ class DistrictTransition{
    this.mark(operation,'failed',{cacheHit:operation.cacheHit});
    this.pendingReady=null;
    if(changed){this.write(previous);this.activate(old);if(loaded||this.location()!==oldLocation){try{if(await this.canReveal(old.authorization))await this.navigate(oldLocation);else await this.onUnavailable();}catch{await this.onUnavailable();}}}
-   if(target&&target!==old){this.pool.delete(district);await target.stop();}
+   if(target&&target!==old){
+    try{await target.stop();this.pool.delete(district);}
+    catch{this.pool.set(district,{runtime:target,fingerprint:null});this.mark(operation,'backend-stop-deferred');}
+   }
    throw error;
   }finally{this.starting=null;this.busy=false;}
  }

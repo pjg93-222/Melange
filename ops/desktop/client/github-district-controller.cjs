@@ -27,11 +27,11 @@ class GitHubDistrictController{
   const result=this.tail.then(()=>this.run(configuration,stageOnly));this.tail=result.catch(()=>{});return result;
  }
  ensure(configuration){return this.enqueue(configuration,false);}
- retire(configuration){
+ retire(configuration,{canRetire=()=>true}={}){
   const result=this.tail.then(async()=>{
-   if(!this.provider||!configuration.standaloneGitHubData)return null;
+   if(!this.provider||!configuration.standaloneGitHubData||!canRetire())return null;
    const authorization=await this.authorize(configuration);
-   if(!authorized(configuration,authorization))return null;
+   if(!authorized(configuration,authorization)||!canRetire())return null;
    this.busy=true;try{return await this.provider.retireInactive(configuration,authorization);}finally{this.busy=false;}
   });this.tail=result.catch(()=>{});return result;
  }

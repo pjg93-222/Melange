@@ -55,6 +55,11 @@ test('public cache retirement waits for ongoing provider work and checks authori
  allowed=false;finish();await discovery;assert.equal(await retirement,null);assert.equal(retired,0);
  allowed=true;await f.controller.retire(selected);assert.equal(retired,1);
 });
+test('post-ready cache retirement declines when a district switch starts during authorization',async()=>{
+ const f=fixture();await f.controller.ensure(configuration);let canRetire=true,retired=false;
+ f.provider.retireInactive=async()=>{retired=true;};f.controller.authorize=async()=>{canRetire=false;return approval();};
+ assert.equal(await f.controller.retire({...configuration,standaloneGitHubData:{schemaVersion:2}},{canRetire:()=>canRetire}),null);assert.equal(retired,false);
+});
 test('runtime IPC denies untrusted frames before reads or refresh and ignores renderer arguments',async()=>{
  const handlers=new Map(),trusted={},calls=[];
  registerDistrictDataIPC({handle:(name,callback)=>handlers.set(name,callback)},{runtimeOnly:event=>{if(event!==trusted)throw new Error('Untrusted application request');},info:()=>{calls.push('info');return {phase:'ready'};},refresh:()=>{calls.push('refresh');return {phase:'update-ready'};},canRefresh:()=>true});

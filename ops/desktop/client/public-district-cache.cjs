@@ -1,11 +1,16 @@
 'use strict';
 // Retire only downloaded public files described by verified catalogues. Local
 // accounts, saved views, snapshot history and rollback journals live elsewhere.
-const fs=require('node:fs').promises,path=require('node:path');
+const nativeFs=require('node:fs'),fs=nativeFs.promises,path=require('node:path'),crypto=require('node:crypto');
 const IDS=['co-05','or-05','ct-01'],SHA=/^[a-f0-9]{64}$/;
 const within=(root,target)=>{const relative=path.relative(root,target);return relative!==''&&relative!=='..'&&!relative.startsWith('..'+path.sep)&&!path.isAbsolute(relative);};
 const stamp=stat=>[stat.dev,stat.ino,stat.size,stat.mtimeNs,stat.ctimeNs].map(String).join('|');
 function requireValue(value){if(!value)throw new Error('Public district cache retirement refused an unsafe path or changed file.');}
+async function signedFile(file,expected,stat){
+ requireValue(SHA.test(expected.sha256));const hash=crypto.createHash('sha256');let bytes=0;
+ for await(const chunk of nativeFs.createReadStream(file,{highWaterMark:4*1024*1024})){bytes+=chunk.length;requireValue(bytes<=expected.bytes);hash.update(chunk);}
+ requireValue(bytes===expected.bytes&&hash.digest('hex')===expected.sha256&&stamp(await fs.lstat(file,{bigint:true}))===stamp(stat));
+}
 async function existing(filename){try{return await fs.lstat(filename,{bigint:true});}catch(error){if(error.code==='ENOENT')return null;throw error;}}
 async function directory(root,target){
  requireValue(target===root||within(root,target));
@@ -20,7 +25,7 @@ function rolePath(role){
  return role.split('/').join(path.sep);
 }
 async function inventory(root,target,files){
- const expected=new Map(files.map(row=>[rolePath(row.role),row.bytes])),allowedDirectories=new Set(['']);
+ const expected=new Map(files.map(row=>[rolePath(row.role),row])),allowedDirectories=new Set(['']);
  for(const name of expected.keys()){let parent=path.dirname(name);while(parent!=='.'){allowedDirectories.add(parent);parent=path.dirname(parent);}}
  const rows=[],directories=[];let visited=0;
  async function visit(current){
@@ -31,7 +36,8 @@ async function inventory(root,target,files){
    for(const name of await fs.readdir(current))await visit(path.join(current,name));
    directories.push(current);
   }else{
-   requireValue(stat.isFile()&&expected.has(relative)&&BigInt(expected.get(relative))===stat.size);
+   requireValue(stat.isFile()&&expected.has(relative)&&BigInt(expected.get(relative).bytes)===stat.size);
+   await signedFile(current,expected.get(relative),stat);
    rows.push({file:current,stamp:stamp(stat)});
   }
  }
@@ -66,6 +72,7 @@ async function retirePublicDistrictCaches({root,configuration,manifests}){
     if(!await directory(root,path.dirname(target)))continue;
     const stat=await existing(target);if(!stat)continue;
     requireValue(stat.isFile()&&!stat.isSymbolicLink()&&stat.size===BigInt(asset.bytes));
+    await signedFile(target,asset,stat);
     requireValue(await directory(root,path.dirname(target))&&stamp(await fs.lstat(target,{bigint:true}))===stamp(stat));await fs.unlink(target);result.retired.push(target);
    }catch{result.skipped.push(target);}
   }
