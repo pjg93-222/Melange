@@ -18,6 +18,19 @@ for(const appId of ['terrier','melange','mentat']){
  });
 }
 
+for(const appId of ['melange','mentat']){
+ test(`actual ${appId} factory disables activation when public configuration cannot be read`,async t=>{
+  let lookups=0;
+  const applicationConfig={};Object.defineProperty(applicationConfig,'desktopPublicData',{get(){throw new Error('Configuration is unavailable');}});
+  const context={definition:{id:appId},applicationConfig,read:()=>({}),refuseModuleDataSettings:require('../runtime.cjs').refuseModuleDataSettings,
+   require:name=>{assert.equal(name,'./module-data-startup.cjs');return {...require('../module-data-startup.cjs'),withCompiledApplicationContract:()=>{lookups++;assert.fail('No program lookup after configuration failure');}};},
+   runtime:{child:null},accessLifecycle:null,resources:path.join(__dirname,'absent-runtime')};
+  actual('function createModuleDataStartup()','\napp.on(\'second-instance\'',context);const startup=context.createModuleDataStartup();t.after(()=>startup.shutdown());
+  assert.equal(startup.supported,false);assert.equal(startup.contract,null);assert.equal(startup.boundary,null);assert.equal(lookups,0);
+  assert.equal((await startup.info()).phase,'unsupported');
+ });
+}
+
 for(const marker of [null,false,undefined,{schemaVersion:1}]){
  test(`actual native factory refuses an own marker ${String(marker)} before installed program lookup`,async t=>{
   let lookups=0,reads=0;const original={dataDirectory:'original',ownerGitHubModuleData:marker};

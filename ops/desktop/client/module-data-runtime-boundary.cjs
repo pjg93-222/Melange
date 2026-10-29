@@ -52,9 +52,14 @@ function verifyProgram(runtime,contract){
 }
 // A construction proof saves only the immediately repeated constructor scan.
 // It cannot authorize startup, survive a yield, or be supplied as JSON/settings.
-function withVerifiedProgramConstruction(runtime,contract,construct){
+function withVerifiedProgramConstruction(runtime,contract,construct,expectedRoots){
  requireValue(typeof construct==='function'&&!require('node:util').types.isAsyncFunction(construct));
- let roots;try{roots=verifyProgram(runtime,contract);}catch{const result=construct(null);requireValue(!result||typeof result.then!=='function');return result;}
+ let roots;try{
+  roots=verifyProgram(runtime,contract);
+  // A matching byte table at a different installed location cannot grant the
+  // selected application's contract. Bind the same scan to its native paths.
+  if(expectedRoots!==undefined)requireValue(exact(expectedRoots,['source','bootstrap'])&&roots.source===expectedRoots.source&&roots.bootstrap===expectedRoots.bootstrap);
+ }catch{const result=construct(null);requireValue(!result||typeof result.then!=='function');return result;}
  const proof=Object.freeze({}),record={runtime,contract,roots:Object.freeze({...roots}),programFingerprint:contract.programFingerprint,used:false};
  CONSTRUCTIONS.set(proof,record);
  try{

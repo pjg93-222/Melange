@@ -31,14 +31,15 @@ function applicationContract(appId,context){
    const result=await desktopProbe(command,'--desktop-github-module-check',request,{signal,timeout:spec.startupTimeoutMs});
    if(signal?.aborted)throw failure();current();return result;
   }});
-  return checkedContract(appId,{...spec,registry});
+  return {contract:checkedContract(appId,{...spec,registry}),roots:Object.freeze({source:sourceRoot,bootstrap:bootstrapRoot})};
  }catch{return null;}
 }
 function withCompiledApplicationContract(appId,context,construct){
  if(typeof construct!=='function'||require('node:util').types.isAsyncFunction(construct))throw failure();
- const contract=applicationContract(appId,context);
- if(!contract)return construct(null);
- return withVerifiedProgramConstruction(context.runtime,contract,proof=>construct(proof?contract:null,proof||undefined));
+ const application=applicationContract(appId,context);
+ if(!application)return construct(null);
+ const {contract,roots}=application;
+ return withVerifiedProgramConstruction(context.runtime,contract,proof=>construct(proof?contract:null,proof||undefined),roots);
 }
 function compiledApplicationContract(appId,context){return withCompiledApplicationContract(appId,context,contract=>contract);}
 function failure(){const error=new Error('Module data activation is unavailable.');error.code=error.reason='transition';return error;}

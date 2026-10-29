@@ -68,10 +68,14 @@ test('changed installed bytes fail closed initially and after a successful compo
  f.behavior=async()=>{fs.writeFileSync(reader,'foreign mutation');return {schemaVersion:1,validated:true,appId:f.appId,kind:PUBLIC_KINDS[f.appId][0],coverage:{completeKind:true,fullApplication:false}};};
  await assert.rejects(contract.registry[PUBLIC_KINDS[f.appId][0]].validateSnapshot(snapshot(f)));assert.equal(f.calls.length,1);assert.equal(f.contract,null);
 });
-test('a replaced registered program root cannot borrow another installed source selection',t=>{
- const f=fixture(t);f.roots.source=path.join(f.base,'other');fs.mkdirSync(f.roots.source);fs.writeFileSync(path.join(f.roots.source,'reader.py'),'compiled reader');
- assert.equal(f.contract,null);assert.equal(f.calls.length,0);
-});
+for(const appId of ['melange','mentat'])for(const root of ['source','bootstrap']){
+ test(`${appId} replaced registered ${root} root cannot borrow another installed selection`,t=>{
+  const f=fixture(t,appId);f.roots[root]=path.join(f.base,'other');fs.mkdirSync(f.roots[root]);
+  const [file,value]=root==='source'?['reader.py','compiled reader']:['desktop_backend.py','compiled backend'];
+  fs.writeFileSync(path.join(f.roots[root],file),value);
+  assert.equal(f.contract,null);assert.equal(f.calls.length,0);
+ });
+}
 test('component cancellation refuses before probe and after response while ordinary metadata cannot grant health',async t=>{
  const f=fixture(t),contract=f.contract,controller=new AbortController();controller.abort();
  await assert.rejects(contract.registry[PUBLIC_KINDS[f.appId][0]].validateSnapshot({...snapshot(f),signal:controller.signal}));assert.equal(f.calls.length,0);

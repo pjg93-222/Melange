@@ -344,8 +344,10 @@ function createModuleDataStartup(){
    authorize:async configuration=>(await ensureAccess()).authorize(configuration),
    effectiveConfiguration:({originalSelected,source})=>({...originalSelected,ownerGitHubModuleData:source})})});
  };
- try{refuseModuleDataSettings(read('settings.json'));}catch{return construct(null);}
- return withCompiledApplicationContract(definition.id,{runtime,resources,publicDataMode:applicationConfig.desktopPublicData?.[definition.id],onProbeDiagnostic:readerDiagnostic},construct);
+ try{
+  refuseModuleDataSettings(read('settings.json'));
+  return withCompiledApplicationContract(definition.id,{runtime,resources,publicDataMode:applicationConfig.desktopPublicData?.[definition.id],onProbeDiagnostic:readerDiagnostic},construct);
+ }catch{return construct(null);}
 }
 async function openPublicData(){
  const target=definition.id==='melange'?'/public-data/':definition.id==='mentat'?'/#public-data':null;if(!target||closing)return;
