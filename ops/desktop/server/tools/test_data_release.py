@@ -97,8 +97,8 @@ class BuildTest(unittest.TestCase):
         self.assertIn("audits/session_118.json", {f["path"] for f in m["files"]})
         self.assertIn("audits/staffer_network/politico_profile_crawl_1_raw/a.html", {f["path"] for f in m["files"]})
 
-    def test_restricted_lda_corpus_never_ships_even_when_allowed(self):
-        corpus = ["__state__/Melange/staffer_network/normalized/lda-source-native/generation-x/lda_lobbyist_assertions.ndjson.gz",
+    def test_restricted_staffer_sections_never_ship_even_when_allowed(self):
+        corpus = ["__state__/Melange/staffer_network/staffer_clients_section.json",
                   "data/engine/staffer_organisations_section.json", "data/engine/staffer_clients_section.json",
                   "staffer-network.html"]
         for rel in corpus + ["data/engine/staffer_offices_section.json"]:
@@ -127,7 +127,7 @@ class BuildTest(unittest.TestCase):
     def test_renamed_copy_of_restricted_file_is_refused_by_content(self):
         corpus = b"lobbyist rows" * 10
         self._write({
-            "__state__/M/normalized/lda-source-native/g/lda_lobbyist_assertions.ndjson.gz": corpus,
+            "data/engine/staffer_clients_section.json": corpus,
             "__state__/M/normalized/operational-spine/g1/inputs/lda_records.ndjson.gz": corpus,
             "data/engine/neutral.bin": corpus,
             "data/engine/same_size_other.bin": b"other  rows" * 10 + b"xx" * 10,
@@ -163,14 +163,13 @@ class BuildTest(unittest.TestCase):
         shipped = {f["path"] for f in m["files"]}
         self.assertTrue({"y/staffer-free.html", "y/notes.json"} <= shipped)
 
-    def test_derived_lda_stores_are_denied_pending_ruling(self):
-        pending = ["__state__/M/live_catalog/lda_source_catalog_v1.sqlite", "audits/r/lda_activity_v1.sqlite",
-                   "audits/r/lda_activity_v2.sqlite", "__state__/M/normalized/lda-identity-candidates/g/c.ndjson.gz",
-                   "audits/r/lda_activity_v1.sqlite-wal", "audits/r/lda_activity_v1.sqlite-journal"]
-        self._write({rel: rel.encode() for rel in pending})
-        m = self._build_all()
-        self.assertTrue(set(pending) <= set(m["excluded"]))
-        self.assertFalse(set(pending) & {f["path"] for f in m["files"]})
+    def test_lda_activity_v2_sqlite_is_allowed(self):
+        rel = "audits/r/lda_activity_v2.sqlite"
+        self._write({rel: b"sqlite"})
+        m = data_release.build("melange", self.root, self.out, "data-melange-2026-10-21", [], data_release.DENY,
+                               data_release.DEFAULT_PART_BYTES)
+        self.assertIn(rel, {f["path"] for f in m["files"]})
+        self.assertNotIn(rel, m["excluded"])
 
     def test_section_copies_with_any_extension_are_denied(self):
         copies = ["data/engine/staffer_organisations_section.json.gz", "b/staffer_clients_section.json.zst",
@@ -184,7 +183,7 @@ class BuildTest(unittest.TestCase):
         known, local = b'{"organisations": [1]}', b"lobbyist rows\n" * 50
         self._write({
             "catalog/orgs.json.gz": gzip.compress(known),
-            "__state__/M/normalized/lda-source-native/g/rows.ndjson": local,
+            "data/engine/staffer_clients_section.json": local,
             "z/copy.bin.gz": gzip.compress(local, mtime=0),
             "z/fine.ndjson.gz": gzip.compress(b"public rows\n" * 50),
             "z/corrupt.ndjson.gz": gzip.compress(b"x" * 999)[:10] + b"\xff" * 40,
@@ -197,7 +196,7 @@ class BuildTest(unittest.TestCase):
     def test_recompressed_or_inflated_copy_of_restricted_gz_is_refused(self):
         rows = b"lobbyist assertion rows\n" * 80
         self._write({
-            "__state__/M/normalized/lda-source-native/g/rows.ndjson.gz": gzip.compress(rows, 9, mtime=0),
+            "data/engine/staffer_clients_section.json.gz": gzip.compress(rows, 9, mtime=0),
             "z/recompressed.bin.gz": gzip.compress(rows, 1, mtime=7),
             "z/inflated.ndjson": rows,
             "z/fine.ndjson.gz": gzip.compress(b"public rows\n" * 80, 1, mtime=7),

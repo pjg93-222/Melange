@@ -57,12 +57,9 @@ DENY = [
 # islands is refused by content (see select()).
 RESTRICTED = [
     # Trailing * takes .gz/.zst/.bak copies; staffer_offices_section.json is public and stays shippable.
-    "**/lda-source-native/**", "**/staffer_organisations_section*", "**/staffer_clients_section*",
+    "**/staffer_organisations_section*", "**/staffer_clients_section*",
     "**/staffer-network.html",
-    # Derived LDA stores: pending Paul ruling on LDA restriction scope (X2 Q1).
-    # Trailing * also takes the -wal/-shm/-journal sidecars, which hold database pages.
-    "**/lda_source_catalog_v1.sqlite*", "**/lda_activity_v1.sqlite*", "**/lda_activity_v2.sqlite*",
-    "**/lda-identity-candidates*",
+    # LDA stores are not restricted (D-405, 2026-10-28).
 ]
 HARD_DENY = [
     "**/accounts.sqlite3", "**/*.dpapi", "**/keys/**", "**/keys.json", "**/.env*", "**/credentials/**",
