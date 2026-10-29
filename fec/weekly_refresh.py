@@ -170,6 +170,7 @@ def _audit_failure_gate(stdout,stderr):
 # there walks and validates the chain, i.e. import triggers execution in this repo). Parse
 # defensively; any uncertainty fails CLOSED (returns False), same posture as _audit_failures.
 _RUN_PIPELINE_PATH=os.path.join(FE,'run_pipeline.py')
+_AUDIT_FULL_PATH=os.path.join(FE,'audit','audit_full.py')
 _CHAIN_BLOCK_RE=re.compile(r'^CHAIN\s*=\s*\[(.*?)\n\]',re.M|re.S)
 _CHAIN_ENTRY_RE=re.compile(r"\(\s*'([^']+)'\s*,\s*\[[^\]]*\]\s*\)")
 def _chain_tail_is_audit_full():
@@ -189,7 +190,17 @@ def _chain_tail_is_audit_full():
     if not entries:
         log('   chain-tail guard: no (\'name\',[...]) tuples parsed from the CHAIN block')
         return False
-    return entries[-1]=='audit_full.py'
+    if entries[-1]!='audit_full.py': return False
+    # The tail must also still carry the [SYNC] live-sync gate (textual, same posture as CHAIN).
+    try:
+        with open(_AUDIT_FULL_PATH,encoding='utf-8') as f: audit_src=f.read()
+    except Exception as e:
+        log('   chain-tail guard: cannot read audit_full.py (%s)'%type(e).__name__)
+        return False
+    if "'live_sync_chain_journal_closed'" not in audit_src:
+        log('   chain-tail guard: audit_full.py no longer carries live_sync_chain_journal_closed')
+        return False
+    return True
 # ---- orphaned-child guard -----------------------------------------------------------------
 # step() creates every child with CREATE_NEW_PROCESS_GROUP, so a console CTRL+C never reaches it.
 # On any abnormal exit (KeyboardInterrupt, unhandled exception, SIGBREAK) the interpreter runs the
@@ -224,6 +235,7 @@ def _kill_live_child():
 atexit.register(_kill_live_child)
 _tolerated=[]
 _soft_failures=[]   # non-hard steps that failed/timed out: reported in status + Glass Box, never a gate (last_outcome/failures unchanged)
+_degraded=[]   # core sources served from a fallback (D-212): named in status, and last_outcome is DEGRADED*, never COMPLETE
 log('===== WEEKLY REFRESH START =====')
 _started_at=datetime.datetime.now()
 # Full child output, one file per step: weekly_refresh.log keeps only the last 300 chars of a failed step's stderr
@@ -549,19 +561,49 @@ if not step('CHRG finance hearings',['collect/fetch_congressional_record.py','ch
 # Open-universe bill discovery.  The collector retains canonical IDs for every
 # Advanced Search candidate and never scores them; the workbook sync later in
 # run_pipeline publishes the checkpoint with pending/adjudicated review state.
+DISCOVERY_PRIMARY='Congress.gov Advanced Search - Legislation'
+def _discovery_fallback_source():
+    """None when this run's discovery checkpoint came from Congress.gov itself; otherwise the source it names (the GovInfo
+    fallback writes its own manifest with primary_instrument='GovInfo BILLSTATUS/BILLS official bulk fallback').  An
+    unreadable manifest is reported as degraded, never as the primary."""
+    try:
+        _m=json.load(open(os.path.join(MB_ROOT,'data','legislation','congress_advanced_current','manifest.json'),encoding='utf-8'))
+        _src=_m.get('primary_instrument')
+    except Exception as e:
+        return 'discovery manifest unreadable (%s)'%type(e).__name__
+    return None if _src==DISCOVERY_PRIMARY else (_src or 'unnamed source')
+# D-212 (Paul, 2026-10-15): core sources, discovery first among them, "stay strict".  A failed or timed-out walk is a
+# deferred collection prerequisite again (0e2f34f43 had made it a soft failure ending COMPLETE): the weekly aborts after
+# the press transaction, HARD_FAILURE.  A walk that succeeded only through a fallback source is DEGRADED, named in status.
 if not step('Congress.gov bill discovery',[
     'legislation/refresh_legislation_discovery.py',
 ],timeout=21600,hard=False):
-    # NOT deferred, and never a hard abort: discovery yields pending-only candidates that
-    # cannot score, so a failed or timed-out walk leaves every scored input untouched. The
-    # collector resumes (--resume), so the stale candidate set simply carries to next week;
-    # aborting the whole refresh over it would strand complete press/interview evidence.
-    # step() has already recorded it in the status marker's soft_failures and the completion summary.
-    log('   FAIL: Congress.gov bill discovery incomplete -- last-good candidate set retained; soft failure, not a gate')
+    log('   FAIL: Congress.gov bill discovery incomplete -- deferred prerequisite; the weekly aborts after press acceptance')
+    _deferred_collection_failures.append('Congress.gov bill discovery')
+else:
+    _disc_src=_discovery_fallback_source()
+    if _disc_src:
+        _degraded.append('Congress.gov bill discovery: served by %s'%_disc_src)
+        log('   DEGRADED: Congress.gov bill discovery served by %s, not %s'%(_disc_src,DISCOVERY_PRIMARY))
+        _emit('refresh.step','degraded','Congress.gov bill discovery served by %s'%_disc_src,stage='Congress.gov bill discovery',
+              metadata={'step':'Congress.gov bill discovery','source':_disc_src,'hard':False})
+        _write_status(degraded=list(_degraded))
 if not step('Official bill evidence and automatic scoring admission',[
     'legislation/refresh_sentinel_admissions.py',
 ],timeout=14400,hard=False):
     _deferred_collection_failures.append('Official bill evidence and automatic scoring admission')
+else:
+    # D-366/D-369: bills still over the evidence envelope after section-aware selection are FAILED; the run is DEGRADED.
+    try:
+        with open(os.path.join(MB_ROOT,'data','legislation','sentinel_admissions.json'),encoding='utf-8') as _f:
+            _env_failed=sorted((json.load(_f).get('evidence_failed') or {}))
+    except Exception as e:
+        _env_failed=['admissions generation unreadable (%s)'%type(e).__name__]
+    if _env_failed:
+        _degraded.append('Official bill evidence: %d bill(s) FAILED the evidence envelope (%s)'
+                         %(len(_env_failed),', '.join(_env_failed[:8])+(' ...' if len(_env_failed)>8 else '')))
+        log('   DEGRADED: %s'%_degraded[-1])
+        _write_status(degraded=list(_degraded))
 if not step('FEC source money refresh',['collect/refresh_fec_money.py'],timeout=7200,hard=False):
     _deferred_collection_failures.append('FEC source money refresh')
 if not step('Congress rollcall source refresh',['legislation/refresh_vote_sources.py'],timeout=1800,hard=False):
@@ -773,14 +815,28 @@ log('===== WEEKLY REFRESH COMPLETE — dashboards regenerated =====')
 _refresh_complete=True
 _rank_summary=('rank movement %d/%d members'%(_rank_moves['moved'],_rank_moves['members'])
                if _rank_moves else 'rank movement not measured')
-_write_status(last_outcome='COMPLETE_WITH_KNOWN_GATED_FAILURES' if _tolerated else 'COMPLETE',
-              failures=list(_tolerated),rank_moves=_rank_moves,soft_failures=list(_soft_failures))
+try:    # a stale roster is a warning, never a failure
+    import roster as _roster
+    _rs=_roster.staleness()
+    _write_status(**_rs)
+    if _rs['roster_stale']:
+        log('WARNING: roster snapshot %s is stale (age %s days, threshold %d; last refresh receipt: %s)%s'%(
+            _rs['roster_snapshot'],_rs['roster_snapshot_age_days'],_roster.ROSTER_STALE_DAYS,
+            _rs['roster_refresh_receipt_status'],'; '+_rs['roster_stale_reason'] if _rs.get('roster_stale_reason') else ''))
+except Exception as _e:
+    log('roster staleness check failed: %s'%str(_e)[:120])
+_outcome='COMPLETE_WITH_KNOWN_GATED_FAILURES' if _tolerated else 'COMPLETE'
+if _degraded: _outcome=_outcome.replace('COMPLETE','DEGRADED',1)   # a fallback-served core source is never COMPLETE
+_write_status(last_outcome=_outcome,
+              failures=list(_tolerated),rank_moves=_rank_moves,soft_failures=list(_soft_failures),degraded=list(_degraded))
 _emit('refresh.run','completed',
-      'WEEKLY REFRESH COMPLETE — dashboards regenerated; %s%s'%(
+      'WEEKLY REFRESH %s — dashboards regenerated; %s%s'%(
+          'DEGRADED' if _degraded else 'COMPLETE',
           _rank_summary,'; %d known Paul-gated audit item(s) tolerated'%len(_tolerated) if _tolerated else '')
-      +('; %d non-hard step(s) failed: %s'%(len(_soft_failures),', '.join(_soft_failures)) if _soft_failures else ''),
+      +('; %d non-hard step(s) failed: %s'%(len(_soft_failures),', '.join(_soft_failures)) if _soft_failures else '')
+      +('; DEGRADED: %s'%'; '.join(_degraded) if _degraded else ''),
       stage='weekly_refresh',detail='; '.join(_tolerated)[:2000],
       duration_ms=int((datetime.datetime.now()-_started_at).total_seconds()*1000),
       metadata={'rank_moves':_rank_moves,'failures':list(_tolerated),
-                'tolerated':bool(_tolerated),'soft_failures':list(_soft_failures)})
+                'tolerated':bool(_tolerated),'soft_failures':list(_soft_failures),'degraded':list(_degraded)})
 _discard_repository_before_image()   # DE-043: last, after the outcome is recorded; an abort never gets here and keeps the before-image

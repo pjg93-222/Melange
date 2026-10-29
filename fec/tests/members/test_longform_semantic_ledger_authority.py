@@ -95,6 +95,39 @@ def test_qualified_role_conditioned_semantics_do_not_gain_baseline_authority(tmp
     assert not groups["baseline_reviewed_semantic_findings"]
 
 
+def test_pre_congress_semantics_remain_source_scoped_without_baseline_authority(tmp_path):
+    item = case(tmp_path, modern=True)
+    item.turn['source_era'] = item.source['source_era'] = 'PRE_CONGRESS_LOCAL_OFFICE'
+    fixtures.jsonl(item.source_path, [item.source])
+    fixtures.save(item)
+    features = fixtures.build(item)
+    turn = annotated(item.turn, features['turns'])
+    assert turn['semantic_review_qualified'] is True
+    assert turn['baseline_semantic_eligible'] is False
+    groups = ledger.partition_longform_semantics([turn])
+    assert groups['reviewed_semantic_findings'][0]['source_era'] == 'PRE_CONGRESS_LOCAL_OFFICE'
+    assert not groups['baseline_reviewed_semantic_findings']
+
+
+@pytest.mark.parametrize('era,recorded,allowed', [
+    ('CURRENT_ROLE_CONDITIONED', '2024-08-16', True),
+    ('CURRENT_ROLE_CONDITIONED', '2020-01-01', False),
+    ('CURRENT_ROLE_CONDITIONED', None, False),
+    ('PRE_CURRENT_LEADERSHIP_ROLE', '2020-01-01', True),
+    ('PRE_CURRENT_LEADERSHIP_ROLE', '2024-08-16', False),
+])
+def test_roster_turn_admission_preserves_and_checks_role_scope(era, recorded, allowed):
+    row = {'member': 'Example Member', 'source_era': era, 'recorded_at': recorded}
+    roles = {'Example Member': {'current_role_assumed_on': '2021-01-20'}}
+    original = copy.deepcopy(row)
+    if allowed:
+        ledger.validate_roster_turn_era(row, roles)
+    else:
+        with pytest.raises(ValueError):
+            ledger.validate_roster_turn_era(row, roles)
+    assert row == original
+
+
 def test_quality_held_or_candidate_feature_remains_provisional(tmp_path):
     item = case(tmp_path, modern=True)
     features = fixtures.build(item)

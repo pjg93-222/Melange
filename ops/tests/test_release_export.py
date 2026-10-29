@@ -4,7 +4,7 @@ from __future__ import annotations
 import unittest
 from unittest import mock
 
-from ops.tests.test_release_common import Base, Fixture, MELANGE_FILES, g, rmtree
+from ops.tests.test_release_common import Base, Fixture, MELANGE_FILES, MENTAT_FILES, g, rmtree
 from ops.release_lib import core, export, gates
 from ops import release
 
@@ -91,6 +91,14 @@ class ExportConfigTests(Base):
         self.assertTrue(export.allowed_name("ops/locks/r-packages.txt", shipped))
         self.assertFalse(export.allowed_name("ops/locks/r-packages.txt", {}))             # only extra_names lets a .txt out
 
+    def test_the_shipped_config_keeps_the_files_publisher_trust_test_reads(self):
+        # 2026-10-22: release 2026.10.22.1 went red in desktop-source-checks because the export dropped both
+        # (ENOENT in ops/desktop/client/tests/publisher-trust.test.cjs). Public certificate and launcher, no secret.
+        shipped = core.load_config()["export"]
+        for path in ("ops/desktop/client/melange-systems-desktop-release.cer", "ops/desktop/client/turn-on-updates.cmd"):
+            self.assertTrue(export.allowed_name(path, shipped), path)
+            self.assertFalse(export.allowed_name(path, {}), path)                        # only extra_names lets them out
+
     def test_desktop_installer_hook_survives_export_without_admitting_other_installer_scripts(self):
         hook = "ops/desktop/client/installer.nsh"
         omitted = ("ops/other/installer.nsh", "ops/desktop/client/unreviewed.nsh",
@@ -106,6 +114,33 @@ class ExportConfigTests(Base):
             for path in omitted:
                 self.assertNotIn(path, plan["entries"])
                 self.assertEqual(dropped[path], "extension not allowed")
+        finally:
+            fixture.close()
+
+    def test_the_mentat_console_root_template_survives_export_by_exact_path_only(self):
+        # 2026-10-22: the 2026.10.22.2 mentat-console container logged "serving the golden index.html; the console page did
+        # not render (TemplateNotFound: 'index.html.j2' ...)". console_page.py renders "/" from mentat/app/templates/, whose
+        # partials are .html (kept) but whose root is .j2, which the extension filter dropped. One exact path is let out.
+        template = "mentat/app/templates/index.html.j2"
+        shipped = core.load_config()["export"]
+        self.assertTrue(export.allowed_name(template, shipped))
+        self.assertFalse(export.allowed_name(template, {}))                              # only extra_paths lets it out
+        for other in ("mentat/app/templates/unreviewed.html.j2", "mentat/app/index.html.j2", "fec/surfaces/templates/index.html.j2",
+                      "x/mentat/app/templates/index.html.j2", "mentat/app/templates/index.html.j2.bak",
+                      "Mentat/app/templates/index.html.j2", "mentat/app/templates/sub/index.html.j2"):
+            self.assertFalse(export.allowed_name(other, shipped), other)
+        files = {template: b"{% include 'page_head.html' %}\r\n", "mentat/app/templates/page_head.html": b"<head></head>\r\n",
+                 "mentat/app/templates/unreviewed.html.j2": b"{# not a release input #}\n"}
+        with mock.patch.dict(MENTAT_FILES, files):
+            fixture = Fixture(with_liveness=False, big=False)
+        try:
+            plan = export.plan_export(fixture.cfg)
+            for path in (template, "mentat/app/templates/page_head.html"):
+                self.assertIn(path, plan["entries"], path)
+                self.assertEqual(plan["entries"][path][1], g("rev-parse", "HEAD:" + path, cwd=fixture.mentat), path)
+                self.assertEqual(plan["source_of"][path], "mentat", path)
+            self.assertNotIn("mentat/app/templates/unreviewed.html.j2", plan["entries"])
+            self.assertEqual(dict(plan["dropped"])["mentat/app/templates/unreviewed.html.j2"], "extension not allowed")
         finally:
             fixture.close()
 

@@ -498,7 +498,7 @@ class PersonalTextureContracts(unittest.TestCase):
         try:
             with tempfile.TemporaryDirectory() as directory:
                 self.module.OUT = os.path.join(directory, "personal.json")
-                self.module.write_artifact([row], {"fixture-key": result}, 1)
+                self.module.write_artifact([row], {"fixture-key": result}, [row])
                 artifact = json.loads(Path(self.module.OUT).read_text(encoding="utf-8"))
         finally:
             self.module.OUT = old_out

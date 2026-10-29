@@ -165,17 +165,34 @@ def measure_file(path: Path, holder: dict) -> dict:
 
 
 def source_era(turn: dict, source: dict, leadership: dict) -> tuple[str, str | None]:
+    turn_era, acquisition_era = turn.get('source_era'), source.get('source_era')
+    if turn_era and acquisition_era and turn_era != acquisition_era:
+        raise FeatureRefusal('materialized_source_era_mismatch')
+    explicit = turn_era or acquisition_era
     role = leadership.get(turn["member"])
-    if not role:
-        return "NOT_CURRENT_FORMAL_LEADERSHIP", None
-    cutoff = str(role["current_role_assumed_on"])
     observed = turn.get("recorded_at") or source.get("recorded_at") or turn.get("published") or source.get("published")
+    if str(explicit or '').startswith('PRE_CONGRESS'):
+        try:
+            dt.date.fromisoformat(str(observed or '')[:10])
+        except ValueError as exc:
+            raise FeatureRefusal('pre_congress_source_date_unresolved') from exc
+        return explicit, str(role['current_role_assumed_on']) if role else None
+    if not role:
+        if explicit in {'CURRENT_ROLE_CONDITIONED', 'PRE_CURRENT_LEADERSHIP_ROLE'}:
+            raise FeatureRefusal('source_era_requires_current_role')
+        return explicit or "NOT_CURRENT_FORMAL_LEADERSHIP", None
+    cutoff = str(role["current_role_assumed_on"])
     try:
         date = dt.date.fromisoformat(str(observed)[:10])
         before = date < dt.date.fromisoformat(cutoff[:10])
-    except ValueError:
+    except ValueError as exc:
+        if explicit in {'CURRENT_ROLE_CONDITIONED', 'PRE_CURRENT_LEADERSHIP_ROLE'}:
+            raise FeatureRefusal('explicit_role_source_date_unresolved') from exc
         return "LEADERSHIP_SOURCE_DATE_UNRESOLVED", cutoff
-    return ("PRE_CURRENT_LEADERSHIP_ROLE" if before else "CURRENT_ROLE_CONDITIONED"), cutoff
+    derived = "PRE_CURRENT_LEADERSHIP_ROLE" if before else "CURRENT_ROLE_CONDITIONED"
+    if explicit and explicit not in {derived, 'NOT_CURRENT_FORMAL_LEADERSHIP'}:
+        raise FeatureRefusal('explicit_role_source_era_date_mismatch')
+    return derived, cutoff
 
 
 def review_authority(turn: dict, receipt: dict, chain: dict[str, Path], inputs: Inputs) -> tuple[str, list[str]]:

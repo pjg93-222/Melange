@@ -19,7 +19,9 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import admission_budget
+import chain_transaction
 from legislation import refresh_congress_pipeline as pipeline
+from legislation import refresh_legislation_discovery as DISCOVERY
 from audit_failure_gate import KNOWN_GATED_FAILURES
 from pipeline_lock import LOCK_OWNER_PID_ENV, LOCK_TOKEN_ENV, pipeline_run_lock
 
@@ -49,10 +51,19 @@ def clean_inherited_lease(monkeypatch):
     monkeypatch.setitem(sys.modules, "run_pipeline", SimpleNamespace(preflight_dependencies=lambda: None))
     monkeypatch.setitem(sys.modules, "legislation.sync_sentinel_bill_ledger",
                         SimpleNamespace(runtime=lambda: ("fixture", "node", "modules")))
+    monkeypatch.setattr(chain_transaction, "preflight", lambda root: None)    # the 30 GB floor is the host disk, not the fixture
 
 
 def write_json(root, relative, value):
     pipeline.write(root / relative, value)
+
+
+def discovery_ok(root, script):
+    """A successful discovery child writes a fresh PASS verdict, like the real wrapper."""
+    if script == "refresh_legislation_discovery.py":
+        out = root / "data/legislation/congress_advanced_current"
+        out.mkdir(parents=True, exist_ok=True)
+        DISCOVERY.write_discovery_status(out, {"id": "c" * 32}, degraded=False)
 
 
 def install_generation(root):
@@ -335,6 +346,19 @@ def test_missing_runtime_stops_before_collecting_any_sources(tmp_path, monkeypat
     assert not (tmp_path / ".pipeline_run.lock").exists()
 
 
+def test_chain_disk_floor_refusal_stops_the_run_before_any_step(tmp_path, monkeypatch):
+    def refuse(root):
+        raise RuntimeError("chain transaction refused to start: floor")
+
+    monkeypatch.setattr(chain_transaction, "preflight", refuse)
+    monkeypatch.setattr(pipeline.subprocess, "Popen", lambda *a, **k: pytest.fail("must not run a collector"))
+    assert pipeline.run(tmp_path) == 1
+    state = pipeline.read(tmp_path / pipeline.STATUS)
+    assert state["status"] == "FAILED" and state["steps"] == []
+    assert "refused to start" in state["error"]
+    assert not (tmp_path / ".pipeline_run.lock").exists()
+
+
 @pytest.mark.parametrize("interruption", [False, True])
 def test_timeout_and_interruption_terminate_child_and_release_lease(tmp_path, monkeypatch, interruption):
     class PendingProcess(CompletedProcess):
@@ -485,11 +509,11 @@ def test_expanded_chain_collects_all_bills_then_media_then_entire_canonical_chai
     names = [name for name, _, _, _ in selected]
     # DE-043/W1: media (hours, killable) precedes the repository fetch, so nothing long sits before the chain's rebind.
     # 2026-10-20: the repository-bound behavioural derivations re-run after billstatus (the media step's own copy read the old repository).
-    assert names == ["calibration", "discovery", "admissions", "votes", "media", "letters", "letters_promote",
+    assert names == ["calibration", "roster", "discovery", "admissions", "votes", "media", "letters", "letters_promote",
                      "repository", "billstatus", *REDERIVED, "pipeline"]
     assert selected[names.index("media")][1] == "collect/daily_media_refresh.py"
     assert selected[-1][1:3] == ("run_pipeline.py", [])
-    assert selected[2][2] == ["--limit", "19", "--max-classifier-calls", "48"]
+    assert selected[names.index("admissions")][2] == ["--limit", "19", "--max-classifier-calls", "48"]
     # Starting from the first canonical step includes collection intake and all
     # media consumers, instead of skipping to the bill-only roster verifier.
     tree = ast.parse((pipeline.CODE / "run_pipeline.py").read_text(encoding="utf-8"))
@@ -724,7 +748,7 @@ def test_cli_include_media_passes_expanded_mode_to_runner(monkeypatch):
 def test_smoke_skips_discovery_spends_no_model_call_and_keeps_the_full_chain():
     selected = pipeline.steps(32, smoke=True)
     names = [name for name, _, _, _ in selected]
-    assert names == ["calibration", "discovery", "admissions", "votes", "media", "letters", "letters_promote",
+    assert names == ["calibration", "roster", "discovery", "admissions", "votes", "media", "letters", "letters_promote",
                      "repository", "billstatus", *REDERIVED, "pipeline"]
     by_name = {name: (script, args) for name, script, args, _ in selected}
     # Discovery is recorded in order but has no script, so it is never launched.
@@ -816,8 +840,9 @@ def test_smoke_receipt_cannot_complete_the_day(tmp_path):
 # --- Flaky discovery: retry once, then defer -----------------------------
 
 
-def discovery_world(tmp_path, monkeypatch, discovery_codes):
-    """Run the wrapper with discovery returning the given codes in order."""
+def discovery_world(tmp_path, monkeypatch, discovery_codes, degraded=False):
+    """Run the wrapper with discovery returning the given codes in order. A successful child
+    writes discovery_status.json like the real wrapper: PASS, or DEGRADED for the GovInfo fallback."""
     write_json(tmp_path, "ranks_python.json", {"rank": {"Member A": 1}})
     monkeypatch.setattr(pipeline, "DISCOVERY_RETRY_DELAY_SECONDS", 0)
     slept = []
@@ -832,6 +857,12 @@ def discovery_world(tmp_path, monkeypatch, discovery_codes):
             code = codes.pop(0)
             if code:
                 kwargs["stdout"].write("launchPersistentContext: Timeout 180000ms exceeded\n")
+            else:
+                out = tmp_path / "data/legislation/congress_advanced_current"
+                out.mkdir(parents=True, exist_ok=True)
+                DISCOVERY.write_discovery_status(
+                    out, {"id": "c" * 32}, degraded=degraded,
+                    reason="CONGRESS_AUTOMATIC_VERIFICATION_TIMEOUT" if degraded else None)
             return CompletedProcess(code)
         if script == "run_pipeline.py":
             install_generation(tmp_path)
@@ -839,6 +870,45 @@ def discovery_world(tmp_path, monkeypatch, discovery_codes):
 
     monkeypatch.setattr(pipeline.subprocess, "Popen", launch)
     return seen, slept
+
+
+def test_govinfo_fallback_is_sealed_degraded_and_keeps_the_deferral_streak(tmp_path, monkeypatch):
+    """Since 09-13 every fallback run was sealed PASS and reset the streak to 0 (DEVIATIONS-A #1)."""
+    write_json(tmp_path, str(pipeline.RECEIPT), {"deferred_streaks": {"discovery": 4}})
+    discovery_world(tmp_path, monkeypatch, [0], degraded=True)
+    events = []
+    monkeypatch.setattr(pipeline, "_emit", lambda *args, **kwargs: events.append((args, kwargs)))
+    assert pipeline.run(tmp_path) == 0
+    receipt = pipeline.read(tmp_path / pipeline.RECEIPT)
+    row = next(r for r in receipt["steps"] if r["step"] == "discovery")
+    assert row["returncode"] == 0 and row["status"] == "DEGRADED"
+    assert row["discovery_source"] == DISCOVERY.GOVINFO_SOURCE
+    assert receipt["discovery_status"] == "DEGRADED" and receipt["degraded_steps"] == ["discovery"]
+    assert receipt["deferred_streaks"]["discovery"] == 5          # not reset by a fallback
+    assert pipeline.read(tmp_path / pipeline.STATUS)["discovery_status"] == "DEGRADED"
+    run_done = next(args for args, kwargs in events if args[:2] == ("refresh.run", "completed"))
+    assert "discovery DEGRADED: GovInfo" in run_done[2]
+
+
+def test_congress_gov_discovery_is_pass_and_breaks_the_streak(tmp_path, monkeypatch):
+    write_json(tmp_path, str(pipeline.RECEIPT), {"deferred_streaks": {"discovery": 4}})
+    discovery_world(tmp_path, monkeypatch, [0])
+    assert pipeline.run(tmp_path) == 0
+    receipt = pipeline.read(tmp_path / pipeline.RECEIPT)
+    row = next(r for r in receipt["steps"] if r["step"] == "discovery")
+    assert "status" not in row and row["discovery_status"] == "PASS"
+    assert receipt["degraded_steps"] == [] and receipt["deferred_streaks"]["discovery"] == 0
+
+
+def test_discovery_without_a_fresh_status_file_is_never_pass(tmp_path, monkeypatch):
+    out = tmp_path / "data/legislation/congress_advanced_current"
+    out.mkdir(parents=True)
+    DISCOVERY.write_discovery_status(out, {"id": "c" * 32}, degraded=False)
+    os.utime(out / DISCOVERY.STATUS_FILE, (1, 1))                    # last week's PASS
+    verdict = pipeline.discovery_verdict(tmp_path, since=10_000)
+    assert verdict["status"] == "DEGRADED" and "predates" in verdict["reason"]
+    (out / DISCOVERY.STATUS_FILE).unlink()
+    assert pipeline.discovery_verdict(tmp_path, since=None)["status"] == "DEGRADED"
 
 
 def test_flaky_discovery_recovers_on_one_retry_and_the_run_is_an_ordinary_pass(tmp_path, monkeypatch):
@@ -868,6 +938,11 @@ def test_discovery_failing_twice_defers_without_failing_the_day(tmp_path, monkey
     assert receipt["deferred_steps"] == ["discovery"]
     row = next(r for r in receipt["steps"] if r["step"] == "discovery")
     assert row["status"] == "DEFERRED" and row["returncode"] == 1
+    # No Congress.gov walk ran: the receipt is DEGRADED for discovery, so the daily seal is never PASS.
+    assert receipt["discovery_status"] == "DEGRADED" and row["discovery_status"] == "DEGRADED"
+    assert receipt["discovery_source"].startswith("none: discovery deferred")
+    import daily_refresh as daily
+    assert daily.completion_status({"media_status": "PASS", "discovery_status": receipt["discovery_status"]}) == "DEGRADED"
     assert row["first_returncode"] == 1 and row["retried"] is True
     assert row["note"].startswith("discovery collector failed twice (rc=1, rc=1); "
                                   "new-bill discovery deferred to the next run; see ")
@@ -1054,6 +1129,7 @@ def test_partial_media_receipt_is_a_non_fatal_success_recorded_on_the_run(tmp_pa
         script = Path(command[1]).name
         seen.append(script)
         letters_ok(tmp_path, script)
+        discovery_ok(tmp_path, script)
         if script == "daily_media_refresh.py":
             write_json(tmp_path, MEDIA_RECEIPT, {
                 "schema": "daily-media-refresh-receipt-v1", "status": "PARTIAL",
@@ -1094,6 +1170,7 @@ def test_a_clean_media_receipt_adds_no_partial_noise(tmp_path, monkeypatch):
     def launch(command, **kwargs):
         script = Path(command[1]).name
         letters_ok(tmp_path, script)
+        discovery_ok(tmp_path, script)
         if script == "daily_media_refresh.py":
             media_receipt(tmp_path)
         elif script == "run_pipeline.py":
@@ -1148,7 +1225,7 @@ def test_w1_media_precedes_repository_fetch():
         assert names[names.index("billstatus") + 1:-1] == REDERIVED   # nothing else between billstatus and the chain
     # Without media the order is unchanged.
     assert [name for name, _, _, _ in pipeline.steps(19)] == [
-        "calibration", "discovery", "admissions", "votes", "letters", "letters_promote", "repository", "billstatus", "pipeline"]
+        "calibration", "roster", "discovery", "admissions", "votes", "letters", "letters_promote", "repository", "billstatus", "pipeline"]
 
 
 REDERIVE_ENV = "CONGRESS_REDERIVE"
@@ -1167,11 +1244,11 @@ def test_congress_rederive_zero_is_the_revert_switch_and_skips_exactly_the_four_
     monkeypatch.setenv(REDERIVE_ENV, "0")
     for mode in ({"include_media": True}, {"smoke": True}):
         names = [name for name, _, _, _ in pipeline.steps(19, **mode)]
-        assert names == ["calibration", "discovery", "admissions", "votes", "media", "letters", "letters_promote",
+        assert names == ["calibration", "roster", "discovery", "admissions", "votes", "media", "letters", "letters_promote",
                          "repository", "billstatus", "pipeline"]
     # Without media there was never a re-derivation, so the dial changes nothing (and a bad value there is not its business).
     assert [n for n, _, _, _ in pipeline.steps(19)] == [
-        "calibration", "discovery", "admissions", "votes", "letters", "letters_promote", "repository", "billstatus", "pipeline"]
+        "calibration", "roster", "discovery", "admissions", "votes", "letters", "letters_promote", "repository", "billstatus", "pipeline"]
     monkeypatch.setenv(REDERIVE_ENV, "off")
     assert [n for n, _, _, _ in pipeline.steps(19)][-1] == "pipeline"
 
@@ -1610,6 +1687,7 @@ def letters_world(tmp_path, monkeypatch, collector="missing", promoter="missing"
 
     def launch(command, **kwargs):
         script = Path(command[1]).name
+        discovery_ok(tmp_path, script)
         if script == "run_pipeline.py":
             install_generation(tmp_path)
         d.mkdir(parents=True, exist_ok=True)
@@ -1695,3 +1773,11 @@ def test_a_step_that_completes_resets_its_streak(tmp_path, monkeypatch):
     assert pipeline.run(tmp_path) == 0
     streaks = pipeline.read(tmp_path / pipeline.RECEIPT)["deferred_streaks"]
     assert streaks["letters"] == 0 and streaks["discovery"] == 0
+
+
+def test_daily_seal_is_degraded_for_a_fallback_never_pass():
+    import daily_refresh as daily
+    assert daily.completion_status({"media_status": "PASS", "discovery_status": "DEGRADED"}) == "DEGRADED"
+    assert daily.completion_status({"media_status": "PARTIAL", "discovery_status": "DEGRADED"}) == "DEGRADED"
+    assert daily.completion_status({"media_status": "PARTIAL", "discovery_status": "PASS"}) == "PARTIAL"
+    assert daily.completion_status({"media_status": "PASS", "discovery_status": "PASS"}) == "PASS"

@@ -222,16 +222,19 @@ def main() -> int:
             raise PromotionRefusal(f"turn_too_few_words:{turn_id}")
         transcript_text = " ".join(str(row.get("word") or "").strip() for row in selected_words)
         source_era = str(selection.get("source_era") or "UNKNOWN_REQUIRES_REVIEW")
-        if selection.get("current_role") and source_era != "PRE_CURRENT_LEADERSHIP_ROLE":
+        has_current_role = bool(selection.get("current_role") or selection.get("current_role_assumed_on"))
+        if has_current_role and source_era not in {"PRE_CURRENT_LEADERSHIP_ROLE", "CURRENT_ROLE_CONDITIONED"}:
             raise PromotionRefusal(f"leader_source_not_pre_current_role:{turn_id}")
-        if selection.get("current_role"):
+        if has_current_role:
             try:
                 recorded = dt.date.fromisoformat(str(selection.get("recorded_at") or selection.get("published") or "")[:10])
                 cutoff = dt.date.fromisoformat(str(selection.get("current_role_assumed_on") or "")[:10])
-                if recorded >= cutoff:
-                    raise ValueError("recording does not predate current role")
+                if (recorded < cutoff) != (source_era == 'PRE_CURRENT_LEADERSHIP_ROLE'):
+                    raise ValueError("recording date disagrees with source era")
             except ValueError as exc:
-                raise PromotionRefusal(f"leader_recording_date_not_pre_current_role:{turn_id}") from exc
+                label = ('leader_recording_date_not_pre_current_role' if source_era == 'PRE_CURRENT_LEADERSHIP_ROLE'
+                         else 'leader_recording_date_not_current_role')
+                raise PromotionRefusal(f"{label}:{turn_id}") from exc
         turn_wav = args.audio_root / f"{turn_id}.wav"
         turn_sha = cut_wav(wav, turn_wav, start, end)
         method = str(acoustic.get("method") or "")

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import fs from "node:fs";
 import {
   buildSessionMeta,
   chromeSpawnArgs,
@@ -9,6 +10,7 @@ import {
   clearedProbeExpression,
   ensureChrome,
   isClearedSignal,
+  openCollectorTabs,
   waitForClearance,
 } from "../lib/congress_cdp_browser.mjs";
 
@@ -211,4 +213,33 @@ test("clearanceNeedsRefresh: margin, keep-warm, missing cookie", () => {
   );
   assert.equal(clearanceNeedsRefresh({ cf_clearance_present: false }, now, margin), true);
   assert.equal(clearanceNeedsRefresh(null, now, margin), true);
+});
+
+// Fake Chrome: a new tab takes the front, bringToFront moves the front; only the front tab is visible.
+function fakeChrome() {
+  const chrome = { front: null, tabs: [] };
+  chrome.context = {
+    async newPage() {
+      const tab = { id: chrome.tabs.length, async bringToFront() { chrome.front = tab; } };
+      chrome.tabs.push(tab);
+      chrome.front = tab;
+      return tab;
+    },
+  };
+  return chrome;
+}
+
+test("openCollectorTabs leaves the Cloudflare clearance tab in front, not the parse tab", async () => {
+  const chrome = fakeChrome();
+  const { mainPage, parsePage } = await openCollectorTabs(chrome.context);
+  assert.notEqual(mainPage, parsePage);
+  assert.equal(chrome.front, mainPage, "a background clearance tab stalls the check (\"Incorrect device time\", 2026-10-27)");
+});
+
+test("collector opens its tabs through openCollectorTabs and raises the clearance tab before navigating", () => {
+  const src = fs.readFileSync(new URL("../collect/collect_congress_member_pages.mjs", import.meta.url), "utf8");
+  assert.match(src, /openCollectorTabs\(context\)/);
+  assert.doesNotMatch(src, /mainPage = await context\.newPage\(\)/);
+  assert.match(src, /await raiseTab\(mainPage\);\s*await mainPage\.goto\(/);
+  assert.match(src, /await raiseTab\(tab\);\s*await tab\.goto\(/);
 });

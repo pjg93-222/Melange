@@ -772,7 +772,8 @@ def test_full_audit_invokes_all_cumulative_history_gates():
     assert "_sbh_detail=str(_sbh_exc)[:300]" in source
     assert "if _sbl_block_raw is not None and not isinstance(_sbl_block_raw,dict):" in source
     assert "except Exception as _sbl_exc:" in source
-    assert source.count("print('   note:") == 3
+    # Scoped to the sentinel gates: [SYNC] (9b35a8198) prints a generic note of its own.
+    assert source.count("print('   note: sentinel ") == 3
     assert "audit_history_publication(" in source
     assert "sentinel verified history receipt/hash/counts and unique keys" in source
     assert "sentinel workbook receipt reconciles to cumulative verified history" in source

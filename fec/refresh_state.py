@@ -101,6 +101,10 @@ FAILURE_CLASSES = (TRANSIENT, SOURCE_OUTAGE, BUDGET_QUOTA, DATA_CONTRACT)
 BUDGET_CALLS = 'BUDGET_CALLS'
 STOP_QUOTA = 'CLASSIFIER_QUOTA_EXHAUSTED'
 STOP_CALLS = 'CLASSIFIER_CALL_BUDGET'
+# The api transport's other loop stop (lane/w3-sentinel-api): the provider refused the REQUEST itself (unknown model id, malformed
+# body, bad key).  It stops and checkpoints exactly as a quota stop does and every retry meets the same refusal, so it is a
+# BUDGET_QUOTA failure under its own reason -- one attempt per daily window, never backoff-retried (D-356).
+STOP_REJECTED = 'CLASSIFIER_REQUEST_REJECTED'
 
 # ---- freshness labels (data/engine/source_freshness.json) -----------------------------------------
 FRESH = 'FRESH'
@@ -628,11 +632,22 @@ def freshness_record(tier, cadence_h, entry, now, window_days, manifest_unreadab
                   else 'outputs await complete snapshot reconciliation')
     elif entry.get('coverage') != COVERAGE_OK:
         status, detail = DEGRADED, 'coverage is %s' % entry.get('coverage')
+    elif state == OK and entry.get('evidence_failed'):
+        # D-366/D-369: the admissions generation installed, but bills over the evidence envelope are FAILED, not
+        # scored (the receipt names them and those still awaiting a section-aware retry).  Not a publication block; a
+        # labelled DEGRADED source until none is left.
+        status = DEGRADED
+        detail = ('%d bill(s) FAILED the evidence envelope (D-366); see the admissions receipt'
+                  % entry['evidence_failed'])
+        if cadence_h and age >= cadence_h:
+            detail += '; last success %.1f h ago, cadence %d h' % (age, cadence_h)
     elif klass == BUDGET_QUOTA:
         status = STALE_LABELLED
-        detail = ('classifier quota exhausted (%s): the new generation was NOT installed, the '
+        reason = (budget or {}).get('reason', STOP_QUOTA)
+        detail = ('%s (%s): the new generation was NOT installed, the '
                   'last-good one is served; one attempt per daily window'
-                  % (budget or {}).get('reason', STOP_QUOTA))
+                  % ('classifier request rejected' if reason == STOP_REJECTED
+                     else 'classifier quota exhausted', reason))
     elif cadence_h and age >= cadence_h:
         status = DEGRADED if failed else STALE_LABELLED
         detail = 'last success %.1f h ago, cadence %d h' % (age, cadence_h)
