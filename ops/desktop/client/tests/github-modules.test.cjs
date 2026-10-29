@@ -214,6 +214,54 @@ test('background checks stage newer data while preserving active and do not inve
  assert.equal(second.status.phase,'update-ready');assert.equal(second.status.updateAvailable,true);assert.equal(f.journal.active.catalogSequence,1);assert.equal(f.journal.staged.catalogSequence,2);
  await p.commitActive(second,f.selected);assert.equal(f.journal.active.catalogSequence,2);
 });
+for(const appId of ['melange','mentat'])test(`${appId} unchanged staged checks validate once while startup activation still verifies independently`,async t=>{
+ const f=environment(appId);t.after(()=>f.cleanup());const p=new GitHubModules(f.options),first=await p.prepare(f.selected);await p.commitActive(first,f.selected);
+ const before=structuredClone(f.journal),selected=structuredClone(f.selected),account=path.join(f.original,'account.fixture');fs.writeFileSync(account,'owner state');
+ const validate=t.mock.method(p,'validateSnapshot'),adapter=t.mock.method(f.options.registry[appId+'.fixture.v1'],'validateSnapshot'),write=t.mock.method(f.store,'write');
+ f.requests.length=0;const unchanged=await p.stage(f.selected);
+ assert.equal(unchanged.status.phase,'ready');assert.equal(unchanged.status.updateAvailable,undefined);assert.equal(validate.mock.callCount(),1);assert.equal(adapter.mock.callCount(),1);assert.equal(write.mock.callCount(),1);
+ assert.deepEqual(f.requests,['main','pointer','release','manifest']);assert.deepEqual(f.journal,before);assert.deepEqual(f.selected,selected);assert.equal(fs.readFileSync(account,'utf8'),'owner state');
+ const prepared=await p.prepare(f.selected);assert.equal(validate.mock.callCount(),2);assert.equal(adapter.mock.callCount(),2);const requests=f.requests.length;
+ await p.commitActive(prepared,f.selected);assert.equal(validate.mock.callCount(),3);assert.equal(adapter.mock.callCount(),3);assert.equal(f.requests.length,requests);assert.deepEqual(f.journal,before);
+});
+test('a restarted provider revalidates a staged newer snapshot once without activating or downloading it again',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.commitActive(await p.prepare(f.selected),f.selected);next(f);await p.stage(f.selected);
+ const before=structuredClone(f.journal),restarted=new GitHubModules(f.options),validate=t.mock.method(restarted,'validateSnapshot'),write=t.mock.method(f.store,'write');f.requests.length=0;
+ const repeated=await restarted.stage(f.selected);assert.equal(repeated.status.phase,'update-ready');assert.equal(repeated.status.updateAvailable,true);assert.equal(validate.mock.callCount(),1);assert.equal(write.mock.callCount(),1);
+ assert.deepEqual(f.requests,['main','pointer','release','manifest']);assert.deepEqual(f.journal,before);assert.equal(f.journal.active.catalogSequence,1);assert.equal(f.journal.staged.catalogSequence,2);
+});
+for(const [field,value] of Object.entries({catalogSequence:1,pointerDigest:'1'.repeat(64),manifestSha256:'2'.repeat(64),releaseTag:'module-data-2026-10-21-other',releaseCommit:'b'.repeat(40),identityDigest:'3'.repeat(64)}))test(`a different staged ${field} cannot skip materialization`,async t=>{
+ const f=fixture(t);next(f);const p=new GitHubModules(f.options);await p.prepare(f.selected);const expected=structuredClone(f.journal.staged),state=structuredClone(f.journal);state.staged={...state.staged,[field]:value};await f.store.write(state);
+ const materialize=t.mock.method(p,'materialize'),validate=t.mock.method(p,'validateSnapshot');await p.stage(f.selected);
+ assert.equal(materialize.mock.callCount(),1);assert.equal(validate.mock.callCount(),2);assert.deepEqual(f.journal.staged,expected);assert.equal(f.journal.active,null);
+});
+test('an exact staged record with a missing snapshot rematerializes from verified segments',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected),before=structuredClone(f.journal);fs.renameSync(first.snapshotRoot,path.join(f.temporary,'removed-snapshot'));
+ const materialize=t.mock.method(p,'materialize');f.requests.length=0;const recovered=await p.prepare(f.selected);
+ assert.equal(materialize.mock.callCount(),1);assert.deepEqual(fs.readFileSync(roleFile(recovered,f)),f.remote.bytes);assert.deepEqual(f.requests,['main','pointer','release','manifest']);assert.deepEqual(f.journal,before);
+});
+for(const mutation of ['bytes','extra','junction','hardlink','missing-role','reader'])test(`an exact staged record still refuses ${mutation} snapshot corruption`,async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected);await p.commitActive(first,f.selected);const before=structuredClone(f.journal),file=roleFile(first,f),backup=path.join(f.temporary,'original-snapshot');
+ if(mutation==='bytes')fs.writeFileSync(file,Buffer.alloc(f.remote.bytes.length,120));
+ if(mutation==='extra')fs.writeFileSync(path.join(first.snapshotRoot,'foreign'),'preserve');
+ if(mutation==='junction'){fs.renameSync(first.snapshotRoot,backup);fs.symlinkSync(backup,first.snapshotRoot,process.platform==='win32'?'junction':'dir');}
+ if(mutation==='hardlink'){const original=path.join(f.original,'original-role');fs.renameSync(file,original);fs.linkSync(original,file);}
+ if(mutation==='missing-role')fs.renameSync(file,path.join(f.temporary,'missing-role'));
+ if(mutation==='reader')f.options.registry['mentat.fixture.v1'].validateSnapshot=async()=>false;
+ const materialize=t.mock.method(p,'materialize');await assert.rejects(p.stage(f.selected),error=>error.reason===(mutation==='missing-role'?'storage':'integrity'));
+ assert.equal(materialize.mock.callCount(),0);assert.deepEqual(f.journal,before);if(mutation==='extra')assert.equal(fs.readFileSync(path.join(first.snapshotRoot,'foreign'),'utf8'),'preserve');
+ if(mutation==='junction')assert.equal(fs.lstatSync(first.snapshotRoot).isSymbolicLink(),true);if(mutation==='hardlink')assert.equal(fs.statSync(file).nlink,2);
+});
+test('an exact staged record retains the final byte check after a reader mutation with identical observed timestamps',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected);await p.commitActive(first,f.selected);const before=structuredClone(f.journal);equalObservedTimes(t);let reached=false;
+ f.options.registry['mentat.fixture.v1'].validateSnapshot=async({files})=>{reached=true;fs.writeFileSync(files.aggregate,Buffer.alloc(f.remote.bytes.length,120));return true;};
+ await assert.rejects(p.stage(f.selected),/Owned module file integrity/);assert.equal(reached,true);assert.deepEqual(f.journal,before);
+});
+for(const mutation of ['bytes','revoked','cancelled'])test(`an exact staged record refuses ${mutation} after accepted-state persistence`,async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected);await p.commitActive(first,f.selected);const before=structuredClone(f.journal),controller=new AbortController(),write=f.store.write;let reached=false;
+ f.store.write=async value=>{await write(value);reached=true;if(mutation==='bytes')fs.writeFileSync(roleFile(first,f),Buffer.alloc(f.remote.bytes.length,120));if(mutation==='revoked')f.revoked=true;if(mutation==='cancelled')controller.abort();};
+ await assert.rejects(p.stage(f.selected,{signal:controller.signal}),error=>error.reason===({bytes:'integrity',revoked:'authorization',cancelled:'cancelled'})[mutation]);assert.equal(reached,true);assert.deepEqual(f.journal,before);
+});
 test('interrupted transfers retain bounded partial bytes and resume with the exact offset',async t=>{
  const f=fixture(t),original=f.transport.segment;let interrupted=false;
  f.transport.segment=async(tag,item,options)=>{if(!interrupted){interrupted=true;await options.onChunk(f.remote.objects.get(item.asset).subarray(0,3));throw fail('unreachable','Synthetic interruption');}return original(tag,item,options);};

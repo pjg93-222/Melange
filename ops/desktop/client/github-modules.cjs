@@ -349,8 +349,13 @@ class GitHubModules{
    requireValue(await this.owner(selected)===identity,'Owner approval changed during module check');canceled(signal);
    await this.immutable('pointers/'+checked.digest+'.json',Buffer.from(canonical(envelope)));await this.immutable('manifests/'+manifest.sha256+'.json',manifest.bytes);
    state.highwater={catalogSequence:record.catalogSequence,pointerDigest:record.pointerDigest};state.accepted=record;await this.save(state);
-   await this.materialize(manifest,checked,selected,options);requireValue(await this.owner(selected)===identity,'Owner approval changed during module staging');canceled(signal);
-   state.staged=record;await this.save(state);
+   // An exact staged record needs no restaging, but candidate still freshly
+   // verifies every byte, compiled reader and owner before this check returns.
+   const alreadyStaged=state.staged&&RECORD.every(key=>state.staged[key]===record[key])&&fs.existsSync(path.join(this.cacheRoot,'snapshots',record.manifestSha256));
+   if(!alreadyStaged){
+    await this.materialize(manifest,checked,selected,options);requireValue(await this.owner(selected)===identity,'Owner approval changed during module staging');canceled(signal);
+    state.staged=record;await this.save(state);
+   }
    const unchanged=state.active?.pointerDigest===record.pointerDigest&&state.active?.identityDigest===identity;
    return this.candidate(record,selected,identity,{...options,phase:background&&!unchanged?'update-ready':'ready'});
   }catch(error){
