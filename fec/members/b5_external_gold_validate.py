@@ -8,6 +8,7 @@ value is used to fit or tune a coefficient.
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -20,6 +21,7 @@ import numpy as np
 sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from moneyball_core import dump_atomic
 from paths import ROOT
+from members.b5_gold_identity import map_gold, map_gold_with_receipt, registry_sha256, roster_records
 
 TRAITS=('O','C','E','A','ES')
 GOLD='data/stance/big5_senate_expert_gold.json'
@@ -27,6 +29,7 @@ BLUE='data/members/big5_blue_validated.json'
 PINK='data/members/big5_llm_opus.json'
 DISPOSITIONS='behavioral_dispositions.json'
 STYLE='communication_style.json'
+ROSTER='data/engine/roster.json'
 VALIDATION_OUT=os.path.join(ROOT,'data','stance','big5_external_gold_validation.json')
 E_OUT=os.path.join(ROOT,'data','stance','big5_e_gold_anchored.json')
 MIN_COVERAGE=450
@@ -83,25 +86,6 @@ def name_key(value,source_order=False):
     return (tokens[0],tokens[-1]) if len(tokens)>=2 else tuple(tokens)
 
 
-def map_gold(gold,roster):
-    current={}
-    for name in roster:
-        current.setdefault(name_key(name),[]).append(name)
-    panels={'senate_insiders':{},'academic_experts':{}}
-    unmatched=[]; ambiguous=[]
-    for row in gold['records']:
-        matches=current.get(name_key(row['source_name'],True),[])
-        if len(matches)==1:
-            panels[row['panel']][matches[0]]=row
-        elif matches:
-            ambiguous.append({'source_name':row['source_name'],'matches':matches})
-        else:
-            unmatched.append(row['source_name'])
-    if ambiguous:
-        raise ValueError('ambiguous external-gold roster matches: %r'%ambiguous[:5])
-    return panels,sorted(set(unmatched))
-
-
 def one_sided_permutation_p(x,y,seed):
     x=np.asarray(x,float); y=np.asarray(y,float); observed=float(np.corrcoef(x,y)[0,1])
     rng=np.random.default_rng(seed); exceed=0
@@ -148,14 +132,16 @@ def build_e(blue,pink):
     return scores,members,bz,pz
 
 
-def validate():
-    filenames=(GOLD,BLUE,PINK,DISPOSITIONS,STYLE)
+def validate(out_dir=None):
+    filenames=(GOLD,BLUE,PINK,DISPOSITIONS,STYLE,ROSTER)
     gold=load(GOLD); blue_doc=load(BLUE); pink_doc=load(PINK)
     if gold.get('schema')!='big5-senate-expert-gold-v1' or gold.get('status')!='FROZEN_EXTERNAL_GOLD':
         raise ValueError('external gold artifact missing/wrong schema')
-    roster=[row['member'] for row in load('data/engine/congestion.json')]
-    panels,unmatched=map_gold(gold,roster)
-    blue=blue_doc.get('traits') or {}; pink=pink_doc.get('traits') or {}
+    roster=roster_records(load(ROSTER))
+    panels,unmatched,identity_audit=map_gold_with_receipt(gold,roster)
+    current_names={row['member'] for row in roster}
+    blue={name: row for name,row in (blue_doc.get('traits') or {}).items() if name in current_names}
+    pink={name: row for name,row in (pink_doc.get('traits') or {}).items() if name in current_names}
     scores,members,blue_e,pink_e=build_e(blue,pink)
     agreement={}
     shared=sorted(set(panels['senate_insiders'])&set(panels['academic_experts']))
@@ -215,6 +201,7 @@ def validate():
                     'shared_panel_members':len(shared),'unmatched_historic_names':len(unmatched)},
         'panel_agreement':agreement,'panel_results':panel_results,'comparators':comparators,
         'nomological_visibility':visibility,'inputs_sha256':hashes,
+        'identity_audit':identity_audit,'identity_registry_sha256':registry_sha256(),
         'verdict':'PASS' if all_pass else 'FAIL',
     }
     e_doc={
@@ -227,10 +214,15 @@ def validate():
                                     'diagonal_dominant':row['diagonal_dominant']}
                               for name,row in panel_results.items()},
         'validation_sha256':None,'inputs_sha256':hashes,
+        'identity_registry_sha256':registry_sha256(),
     }
-    dump_atomic(validation,VALIDATION_OUT,indent=1)
-    e_doc['validation_sha256']=sha256_file(VALIDATION_OUT)
-    dump_atomic(e_doc,E_OUT,indent=1)
+    if out_dir is not None:
+        os.makedirs(out_dir,exist_ok=True)
+    validation_out=os.path.join(out_dir,os.path.basename(VALIDATION_OUT)) if out_dir else VALIDATION_OUT
+    e_out=os.path.join(out_dir,os.path.basename(E_OUT)) if out_dir else E_OUT
+    dump_atomic(validation,validation_out,indent=1)
+    e_doc['validation_sha256']=sha256_file(validation_out)
+    dump_atomic(e_doc,e_out,indent=1)
     return validation,e_doc
 
 
@@ -242,10 +234,14 @@ def self_test():
     print('b5_external_gold_validate self-test: 4 passed, 0 failed')
 
 
-def main():
-    if '--self-test' in sys.argv:
+def main(argv=None):
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--self-test',action='store_true')
+    parser.add_argument('--out-dir',help='write audit outputs here instead of the production data directory')
+    args=parser.parse_args(argv)
+    if args.self_test:
         self_test(); return 0
-    validation,e_doc=validate()
+    validation,e_doc=validate(out_dir=args.out_dir)
     print('external gold %s: E %d members | insiders r=%+.3f | academics r=%+.3f'%(
           validation['verdict'],e_doc['coverage_n'],
           validation['panel_results']['senate_insiders']['e_r'],

@@ -600,8 +600,11 @@ def run_gates():
         try:
             weekly_status = json.load(open(weekly_status_path, encoding='utf-8'))
             status_fresh = os.path.getmtime(weekly_status_path) >= started - 2
+            # DEGRADED* (a fallback-served core source, D-212) finished every step as before; it is accepted
+            # exactly as COMPLETE was, and the receipt carries the outcome so GATE-2 consumers can see it.
             status_complete = weekly_status.get('last_outcome') in (
-                'COMPLETE', 'COMPLETE_WITH_KNOWN_GATED_FAILURES')
+                'COMPLETE', 'COMPLETE_WITH_KNOWN_GATED_FAILURES',
+                'DEGRADED', 'DEGRADED_WITH_KNOWN_GATED_FAILURES')
         except Exception:
             weekly_status, status_fresh, status_complete = {}, False, False
         if not (ok_refresh and status_fresh and status_complete):

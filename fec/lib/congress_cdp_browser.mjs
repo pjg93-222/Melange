@@ -131,11 +131,11 @@ export function classifyFetchPushback({ status, text }) {
   return null;
 }
 
-async function snapshot(page) {
+export async function snapshot(page, { bodyTimeoutMs = 2000 } = {}) {
   const title = await page.title().catch(() => "");
   const bodyText = await page
     .locator("body")
-    .innerText({ timeout: 2000 })
+    .innerText({ timeout: bodyTimeoutMs })
     .then((value) => value.slice(0, 1200))
     .catch(() => "");
   return { loadedUrl: page.url(), title, bodyText };
@@ -245,4 +245,60 @@ export async function recordClearance({
   await fs.mkdir(path.dirname(metaPath), { recursive: true });
   await fs.writeFile(metaPath, `${JSON.stringify(meta, null, 2)}\n`, "utf8");
   return meta;
+}
+
+// The Cloudflare check must run in the ACTIVE tab, as it did in R (harvest_cf_session navigated a
+// fresh ChromoteSession tab, the newest and so the front one). Observed 2026-10-27: the collector
+// opened its clearance tab and THEN its about:blank parse tab, so the parse tab took the front and
+// the check loaded in a background tab. It never cleared automatically, and when it was raised
+// ~6.5 min later Cloudflare rejected it as "Incorrect device time". So open the parse tab first,
+// then the clearance tab, and raise it. No content, cookie, clock or fingerprint is touched.
+export async function raiseTab(page) {
+  await page.bringToFront().catch(() => {});
+}
+
+export async function openCollectorTabs(context) {
+  const parsePage = await context.newPage();
+  const mainPage = await context.newPage();
+  await raiseTab(mainPage);
+  return { mainPage, parsePage };
+}
+
+export const visibilityOf = (page) => page.evaluate(() => document.visibilityState).catch(() => null);
+
+// A long-idle Chrome freezes background tabs; Playwright's connectOverCDP then waits forever on
+// the frozen page (observed 2026-10-27: Runtime.evaluate on the idle congress.gov tab never
+// answered until Page.setWebLifecycleState active). Mark every page active before attaching.
+// Lifecycle only: no page content, cookie or fingerprint is touched. Never throws.
+export async function wakeFrozenPages(port = DEFAULT_CDP_PORT, { timeoutMs = 5_000 } = {}) {
+  let ws;
+  try {
+    const version = await (await fetch(`http://127.0.0.1:${port}/json/version`, { signal: AbortSignal.timeout(timeoutMs) })).json();
+    ws = new WebSocket(version.webSocketDebuggerUrl);
+    await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject; setTimeout(reject, timeoutMs); });
+    let id = 0;
+    const pending = new Map();
+    ws.onmessage = (message) => {
+      const data = JSON.parse(message.data);
+      pending.get(data.id)?.(data);
+      pending.delete(data.id);
+    };
+    const send = (method, params = {}, sessionId) => Promise.race([
+      new Promise((resolve) => { const n = ++id; pending.set(n, resolve); ws.send(JSON.stringify({ id: n, method, params, sessionId })); }),
+      new Promise((resolve) => setTimeout(() => resolve({}), timeoutMs)),
+    ]);
+    const targets = (await send("Target.getTargets")).result?.targetInfos ?? [];
+    let woken = 0;
+    for (const target of targets.filter((t) => t.type === "page")) {
+      const sessionId = (await send("Target.attachToTarget", { targetId: target.targetId, flatten: true })).result?.sessionId;
+      if (!sessionId) continue;
+      if ((await send("Page.setWebLifecycleState", { state: "active" }, sessionId)).result) woken += 1;
+      await send("Target.detachFromTarget", { sessionId });
+    }
+    return woken;
+  } catch {
+    return 0;
+  } finally {
+    try { ws?.close(); } catch { /* ignore */ }
+  }
 }

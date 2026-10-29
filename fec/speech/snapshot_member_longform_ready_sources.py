@@ -37,6 +37,7 @@ INPUTS = {
     "quality_holds": AUDIT / "quality_holds.jsonl",
 }
 BINDING_KEYS = ("member", "source_id", "wav_sha256", "transcript_sha256")
+CURRENT_ROLE_AUTH_SCHEMA = "member-longform-current-role-source-authorization-v1"
 
 
 def digest(payload: bytes) -> str:
@@ -53,9 +54,87 @@ def rows_by_member(rows: list[dict], label: str) -> dict[str, dict]:
     return result
 
 
+def validate_current_role_authorization(row: dict, role: dict | None) -> None:
+    """An explicit source-bound P-7 exception never supplies a pre-role baseline."""
+    if (row.get("schema") != CURRENT_ROLE_AUTH_SCHEMA
+            or row.get("status") != "APPROVED_CURRENT_ROLE_CONDITIONED_SOURCE"
+            or row.get("source_era") != "CURRENT_ROLE_CONDITIONED"
+            or row.get("no_pre_role_baseline") is not True
+            or row.get("decision_id") != "L-8/P-7"):
+        raise ValueError("invalid current-role source authorization")
+    for key in ("member", "source_id", "url", "wav_sha256", "recorded_at",
+                "current_role_assumed_on", "decision_path", "decision_sha256"):
+        if not isinstance(row.get(key), str) or not row[key].strip():
+            raise ValueError("current-role authorization lacks " + key)
+    for key in ("wav_sha256", "decision_sha256"):
+        if len(row[key]) != 64 or any(char not in "0123456789abcdef" for char in row[key]):
+            raise ValueError("invalid current-role authorization hash: " + key)
+    if not role or row["current_role_assumed_on"] != role.get("current_role_assumed_on"):
+        raise ValueError("current-role authorization cutoff differs from canonical role")
+    if dt.date.fromisoformat(row["recorded_at"][:10]) < dt.date.fromisoformat(row["current_role_assumed_on"][:10]):
+        raise ValueError("current-role authorization predates the current role")
+
+
+def frozen_current_role_authorizations(run_root: Path, receipt: dict) -> dict[str, dict]:
+    """Load only the hashed authorization input and copied decision bytes."""
+    item = receipt["inputs"].get("current_role_authorizations")
+    decisions = receipt.get("current_role_decisions") or {}
+    if item is None:
+        if decisions or receipt.get("contract", {}).get("current_role_conditioned_members"):
+            raise ValueError("current-role scope has no frozen authorization input")
+        return {}
+    path = Path(item["snapshot_path"]).resolve()
+    if not path.is_relative_to(run_root.resolve() / "inputs") or SMR.sha256_file(path) != item["sha256"]:
+        raise ValueError("current-role authorization input hash/path mismatch")
+    rows = rows_by_member(SMR.read_jsonl(path, required=True), "current-role authorizations")
+    roles = json.loads(Path(receipt["inputs"]["roles"]["snapshot_path"]).read_text(encoding="utf-8-sig"))["members"]
+    if set(decisions) != set(rows):
+        raise ValueError("current-role decisions do not cover the frozen authorizations")
+    if sorted(rows) != receipt.get("contract", {}).get("current_role_conditioned_members"):
+        raise ValueError("current-role receipt scope differs from the frozen authorizations")
+    result = {}
+    for member, row in rows.items():
+        validate_current_role_authorization(row, roles.get(member))
+        bound = decisions[member]
+        decision = Path(bound["snapshot_path"]).resolve()
+        if (not decision.is_relative_to(run_root.resolve() / "decisions")
+                or bound.get("sha256") != row["decision_sha256"]
+                or SMR.sha256_file(decision) != row["decision_sha256"]):
+            raise ValueError("current-role decision hash/path mismatch")
+        result[member] = {**row, "decision_path": str(decision)}
+    return result
+
+
+def current_role_source_problem(member, acquisition, transcript, role, leader, authorization, *, acquisition_only):
+    try:
+        validate_current_role_authorization(authorization, role)
+        if SMR.sha256_file(Path(authorization["decision_path"])) != authorization["decision_sha256"]:
+            return "CURRENT_ROLE_DECISION_HASH_MISMATCH"
+    except (ValueError, OSError):
+        return "CURRENT_ROLE_AUTHORIZATION_INVALID"
+    if authorization["member"] != member:
+        return "CURRENT_ROLE_AUTHORIZATION_MEMBER_MISMATCH"
+    if not leader or leader.get("status") == "HISTORICAL_LONGFORM_SOURCE_GAP":
+        return "CURRENT_ROLE_REVIEWED_SOURCE_GAP"
+    rows = (leader, acquisition) if acquisition_only else (leader, acquisition, transcript)
+    for row in rows:
+        if any(row.get(key) != authorization[key] for key in ("member", "source_id", "url", "source_era")):
+            return "CURRENT_ROLE_AUTHORIZATION_SOURCE_MISMATCH"
+        observed = str(row.get("recorded_at") or row.get("published") or "")[:10]
+        if observed != authorization["recorded_at"][:10]:
+            return "CURRENT_ROLE_RECORDING_DATE_BINDING_MISMATCH"
+        if row.get("current_role_assumed_on") not in (None, role["current_role_assumed_on"]):
+            return "CURRENT_ROLE_CUTOFF_BINDING_MISMATCH"
+    for row in ((acquisition,) if acquisition_only else (acquisition, transcript)):
+        if row.get("wav_sha256") != authorization["wav_sha256"]:
+            return "CURRENT_ROLE_AUDIO_BINDING_MISMATCH"
+    return None
+
+
 def source_problem(member: str, acquisition: dict | None, transcript: dict | None,
                    queue: dict | None, role: dict | None, leader: dict | None,
-                   rejected: list[dict], holds: list[dict], *, acquisition_only: bool = False) -> str | None:
+                   rejected: list[dict], holds: list[dict], *, acquisition_only: bool = False,
+                   current_role_authorization: dict | None = None) -> str | None:
     if not acquisition or acquisition.get("status") not in quality.SUCCESS:
         return "ACQUISITION_PENDING"
     if not acquisition_only and (not transcript or not selection.ready(transcript)):
@@ -63,7 +142,12 @@ def source_problem(member: str, acquisition: dict | None, transcript: dict | Non
     if not acquisition_only and any(not transcript.get(key) or transcript.get(key) != acquisition.get(key)
            for key in ("member", "source_id", "wav_sha256")):
         return "STALE_TRANSCRIPT_SOURCE_BINDING"
-    if role:
+    if current_role_authorization is not None:
+        problem = current_role_source_problem(member, acquisition, transcript, role, leader,
+                                              current_role_authorization, acquisition_only=acquisition_only)
+        if problem:
+            return problem
+    elif role:
         if not leader or leader.get("status") == "HISTORICAL_LONGFORM_SOURCE_GAP":
             return "LEADERSHIP_PREROLE_SOURCE_GAP"
         if not acquisition_matches_candidate(acquisition, leader):
@@ -96,11 +180,15 @@ def source_problem(member: str, acquisition: dict | None, transcript: dict | Non
     return None
 
 
-def build_snapshot(run_root: Path, paths: dict[str, Path], members: list[str] | None) -> dict:
+def build_snapshot(run_root: Path, paths: dict[str, Path], members: list[str] | None, *,
+                   current_role_authorizations: Path | None = None) -> dict:
     run_root = run_root.resolve()
     # Never reuse a previous cohort, candidate cache, canonical directory, or receipt.
     if run_root.exists():
         raise ValueError(f"snapshot directory already exists: {run_root}")
+    paths = dict(paths)
+    if current_role_authorizations is not None:
+        paths["current_role_authorizations"] = current_role_authorizations
     payloads = {key: path.read_bytes() for key, path in paths.items()}
     docs = {key: (json.loads(payload.decode("utf-8-sig")) if key in {"roster", "roles"}
                   else quality.jsonl(payload)) for key, payload in payloads.items()}
@@ -116,6 +204,11 @@ def build_snapshot(run_root: Path, paths: dict[str, Path], members: list[str] | 
     wanted = set(members) if members is not None else roster
     if not wanted or not wanted <= roster:
         raise ValueError("requested members absent from active roster")
+    authorizations = rows_by_member(docs.get("current_role_authorizations") or [], "current-role authorizations")
+    if not set(authorizations) <= wanted:
+        raise ValueError("current-role authorization is outside the requested member scope")
+    for member, authorization in authorizations.items():
+        validate_current_role_authorization(authorization, roles.get(member))
     if any(any(not row.get(key) for key in BINDING_KEYS) for row in docs["quality_holds"]):
         raise ValueError("quality hold lacks exact artifact binding")
     run_root.mkdir(parents=True, exist_ok=False)
@@ -127,6 +220,18 @@ def build_snapshot(run_root: Path, paths: dict[str, Path], members: list[str] | 
         target.write_bytes(payload)
         input_receipts[key] = {"live_path": str(paths[key].resolve()), "snapshot_path": str(target),
                                "sha256": digest(payload)}
+    decisions = {}
+    for member, authorization in authorizations.items():
+        source = Path(authorization["decision_path"])
+        decision_bytes = source.read_bytes()
+        if digest(decision_bytes) != authorization["decision_sha256"]:
+            raise ValueError("current-role decision hash mismatch")
+        target = run_root / "decisions" / (authorization["decision_sha256"] + ".decision")
+        target.parent.mkdir(exist_ok=True)
+        target.write_bytes(decision_bytes)
+        decisions[member] = {"source_path": str(source.resolve()), "snapshot_path": str(target),
+                             "sha256": authorization["decision_sha256"]}
+        authorizations[member] = {**authorization, "decision_path": str(target)}
     selected, diagnostics = [], []
     hash_cache: dict = {}
     for member in sorted(wanted):
@@ -135,12 +240,16 @@ def build_snapshot(run_root: Path, paths: dict[str, Path], members: list[str] | 
         transcript = indexes[stream + "_transcripts"].get(member)
         problem = source_problem(member, acquired, transcript, indexes["primary_queue"].get(member),
                                  roles.get(member), indexes["leader_sources"].get(member),
-                                 docs["rejected_sources"], docs["quality_holds"])
+                                 docs["rejected_sources"], docs["quality_holds"],
+                                 current_role_authorization=authorizations.get(member))
         report = {"member": member, "stream": stream, "source_id": (acquired or {}).get("source_id")}
         if problem:
             diagnostics.append({**report, "status": "EXCLUDED", "reason": problem})
             continue
         try:
+            acquired_era, transcript_era = acquired.get("source_era"), transcript.get("source_era")
+            if acquired_era and transcript_era and acquired_era != transcript_era:
+                raise ValueError("acquisition and transcript source eras disagree")
             selection.require_lineage(transcript, transcript, acquired, context=member, file_hashes=hash_cache)
             word_payload = Path(transcript["transcript"]).read_bytes()
             if digest(word_payload) != transcript["transcript_sha256"]:
@@ -160,7 +269,9 @@ def build_snapshot(run_root: Path, paths: dict[str, Path], members: list[str] | 
             record = selection.source_record(
                 {**frozen, "cues": cues}, acquired,
                 selection="immutable_ready_cohort_" + stream,
-                source_era="PRE_CURRENT_LEADERSHIP_ROLE" if stream == "leader" else "NOT_CURRENT_FORMAL_LEADERSHIP",
+                source_era=("CURRENT_ROLE_CONDITIONED" if member in authorizations else
+                            "PRE_CURRENT_LEADERSHIP_ROLE" if stream == "leader" else
+                            acquired_era or transcript_era or "NOT_CURRENT_FORMAL_LEADERSHIP"),
             )
             record.update(snapshot_only=True, quality_scope="technical diagnostic screen; no semantic approval",
                           human_semantic_review=False, final_profile_authority=False)
@@ -187,11 +298,14 @@ def build_snapshot(run_root: Path, paths: dict[str, Path], members: list[str] | 
         "contract": {"canonical_manifests_modified": False, "profile_effect": "NONE",
                      "human_semantic_review": False, "speaker_identity_authority": False,
                      "word_files_copied": True, "audio_files_copied": False,
-                     "audio_content_hashes_verified": True, "leader_pre_current_role_only": True,
+                     "audio_content_hashes_verified": True, "leader_pre_current_role_only": not bool(authorizations),
+                     "current_role_conditioned_members": sorted(authorizations),
+                     "current_role_sources_are_baseline": False,
                      "quality_pass_is_technical_not_semantic": True,
                      "held_recording_not_cleared_by_new_transcript_hash": True,
                      "retry_sources_not_in_snapshot_scope": True},
         "inputs": input_receipts,
+        "current_role_decisions": decisions,
         "code": {"snapshot_sha256": SMR.sha256_file(Path(__file__)),
                  "quality_audit_sha256": SMR.sha256_file(Path(quality.__file__)),
                  "source_selector_sha256": SMR.sha256_file(Path(selection.__file__))},
@@ -219,6 +333,7 @@ def verify_snapshot(run_root: Path) -> dict:
         path = Path(item["snapshot_path"]).resolve()
         if not path.is_relative_to(run_root / "inputs") or SMR.sha256_file(path) != item["sha256"]:
             raise ValueError("frozen input hash/path mismatch")
+    frozen_current_role_authorizations(run_root, receipt)
     rows = SMR.read_jsonl(run_root / "ready_sources.jsonl", required=True)
     if len(rows) != receipt["counts"]["ready"] or len(rows_by_member(rows, "snapshot")) != len(rows):
         raise ValueError("snapshot cohort count mismatch")
@@ -239,16 +354,19 @@ def main() -> int:
     scope = parser.add_mutually_exclusive_group()
     scope.add_argument("--member", action="append")
     scope.add_argument("--all-ready", action="store_true")
+    parser.add_argument("--current-role-authorizations", type=Path,
+                        help="source-bound L-8/P-7 authorization JSONL; the pre-role default stays strict")
     args = parser.parse_args()
     if args.verify_run_root:
-        if args.member or args.all_ready:
+        if args.member or args.all_ready or args.current_role_authorizations:
             parser.error("verification does not accept a new member scope")
         receipt = verify_snapshot(args.verify_run_root)
         print(json.dumps({"status": "PASS_FROZEN_INPUT_BINDINGS_ONLY", "counts": receipt["counts"]}))
         return 0
     if not args.member and not args.all_ready:
         parser.error("snapshot creation requires explicit --member or --all-ready")
-    receipt = build_snapshot(args.run_root, INPUTS, args.member)
+    receipt = build_snapshot(args.run_root, INPUTS, args.member,
+                             current_role_authorizations=args.current_role_authorizations)
     print(json.dumps({"status": receipt["status"], "counts": receipt["counts"], "output": receipt["output"]}))
     return 0 if receipt["counts"]["ready"] else 2
 

@@ -27,12 +27,19 @@ import os
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from fec.paths import to_host
+from fec import roster
+from fec.paths import MELANGE_DATA, to_host
 from fec.speech import longform_automated_authority as auto
 
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = ROOT / "data" / "members" / "member_narrative_evidence_v4.json"
+# --hearing-candidate (opt-in, brief-packet ledgers only) reads the HA-ATTRIB-v1 candidate Paul ratified for brief
+# packets on 2026-10-24 (RATIFICATION_HA_ATTRIB_V1_20261024.md next to it; applied by his 2026-10-28 decisions, item 1).
+# No live promotion: by default, and in the chain, hearing antagonism stays data/stance/hearing_antagonism.json.
+HEARING_CANDIDATE = (Path(MELANGE_DATA) / "longform_restore_20261020" / "resume_20261021"
+                     / "hearing_attribution_fix_v1" / "hearing_antagonism.candidate.json")
+HEARING_CANDIDATE_SHA256 = "fc1ff45c5b4fe01c49ba18e38dd852a603df4287dbb5cc64c8c6db8d1f1c983a"
 SPEECH_CHANNELS = ("pause", "pace", "volume_dyn", "pitch_var")
 ALL_SPEECH_CHANNELS = SPEECH_CHANNELS + ("strain", "f0_mean")
 # Two audio layers exist per member and they are COMPLEMENTARY, never substitutes
@@ -482,6 +489,19 @@ def leadership_source_era(member, published, leadership_roles):
     )
 
 
+def validate_roster_turn_era(row: dict, leadership_roles: dict) -> None:
+    """Admit current-role observations separately, never as pre-role baseline evidence."""
+    member = str(row['member'])
+    if member not in leadership_roles:
+        return
+    era = row.get('source_era')
+    if era not in {'PRE_CURRENT_LEADERSHIP_ROLE', 'CURRENT_ROLE_CONDITIONED'}:
+        raise ValueError('current leader roster-wide turn has no admitted source era')
+    observed = row.get('recorded_at') or row.get('published')
+    if leadership_source_era(member, observed, leadership_roles) != era:
+        raise ValueError('current leader roster-wide turn source era disagrees with its date')
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
@@ -489,6 +509,9 @@ def main() -> int:
     parser.add_argument("--longform-feature-receipt", type=Path, default=LONGFORM_FEATURE_RECEIPT)
     parser.add_argument("--roster-turns", type=Path)
     parser.add_argument("--roster-turn-receipt", type=Path)
+    parser.add_argument("--hearing-candidate", action="store_true",
+                        help="opt-in for brief-packet ledgers: read the ratified HA-ATTRIB-v1 candidate instead of the live "
+                             "hearing file (fails closed when it is missing or its sha256 differs); never used by the chain")
     args = parser.parse_args()
 
     paths = {
@@ -508,12 +531,14 @@ def main() -> int:
         "audio_cache": ROOT / "data" / "members" / "b5_audio_cache.json",
         "interaction": ROOT / "data" / "lobbying" / "interaction_features.json",
         "personal_texture": ROOT / "data" / "members" / "member_personal_texture.json",
-        "hearing": ROOT / "data" / "stance" / "hearing_antagonism.json",
+        "hearing": HEARING_CANDIDATE if args.hearing_candidate else ROOT / "data" / "stance" / "hearing_antagonism.json",
         "cooperation": ROOT / "coop_v2_candidate.json",
     }
     missing = [str(path) for path in paths.values() if not path.is_file()]
     if missing:
         raise SystemExit("missing required input(s): " + ", ".join(missing))
+    if args.hearing_candidate and sha256(paths["hearing"]) != HEARING_CANDIDATE_SHA256:
+        raise SystemExit("hearing antagonism candidate sha256 is not the ratified HA-ATTRIB-v1 file: %s" % paths["hearing"])
     optional_paths = {
         "roster_longform_turns": args.roster_turns or ROOT / "data" / "speech" / "member_longform_reviewed_turns_v1.jsonl",
         "roster_longform_turn_receipt": args.roster_turn_receipt or ROOT / "data" / "speech" / "member_longform_reviewed_turns_v1.receipt.json",
@@ -624,8 +649,7 @@ def main() -> int:
                     row.get("status") not in {"HUMAN_BOUNDARY_REVIEWED_SOURCE_IDENTITY_VERIFIED", auto.STATUS}):
                 raise SystemExit("roster-wide reviewed turn artifact contains an inadmissible row")
             member = str(row["member"])
-            if member in leadership_roles and row.get("source_era") != "PRE_CURRENT_LEADERSHIP_ROLE":
-                raise SystemExit("current leader roster-wide turn is not pre-current-role")
+            validate_roster_turn_era(row, leadership_roles)
             source_record = {
                 "source_id": row.get("source_id"),
                 "title": row.get("title"),
@@ -694,6 +718,9 @@ def main() -> int:
 
     if set(basis) != set(desk) or set(basis) != set(congestion):
         raise SystemExit("basis, desk bundle, and congestion roster keys do not match exactly")
+    corrupted = sorted(key for key in basis if "�" in key)
+    if corrupted:  # a decoded-with-the-wrong-codec name must never become a ledger key
+        raise SystemExit("member key(s) contain U+FFFD: " + ", ".join(map(ascii, corrupted)))
 
     def facet_values(key):
         return [((row.get("personality_facets") or {}).get(key) or {}).get("z") for row in basis.values()]
@@ -1139,7 +1166,7 @@ def main() -> int:
     coop_covered = sum("cross_party_cooperation" in row["behavior"] for row in records.values())
     # 300 since 0b65a2cab (CU_IDENTITY_FIX, 2026-10-11): Rep. Robert Menendez (M001226) loses cooperation_v2
     # coverage once Sen. Menendez's Senate bills stop being credited to him by name. CU_IDENTITY_FIX=0 gives 301.
-    if len(records) != 533 or coop_covered != (300 if os.environ.get("CU_IDENTITY_FIX", "1") != "0" else 301):
+    if len(records) != roster.count() or coop_covered != (300 if os.environ.get("CU_IDENTITY_FIX", "1") != "0" else 301):
         raise SystemExit("coverage gate failed: members=%d cooperation=%d" % (len(records), coop_covered))
     if any((row.get("speech_profile") or {}).get("status") != "PASS" for row in records.values()):
         raise SystemExit("every member must receive a PASS speech profile")
@@ -1156,7 +1183,7 @@ def main() -> int:
             "rank_convention": "make_member_desk.py bisect_left/(n-1)",
             "constructs_independent": True,
             "cross_party_source": "coop_v2_candidate.json cooperation_v2_z only; no v1 fallback",
-            "speech_gate": "all 533 receive word/interaction baseline; all accepted audio settings combine into a general baseline; thin coverage limits strength, never pass/fail",
+            "speech_gate": "all %d receive word/interaction baseline; all accepted audio settings combine into a general baseline; thin coverage limits strength, never pass/fail" % roster.count(),
             "audio_layer_rule": (
                 "two complementary audio layers, never substitutes: general_audio_habits carries "
                 "clip-weighted raw means over accepted descriptive clips (scale=%s) and "

@@ -62,6 +62,29 @@ def test_snapshot_copies_words_and_leaves_canonical_files_unchanged(tmp_path):
         mod.build_snapshot(run, paths, ["Example Member"])
 
 
+@pytest.mark.parametrize("era", ["PRE_CONGRESS_LOCAL_OFFICE_GWINNETT_SCHOOL_BOARD", "IN_CONGRESS"])
+def test_primary_snapshot_preserves_the_explicit_recording_era(tmp_path, era):
+    paths, acquired, row = fixture_inputs(tmp_path)
+    mod.SMR.write_jsonl_atomic(paths["primary_acquisition"], [{**acquired, "source_era": era}])
+    mod.SMR.write_jsonl_atomic(paths["primary_transcripts"], [{**row, "source_era": era}])
+    run = tmp_path / "run"
+    assert mod.build_snapshot(run, paths, ["Example Member"])["counts"]["ready"] == 1
+    candidate = mod.SMR.read_jsonl(run / "ready_sources.jsonl")[0]
+    assert candidate["source_era"] == era
+    assert candidate["speaker_identity_authority"] is False
+
+
+def test_snapshot_refuses_conflicting_acquisition_and_transcript_eras(tmp_path):
+    paths, acquired, row = fixture_inputs(tmp_path)
+    mod.SMR.write_jsonl_atomic(paths["primary_acquisition"], [{**acquired, "source_era": "PRE_CONGRESS_LOCAL_OFFICE_X"}])
+    mod.SMR.write_jsonl_atomic(paths["primary_transcripts"], [{**row, "source_era": "IN_CONGRESS"}])
+    run = tmp_path / "run"
+    receipt = mod.build_snapshot(run, paths, ["Example Member"])
+    assert receipt["status"] == "NO_READY_SOURCES"
+    diagnostic = mod.SMR.read_jsonl(run / "source_diagnostics.jsonl")[0]
+    assert "source eras disagree" in diagnostic["error"]
+
+
 def test_live_asr_atomic_replacement_does_not_change_frozen_cohort(tmp_path, monkeypatch):
     paths, _, _ = fixture_inputs(tmp_path)
     original = mod.quality.inspect

@@ -79,7 +79,10 @@ def test_a_successful_envelope_that_merely_mentions_a_limit_is_not_a_quota_stop(
 def test_api_transport_429_is_quota_exhausted_but_other_statuses_are_not(monkeypatch):
     monkeypatch.setenv('ANTHROPIC_API_KEY', 'fixture-not-a-key')
     monkeypatch.setattr(R.time, 'sleep', Mock())
-    for code, expected in ((429, R.ClassifierQuotaExhausted), (400, urllib.error.HTTPError)):
+    # ATTEMPT10-400 (2026-10-27): a 400 is a rejected request that stops the run under its own reason, not a quota stop;
+    # a 5xx stays a per-key HTTPError.
+    for code, expected in ((429, R.ClassifierQuotaExhausted), (400, R.ClassifierRequestRejected),
+                           (500, urllib.error.HTTPError)):
         error = urllib.error.HTTPError('https://api.anthropic.com/v1/messages', code, 'status', {}, None)
         monkeypatch.setattr(R.urllib.request, 'urlopen', Mock(side_effect=error))
         with pytest.raises(expected) as raised:

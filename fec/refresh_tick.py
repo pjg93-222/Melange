@@ -389,7 +389,20 @@ def _chain_tail_is_audit_full(run_pipeline_path, log):
     if not entries:
         log('   chain-tail guard: no (\'name\',[...]) tuples parsed from the CHAIN block')
         return False
-    return entries[-1] == 'audit_full.py'
+    if entries[-1] != 'audit_full.py':
+        return False
+    # The tail must also still carry the [SYNC] live-sync gate (textual, same posture as CHAIN).
+    try:
+        with open(os.path.join(os.path.dirname(run_pipeline_path), 'audit', 'audit_full.py'),
+                  encoding='utf-8') as handle:
+            audit_source = handle.read()
+    except Exception as error:
+        log('   chain-tail guard: cannot read audit_full.py (%s)' % type(error).__name__)
+        return False
+    if "'live_sync_chain_journal_closed'" not in audit_source:
+        log('   chain-tail guard: audit_full.py no longer carries live_sync_chain_journal_closed')
+        return False
+    return True
 
 
 def audit_failure_gate(stdout, stderr, log, run_pipeline_path):
@@ -1424,7 +1437,12 @@ class Tick(object):
                 # a PASS at the normal cadence (D-211).  Not a failure and not a partial.
                 self.log('%-30s stopped on its call budget (%s) -- a bounded run, PASS; the '
                          'unattempted work stays in the pool' % (step.name, budget))
-            return self._commit_step(step, pre, post, OK, duration, run, budget=budget)
+            failed = failure_module.evidence_failed_count(run.stdout)
+            if failed:
+                self.log('%-30s %d bill(s) FAILED the evidence envelope (D-366) -- DEGRADED'
+                         % (step.name, failed))
+            return self._commit_step(step, pre, post, OK, duration, run, budget=budget,
+                                     evidence_failed=failed)
         if run.returncode in step.partial_codes:
             self.log('%-30s PARTIAL %3.0fs  exit %s — committed, not retried; the deferred work '
                      'is the downstream gates\' decision' % (step.name, duration, run.returncode))
@@ -1612,7 +1630,7 @@ class Tick(object):
                             'signature': letter['signature'], 'written': written})
 
     def _commit_step(self, step, pre, post, result_state, duration, run, tolerated=(),
-                     budget=None, quota=None):
+                     budget=None, quota=None, evidence_failed=0):
         """Build the manifest, run the zero floor, then ONE atomic state write.
 
         ``budget`` is STOP_CALLS when the producer stopped on its intentional call budget: the step
@@ -1790,7 +1808,8 @@ class Tick(object):
                           failure_class=None, next_attempt_utc=None, dead_letter=None,
                           quota_stop_utc=None,
                           budget_stop=({'reason': budget, 'at': state_store.stamp(self.now())}
-                                       if budget else None))
+                                       if budget else None),
+                          evidence_failed=evidence_failed or None)
         self.state.step(step.name).pop('failure_pending_tick_end', None)
         self.commit_state()
         _crashpoint('after_state_commit')

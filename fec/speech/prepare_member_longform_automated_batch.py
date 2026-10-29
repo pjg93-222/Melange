@@ -32,6 +32,7 @@ def main() -> int:
     docs = {key: (json.loads(Path(item["snapshot_path"]).read_text(encoding="utf-8-sig"))
                   if key in {"roster", "roles"} else SMR.read_jsonl(Path(item["snapshot_path"]), required=True))
             for key, item in receipt["inputs"].items()}
+    current_role_authorizations = snapshot.frozen_current_role_authorizations(args.snapshot, receipt)
     indexes = {key: snapshot.rows_by_member(docs[key], key) for key in (
         "primary_queue", "primary_acquisition", "primary_transcripts", "leader_sources", "leader_acquisition", "leader_transcripts")}
     # Read the active primary manifest once, solely to reuse completed repairs.
@@ -47,8 +48,13 @@ def main() -> int:
             transcript = live[member]
         item = {"member": member, "stream": stream, "source_id": (acquired or {}).get("source_id"),
                 "profile_effect": "NONE_UNTIL_COMPLETE_AUTOMATED_VERIFICATION"}
+        authorization = current_role_authorizations.get(member)
+        if authorization:
+            item.update(source_era="CURRENT_ROLE_CONDITIONED", no_pre_role_baseline=True,
+                        current_role_decision_sha256=authorization["decision_sha256"])
         problem = snapshot.source_problem(member, acquired, transcript, indexes["primary_queue"].get(member),
-            role, indexes["leader_sources"].get(member), docs["rejected_sources"], docs["quality_holds"])
+            role, indexes["leader_sources"].get(member), docs["rejected_sources"], docs["quality_holds"],
+            current_role_authorization=authorization)
         recoverable = {None, "TRANSCRIPT_PENDING", "STALE_TRANSCRIPT_SOURCE_BINDING", "QUALITY_HOLD_REQUIRES_SEPARATE_REPAIR_REVIEW"}
         if problem not in recoverable:
             queue_rows.append({**item, "status": "SOURCE_HOLD", "reason": problem})
@@ -56,7 +62,8 @@ def main() -> int:
         # source_problem returns early on stale transcripts. Independently check
         # the acquired source against authoritative selection before scheduling.
         acquisition_problem = snapshot.source_problem(member, acquired, None, indexes["primary_queue"].get(member),
-            role, indexes["leader_sources"].get(member), docs["rejected_sources"], [], acquisition_only=True)
+            role, indexes["leader_sources"].get(member), docs["rejected_sources"], [], acquisition_only=True,
+            current_role_authorization=authorization)
         if acquisition_problem:
             queue_rows.append({**item, "status": "SOURCE_HOLD", "reason": acquisition_problem})
             continue
@@ -91,6 +98,8 @@ def main() -> int:
         "artifacts": {name: {"path": str(root / name), "sha256": SMR.sha256_file(root / name)}
                       for name in ("acquisitions.jsonl", "transcripts.jsonl", "member_queue.jsonl")},
         "contract": {"live_manifests_written": False, "human_signoff_required": False,
+                     "current_role_conditioned_members": sorted(current_role_authorizations),
+                     "current_role_sources_are_baseline": False,
                      "failed_checks_are_verified": False, "caption_timing_repaired_by_clipping_or_sorting": False,
                      "same_whisper_asr_model": True, "original_recordings_preserved": True}})
     print({"active_members": len(queue_rows), "counts": counts}, flush=True)

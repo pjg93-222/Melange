@@ -201,6 +201,10 @@ def make_root(control=None, skip_producers=()):
         body = STUB + (RUN_PIPELINE_CHAIN if os.path.basename(path) == 'run_pipeline.py' else '')
         with open(path, 'w', encoding='utf-8', newline='\n') as handle:
             handle.write(body)
+    # The chain-tail guard also requires audit_full.py to carry the [SYNC] live-sync check name.
+    os.makedirs(os.path.join(fec, 'audit'), exist_ok=True)
+    with open(os.path.join(fec, 'audit', 'audit_full.py'), 'w', encoding='utf-8', newline='\n') as handle:
+        handle.write("ck('live_sync_chain_journal_closed', True)\n")
     write_control(root, control or {})
     return root
 

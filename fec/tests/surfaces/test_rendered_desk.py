@@ -66,6 +66,71 @@ PROFILES = p('cu-member-desk-profiles.js')
 BUNDLE = p('member_desk_bundle.json')
 NODE = os.environ.get('RENDERED_DESK_NODE') or shutil.which('node')
 
+# ---- run_probe must turn a hang / garbage into a recorded failure, never an exception, and the
+# glassbox status must show skips (artifact-independent, so these run even on a bare clone).
+import subprocess                                      # noqa: E402
+import types                                           # noqa: E402
+
+
+def _fake_run(stdout='', raises=None):
+    def run(*a, **k):
+        if raises:
+            raise raises
+        return types.SimpleNamespace(stdout=stdout, stderr='')
+    return run
+
+
+_real_run = ARD.subprocess.run
+try:
+    ARD.subprocess.run = _fake_run(raises=subprocess.TimeoutExpired('node', 1, output='partial'))
+    try:
+        got = ARD.run_probe('h.html', None, 'node', timeout=1)
+        ok('run_probe timeout returns (None, reason, secs)',
+           got[0] is None and 'timed out' in got[1], got)
+    except Exception as exc:
+        ok('run_probe timeout returns (None, reason, secs)', False, repr(exc))
+    ARD.subprocess.run = _fake_run(stdout='__PROBE_JSON__ {not json')
+    try:
+        got = ARD.run_probe('h.html', None, 'node', timeout=1)
+        ok('run_probe bad JSON returns (None, reason, secs)',
+           got[0] is None and 'malformed' in got[1], got)
+    except Exception as exc:
+        ok('run_probe bad JSON returns (None, reason, secs)', False, repr(exc))
+finally:
+    ARD.subprocess.run = _real_run
+
+_emitted = []
+_gb = types.ModuleType('surfaces.glassbox_emit')
+_gb.emit = lambda *a, **k: _emitted.append(a[1])
+_saved = {k: sys.modules.get(k) for k in ('surfaces', 'surfaces.glassbox_emit')}
+_real_audit = ARD.audit
+try:
+    _pkg = types.ModuleType('surfaces')
+    _pkg.glassbox_emit = _gb
+    sys.modules['surfaces'] = _pkg
+    sys.modules['surfaces.glassbox_emit'] = _gb
+    _r = ARD.Result()
+    _r.add(ARD.PASS, 'CONTRACT x')
+    _r.add(ARD.PASS, 'PROBE x')
+    _r.add(ARD.SKIP, 'A1 x', 'not split')
+    ARD.audit = lambda *a, **k: _r
+    _out = sys.stdout
+    sys.stdout = open(os.devnull, 'w')
+    try:
+        ARD.main([])
+    finally:
+        sys.stdout.close()
+        sys.stdout = _out
+    ok('glassbox reports skip when a substantive check skipped despite passes', _emitted == ['skip'], _emitted)
+
+finally:
+    ARD.audit = _real_audit
+    for k, v in _saved.items():
+        if v is None:
+            sys.modules.pop(k, None)
+        else:
+            sys.modules[k] = v
+
 _missing = [q for q in (HTML, PROFILES, BUNDLE, ARD.PROBE) if not os.path.exists(q)]
 if _missing or not NODE:
     reason = ('node not found' if not _missing else

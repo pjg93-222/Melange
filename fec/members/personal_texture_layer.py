@@ -220,6 +220,16 @@ SCHEMA = {'type':'object','properties':{
 
 def cache_key(r): return r['key']
 
+def local_todo(selected, cache, refresh=False):
+    """Semantic-gate windows the credit-free local pass classifies: every window with no judgment yet,
+    plus (refresh) windows held by a superseded local_explicit_ version.  Fable judgments are never
+    touched.  M7-texture (2026-10-26): the chain's --refresh-local used to take only the stale-local
+    half, so windows new to the corpus stayed unclassified (attempt 9: 6244 classified < 6545 gate)."""
+    def stale(o):
+        c = str((o or {}).get('classifier', ''))
+        return c.startswith('local_explicit_') and c != LOCAL_CLASSIFIER
+    return [r for r in selected if cache_key(r) not in cache or (refresh and stale(cache[cache_key(r)]))]
+
 def load_cache():
     out = {}
     if os.path.exists(CACHE):
@@ -291,7 +301,7 @@ def local_explicit(r):
     return {'keep':True,'category':cat,'claim':sent,'confidence':'medium',
             'reason':'explicit first-person phrase; verbatim fallback','classifier':LOCAL_CLASSIFIER}
 
-def write_artifact(rows, cache, selected_count=None):
+def write_artifact(rows, cache, selected=()):
     by = collections.defaultdict(list); rejected = 0
     for r in rows:
         o = cache.get(cache_key(r))
@@ -328,7 +338,11 @@ def write_artifact(rows, cache, selected_count=None):
                   'model':'mixed: %s + %s'%(MODEL,LOCAL_CLASSIFIER),
                   'candidate_count':len(rows), 'classified_count':sum(cache_key(r) in cache for r in rows),
                   'candidate_member_count':len({r['member'] for r in rows}),
-                  'semantic_gate_count':selected_count, 'semantic_cap_per_member_category':SEMANTIC_CAP,
+                  # M7-texture: gate coverage on the gate's own denominator; classified_count also counts
+                  # cached rows outside the gate, so it can exceed the gate while gate windows are unjudged.
+                  'semantic_gate_count':len(selected),
+                  'semantic_gate_classified_count':sum(cache_key(r) in cache for r in selected),
+                  'semantic_cap_per_member_category':SEMANTIC_CAP,
                   'display_policy':'Fable-kept rows plus exact INTERVIEW sentences passing local_explicit_v6; local rows remain narrative-ineligible',
                   'rejected_count':rejected, 'member_count':len(members),
                   'source_policy':'member-attributed text only; reposts excluded; evidence and locator retained; display-only'}
@@ -348,24 +362,15 @@ if __name__ == '__main__':
         for r in rows[:8]: print('  [%s/%s] %s | %s' % (r['source'], ','.join(r['hints']), r['member'], r['evidence'][:150]))
         sys.exit(0)
     if '--rebuild' in sys.argv:
-        write_artifact(rows, cache, len(selected)); sys.exit(0)
-    if '--local' in sys.argv:
-        todo=[r for r in selected if cache_key(r) not in cache]
+        write_artifact(rows, cache, selected); sys.exit(0)
+    if '--local' in sys.argv or '--refresh-local' in sys.argv:
+        todo=local_todo(selected,cache,refresh='--refresh-local' in sys.argv)
         with io.open(CACHE,'a',encoding='utf-8', newline='\r\n') as cf:
             for r in todo:
                 o=local_explicit(r); cache[cache_key(r)]=o
                 cf.write(json.dumps({'k':cache_key(r),'out':o},ensure_ascii=True)+'\n')
-        print('LOCAL EXPLICIT FALLBACK: classified %d previously uncached semantic-gate windows'%len(todo))
-        write_artifact(rows,cache,len(selected));sys.exit(0)
-    if '--refresh-local' in sys.argv:
-        todo=[r for r in selected if str((cache.get(cache_key(r)) or {}).get('classifier','')).startswith('local_explicit_') and
-               (cache.get(cache_key(r)) or {}).get('classifier')!=LOCAL_CLASSIFIER]
-        with io.open(CACHE,'a',encoding='utf-8', newline='\r\n') as cf:
-            for r in todo:
-                o=local_explicit(r);cache[cache_key(r)]=o
-                cf.write(json.dumps({'k':cache_key(r),'out':o},ensure_ascii=True)+'\n')
-        print('LOCAL EXPLICIT REFRESH v6: reclassified %d deterministic windows'%len(todo))
-        write_artifact(rows,cache,len(selected));sys.exit(0)
+        print('LOCAL EXPLICIT %s: classified %d uncached or superseded semantic-gate windows'%(LOCAL_CLASSIFIER,len(todo)))
+        write_artifact(rows,cache,selected);sys.exit(0)
     if '--score' not in sys.argv:
         print('usage: personal_texture_layer.py [--probe | --score --go | --local | --refresh-local | --rebuild]'); sys.exit(0)
     todo = [r for r in selected if cache_key(r) not in cache]
@@ -405,4 +410,4 @@ if __name__ == '__main__':
                         cf.write(json.dumps({'k':cache_key(r),'out':o},ensure_ascii=True)+'\n'); cf.flush()
                     if done%250==0 or done==len(todo): print('  %d/%d (%d errors)'%(done,len(todo),errs),flush=True)
         cf.close()
-    write_artifact(rows, cache, len(selected))
+    write_artifact(rows, cache, selected)

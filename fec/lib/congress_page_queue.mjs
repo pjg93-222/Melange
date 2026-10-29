@@ -15,6 +15,14 @@ export const MAX_RETRIES_PER_PAGE = 3;
 
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Browser "TypeError: Failed to fetch", Node "TypeError: fetch failed", and the same message
+// surfaced through page.evaluate.
+export function isTransportError(error) {
+  return /failed to fetch|fetch failed|ECONNRESET|ETIMEDOUT|socket hang up|network error/i.test(
+    `${error?.name ?? ""}: ${error?.message ?? ""} ${error?.cause?.message ?? ""}`,
+  );
+}
+
 async function waitForSlot(governor, sleep) {
   const wait = governor.reserve();
   if (wait > 0) await sleep(wait);
@@ -30,6 +38,7 @@ export async function governedAttempt({
   onChallenge = async () => {},
   maxRetries = MAX_RETRIES_PER_PAGE,
   sleep = defaultSleep,
+  transportBackoffMs = 4_000,
 }) {
   let lastError = null;
   for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
@@ -39,6 +48,13 @@ export async function governedAttempt({
       governor.onSuccess();
       return { ok: true, value, attempts: attempt };
     } catch (error) {
+      if (isTransportError(error)) {
+        // "Failed to fetch" / "fetch failed": transient, retried with backoff; exhaustion is a
+        // gap row for the caller, never a thrown error that stops every worker.
+        lastError = error;
+        if (attempt < maxRetries) await sleep(transportBackoffMs * attempt);
+        continue;
+      }
       if (!(error instanceof PushbackError)) throw error;
       lastError = error;
       governor.onPushback();

@@ -143,7 +143,7 @@ def load_inputs():
     gold = load_root("data/stance/big5_senate_expert_gold.json")
     roster_rows = load_root("data/engine/congestion.json")
     roster = [row["member"] for row in roster_rows]
-    panels, _ = map_gold(gold, roster)
+    panels, _ = map_gold(gold, roster_rows)
     anchored = load_root("data/stance/big5_gold_anchored.json")
     trait_block = anchored["traits"][TRAIT]
     composite = {name: row[TRAIT] for name, row in (trait_block.get("members") or {}).items()}

@@ -242,7 +242,7 @@ OFFICE_NAME_POLICY = (
 # above is named here, in the producer. The MOVE tables (top_sources /
 # top_destinations) are named in the BROWSER: the page's own containerLabel()
 # strips container:office:<chamber>: off the id and looks the remainder up in the
-# 533-member roster it already carries, and printed the raw key whenever that
+# member roster it already carries, and printed the raw key whenever that
 # missed. Every miss is a member office off the CURRENT roster -- exactly the
 # population the House personnel ledger exists to name -- so the same rule that
 # fixed the office column fixes these, and the page stops inventing a naming rule
@@ -581,8 +581,8 @@ def bind_inputs(root, generation, hash_edges=False):
             'sha256': edges_declared.get('sha256'),
             'bytes': edges_declared.get('bytes'),
             'bound_against': [],
-            'not_recomputed': ('this producer reads no edge row; the 1.5 GB file is not hashed '
-                               'here. Rerun with --hash-edges to bind it.')}
+            'not_recomputed': ('this producer reads no edge row and does not hash the edge file; '
+                               'audit_full re-hashes it against this sha256 regardless of this marker.')}
 
     return {'base': base, 'verification_path': verification_path, 'verification': verification,
             'receipt': receipt, 'receipt_path': receipt_path, 'bound': bound, 'paths': paths}
@@ -681,7 +681,7 @@ def load_roster(root):
     moneyball_core.congestion() is the loader every dashboard producer already
     goes through (fec/surfaces/make_member_desk.py:153,
     fec/surfaces/build_dashboard_bundle.py:2). It reads data/engine/congestion.json,
-    the same 533-row roster the generation receipt itself records having used.
+    the same roster the generation receipt itself records having used.
     Party comes from the same kernel's Voteview map; state comes from
     fec/legislators.csv joined on bioguide, which is exactly how the member desk
     enriches (make_member_desk.py:924-935).
@@ -1235,7 +1235,7 @@ def container_display_name(container_id, office_key, roster, ledger_names=None,
     label, is print a container id at a reader. The previous version ended in
     `return raw`, which is how HON:H001060 reached the page for 1,247 of 7,720
     published rows: every one of those is a member office whose bioguide is off
-    the current 533-member roster, so the roster lookup failed and the raw key
+    the current member roster, so the roster lookup failed and the raw key
     was printed as if it were a name. Those are now named from the House
     personnel ledger, and the handful the ledger cannot name say so.
 
@@ -1831,6 +1831,9 @@ def build(root, generation, out_path, max_bytes, use_glassbox=True, hash_edges=F
             'generation': generation,
             'generation_root': os.path.relpath(binding['base'], root).replace('\\', '/'),
             'inputs': binding['bound'],
+            # meta.bound_against = the ROLES whose sha256 is recorded in inputs (audit_full re-hashes every one, edges
+            # included); inputs.<role>.bound_against = the RECEIPTS that role's sha256 was checked against at build time.
+            'bound_against': sorted(role for role, rec in binding['bound'].items() if rec.get('sha256')),
             'verification': {
                 'status': binding['verification'].get('status'),
                 'failures': len(binding['verification'].get('failures') or []),

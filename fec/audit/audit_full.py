@@ -5,6 +5,7 @@ new modules: money-response, electoral plays, co-sponsor routes, LT-priming, sta
 import json,sys,os,subprocess,re,collections,importlib.util,csv,copy,hashlib
 from pathlib import Path
 import config_overlay as CO
+import roster
 import district.demographic_potential as _demographic_potential
 from legislation.congress_bill_repository import validate_live_repository
 from pipeline_lock import valid_inherited_lease
@@ -30,6 +31,22 @@ assert_no_foreign_pipeline_writer()
 P,F=[],[]
 def ck(name,cond,detail=''):
     (P if cond else F).append(name); print(('  OK   ' if cond else 'FAIL  ')+name+((' :: '+detail) if (detail and not cond) else ''))
+def ck_roster(name,covered,cond=True,detail=''):
+    # ck() for an artifact keyed by member name that the media-phase producers rebuild (run_pipeline CHAIN :52-90).  The non-media
+    # chain starts after that phase, so just after a roster refresh the artifact may still describe the old roster: it may lack
+    # roster ARRIVALS and carry DEPARTED members (named on a "!!" line; the media-inclusive run regenerates it).  Any other
+    # difference from the roster, or a failed companion condition, fails.
+    withheld,dropped,bad_missing,bad_extra=roster.drift(roster.names(),covered)
+    if withheld or dropped:
+        print('  !! %s: built before the last roster refresh; %d arrival(s) not covered (%s); %d departed member(s) still carried (%s)'%(
+            name,len(withheld),', '.join(sorted(withheld)),len(dropped),', '.join(sorted(dropped))))
+    ck(name,cond and not bad_missing and not bad_extra,
+       (detail+'; ' if detail else '')+'missing=%s extra=%s'%(sorted(bad_missing)[:5],sorted(bad_extra)[:5]))
+def departed_carried(label,names):
+    # Roster departures a pre-refresh artifact still carries: returned so the caller can set them aside, and named on a "!!" line.
+    gone=sorted({d['member'] for d in roster.departed()}&set(names))
+    if gone: print('  !! %s: %d departed member(s) still carried, not expected downstream (%s)'%(label,len(gone),', '.join(gone)))
+    return set(gone)
 def run(script):
     result=subprocess.run([sys.executable,os.path.join(FE,*script.split('/'))],capture_output=True,text=True,encoding='utf-8',errors='replace')   # step names are slash-separated; join natively
     return result.stdout if result.returncode==0 else 'sub-audit execution failed (exit %s)'%result.returncode
@@ -385,7 +402,7 @@ print('\n========================================')
 # RECEPTIVITY LAYER (2026-07-02): coverage + documented caps.
 if os.path.exists(os.path.join(B, 'member_receptivity.json')):
     _rj=json.load(open(os.path.join(B, 'member_receptivity.json')))['members']
-    ck('receptivity layer covers all members', len(_rj)==533, str(len(_rj)))
+    ck_roster('receptivity layer covers all members', _rj, True, str(len(_rj)))
     ck('receptivity multipliers within documented caps',
        all(0.30<=v['seed_prob']<=0.90 and 0.50<=v['pressure_mult']<=1.60 and 0.80<=v['edge_mult']<=1.20 for v in _rj.values()))
     # R1 (Paul ruling 2026-10-07, D-107): with COMPET_MULT on the engines read pressure_mult_compet (F&H competitiveness term neutral).
@@ -417,8 +434,9 @@ if os.path.exists(os.path.join(B, 'member_receptivity.json')):
 # evaluated to 0 on the three TOP-tier categories — every weight must be a positive literal number.
 import openpyxl as _px
 _wb=_px.load_workbook(os.path.join(B, 'Moneyball Main Version - Blended.xlsx'),data_only=True)
-_w535=[_wb['Press Release - Normalized'].cell(535,c).value for c in range(5,24)]
-ck('press-pillar weight row 535: 19 numeric positive weights (no formula remnants)',
+_wfoot=roster.footer_row('Press Release - Normalized')
+_w535=[_wb['Press Release - Normalized'].cell(_wfoot,c).value for c in range(5,24)]
+ck('press-pillar weight row %d: 19 numeric positive weights (no formula remnants)'%_wfoot,
    all(isinstance(v,(int,float)) and v>0 for v in _w535),str(_w535))
 # 2026-07-04 integrity fix guard: the press component must be DYNAMIC (built from the current tone
 # csv), never the frozen 07-02 archive (which silently excluded every post-archive article: 197
@@ -649,7 +667,7 @@ if os.path.exists(_lra_p):
     # from the roster for TWO honest reasons -- this allowlist previously
     # encoded only the first, so the check failed on the second and reported a
     # data error that was not one. Each name is annotated; verified absent from
-    # the 533 roster under every spelling before being listed here.
+    # the roster under every spelling before being listed here.
     _lrdelegates={'Stacey Plaskett','James Moylan'}      # non-voting delegates
     _lrdeparted={
         'Ed Perlmutter',        # retired, end of the 117th
@@ -657,7 +675,7 @@ if os.path.exists(_lra_p):
         'Alexander X. Mooney',  # left the House after the 118th
         'Marco Rubio',          # resigned Jan 2025 (Secretary of State)
     }
-    _lrknown=_lrdelegates|_lrdeparted
+    _lrknown=_lrdelegates|_lrdeparted|departed_carried('legislation_routing_audit unmatched sponsors',_lrsum.get('unmatched_members') or {})
     _lrunmap=_lrsum.get('unmatched_members') or {}
     _lrun=set(_lrunmap)
     ck('unmatched members stay the known delegates and departed members',
@@ -691,7 +709,7 @@ if os.path.exists(_lra_p):
         with open(_lrarch_p,encoding='utf-8') as _fh: _lrarch=json.load(_fh)
         ck('legislative evidence coverage holds its floor',
            len(_lrarch)>=516,
-           '%d members carry >=1 archive bill (floor 516 of 533)'%len(_lrarch))
+           '%d members carry >=1 archive bill (floor 516 of %d)'%(len(_lrarch),roster.count()))
     else:
         ck('legislative evidence coverage holds its floor',False,'archive_leg.json missing')
 else:
@@ -704,6 +722,7 @@ else:
 _sbl_receipt_p=os.path.join(B, 'data', 'engine', 'sentinel_bill_workbook_receipt.json')
 _sbl_ledger_p=os.path.join(B, 'Sentinel Bill Ledger.xlsx')
 _SBL_MAX_SKIP_DAYS=21
+_sbl_have=None   # the installed ledger's sha256 once hashed; reused by [SYNC] live_sync_sentinel_ledger_sha
 try:
     if os.path.exists(_sbl_receipt_p):
         import time as _sbl_time
@@ -851,7 +870,7 @@ if os.path.exists(_rc_p):
         ck('cooperation and low-antagonism A remain separately sourced (zero substitutions)',
            _co_bad==0, '%d cooperation_v2 values substituted/mismatched'%_co_bad)
         _con={d['member']:d for d in json.load(open(os.path.join(B, 'data', 'engine', 'congestion.json'),encoding='utf-8'))}
-        _g={d.get('full_name'):d.get('gender') for d in _csv.DictReader(open(os.path.join(DATA_FE, 'legislators.csv'),encoding='utf-8-sig'))}
+        _g={(d.get('full_name') or '').strip() or ('%s %s'%(d.get('first_name') or '',d.get('last_name') or '')).strip():d.get('gender') for d in _csv.DictReader(open(os.path.join(DATA_FE, 'legislators.csv'),encoding='utf-8-sig'))}   # a blank upstream full_name (e.g. arrival W000832) falls back to first + last name
         _rows=[]
         for _m in set(_cvm)&set(_avm)&set(_con):
             _x=(_cvm.get(_m) or {}).get('cooperation_v2_z')
@@ -874,13 +893,23 @@ if os.path.exists(_rc_p):
 else:
     # (2026-07-09 fix: this branch previously fired a MISLABELED press-component check name)
     ck('receptivity artifact present (member_receptivity.json)',False,'missing — chain step 1 (receptivity_layer.py) did not run')
-# S2-04 guard (audit 2026-07-02): every workbook reader hardcodes range(3,536) for the 533-member roster.
-# If a member row is ever added/removed, those readers silently truncate or NUL the tail. Assert on
+# S2-04 guard (audit 2026-07-02): every workbook reader walks roster.rows() (roster lane 2026-10-20: it was a hardcoded range(3,536)).
+# If the workbook and the roster ever disagree on the member list, those readers silently truncate or NUL the tail. Assert on
 # R&A col A — TYPED names, immune to the phase-2 openpyxl-save cache death (Blended col A is
 # formula-backed and legitimately reads empty between Excel opens).
-_roster=len(json.load(open(os.path.join(B, 'data', 'engine', 'congestion.json'))))
-_ra_ws=_wb['Rank & Allocation']; _wbrows=sum(1 for r in range(3,536) if _ra_ws.cell(r,1).value)
-ck('workbook member rows == roster size (no silent row drift)', _wbrows==_roster, 'workbook %d vs roster %d'%(_wbrows,_roster))
+_roster=roster.count()
+_cong_names=[d['member'] for d in json.load(open(os.path.join(B, 'data', 'engine', 'congestion.json'),encoding='utf-8'))]
+ck('roster.json agrees with congestion.json (same names, same count)',
+   len(_cong_names)==_roster and len(set(_cong_names))==len(_cong_names) and set(_cong_names)==set(roster.names()),
+   'congestion.json %d vs roster.json %d; only in congestion=%s only in roster=%s'%(len(_cong_names),_roster,
+   sorted(set(_cong_names)-set(roster.names()))[:5],sorted(set(roster.names())-set(_cong_names))[:5]))
+_ra_ws=_wb['Rank & Allocation']
+_ra_names=[_ra_ws.cell(r,1).value for r in range(roster.first_row('Rank & Allocation'),_ra_ws.max_row+1) if _ra_ws.cell(r,1).value]   # every typed name under the header, not just the roster window
+_wbrows=len(_ra_names)
+ck('workbook member rows == roster size (no silent row drift)',
+   _wbrows==_roster and len(set(_ra_names))==_wbrows and set(_ra_names)==set(roster.names()),
+   'workbook %d vs roster %d; only in workbook=%s only in roster=%s'%(_wbrows,_roster,
+   sorted(set(_ra_names)-set(roster.names()))[:5],sorted(set(roster.names())-set(_ra_names))[:5]))
 # Roadmap-#9 phase 1 (2026-07-02): the whole raw->normalized->pillar->score->rank chain is reproduced
 # in Python (compute_pillars.py) and must match the sheet EXACTLY — catches any silent formula edit.
 os.environ['PILLAR_SNAPSHOT_FREEZE']='1'   # the audit must NEVER advance the pillar snapshot vintage (2026-07-17 guard)
@@ -888,7 +917,7 @@ try:
     _pp=run('engine/compute_pillars.py')
 finally:
     os.environ.pop('PILLAR_SNAPSHOT_FREEZE',None)
-ck('python pillar shadow-compute parity (rank math reproducible, 533/533)','PARITY: CLEAN' in _pp,
+ck('python pillar shadow-compute parity (rank math reproducible, %d/%d)'%(roster.count(),roster.count()),'PARITY: CLEAN' in _pp,
    _pp.strip().splitlines()[-1] if _pp else 'no output')
 # rank-integrity guards: validate the basis selected by compute_pillars. Live mode
 # binds current source hashes and shadow parity; legacy mode retains the 14-day
@@ -1287,8 +1316,12 @@ if os.path.exists(os.path.join(B, 'member_desk_bundle.json')) and os.path.exists
             for _i in range(5):
                 if (_i>=len(_g) or _g[_i] is None) and _i<len(_f) and _f[_i] is not None and not (_i<len(_s) and _s[_i]):
                     _fb_unlabeled+=1
-        ck('every member renders a Big-Five panel (gold or labeled estimate; Paul fill 2026-07-17)',
-           not _b5empty, str(_b5empty[:6]))
+        # arrivals with an empty panel are withheld by ck_roster (logged "!!"); an empty panel for a continuing member, or for a
+        # name that is neither on the roster nor departed, still fails
+        _b5known=set(roster.names())|{d['member'] for d in roster.departed()}
+        ck_roster('every member renders a Big-Five panel (gold or labeled estimate; Paul fill 2026-07-17)',
+                  [m.get('name') for m in _bun.get('members',[]) if m.get('name') not in set(_b5empty)],
+                  not (set(_b5empty)-_b5known), str(_b5empty[:6]))
         ck('every estimate slot carries a provenance label', _fb_unlabeled==0, '%d unlabeled'%_fb_unlabeled)
     _fr=json.load(open(os.path.join(B, 'data', 'members', 'formal_visibility_roles.json'),encoding='utf-8'))
     from engine import influence_roles as _ir
@@ -1339,26 +1372,31 @@ if os.path.exists(os.path.join(B, 'member_desk_bundle.json')) and os.path.exists
         _egm=_eg.get('members') or {}; _epr=_ev.get('panel_results') or {}
         _ebad=sum(1 for d in _egm.values() if d.get('E') is None or d.get('percentile') is None or
                   d.get('channel_weights')!={'blue_visibility':.5,'pink_observer':.5})
-        ck('external Senate gold preserves the discriminant equal-weight Extraversion comparator',
+        # This archived comparator receipt is internally bound to its saved validation.
+        # Its hashes do not establish present-day validity or require a routine reaudit.
+        ck('archived equal-weight Extraversion comparator preserves its historical evidence receipt',
            _eg.get('schema')=='big5-e-gold-anchored-v1' and _eg.get('status')=='ACTIVE_EXTERNAL_GOLD_ANCHORED' and
            _ev.get('verdict')=='PASS' and len(_egm)>=450 and _ebad==0 and
+           set(_epr)=={'senate_insiders','academic_experts'} and
+           bool(_eg.get('inputs_sha256')) and _eg.get('inputs_sha256')==_ev.get('inputs_sha256') and
+           _eg.get('validation_sha256')==hashlib.sha256(Path(_evp).read_bytes()).hexdigest() and
            all((d.get('e_r') or 0)>=.30 and d.get('diagonal_dominant') and (d.get('e_permutation_p_one_sided') or 1)<.05
                for d in _epr.values()),
-           '%d E members, %d malformed; panel r=%s'%(
+           'archived %d E members, %d malformed; historical panel r=%s'%(
            len(_egm),_ebad,{k:round(v.get('e_r',0),3) for k,v in _epr.items()}))
     _mgp=os.path.join(B, 'data', 'stance', 'big5_gold_anchored.json')
     if os.path.exists(_mgp):
         _mg=json.load(open(_mgp,encoding='utf-8')); _mgt=_mg.get('traits') or {}; _mge=_mgt.get('E') or {}
         _mgem=_mge.get('members') or {}; _mgew=_mge.get('selected_weights') or {}
         _mgebad=sum(1 for d in _mgem.values() if d.get('E') is None or d.get('percentile') is None)
-        _mgpan=(_mge.get('validation') or {}).get('panels') or {}
-        ck('multitrait OOF Senate gold activates E with dominance and role-adjusted visibility',
+        _mgpan=(_mge.get('historical_validation') or {}).get('panels') or {}
+        ck('accepted fixed-weight Senate-gold E preserves its historical evidence receipt',
            _mg.get('schema')=='big5-gold-anchored-v2' and set(_mgt)=={'O','C','E','A','N'} and
            _mge.get('status')=='ACTIVE_EXTERNAL_GOLD_ANCHORED' and len(_mgem)>=450 and _mgebad==0 and
            _mgew.get('interaction_dominance',0)>=.1 and _mgew.get('role_adjusted_visibility',0)>=.1 and
-           all(d.get('diagonal_dominant') and (d.get('r') or 0)>=.2 and
+           len(_mgpan)==2 and all(d.get('diagonal_dominant') and (d.get('r') or 0)>=.2 and
                (d.get('permutation_p_one_sided') or 1)<.1 for d in _mgpan.values()) and
-           all((d.get('validation') or {}).get('predictions_are_out_of_fold') for d in _mgt.values()),
+           all((d.get('historical_validation') or {}).get('predictions_are_out_of_fold') is True for d in _mgt.values()),
            '%d E members, %d malformed; weights=%s; panel r=%s'%(
            len(_mgem),_mgebad,_mgew,{k:round(v.get('r',0),3) for k,v in _mgpan.items()}))
         from members.ratified_trait_status import RATIFIED_STATUS as _expected_status   # the producer caps at the same map
@@ -1369,6 +1407,13 @@ if os.path.exists(os.path.join(B, 'member_desk_bundle.json')) and os.path.exists
            'statuses=%s; association gates=%s'%(
            {k:v.get('status') for k,v in _mgt.items()},
            {k:v.get('association_gates') for k,v in _mgt.items()}))
+        from members.validate_guarded_profile_artifacts import validate_frozen_gold_contract
+        _mgspec=os.path.join(os.path.dirname(FE),'source_data','big5','frozen_accepted_spec.json')
+        _mgspecsha=hashlib.sha256(Path(_mgspec).read_bytes()).hexdigest() if os.path.isfile(_mgspec) else ''
+        _mgerrors=validate_frozen_gold_contract(_mg,roster.names(),_mgspecsha)
+        if not _mgspecsha: _mgerrors.append('frozen Big Five specification missing')
+        ck('Big Five weights stay frozen, roster current, and correction diagnostics are not OOF claims',
+           not _mgerrors,'; '.join(_mgerrors))
     # Source-primary Blue is the completed Round-4 promotion, not the pooled lexical v2 draft.
     _bep=os.path.join(B, 'data', 'members', 'big5_blue_emb.json')
     if os.path.exists(_bep):
@@ -1420,8 +1465,9 @@ if os.path.exists(os.path.join(B, 'member_desk_bundle.json')) and os.path.exists
            (len(_avm),_av.get('reliability_sb'),_mal))
         _desk_av={m.get('name'):(m.get('psy') or {}).get('a_validated_pct')
                   for m in _bun.get('members',[]) if (m.get('psy') or {}).get('a_validated_pct') is not None}
+        _av_cur=set(_avm)-departed_carried('interview_antagonism.json',_avm)
         ck('validated A facet propagates to desk without replacing engine/text A',
-           len(_desk_av)==len(_avm) and all(0<=v<=1 for v in _desk_av.values())
+           set(_desk_av)==_av_cur and all(0<=v<=1 for v in _desk_av.values())
            and all((m.get('psy') or {}).get('a_validated_scope')=='interview/media-covered stratum only'
                    for m in _bun.get('members',[]) if (m.get('psy') or {}).get('a_validated_pct') is not None),
            '%d artifact members, %d desk values'%(len(_avm),len(_desk_av)))
@@ -1478,8 +1524,8 @@ if os.path.exists(os.path.join(B, 'member_desk_bundle.json')) and os.path.exists
                                                  for _p in ('p1','p2','p3')): _ungrounded+=1
             if _nardescriptive and (_dn.get('format')!='descriptive-v3' or 'meeting_playbook' in _dn):
                 _ungrounded+=1
-        _safe=(not _nar_present and _withheld==533) or (
-              bool(_narsrc) and len(_nar_present)+_withheld==533 and _ungrounded==0)
+        _safe=(not _nar_present and _withheld==roster.count()) or (
+              bool(_narsrc) and len(_nar_present)+_withheld==roster.count() and _ungrounded==0)
         ck('current narratives cannot silently fall back to legacy E/audio prose', _safe,
            '%d desk narratives, %d explicitly withheld, %d paragraphs not source-identical '
            '(labelled=%s basis-bound=%s accepted=%s, %d briefs; descriptive errors=%s)'%
@@ -1551,8 +1597,8 @@ if all(os.path.exists(_p) for _p in _alp.values()):
         if isinstance(_v,dict) and _v.get('scale')!='within_source_z': _al_scale.append(_m+'/voiceprint')
         if isinstance(_g,dict) and isinstance(_v,dict) and _g.get('scale')==_v.get('scale'):
             _al_scale.append(_m+'/COLLIDING_SCALES')
-    ck('every member holding verified audio evidence publishes an audio layer (no silent blindness)',
-       len(_alrows)==533 and not _al_blind and not _al_missing_desc and not _al_missing_vp
+    ck_roster('every member holding verified audio evidence publishes an audio layer (no silent blindness)', _alrows,
+       not _al_blind and not _al_missing_desc and not _al_missing_vp
        and not _al_empty and not _al_clipmismatch,
        '%d members expected to hold audio; %d publish NEITHER layer, %d missing the clip layer, '
        '%d missing the voiceprint layer, %d empty-object layers, %d clip-count mismatches; %s'%
@@ -1617,10 +1663,11 @@ if os.path.exists(_ptp):
         len(_ptm)>=.90*_pp.get('candidate_member_count',9999) and _ni>0 and _bad==0 and
         _local_narrative_leak==0 and _bad_display_gate==0 and
         _pp.get('candidate_count',0)>=_pp.get('semantic_gate_count',1) and
-        _pp.get('classified_count',0)>=_pp.get('semantic_gate_count',1),
-        '%d members, %d details, %d malformed, %d local-to-narrative leaks, %d invalid display admissions, candidates=%s classified=%s gate=%s'%
+        _pp.get('semantic_gate_classified_count',-1)>=_pp.get('semantic_gate_count',1),
+        '%d members, %d details, %d malformed, %d local-to-narrative leaks, %d invalid display admissions, candidates=%s classified=%s gate=%s gate_classified=%s'%
         (len(_ptm),_ni,_bad,_local_narrative_leak,_bad_display_gate,
-         _pp.get('candidate_count'),_pp.get('classified_count'),_pp.get('semantic_gate_count')))
+         _pp.get('candidate_count'),_pp.get('classified_count'),_pp.get('semantic_gate_count'),
+         _pp.get('semantic_gate_classified_count')))
     if os.path.exists(os.path.join(B, 'member_desk_bundle.json')):
         _dm={m.get('name'):m.get('personal') for m in json.load(open(os.path.join(B, 'member_desk_bundle.json'),encoding='utf-8')).get('members',[])}
         _personal_errors=personal_source_errors(_ptm,_dm)
@@ -1637,22 +1684,21 @@ else:
 _wkp=os.path.join(B, 'data', 'members', 'member_wikipedia_summaries.json')
 if os.path.exists(_wkp):
     _wk=json.load(open(_wkp,encoding='utf-8')); _wkm=_wk.get('members') or {}; _wkc=_wk.get('coverage') or {}
-    _wk_roster=json.load(open(os.path.join(B, 'data', 'engine', 'congestion.json'),encoding='utf-8'))
-    _wk_roster_n=len(_wk_roster)
     _wk_bad=sum(1 for _name,_row in _wkm.items() if (
         _row.get('status') not in ('ok','missing') or not _row.get('bioguide') or
         (_row.get('status')=='ok' and (
             not _row.get('url') or not _row.get('revision_id') or
             not (_row.get('summary') or {}).get('overview')))))
-    ck('Wikipedia biography summaries account for the full current roster',
-       _wk.get('schema')=='member-wikipedia-biographies-v1' and len(_wkm)==_wk_roster_n and
-       _wkc.get('rows')==_wk_roster_n and not _wkc.get('missing') and _wk_bad==0,
+    ck_roster('Wikipedia biography summaries account for the full current roster', _wkm,
+       _wk.get('schema')=='member-wikipedia-biographies-v1' and
+       _wkc.get('rows')==len(_wkm) and not _wkc.get('missing') and _wk_bad==0,
        '%d rows, %d summarized, %d missing, %d malformed'%(
            len(_wkm),_wkc.get('ok',0),len(_wkc.get('missing') or []),_wk_bad))
     if os.path.exists(os.path.join(B, 'member_desk_bundle.json')):
         _desk_bio={m.get('name'):(m.get('bio') or {}).get('wikipedia')
                    for m in json.load(open(os.path.join(B, 'member_desk_bundle.json'),encoding='utf-8')).get('members',[])}
-        _wk_mis=sum(1 for name,row in _wkm.items() if row.get('status')=='ok' and
+        _wk_gone=departed_carried('member_wikipedia_summaries.json',_wkm)
+        _wk_mis=sum(1 for name,row in _wkm.items() if name not in _wk_gone and row.get('status')=='ok' and
                     ((_desk_bio.get(name) or {}).get('revision_id')!=row.get('revision_id')))
         ck('Wikipedia summaries propagate revision-identically to member profiles',
            _wk_mis==0,'%d revision mismatches'%_wk_mis)
@@ -1845,7 +1891,7 @@ ck('voice-ES retired from display (b5_es_voice not re-wired into the desk)',
 _desk_tpl=open(os.path.join(FE, 'surfaces', 'templates', 'make_member_desk_00.tpl'),encoding='utf-8').read()
 ck('desk presents the accepted five-axis display under canonical Big-Five names',
    "const B5AX=['Sociability','Openness','Diligence','Cooperativeness','Neuroticism'];" in _desk_tpl and
-   'Gold-validated: gold-anchored axes use the OOF Senate-gold composites' in _desk_tpl and
+   'Public-perceived traits with varying panel support; hatching marks weaker fallback evidence.' in _desk_tpl and
    all(len((m.get('psy') or {}).get('big5_pct') or [])==5 for m in _bun.get('members',[])
        if (m.get('psy') or {}).get('big5_pct')),
    'accepted display must carry five canonically named axes and disclose the E scope')
@@ -1863,7 +1909,7 @@ for _row in _bun.get('members',[]):
         _act=((_src.get('facets') or {}).get('activity') or {}).get('percentile')
         _cbad += int((_got.get('public_exposure') or {}).get('role_adjusted_percentile') != _adj)
         _cbad += int(_psy.get('e_public_proxy_pct') != _adj)
-        # Public exposure propagates independently.  The Big-Five E slot is the OOF-gated
+        # Public exposure propagates independently.  The Big-Five E slot is the accepted fixed-weight
         # four-channel composite where both primary channels exist and remains missing otherwise.
         if _psy.get('big5_pct'):
             _egbad += int(_psy['big5_pct'][0] != (_egsrc.get(_name) or {}).get('percentile'))
@@ -1872,7 +1918,7 @@ for _row in _bun.get('members',[]):
         _cbad += int(((_psy.get('behav_pct') or [None,None,None,None])[3]) != _act)
 _mike=_csrc.get('Mike Johnson') or {}; _mexp=_mike.get('public_exposure') or {}
 ck('observable communication facets and role-adjusted exposure propagate as separate context',
-   _comm.get('schema')=='communication-style-v1' and len(_csrc)==533 and _cbad==0 and _egbad==0 and _gbad==0 and
+   _comm.get('schema')=='communication-style-v1' and len(_csrc)==roster.count() and _cbad==0 and _egbad==0 and _gbad==0 and
    len(_egsrc)>=450 and
    _mexp.get('formal_role')=='Speaker of the House' and
    _mexp.get('role_adjusted_percentile',1)<_mexp.get('observed_visibility_percentile',0) and
@@ -1882,6 +1928,8 @@ ck('observable communication facets and role-adjusted exposure propagate as sepa
    '%d style members, %d style errors, %d E errors, %d broad-trait errors; Mike raw %.3f adjusted %.3f'%
    (len(_csrc),_cbad,_egbad,_gbad,_mexp.get('observed_visibility_percentile',-1),_mexp.get('role_adjusted_percentile',-1)))
 _goldn=((_gtraits.get('N') or {}).get('members') or {})
+_goldn_gone=departed_carried('big5_gold_anchored.json N',_goldn)
+_goldn={m:d for m,d in _goldn.items() if m not in _goldn_gone}
 _golddesk={m.get('name'):((m.get('psy') or {}).get('big5_pct') or [None]*5)[4]
           for m in _bun.get('members',[]) if ((m.get('psy') or {}).get('big5_pct') or [None]*5)[4] is not None}
 _profm=(json.load(open(os.path.join(B, 'data', 'members', 'profile_basis_v2.json'),encoding='utf-8')).get('members') or {})
@@ -1920,7 +1968,7 @@ if os.path.exists(os.path.join(B, 'data', 'members', 'behavioral_roles_v2_candid
             _r2bad += int(any(k in _d for k in ('dominance_v2_z','expressiveness_v2_z','expressiveness_v2_pct')))
     _producer=open(os.path.join(FE, 'surfaces', 'make_member_desk.py'),encoding='utf-8').read()
     _engine_refs=[]
-    # The locked study producer, audio validator, and OOF-gold display/profile estimator are research
+    # The locked study producer, audio validator, and fixed-weight gold display/profile estimator are research
     # provenance, not influence/rank engines. The legislation shadow wrappers
     # copy this artifact only as an immutable input to their isolated
     # dashboard/member-desk branch; they do not expose it to rank computation.
@@ -2044,8 +2092,8 @@ if _g:
                for m in MAT),
        str(_mc.PRIMACY_ENGINE_LEVELS))
     _primacy=_lpf(B)
-    ck('primacy factors cover the full 533-member rank roster',
-       len(_primacy)==len(MAT)==533,
+    ck('primacy factors cover the full %d-member rank roster'%roster.count(),
+       len(_primacy)==len(MAT)==roster.count(),
        '%d factors vs %d stance members'%(len(_primacy),len(MAT)))
     from engine import primacy_factors as _pf
     _adjudicated=_pf.load_adjudicated_credits(
@@ -2417,7 +2465,7 @@ if _g:
        and all(bill in _desk_html
                for bill in ('H.R.975','H.R.4437','H.R.4544')),
        'cu-member-desk.html')
-    _wb_display={_ra_ws.cell(r,1).value:_ra_ws.cell(r,7).value for r in range(3,536) if _ra_ws.cell(r,1).value}
+    _wb_display={_ra_ws.cell(r,1).value:_ra_ws.cell(r,7).value for r in roster.rows('Rank & Allocation') if _ra_ws.cell(r,1).value}
     ck('workbook stance column exactly matches shared crown law',
        all(_wb_display.get(m)==v for m,v in _display_board.items()) and len(_wb_display)==len(_display_board),
        'workbook %d vs matrix %d rows'%(len(_wb_display),len(_display_board)))
@@ -2692,8 +2740,9 @@ print('\n[STAFF] Staffer network section')
 # OPTIONAL in fec/run_pipeline.py precisely because a fresh or data-isolated tree has no
 # staffer generation. The import and the generation-name lookup are wrapped, D4-style, so this
 # section can never take the audit down.
+_staff_json=os.path.join(B,'data','engine','staffer_network_section.json')
+_staff_meta={}; _staff_inputs_ok=None   # read again by [SYNC] live_sync_staffer_inputs_bound
 try:
-    _staff_json=os.path.join(B,'data','engine','staffer_network_section.json')
     # The generation name lives in the producer as a constant. Read it out of the SOURCE rather
     # than importing the module: this is a name lookup, and an audit should not execute a
     # producer to learn one.
@@ -2735,8 +2784,9 @@ try:
            'parsed but incomplete: meta.generation=%r members=%d'
            %(_staff_meta.get('generation'),len(_staff.get('members') or {})))
 
-        # Every byte the producer bound at build time, re-hashed now. The 1.5 GB edge file it
-        # never reads carries `not_recomputed` and is skipped here for the same reason.
+        # Every byte the producer bound at build time, re-hashed now -- including the 574 MB edge
+        # file the producer never reads (`not_recomputed`): its recorded sha256 is the generation
+        # receipt's, so a swap under the section is caught here (~3 s to hash).
         _staff_root=(_staff_meta.get('generation_root') or '').replace('/',os.sep)
 
         # Not every recorded path is generation-relative. bind_inputs() (this generation's own
@@ -2761,7 +2811,7 @@ try:
 
         _staff_bad=[]; _staff_checked=0
         for _role,_rec in sorted((_staff_meta.get('inputs') or {}).items()):
-            if not isinstance(_rec,dict) or _rec.get('not_recomputed'): continue
+            if not isinstance(_rec,dict): _staff_bad.append('%s invalid binding'%_role); continue
             _p=_staff_resolve_input(_rec)
             if not os.path.exists(_p): _staff_bad.append('%s missing (%s)'%(_role,_p)); continue
             _staff_checked+=1
@@ -2769,7 +2819,8 @@ try:
             if _actual!=_rec.get('sha256'):
                 _staff_bad.append('%s sha256 %s != recorded %s'
                                   %(_role,_actual[:12],str(_rec.get('sha256'))[:12]))
-        ck('staffer_section_inputs_current',_staff_checked>0 and not _staff_bad,
+        _staff_inputs_ok=_staff_checked>0 and not _staff_bad
+        ck('staffer_section_inputs_current',_staff_inputs_ok,
            '; '.join(_staff_bad)[:400] or 'the section recorded no recomputable input sha256')
 
         _staff_html=os.path.join(B,'staffer-network.html'); _staff_comb=os.path.join(B,'Moneyball.html')
@@ -2982,6 +3033,25 @@ try:
 except Exception as _e:
     # Same contract as the sections around it: a section that cannot run proves nothing.
     ck('staffer network section ran to completion',False,'%s: %s'%(type(_e).__name__,str(_e)[:200]))
+
+print('\n[SYNC] Live sync: ledgers, snapshots, chain')
+# Each live ledger/snapshot still equals the bytes its receipt names, and the last chain
+# transaction closed. The checks live in audit/live_sync.py (tested there); each returns (ok, detail)
+# or None (SKIP); an exception FAILS the check. A passing check's detail prints as a note.
+try: from audit import live_sync as _LS
+except Exception as _e: _LS=None; print('  !! audit/live_sync.py failed to import: %s'%_e)
+def _live_sync(_name,_fn,*_args):
+    try: _r=getattr(_LS,_fn)(*_args)
+    except Exception as _e: _r=(False,'%s: %s'%(type(_e).__name__,str(_e)[:200]))
+    if _r is None: print('  SKIP   %s :: nothing to check in this tree'%_name); return
+    ck(_name,_r[0],_r[1])
+    if _r[0] and _r[1]: print('   note: %s'%_r[1])
+_live_sync('live_sync_chain_journal_closed','chain_journal',B)
+_live_sync('live_sync_sentinel_ledger_sha','sentinel_ledger',_sbl_receipt_p,_sbl_ledger_p,_sbl_have)   # reuses sentinel_ledger_freshness's hash
+_live_sync('live_sync_staffer_inputs_bound','staffer_inputs',_staff_json,_staff_meta,_staff_inputs_ok)
+_live_sync('live_sync_press_body_ledger_sha','press_body_ledger',_press_feed)
+_live_sync('live_sync_status_files_consistent','status_files',
+           os.path.join(B,'data','engine','weekly_refresh_status.json'),os.path.join(B,'data','engine','congress_pipeline_status.json'))
 
 print('\n[SYS] System manifest vs disk (containerization phase 0)')
 # The expectation is data/system/system_manifest.json AS COMMITTED — produced by a PRIOR run of

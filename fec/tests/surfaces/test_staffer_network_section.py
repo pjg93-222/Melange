@@ -987,6 +987,9 @@ def main():
         ok('the unread edge file is declared unbound, not silently claimed',
            meta['inputs']['staffer_social_edges']['bound_against'] == [] and
            'not_recomputed' in meta['inputs']['staffer_social_edges'])
+        ok('meta.bound_against names every role with a recorded sha256, the edge file included',
+           meta['bound_against'] == sorted(r for r, v in meta['inputs'].items() if v.get('sha256')) and
+           'staffer_social_edges' in meta['bound_against'])
         eq('meta counts the attached bioguides that are not on the roster',
            meta['unrostered_member_bioguides'], 1)
         eq('meta.bytes equals the file it is written into',

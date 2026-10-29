@@ -1,6 +1,8 @@
 """Two explicit candidate passes over every word of one recording.
 
-The local pinned Qwen model proposes boundaries only. No human listening or
+The local pinned Qwen model (--backend local) or Claude Haiku 5.5 through the
+subscription CLI (--backend cli, two same-model passes recorded as NOT
+independent) proposes boundaries only. No human listening or
 independent-model corroboration is asserted. Exact anchors are resolved in the
 unaltered transcript; unsupported, ambiguous, or incomplete answers are held.
 This stage never changes personality scores, measures audio, or writes profiles.
@@ -12,6 +14,7 @@ import datetime as dt
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 from fec.speech import source_media_recovery as SMR
 from fec.speech import classify_member_longform_full_turns as physical
@@ -20,6 +23,8 @@ from fec.speech import reconcile_member_longform_candidate_passes as reconcile
 from fec.speech import classify_local_youtube_turns as lexical
 
 CONTRACT = "whole-transcript-two-explicit-local-passes-v1"
+DEFAULT_CLI_EFFORT = "low"
+CLI_CWD = Path(r"C:\melange-data\longform_restore_20261020\cli_cwd")
 
 
 def compact_transcript(words: list[dict]) -> str:
@@ -133,23 +138,68 @@ class Generator:
             "context_limit": self.limit, "output_complete": True}
 
 
+class CliGenerator:
+    """Claude Haiku 5.5 via the subscription CLI; same interface as Generator.
+
+    The CLI version is deliberately absent from `runtime`: main() compares it on resume, so an
+    auto-update would invalidate every finished pass. (The result envelope carries no version field.)
+    """
+    def __init__(self, run=subprocess.run, effort: str = DEFAULT_CLI_EFFORT):
+        self.run, self.effort = run, effort
+        # Effort is deliberately NOT in `runtime` (resume compares it); it is recorded per call in `tokens`.
+        flags = physical.CLI_ARGS[1:]
+        i = flags.index("--effort")
+        self.runtime = {"model_id": physical.MODEL, "backend": physical.BACKEND, "contract": CONTRACT,
+                        "cli_flags": flags[:i] + flags[i + 2:], "max_output_tokens": physical.CLI_MAX_OUTPUT_TOKENS,
+                        "same_model_passes": True, "passes_independent": False,
+                        "acoustic_model_or_thresholds_changed": False}
+
+    def generate(self, request: str) -> tuple[str, dict]:
+        CLI_CWD.mkdir(parents=True, exist_ok=True)
+        proc = self.run(physical.cli_command(self.effort), input=request, capture_output=True, text=True, encoding="utf-8",
+                        timeout=physical.CLI_TIMEOUT_SECONDS, env=physical.cli_env(physical.CLI_MAX_OUTPUT_TOKENS),
+                        cwd=str(CLI_CWD), creationflags=getattr(subprocess, "BELOW_NORMAL_PRIORITY_CLASS", 0))
+        if proc.returncode != 0:
+            raise RuntimeError(f"claude CLI exit {proc.returncode}: {(proc.stderr or proc.stdout or '').strip()[:500]}")
+        envelope = json.loads(proc.stdout)
+        if envelope.get("is_error"):
+            raise RuntimeError(f"claude CLI is_error: {str(envelope.get('result') or envelope.get('subtype'))[:500]}")
+        if envelope.get("stop_reason") != "end_turn":
+            raise RuntimeError(f"claude CLI unfinished response: stop_reason={envelope.get('stop_reason')}")
+        usage = envelope.get("usage") or {}
+        return str(envelope.get("result") or "").strip(), {
+            "output": usage.get("output_tokens"), "thinking": (usage.get("output_tokens_details") or {}).get("thinking_tokens"),
+            "session_id": envelope.get("session_id"), "provider_model": next(iter(envelope.get("modelUsage") or {}), None),
+            "cli_effort": self.effort, "output_complete": True}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--input', required=True, type=Path)
     parser.add_argument('--out-root', required=True, type=Path)
     parser.add_argument('--model', type=Path, default=local.DEFAULT_MODEL)
-    parser.add_argument('--converted-model', required=True, type=Path)
+    parser.add_argument('--backend', choices=('local', 'cli'), default='local')
+    parser.add_argument('--converted-model', type=Path)
+    parser.add_argument('--cli-effort', choices=('low', 'medium', 'high'), default=DEFAULT_CLI_EFFORT)
     parser.add_argument('--cpu-threads', type=int, default=2)
+    parser.add_argument('--same-prompt-both-passes', action='store_true',
+                        help="send the pass-b prompt in both fresh sessions (pass-a's floor-transfer focus collapses to one short turn)")
     args = parser.parse_args()
     sources = SMR.read_jsonl(args.input, required=True)
     if len(sources) != 1:
         raise ValueError('one immutable selected source required')
     source = sources[0]
     words, _ = physical.validate_source(source)
-    generator = Generator(args.model, args.converted_model, max(1, args.cpu_threads))
+    if args.backend == 'local' and not args.converted_model:
+        parser.error('--converted-model is required for --backend local')
+    generator = (CliGenerator(effort=args.cli_effort) if args.backend == 'cli'
+                 else Generator(args.model, args.converted_model, max(1, args.cpu_threads)))
+    if args.same_prompt_both_passes:  # only when set, so passes written without the flag still resume
+        generator.runtime['same_prompt_both_passes'] = True
     for label in ('a', 'b'):
         output = args.out_root / ('pass-' + label + '.json')
-        request = prompt(source, words, label)
+        focus = 'b' if args.same_prompt_both_passes else label
+        request = prompt(source, words, focus)
         if output.exists():
             prior = json.loads(output.read_text(encoding='utf-8'))
             if (any(prior.get(key) != source.get(key) for key in reconcile.BINDING_KEYS)
@@ -160,6 +210,7 @@ def main() -> int:
         raw, token_counts = generator.generate(request)
         parsed = physical.parse_json(raw)
         record = bind_pass(source, words, parsed, raw, label, generator.runtime, request, token_counts)
+        record['prompt_focus'] = focus
         physical.validate_source(source)
         SMR.write_json_atomic(output, record)
         print(f"candidate pass {label}: {source['member']}: {len(record['turns'])} exact-anchor claims", flush=True)
