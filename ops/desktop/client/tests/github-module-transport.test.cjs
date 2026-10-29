@@ -3,10 +3,10 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const {EventEmitter}=require('node:events');
 const {Readable}=require('node:stream');
 const {GitHubModuleTransport}=require('../github-module-transport.cjs');
-function fixture(handler){
+function fixture(handler,options={}){
  const calls=[];
  const request=(url,options,callback)=>{const req=new EventEmitter();req.destroy=()=>{req.destroyed=true;};req.end=()=>queueMicrotask(()=>handler({url,options,req,respond:(status,body='',headers={})=>{const bytes=Buffer.isBuffer(body)?body:Buffer.from(body);const incoming=Readable.from([bytes]);incoming.statusCode=status;incoming.headers={'content-length':String(bytes.length),...headers};callback(incoming);}}));calls.push({url,options,req});return req;};
- return {calls,transport:new GitHubModuleTransport('mentat',{request})};
+ return {calls,transport:new GitHubModuleTransport('mentat',{request,...options})};
 }
 const tag='module-data-2026-10-21-fixture',commit='a'.repeat(40);
 test('paged Melange channel has a separate fixed pointer and cannot alter legacy routing',async()=>{
@@ -56,6 +56,51 @@ test('exact byte bounds reject short/long and transfer-framing ambiguity',async(
 test('only known network failures are eligible for an offline reason; TLS failure is verification failure',async()=>{
  for(const [code,reason] of [['ENOTFOUND','unreachable'],['ECONNRESET','unreachable'],['CERT_HAS_EXPIRED','integrity'],['ERR_TLS_CERT_ALTNAME_INVALID','integrity']]){const f=fixture(({req})=>req.emit('error',Object.assign(new Error('synthetic-no-secret'),{code})));await assert.rejects(f.transport.resolveMain(),error=>error.reason===reason);}
  for(const [status,headers,reason] of [[429,{},'rate_limited'],[403,{'x-ratelimit-remaining':'0'},'rate_limited'],[503,{},'unreachable'],[403,{},'integrity'],[404,{},'integrity']]){const f=fixture(({respond})=>respond(status,'',headers));await assert.rejects(f.transport.resolveMain(),error=>error.reason===reason);}
+});
+
+test('primary and secondary quota responses retain deadlines and suppress repeated manual requests until expiry',async()=>{
+ for(const [status,headers,seconds] of [[403,{'x-ratelimit-remaining':'0','x-ratelimit-reset':'1700000300'},300],
+  [403,{'x-ratelimit-remaining':'24','retry-after':'120'},120],[429,{'retry-after':'120'},120]]){
+  let now=1700000000000;
+  const f=fixture(({respond})=>f.calls.length===1?respond(status,'',headers):respond(200,JSON.stringify({ref:'refs/heads/main',object:{type:'commit',sha:commit}})),{now:()=>now,random:()=>0});
+  let first;await assert.rejects(f.transport.resolveMain(),error=>{first=error;return error.reason==='rate_limited';});
+  assert.equal(first.githubRateLimit,true);assert.equal(first.retryAt,now+seconds*1000);assert.equal(first.retryAfter,headers['retry-after']);assert.equal(first.resetAt,headers['x-ratelimit-reset']);
+  now=first.retryAt-1;await assert.rejects(f.transport.resolveMain(),error=>error.retryAt===first.retryAt&&error.reason==='rate_limited');assert.equal(f.calls.length,1);
+  await assert.rejects(f.transport.fetch('https://api.github.com/repos/other/private/commits/main',{limit:100}),error=>error.reason==='integrity');
+  const cancelled=new AbortController();cancelled.abort();await assert.rejects(f.transport.resolveMain({signal:cancelled.signal}),error=>error.reason==='cancelled');assert.equal(f.calls.length,1);
+  now=first.retryAt;assert.equal(await f.transport.resolveMain(),commit);assert.equal(f.calls.length,2);
+ }
+});
+
+test('known secondary-limit bodies use bounded classification while ordinary access denial remains closed',async()=>{
+ for(const body of ['You have exceeded a secondary rate limit.','Abuse detection: try later.']){
+  const f=fixture(({respond})=>respond(403,body,{'x-ratelimit-remaining':'24'}),{now:()=>1700000000000,random:()=>0});
+  await assert.rejects(f.transport.resolveMain(),error=>error.reason==='rate_limited'&&error.retryAt===1700003600000);
+  await assert.rejects(f.transport.resolveMain(),error=>error.reason==='rate_limited');assert.equal(f.calls.length,1);
+ }
+ for(const body of ['Resource not accessible','x'.repeat(8192)+'secondary rate limit']){
+  const f=fixture(({respond})=>respond(403,body),{now:()=>1700000000000,random:()=>0});
+  await assert.rejects(f.transport.resolveMain(),error=>error.reason==='integrity');assert.equal(f.transport.retry,null);
+ }
+});
+
+test('an unfinished secondary-limit error body remains bounded by the original deadline and cancellation',async()=>{
+ const {PassThrough}=require('node:stream');let request;
+ const send=(_url,_options,callback)=>{request=new EventEmitter();request.destroy=()=>{request.destroyed=true;};request.end=()=>queueMicrotask(()=>{const body=new PassThrough();body.statusCode=403;body.headers={};callback(body);body.write('incomplete response');});return request;};
+ const transport=new GitHubModuleTransport('mentat',{request:send});
+ await assert.rejects(transport.fetch('https://api.github.com/repos/pjg93-222/mentat/git/ref/heads/main',{limit:100,deadlineMs:50}),error=>error.reason==='timeout');assert.equal(request.destroyed,true);assert.equal(transport.retry,null);
+ const abort=new AbortController(),pending=transport.resolveMain({signal:abort.signal});await new Promise(resolve=>setImmediate(resolve));abort.abort();await assert.rejects(pending,error=>error.reason==='cancelled');assert.equal(request.destroyed,true);assert.equal(transport.retry,null);
+});
+
+test('a secondary-limit body stops at eight KiB without waiting for the server to finish',async()=>{
+ const {PassThrough}=require('node:stream');
+ for(const known of [true,false]){
+  let request,body;
+  const send=(_url,_options,callback)=>{request=new EventEmitter();request.destroy=()=>{request.destroyed=true;};request.end=()=>queueMicrotask(()=>{body=new PassThrough();body.statusCode=403;body.headers={};callback(body);body.write(Buffer.from((known?'secondary rate limit ':'')+'x'.repeat(8192)));});return request;};
+  const transport=new GitHubModuleTransport('mentat',{request:send});
+  await assert.rejects(transport.resolveMain(),error=>error.reason===(known?'rate_limited':'integrity'));
+  assert.equal(request.destroyed,true);assert.equal(body.destroyed,true,'The capped response is closed without consuming its remainder');
+ }
 });
 test('total deadline and abort cancel the owned request',async()=>{
  const f=fixture(()=>{});await assert.rejects(f.transport.fetch('https://api.github.com/repos/pjg93-222/mentat/git/ref/heads/main',{limit:100,deadlineMs:50}),error=>error.reason==='timeout');assert.equal(f.calls[0].req.destroyed,true);

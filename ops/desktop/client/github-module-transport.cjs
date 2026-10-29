@@ -2,13 +2,18 @@
 // Fixed public hosts only. This module never receives an access token, cookie,
 // account identity, data-root path or caller-supplied URL.
 const https=require('node:https');
+const {rateLimit,deadline}=require('./github-discovery.cjs');
 const {configuration,parseJson,fail,requireValue,COMMIT,TAG,POINTER_PATH,assetName,integer,MAX_MANIFEST,MAX_SEGMENT}=require('./github-module-protocol.cjs');
 const ASSET_HOSTS=new Set(['github.com','release-assets.githubusercontent.com','objects.githubusercontent.com','github-releases.githubusercontent.com']);
 const NETWORK=new Set(['ENOTFOUND','EAI_AGAIN','ECONNRESET','ECONNREFUSED','ETIMEDOUT','ENETUNREACH','EHOSTUNREACH','EPIPE']);
 function canceled(signal){if(signal?.aborted)throw fail('cancelled','Module data transfer cancelled');}
 function networkError(error){return error?.reason?error:fail(NETWORK.has(error?.code)?'unreachable':'integrity',NETWORK.has(error?.code)?'GitHub module data is unavailable':'GitHub module connection verification failed');}
 class GitHubModuleTransport{
- constructor(appId,{request=https.request,paged=false}={}){requireValue(typeof paged==='boolean'&&(!paged||appId==='melange'),'Unsupported module data channel');this.appId=appId;this.app=configuration(appId);this.request=request;this.pointerPath=paged?'docs/desktop-data/on-demand-current.json':POINTER_PATH;}
+ constructor(appId,{request=https.request,paged=false,now=Date.now,random=Math.random}={}){requireValue(typeof paged==='boolean'&&(!paged||appId==='melange'),'Unsupported module data channel');requireValue(typeof now==='function'&&typeof random==='function','Invalid module rate-limit clock');this.appId=appId;this.app=configuration(appId);this.request=request;this.now=now;this.random=random;this.retry=null;this.pointerPath=paged?'docs/desktop-data/on-demand-current.json':POINTER_PATH;}
+ rateLimited(error){
+  if(error)this.retry={until:Math.max(this.retry?.until||0,deadline(error,this.now(),this.random)),retryAfter:error.retryAfter,resetAt:error.resetAt};
+  return Object.assign(fail('rate_limited','GitHub module checks are rate limited'),{githubRateLimit:true,retryAt:this.retry.until,retryAfter:this.retry.retryAfter,resetAt:this.retry.resetAt});
+ }
  async fetch(url,{limit,expectedBytes,offset=0,totalBytes,signal,onChunk,asset=false,deadlineMs=15000}={}){
   requireValue(Number.isSafeInteger(limit)&&limit>=0&&limit<=MAX_SEGMENT&&Number.isSafeInteger(deadlineMs)&&deadlineMs>=50&&deadlineMs<=120000,'Invalid module transport bounds');
   canceled(signal);const deadline=Date.now()+deadlineMs;let target=new URL(url),redirects=0;
@@ -20,6 +25,7 @@ class GitHubModuleTransport{
    const allowed=asset?ASSET_HOSTS.has(target.hostname):['api.github.com','raw.githubusercontent.com'].includes(target.hostname);
    requireValue(allowed,'Invalid module transport host');
    if(asset&&target.hostname==='github.com')requireValue(target.pathname.startsWith('/'+repo+'/releases/download/'),'Cross-repository module redirect refused');
+   if(this.retry?.until>this.now())throw this.rateLimited();
    const remaining=deadline-Date.now();if(remaining<=0)throw fail('timeout','GitHub module transfer timed out');
    const result=await this.once(target,{limit,expectedBytes,offset,totalBytes,signal,onChunk,asset,deadlineMs:remaining});
    if(!result.redirect)return result.bytes;
@@ -44,7 +50,17 @@ class GitHubModuleTransport{
       if(!asset||typeof location!=='string'||location.length>8192){finish(fail('integrity','GitHub module redirect refused'));return;}
       finish(null,{redirect:location});return;
      }
-     if(res.statusCode===429||res.statusCode===403&&res.headers['x-ratelimit-remaining']==='0'){finish(fail('rate_limited','GitHub module checks are rate limited'));return;}
+     const limited=rateLimit(res.statusCode,res.headers);
+     if(limited){finish(this.rateLimited(limited));return;}
+     if(res.statusCode===403){
+      // Secondary limits may retain a positive primary quota. Read only a
+      // bounded error body, using the same classifier as binary discovery.
+      let body='',received=0;
+      const refuse=()=>{const secondary=rateLimit(res.statusCode,res.headers,body);finish(secondary?this.rateLimited(secondary):fail('integrity','GitHub module request refused'));};
+      res.on('data',chunk=>{if(settled)return;const raw=Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk),part=raw.subarray(0,8192-received);received+=part.length;body+=part.toString('utf8');if(received===8192)refuse();});
+      res.once('end',refuse);
+      res.once('error',error=>finish(networkError(error)));return;
+     }
      if([500,502,503,504].includes(res.statusCode)){finish(fail('unreachable','GitHub module data is unavailable'));return;}
      if(res.statusCode!==(offset?206:200)){finish(fail('integrity','GitHub module request refused'));return;}
      const lengthText=res.headers['content-length'],length=lengthText===undefined?null:Number(lengthText),encoding=res.headers['content-encoding'];

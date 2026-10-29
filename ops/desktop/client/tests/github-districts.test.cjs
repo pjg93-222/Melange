@@ -225,6 +225,27 @@ test('offline reuse revalidates exact bytes; signature/rollback failures never m
  f.networkDown=false;const accepted=structuredClone(f.state);f.world={...f.world,envelope:{...f.world.envelope,signature:Buffer.alloc(64).toString('base64')}};await assert.rejects(()=>p.ensure(f.config,f.authorization),/signature/);assert.equal(p.info(f.config).phase,'error');assert.deepEqual(f.state,accepted);
  f.networkDown=true;fs.writeFileSync(path.join(f.legacy,'density.json'),'invalid');await assert.rejects(()=>p.ensure(f.config,f.authorization));assert.equal(p.info(f.config).phase,'error');
 });
+
+test('district server cooldown spans manual/background checks and revalidates cached bytes before offline use',async t=>{
+ const f=fixture(t);f.writeLegacy();let now=1700000000000,requests=0,limited=true;
+ const p=f.create({now:()=>now,random:()=>0});await p.ensure(f.config,f.authorization);const original=f.transport.read;
+ f.transport.read=async(...args)=>{requests++;if(limited)throw Object.assign(new Error('fixture quota'),{githubRateLimit:true,retryAfter:'120'});return original(...args);};
+ assert.equal((await p.discover(f.config,f.authorization)).phase,'offline');assert.equal(requests,1);const checks=f.checks.length;
+ assert.deepEqual(await p.ensure(f.config,f.authorization),f.config);assert.equal(requests,1);assert.ok(f.checks.length>checks,'Cooldown does not skip native/cache revalidation');
+ const raw=fs.readFileSync(path.join(f.legacy,'density.json'));fs.writeFileSync(path.join(f.legacy,'density.json'),'invalid');await assert.rejects(p.ensure(f.config,f.authorization));assert.equal(p.info(f.config).phase,'error');assert.equal(requests,1);fs.writeFileSync(path.join(f.legacy,'density.json'),raw);
+ now+=120000;limited=false;assert.equal((await p.discover(f.config,f.authorization)).phase,'ready');assert.equal(requests,3,'Fresh main and pointer requests resume at the advertised deadline');
+});
+
+test('district quota cannot authorize an unaccepted cache and download limits preserve the previous active revision',async t=>{
+ const f=fixture(t);f.writeLegacy();let now=1700000000000;
+ const p=f.create({now:()=>now,random:()=>0}),original=f.transport.read;
+ f.transport.read=async()=>{throw Object.assign(new Error('fixture quota'),{githubRateLimit:true,resetAt:'1700000120'});};
+ await assert.rejects(p.ensure(f.config,f.authorization));assert.equal(f.state,null,'No accepted state is synthesized');
+ now+=120000;f.transport.read=original;await p.ensure(f.config,f.authorization);const active=structuredClone(f.state.active);f.world=f.build(2);
+ f.transport.download=async()=>{throw Object.assign(new Error('fixture download quota'),{githubRateLimit:true,retryAfter:'300'});};
+ assert.deepEqual(await p.ensure(f.config,f.authorization),f.config);assert.deepEqual(f.state.active,active);assert.equal(p.info(f.config).phase,'offline');
+ const requests=f.requests.length;await p.discover(f.config,f.authorization);assert.equal(f.requests.length,requests);assert.deepEqual(f.state.active,active);
+});
 test('cached catalogue/protected owner identity tamper and cache junctions are refused',async t=>{
  const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const accepted=structuredClone(f.state);
  f.state={...f.state,identity:{...f.state.identity,deviceId:'wrong'}};await assert.rejects(()=>p.ensure(f.config,f.authorization),/another owner/);f.state=accepted;

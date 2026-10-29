@@ -285,6 +285,17 @@ test('offline fallback requires a previously active fully reverified snapshot',a
  f.network=null;await p.commitActive(prepared,f.selected);f.network='timeout';const offline=await p.prepare(f.selected);assert.equal(offline.status.phase,'offline');assert.equal(offline.status.cached,true);
  fs.writeFileSync(roleFile(offline,f),'corrupt');await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');assert.equal(f.journal.active.catalogSequence,1);
 });
+
+test('a real transport cooldown reuses only active matching-owner data and still refuses corrupt bytes',async t=>{
+ const {EventEmitter}=require('node:events'),{Readable}=require('node:stream'),{GitHubModuleTransport}=require('../github-module-transport.cjs');
+ const f=fixture(t),initial=new GitHubModules(f.options),prepared=await initial.prepare(f.selected);let requests=0;
+ const request=(_url,_options,callback)=>{requests++;const req=new EventEmitter();req.destroy=()=>{};req.end=()=>queueMicrotask(()=>{const res=Readable.from(['secondary rate limit']);res.statusCode=403;res.headers={'x-ratelimit-remaining':'24','retry-after':'120'};callback(res);});return req;};
+ const transport=new GitHubModuleTransport('mentat',{request,now:()=>1700000000000,random:()=>0}),p=new GitHubModules({...f.options,transport});
+ await assert.rejects(p.prepare(f.selected),error=>error.reason==='rate_limited','A staged-only cache cannot supply offline activation');assert.equal(requests,1);
+ await initial.commitActive(prepared,f.selected);const offline=await p.prepare(f.selected);assert.equal(offline.status.phase,'offline');assert.equal(requests,1);
+ f.revoked=true;await assert.rejects(p.prepare(f.selected),error=>error.reason==='authorization');assert.equal(requests,1);f.revoked=false;
+ fs.writeFileSync(roleFile(offline,f),'corrupt');await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');assert.equal(requests,1);
+});
 test('bad signatures, lower sequences and equivocation never become an offline success',async t=>{
  const f=fixture(t),p=new GitHubModules(f.options);await p.commitActive(await p.prepare(f.selected),f.selected);
  const valid=f.remote.envelope;f.remote.envelope={...valid,signature:Buffer.alloc(64).toString('base64')};await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');

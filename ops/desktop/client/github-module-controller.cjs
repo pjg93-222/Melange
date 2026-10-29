@@ -60,7 +60,7 @@ function sanitizeModuleStatus(appId,value,{canRefresh=false}={}){
 
 class GitHubModuleController{
  constructor({appId,getSelected,createProvider,authorize,canStage=()=>false,canCommit=()=>false,
-              keepAwake=()=>()=>{},onStatus=()=>{},intervalMs=5*60*1000,
+              keepAwake=()=>()=>{},onStatus=()=>{},intervalMs=15*60*1000,
               setInterval:setIntervalFn=setInterval,clearInterval:clearIntervalFn=clearInterval}){
   this.appId=appId;this.repository=appRepository(appId);
   for(const callback of [getSelected,createProvider,authorize,canStage,canCommit,keepAwake,onStatus,setIntervalFn,clearIntervalFn])if(typeof callback!=='function')throw new Error('Native module data callbacks are required.');

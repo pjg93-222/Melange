@@ -7,6 +7,7 @@ const {pipeline}=require('node:stream/promises'),{Transform}=require('node:strea
 const {canonical}=require('./access-client.cjs');
 const {strictJson,exact}=require('./dataset-protocol.cjs');
 const {response}=require('./github-source.cjs');
+const {deadline}=require('./github-discovery.cjs');
 const protocol=require('./github-district-protocol.cjs');
 const {REPOSITORY,POINTER_PATH,ROLES,IDS,COMMIT,MAX_MANIFEST,assetURL,requireValue}=protocol;
 const API='https://api.github.com/repos/'+REPOSITORY,TAG_HOPS=4;
@@ -75,12 +76,18 @@ function configurationFor(configuration,entry,root,authorization){
  return {...base,[field]:{schemaVersion:2,district:configuration.district,cacheRoot:root,catalogueSha256:entry.manifestSha256}};
 }
 class GitHubDistricts{
- constructor({resources,profile,root,publicKeys,store,previousStore=null,transport=publicTransport,checkExisting,prepareCheckExisting=null,extract,onStatus=()=>{},signal,now=Date.now,statfs=fsp.statfs}){
+ constructor({resources,profile,root,publicKeys,store,previousStore=null,transport=publicTransport,checkExisting,prepareCheckExisting=null,extract,onStatus=()=>{},signal,now=Date.now,random=Math.random,statfs=fsp.statfs}){
   requireValue(typeof profile==='string'&&typeof root==='string'&&publicKeys&&Object.keys(publicKeys).length>0&&Object.keys(publicKeys).length<=8&&store?.read&&store?.write&&typeof transport?.read==='function'&&typeof transport.download==='function'&&typeof checkExisting==='function'&&typeof extract==='function','GitHub district provider requires pinned keys and protected storage');
   for(const [id,value]of Object.entries(publicKeys))requireValue(/^[A-Za-z0-9._-]{1,100}$/.test(id)&&typeof value==='string'&&Buffer.from(value,'base64').length===32&&Buffer.from(value,'base64').toString('base64')===value,'Invalid GitHub district verification key');
   requireValue(previousStore===null||typeof previousStore.read==='function','Invalid previous public dataset journal');
   requireValue(prepareCheckExisting===null||typeof prepareCheckExisting==='function','Invalid native reader preparation');
-  Object.assign(this,{resources,profile:path.resolve(profile),root:path.resolve(root),publicKeys:structuredClone(publicKeys),store,previousStore,transport,checkExisting,prepareCheckExisting,extract,onStatus,signal,now,statfs});this.states=new Map();this.busy=false;
+  requireValue(typeof now==='function'&&typeof random==='function','Invalid district rate-limit clock');
+  Object.assign(this,{resources,profile:path.resolve(profile),root:path.resolve(root),publicKeys:structuredClone(publicKeys),store,previousStore,transport,checkExisting,prepareCheckExisting,extract,onStatus,signal,now,random,statfs});this.states=new Map();this.busy=false;this.retry=null;
+ }
+ permitPublicRequest(){if(this.retry?.until>this.now())throw new ConnectionError(Object.assign(new Error('GitHub district checks are rate limited'),{githubRateLimit:true,retryAt:this.retry.until,retryAfter:this.retry.retryAfter,resetAt:this.retry.resetAt}));}
+ connection(error){
+  if(error?.githubRateLimit===true)this.retry={until:Math.max(this.retry?.until||0,deadline(error,this.now(),this.random)),retryAfter:error.retryAfter,resetAt:error.resetAt};
+  return connectionFailure(error)?new ConnectionError(error):error;
  }
  status(configuration,phase,extra={}){const previous=this.states.get(configuration.district),retained={};for(const key of ['releaseTag','catalogueSequence','checkedAt','verifiedAt'])if(previous?.[key]!==undefined)retained[key]=previous[key];const value={provider:'github',repository:REPOSITORY,district:configuration.district,phase,cached:previous?.cached||false,canRefresh:true,...retained,...extra};this.states.set(configuration.district,value);this.onStatus(structuredClone(value));return structuredClone(value);}
  info(configuration){return this.states.has(configuration?.district)?structuredClone(this.states.get(configuration.district)):null;}
@@ -154,7 +161,7 @@ class GitHubDistricts{
   requireValue(Object.keys(state.catalogues).length<=16&&Buffer.byteLength(JSON.stringify(state))<6*1024*1024);await this.store.write(structuredClone(state));
  }
  async discoverCatalogue(state){
-  const read=async(url,options={})=>{canceled(this.signal);let bytes;try{bytes=await this.transport.read(url,{maxBytes:512*1024,signal:this.signal,...options});}catch(error){throw connectionFailure(error)?new ConnectionError(error):error;}requireValue(Buffer.isBuffer(bytes));return bytes;};
+  const read=async(url,options={})=>{canceled(this.signal);this.permitPublicRequest();let bytes;try{bytes=await this.transport.read(url,{maxBytes:512*1024,signal:this.signal,...options});}catch(error){throw this.connection(error);}requireValue(Buffer.isBuffer(bytes));return bytes;};
   const commit=strictJson(await read(API+'/commits/main')).sha;requireValue(typeof commit==='string'&&COMMIT.test(commit)&&commit!=='0'.repeat(40),'Invalid GitHub branch commit');
   const content=strictJson(await read(API+'/contents/'+POINTER_PATH+'?ref='+commit));
   requireValue(content.type==='file'&&content.encoding==='base64'&&typeof content.content==='string'&&content.content.length<32768&&content.path===POINTER_PATH&&Number.isInteger(content.size)&&content.size>0&&content.size<=16384,'Invalid GitHub district pointer response');
@@ -247,7 +254,7 @@ class GitHubDistricts{
     const temporary=archive+'.'+crypto.randomUUID()+'.part';
     let progressAt=0,progressBytes=-8*1024*1024;
     this.status(configuration,'downloading',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,receivedBytes:0,totalBytes:asset.bytes,message:TEXT.downloading});
-    try{try{await this.transport.download(assetURL(pointer.value.releaseTag,asset.name),temporary,{bytes:asset.bytes,signal:this.signal,onProgress:receivedBytes=>{requireValue(Number.isSafeInteger(receivedBytes)&&receivedBytes>=0&&receivedBytes<=asset.bytes);const time=this.now();if(receivedBytes!==asset.bytes&&time-progressAt<250&&receivedBytes-progressBytes<8*1024*1024)return;progressAt=time;progressBytes=receivedBytes;this.status(configuration,'downloading',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,receivedBytes,totalBytes:asset.bytes,message:TEXT.downloading});}});}catch(error){throw connectionFailure(error)?new ConnectionError(error):error;}const actual=await digest(temporary,this.signal);requireValue(actual.bytes===asset.bytes&&actual.sha256===asset.sha256,'GitHub district archive integrity failed');await fsp.rename(temporary,archive);}finally{await fsp.unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}
+    try{try{this.permitPublicRequest();await this.transport.download(assetURL(pointer.value.releaseTag,asset.name),temporary,{bytes:asset.bytes,signal:this.signal,onProgress:receivedBytes=>{requireValue(Number.isSafeInteger(receivedBytes)&&receivedBytes>=0&&receivedBytes<=asset.bytes);const time=this.now();if(receivedBytes!==asset.bytes&&time-progressAt<250&&receivedBytes-progressBytes<8*1024*1024)return;progressAt=time;progressBytes=receivedBytes;this.status(configuration,'downloading',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,receivedBytes,totalBytes:asset.bytes,message:TEXT.downloading});}});}catch(error){throw this.connection(error);}const actual=await digest(temporary,this.signal);requireValue(actual.bytes===asset.bytes&&actual.sha256===asset.sha256,'GitHub district archive integrity failed');await fsp.rename(temporary,archive);}finally{await fsp.unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}
    }
    this.status(configuration,'verifying',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,message:TEXT.verifying});
    try{

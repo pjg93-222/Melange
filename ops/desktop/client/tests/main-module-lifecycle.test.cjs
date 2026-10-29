@@ -7,6 +7,14 @@ function deferred(){let resolve;const promise=new Promise(done=>{resolve=done;})
 function actual(startText,endText,context){const start=source.indexOf(startText),end=source.indexOf(endText,start);assert.ok(start>=0&&end>start);if(!Object.hasOwn(context,'standaloneMode'))context.standaloneMode=false;vm.runInNewContext(source.slice(start,end),context,{filename:mainFile});return context;}
 function bounded(promise){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Fixture staging did not enter within five seconds')),5000);})]).finally(()=>clearTimeout(timer));}
 
+test('actual district background timer waits fifteen minutes and requests skip-if-busy discovery',async()=>{
+ const line=source.split('\n').find(value=>value.includes('districtDataInterval=setInterval('));assert.ok(line);
+ let callback,delay,unref=0;const calls=[];
+ vm.runInNewContext(line,{setInterval:(fn,ms)=>{callback=fn;delay=ms;return {unref(){unref++;}};},discoverDistrictData:async options=>{calls.push({...options});}});
+ assert.equal(delay,15*60*1000);assert.equal(unref,1);assert.equal(calls.length,0);
+ callback();await tick();assert.deepEqual(calls,[{skipIfBusy:true}]);
+});
+
 for(const appId of ['terrier','melange','mentat']){
  test(`actual ${appId} factory requires the exact installed program before activation`,async t=>{
   const context={definition:{id:appId},require:name=>{assert.equal(name,'./module-data-startup.cjs');return require('../module-data-startup.cjs');},

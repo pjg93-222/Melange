@@ -512,7 +512,7 @@ app.whenReady().then(async()=>{
   if(!background){if(read('settings.json').dataDirectory)await launch().catch(()=>{});else{updateStatus('Application startup failed: no local data location is configured. Check local logs.');await showSetup();}}
   if(!portable)if(profile.registerLoginItem)app.setLoginItemSettings({openAtLogin:true,...(process.platform==='win32'?{name:definition.applicationId,path:process.execPath,args:['--desktop-updater']}:{})});
   interval=setInterval(checkUpdates,15*60*1000);interval.unref();
-  districtDataInterval=setInterval(()=>discoverDistrictData({skipIfBusy:true}).catch(()=>{}),5*60*1000);districtDataInterval.unref();
+  districtDataInterval=setInterval(()=>discoverDistrictData({skipIfBusy:true}).catch(()=>{}),15*60*1000);districtDataInterval.unref();
   networkWatcher=watchNetwork({isOnline:()=>net.isOnline(),onReconnect:()=>{checkUpdates();moduleDataStartup?.stage({skipIfBusy:true}).catch(()=>{});}});
   presenceInterval=setInterval(()=>{accessLifecycle?.heartbeat().catch(()=>{});drainActivity();},60000);presenceInterval.unref();
 });
