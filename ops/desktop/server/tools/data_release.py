@@ -51,10 +51,10 @@ DENY = [
 ]
 # Credential stores, the consumer's marker and its download cache: excluded even when --allow names them, and
 # also matched against the real absolute path (a --map can mount .../credentials or rename keys.json to anything).
-# Restricted LDA identity corpus (receipt: publication_enabled false, restricted-machine-local) and the
-# staffer sections/page that inline it as ODATA/CDATA (GOVERNANCE_MATRIX M-07, D-332; X2). Fail closed: a copy
-# of any of these under another name is refused by content hash, and any page carrying the ODATA/CDATA
-# islands is refused by content (see select()).
+# Restricted staffer organisations/clients sections and the staffer-network page that inlines them as
+# ODATA/CDATA (GOVERNANCE_MATRIX M-07, D-332; X2). The LDA corpus and stores they are built from are not
+# restricted (D-399, D-405). Fail closed: a copy of any of these under another name is refused by content hash,
+# and any page carrying the ODATA/CDATA islands is refused by content (see select()).
 RESTRICTED = [
     # Trailing * takes .gz/.zst/.bak copies; staffer_offices_section.json is public and stays shippable.
     "**/staffer_organisations_section*", "**/staffer_clients_section*",
@@ -65,18 +65,12 @@ HARD_DENY = [
     "**/accounts.sqlite3", "**/*.dpapi", "**/keys/**", "**/keys.json", "**/.env*", "**/credentials/**",
     "**/*.pfx", "**/*.pem", ".melange-data-release.json", "__state__/data-download/**",
 ] + RESTRICTED
-# sha256 -> bytes of known restricted files (lda-source-native generation-20260830T231200Z and the
-# staffer_{organisations,clients}_section.json builds seen on the owner machine, 2026-10-28). Any member with
+# sha256 -> bytes of known restricted files (the staffer_{organisations,clients}_section.json builds seen on
+# the owner machine, 2026-10-28; the lda-source-native digests were dropped under D-399/D-405). Any member with
 # this content is refused whatever its name; restricted files present in the build are added at build time,
 # so a new generation's copies are caught too. ponytail: a new section build that is renamed AND absent from
 # the build under its own name escapes this list; regenerate the digests when the sections are rebuilt.
 RESTRICTED_SHA256 = {
-    "2ff6864f8a06e822277083230ab6a59abcc979ca12681e58490c89cb8a85b485": 110195153,
-    "81841c810269bf967cb3edc10664dbbad5aa17261089eaa67e4f288c2fcda625": 58789826,
-    "363027b2c3fff40331b304c9dd9b1d7bd81691bc9f9915aaf1b8f4acd0a869b7": 430061239,
-    "80ac82346c435bb8f1231d9f3425d759ca9a8ae063db879ec104244f9fcd282e": 1928569,
-    "0d35902244f02688d9ac961379efee0f96e3cfab1184409a4c93bb0584a1aed2": 2503228,
-    "5dfd3bbb16dea6ce940a687b15c74f07e720073d02b559d8000bb33db49dce8c": 2386,
     "d3b2b1a9dea5d5ea9d44a0a1329d51a836c99539518c391b900c8220d847a774": 3892182,
     "06db0d498a9e090bf676e0ceb139a4bc97c3b61bc5ec2f52ab4259ebc8feb3ee": 3892182,
     "c0808b7b7991deda567c6d44bdd6cc479d2a12ec2a00ad7c25d342f38a000a72": 3940057,

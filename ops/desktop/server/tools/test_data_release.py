@@ -171,6 +171,31 @@ class BuildTest(unittest.TestCase):
         self.assertIn(rel, {f["path"] for f in m["files"]})
         self.assertNotIn(rel, m["excluded"])
 
+    def test_dropped_lda_corpus_digests_are_allowed(self):
+        # The six lda-source-native generation-20260830T231200Z digests dropped under D-399/D-405.
+        dropped = {
+            "2ff6864f8a06e822277083230ab6a59abcc979ca12681e58490c89cb8a85b485",
+            "81841c810269bf967cb3edc10664dbbad5aa17261089eaa67e4f288c2fcda625",
+            "363027b2c3fff40331b304c9dd9b1d7bd81691bc9f9915aaf1b8f4acd0a869b7",
+            "80ac82346c435bb8f1231d9f3425d759ca9a8ae063db879ec104244f9fcd282e",
+            "0d35902244f02688d9ac961379efee0f96e3cfab1184409a4c93bb0584a1aed2",
+            "5dfd3bbb16dea6ce940a687b15c74f07e720073d02b559d8000bb33db49dce8c",
+        }
+        self.assertFalse(dropped & set(data_release.RESTRICTED_SHA256))
+        # Synthetic stand-in for a corpus file: its digest joins the dropped list, and it ships under its
+        # lda-source-native name and as a renamed copy, gzipped or not.
+        rows = b"lda lobbyist assertion rows\n" * 40
+        gz = gzip.compress(rows, mtime=0)
+        dropped |= {hashlib.sha256(rows).hexdigest(), hashlib.sha256(gz).hexdigest()}
+        self.assertFalse(dropped & set(data_release.RESTRICTED_SHA256))
+        files = {"__state__/M/normalized/lda-source-native/g/lda_lobbyist_assertions.ndjson.gz": gz,
+                 "z/copy.ndjson.gz": gz, "z/inflated.ndjson": rows}
+        self._write(files)
+        m = data_release.build("melange", self.root, self.out, "data-melange-2026-10-21", [], data_release.DENY,
+                               data_release.DEFAULT_PART_BYTES)
+        self.assertTrue(set(files) <= {f["path"] for f in m["files"]})
+        self.assertFalse(set(files) & set(m["excluded"]))
+
     def test_section_copies_with_any_extension_are_denied(self):
         copies = ["data/engine/staffer_organisations_section.json.gz", "b/staffer_clients_section.json.zst",
                   "b/staffer_organisations_section.json.bak", "b/staffer_clients_section"]
