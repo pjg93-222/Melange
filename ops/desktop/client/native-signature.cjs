@@ -19,11 +19,10 @@ function signatureTimeoutMs(bytes){
   const blocks=Math.ceil(Math.max(0,Number(bytes)||0)/(100*MIB));
   return Math.min(600000,Math.max(60000,60000+30000*blocks));
 }
-// D-328/T18: the client pin is the publisher; the signed manifest may only confirm it, never widen it. Paul ruling
-// 2026-10-26: that NEW pin check is warn-only for 1.0.19 (a mismatch is logged and surfaced through the update status
-// and the update proceeds on the manifest allow-list alone); the allow-list itself is always enforced.
-// flip to true in the release after 1.0.19 (Paul ruling 2026-10-26, T18)
-const PUBLISHER_PIN_ENFORCE=false;
+// D-328/T18: the client pin is the publisher; the signed manifest may only confirm it, never widen it. A pin mismatch
+// refuses the installer; the manifest allow-list is always enforced as well.
+// Enforced since 1.0.20 (D-411).
+const PUBLISHER_PIN_ENFORCE=true;
 function allowList(thumbprints){
   if(!Array.isArray(thumbprints)||!thumbprints.length||!thumbprints.every(value=>typeof value==='string'&&THUMBPRINT.test(value)))
     throw new Error('The signed release manifest names no publisher thumbprint; this installer is refused.');

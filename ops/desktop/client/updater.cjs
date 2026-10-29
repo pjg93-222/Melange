@@ -237,8 +237,13 @@ class DesktopUpdater {
     }
     const pending=state.pending;
     if(!pending)return;
+    // M21: a manual install of a newer version supersedes the staged one, whatever its phase. Drop it quietly: it is not a
+    // verification failure (no VERIFY_FAILED report, no backoff), and it must never be offered as a launch install.
+    if(semver.lt(pending.version,this.version)){this.writeState({...state,pending:null});return;}
     if(pending.version===this.version){
-      if(pending.phase==='failed'){this.onStatus('This release failed local startup. Its data is retained; restore a previous authorized version or await a corrected release.');return;}
+      // M21: a failed first start of this release no longer blocks it once the release has started successfully here
+      // (a manual reinstall, or a transient storage timeout); it is then confirmed below like any other update.
+      if(pending.phase==='failed'&&!this.applicationReady){this.onStatus('This release failed local startup. Its data is retained; restore a previous authorized version or await a corrected release.');return;}
       // An installer found only at the pre-move cache path (legacyUserData) proves that this release was installed from the old
       // updater file root, so the running version confirms it with no readiness wait (a background-only run never starts a
       // backend). Otherwise a version string alone does not prove that its backend can start; a copy that is gone everywhere
@@ -330,7 +335,7 @@ class DesktopUpdater {
   launchCandidate(){
     try{
       const state=this.readState(),pending=state.pending;
-      if(this.osShutdown||this.busy||!pending||!['staged','prepared'].includes(pending.phase)||pending.version===this.version)return null;
+      if(this.osShutdown||this.busy||!pending||!['staged','prepared'].includes(pending.phase)||!semver.gt(pending.version,this.version))return null;
       // A requested rollback always beats a pending update.
       if(['staged','prepared','activating'].includes(state.recovery?.phase))return null;
       const strikes=state.launchUnavailable;

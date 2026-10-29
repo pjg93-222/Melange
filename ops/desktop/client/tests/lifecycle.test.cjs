@@ -136,6 +136,26 @@ test('failed backend startup records a bounded failure and preserves previous re
   assert.equal(failed.recoveryCandidate().version,'1.1.0');
 });
 
+test('M21: a release that failed its first start is confirmed once it starts here (manual reinstall), and updates resume',async t=>{
+  const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
+  f.version='1.1.0';const failed=f.client();await failed.markApplicationFailed();await failed.check();
+  assert.equal(f.state.pending.phase,'failed','still held while this release has not started');
+  const reinstalled=f.client();reinstalled.markApplicationReady();await reinstalled.check();
+  assert.equal(f.state.pending,null);assert.equal(f.state.installed.version,'1.1.0');assert.equal(f.state.previous.version,'1.0.0');assert.equal(f.state.installedVersion,'1.1.0');
+  f.envelope=f.sign('1.2.0',2);await reinstalled.check();
+  assert.equal(f.state.pending.version,'1.2.0');assert.equal(f.state.pending.phase,'prepared','no longer stuck: the next release stages');
+});
+
+test('M21: a manual install newer than the staged update drops it quietly, never installs it at launch, never backs off',async t=>{
+  const f=fixture(t);await f.client().check();assert.equal(f.state.pending.version,'1.1.0');
+  f.version='1.2.0';const current=f.sign('1.2.0',2);f.seed=current;f.envelope=current;const manual=f.client();
+  assert.equal(manual.launchCandidate(),null,'an older staged release never runs over a newer manual install');
+  assert.equal(await manual.activateAtLaunch(true),false);assert.equal(f.installs,0);
+  manual.markApplicationReady();await manual.check();
+  assert.equal(f.state.pending,null);assert.equal(f.state.verifyFailure,undefined,'not a verification failure');
+  assert.equal(f.state.installed.version,'1.2.0');assert.ok(f.status.includes('Already current.'));
+});
+
 test('local recovery restores only retained authorized package and preserves anti-rollback high-water',async t=>{
   const f=fixture(t),first=f.client();await first.check();await first.activateAfterClose();
   f.version='1.1.0';const second=f.client();second.markApplicationReady();await second.check();
