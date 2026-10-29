@@ -8,12 +8,12 @@ const {authorized,checkedRegistry}=require('./github-module-protocol.cjs');
 const {GitHubModuleController,sanitizeModuleStatus}=require('./github-module-controller.cjs');
 const {ModuleDataTransition}=require('./module-data-transition.cjs');
 const {refuseModuleDataSettings}=require('./runtime.cjs');
-const {programTable,programFingerprint,verifyProgram}=require('./module-data-runtime-boundary.cjs');
+const {programTable,programFingerprint,verifyProgram,withVerifiedProgramConstruction}=require('./module-data-runtime-boundary.cjs');
 const {APPLICATION_SPECS}=require('./module-application-inventory.cjs');
 const {createPublicModuleDataRegistry,createPagedModuleDataRegistry,PUBLIC_KINDS,PAGED_KINDS}=require('./module-data-adapters.cjs');
 const {backendCommand}=require('./backend-command.cjs');
-const {desktopProbe}=require('./desktop-probe.cjs');
-function compiledApplicationContract(appId,context){
+const {desktopProbe,prepareDesktopProbe}=require('./desktop-probe.cjs');
+function applicationContract(appId,context){
  if(!['melange','mentat'].includes(appId)||!context?.runtime||typeof context.resources!=='string'||!path.isAbsolute(context.resources))return null;
  try{
   const paged=appId==='melange'&&context.publicDataMode==='paged-v1';
@@ -22,8 +22,11 @@ function compiledApplicationContract(appId,context){
      spec.startupTimeoutMs!==(appId==='melange'?600000:300000))return null;
   const command=backendCommand(context.resources,appId),sourceRoot=path.join(command.runtime,'sources'),bootstrapRoot=path.join(command.runtime,'bootstrap');
   const current=()=>{const roots=verifyProgram(context.runtime,spec);if(roots.source!==sourceRoot||roots.bootstrap!==bootstrapRoot)throw failure();};
-  current();
-  const registry=(paged?createPagedModuleDataRegistry:createPublicModuleDataRegistry)({appId,sourceRoot,probe:async(request,{signal}={})=>{
+  const registry=(paged?createPagedModuleDataRegistry:createPublicModuleDataRegistry)({appId,sourceRoot,prepareProbe:({signal}={})=>{
+   if(signal?.aborted)throw failure();
+   const reader=prepareDesktopProbe(command,'--desktop-github-module-check',{signal,timeout:spec.startupTimeoutMs,onDiagnostic:context.onProbeDiagnostic,beforeSpawn:current});
+   return {async run(request){if(signal?.aborted)throw failure();current();const result=await reader.run(request);if(signal?.aborted)throw failure();current();return result;},cancel:()=>reader.cancel()};
+  },probe:async(request,{signal}={})=>{
    if(signal?.aborted)throw failure();current();
    const result=await desktopProbe(command,'--desktop-github-module-check',request,{signal,timeout:spec.startupTimeoutMs});
    if(signal?.aborted)throw failure();current();return result;
@@ -31,6 +34,13 @@ function compiledApplicationContract(appId,context){
   return checkedContract(appId,{...spec,registry});
  }catch{return null;}
 }
+function withCompiledApplicationContract(appId,context,construct){
+ if(typeof construct!=='function'||require('node:util').types.isAsyncFunction(construct))throw failure();
+ const contract=applicationContract(appId,context);
+ if(!contract)return construct(null);
+ return withVerifiedProgramConstruction(context.runtime,contract,proof=>construct(proof?contract:null,proof||undefined));
+}
+function compiledApplicationContract(appId,context){return withCompiledApplicationContract(appId,context,contract=>contract);}
 function failure(){const error=new Error('Module data activation is unavailable.');error.code=error.reason='transition';return error;}
 function fingerprint(value){try{return crypto.createHash('sha256').update(canonical(value)).digest('hex');}catch{throw failure();}}
 function freeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}
@@ -117,4 +127,4 @@ class ModuleDataStartup{
   return Promise.all([startup,staging]).then(()=>Object.freeze({drained:true}));
  }
 }
-module.exports={ModuleDataStartup,compiledApplicationContract,moduleHealthBinding};
+module.exports={ModuleDataStartup,compiledApplicationContract,withCompiledApplicationContract,moduleHealthBinding};

@@ -187,6 +187,7 @@ const journalStore=()=>require('./access-state.cjs').accessStateStore({resources
 // A non-legacy Terrier tester's district-data log and backend.log (runtime.cjs logRoot) live in the private store; the owner's legacy install and the other apps keep the profile's logs folder.
 const districtLogs=()=>{try{if(packs&&read('settings.json').terrierLegacy===undefined)return packs.logDirectory(packRoot);}catch{}return path.join(userData,'logs');};
 function districtLog(message){try{const logs=districtLogs();fs.mkdirSync(logs,{recursive:true,mode:0o700});fs.appendFileSync(path.join(logs,'district-data.log'),new Date().toISOString()+' '+String(message).slice(0,300)+'\n',{mode:0o600});}catch{}}
+function readerDiagnostic(value){try{const logs=districtLogs();fs.mkdirSync(logs,{recursive:true,mode:0o700});fs.appendFile(path.join(logs,'startup.jsonl'),JSON.stringify({time:new Date().toISOString(),appId:definition.id,version:app.getVersion(),phase:value.phase,reason:value.reason,elapsedMs:value.elapsedMs})+'\n',{mode:0o600},()=>{});}catch{}}
 // The backend serves a district even when its downloaded bundle could not be imported (it leaves a marker and retries at its next start): say so.
 function bundleNotice(){const message=packs?.bundleImportNotice(runtime?.roots);if(message)updateStatus(message);}
 function districtDataStatus(state){
@@ -209,6 +210,7 @@ function ownerDistrictController(){
     store:require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:standaloneMode?'github-district-local-state':'github-district-state'}),
     previousStore:standaloneMode?require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:'github-district-state'}):null,signal:downloads.signal,onStatus,
     checkExisting:async(dataRoot,district)=>{const result=await probe(command,'--desktop-github-district-check',{sourceRoot,dataRoot,district},{signal:downloads.signal});return result.validated===true&&result.district===district;},
+    prepareCheckExisting:(dataRoot,district,{signal})=>{const reader=require('./desktop-probe.cjs').prepareDesktopProbe(command,'--desktop-github-district-check',{signal,onDiagnostic:readerDiagnostic});return {async run(){const result=await reader.run({sourceRoot,dataRoot,district});return result.validated===true&&result.district===district;},cancel:()=>reader.cancel()};},
     extract:request=>probe(command,'--desktop-github-district-extract',{...request,sourceRoot},{timeout:10*60*1000,signal:downloads.signal})
    })
   });
@@ -315,12 +317,12 @@ async function finishClose(){
 }
 function createModuleDataStartup(){
  if(!['melange','mentat'].includes(definition.id))return null;
- const {ModuleDataStartup,compiledApplicationContract}=require('./module-data-startup.cjs');
+ const {ModuleDataStartup,withCompiledApplicationContract}=require('./module-data-startup.cjs');
  // Reject untrusted source markers before installed-program or provider I/O.
  // The existing fresh launch preflight reports this through startup failure UI.
- let contract=null;
- try{refuseModuleDataSettings(read('settings.json'));contract=compiledApplicationContract(definition.id,{runtime,resources,publicDataMode:applicationConfig.desktopPublicData?.[definition.id]});}catch{}
+ const construct=(contract,constructionProof)=>{
  const boundary=contract?require('./module-data-runtime-boundary.cjs').createRuntimeModuleBoundary({appId:definition.id,profile:userData,contract,
+  constructionProof,
   publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],getRuntime:()=>runtime,getSelected:()=>read('settings.json'),
   onPreparing:()=>updateStatus('Preparing reviewed public data. Larger sources can take several minutes.'),
   authorize:async configuration=>(await ensureAccess()).authorize(configuration),protectedRoots:[resources,app.getAppPath(),path.dirname(process.execPath)]}):null;
@@ -341,6 +343,9 @@ function createModuleDataStartup(){
    previousStore:standaloneMode?require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}):null,
    authorize:async configuration=>(await ensureAccess()).authorize(configuration),
    effectiveConfiguration:({originalSelected,source})=>({...originalSelected,ownerGitHubModuleData:source})})});
+ };
+ try{refuseModuleDataSettings(read('settings.json'));}catch{return construct(null);}
+ return withCompiledApplicationContract(definition.id,{runtime,resources,publicDataMode:applicationConfig.desktopPublicData?.[definition.id],onProbeDiagnostic:readerDiagnostic},construct);
 }
 async function openPublicData(){
  const target=definition.id==='melange'?'/public-data/':definition.id==='mentat'?'/#public-data':null;if(!target||closing)return;

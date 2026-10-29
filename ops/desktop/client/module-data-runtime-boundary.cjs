@@ -7,6 +7,7 @@ const {authorizationIdentity}=require('./access-lifecycle.cjs');
 const {authorized}=require('./github-module-protocol.cjs');
 const {validateModuleBinding}=require('./module-data-binding.cjs');
 const RUNTIMES=new WeakMap(),CAPABILITIES=new WeakMap();
+const CONSTRUCTIONS=new WeakMap();
 const MAX_FRAME=65536,HASH=/^[a-f0-9]{64}$/;
 function failure(){const error=new Error('Native module input is unavailable.');error.code=error.reason='transition';return error;}
 function requireValue(value){if(!value)throw failure();}
@@ -49,6 +50,24 @@ function verifyProgram(runtime,contract){
  }
  return roots;
 }
+// A construction proof saves only the immediately repeated constructor scan.
+// It cannot authorize startup, survive a yield, or be supplied as JSON/settings.
+function withVerifiedProgramConstruction(runtime,contract,construct){
+ requireValue(typeof construct==='function'&&!require('node:util').types.isAsyncFunction(construct));
+ let roots;try{roots=verifyProgram(runtime,contract);}catch{const result=construct(null);requireValue(!result||typeof result.then!=='function');return result;}
+ const proof=Object.freeze({}),record={runtime,contract,roots:Object.freeze({...roots}),programFingerprint:contract.programFingerprint,used:false};
+ CONSTRUCTIONS.set(proof,record);
+ try{
+  const result=construct(proof);requireValue(!result||typeof result.then!=='function');return result;
+ }finally{CONSTRUCTIONS.delete(proof);}
+}
+function constructionSupport(proof,runtime,contract){
+ const record=CONSTRUCTIONS.get(proof);requireValue(record&&!record.used&&record.runtime===runtime&&record.contract===contract&&
+  record.programFingerprint===contract.programFingerprint&&programFingerprint(contract.programFiles)===record.programFingerprint);
+ const roots=RUNTIMES.get(runtime)?.programRoots();requireValue(exact(roots,['source','bootstrap'])&&
+  roots.source===record.roots.source&&roots.bootstrap===record.roots.bootstrap);
+ record.used=true;return true;
+}
 function encodeModuleFrame(value){
  const bytes=Buffer.from(canonical(value),'utf8');requireValue(bytes.length>=2&&bytes.length<=MAX_FRAME);
  const header=Buffer.alloc(4);header.writeUInt32BE(bytes.length);return Buffer.concat([header,bytes]);
@@ -85,14 +104,17 @@ function checkWarmModule(runtime,configuration,approval){
   authorized(record.appId,configuration,approval)&&authorizationIdentity(approval)===record.authorizationIdentity);
  verifyProgram(runtime,record.contract);
 }
-function createRuntimeModuleBoundary({appId,profile,publicKeys,contract,getRuntime,getSelected,authorize,protectedRoots=[],onPreparing=()=>{}}){
+function createRuntimeModuleBoundary({appId,profile,publicKeys,contract,getRuntime,getSelected,authorize,protectedRoots=[],onPreparing=()=>{},constructionProof}){
  if(!contract||!['melange','mentat'].includes(appId)||typeof getRuntime!=='function'||typeof getSelected!=='function'||typeof authorize!=='function'||typeof onPreparing!=='function')return null;
  let files;
  try{
   files=programTable(contract.programFiles);
   requireValue(contract.appId===appId&&programFingerprint(files)===contract.programFingerprint&&Number.isSafeInteger(contract.startupTimeoutMs)&&contract.startupTimeoutMs>=1000&&contract.startupTimeoutMs<=600000);
  }catch{return null;}
- const supported=selected=>{try{requireValue(selected===contract);verifyProgram(getRuntime(),contract);return true;}catch{return false;}};
+ // Only this first, synchronous construction check may consume the proof. Any
+ // later call, including start/capability/health, always reads program bytes.
+ let initial=constructionProof;
+ const supported=selected=>{try{requireValue(selected===contract);if(initial!==undefined){const proof=initial;initial=undefined;return constructionSupport(proof,getRuntime(),contract);}verifyProgram(getRuntime(),contract);return true;}catch{return false;}};
  return Object.freeze({programFingerprint:contract.programFingerprint,supportsContract:supported,
   async start({runtime,configuration,candidate,lease,contract:requested,claimChild}){
    requireValue(runtime===getRuntime()&&requested===contract&&supported(requested)&&!runtime.child&&typeof claimChild==='function');
@@ -127,5 +149,5 @@ function createRuntimeModuleBoundary({appId,profile,publicKeys,contract,getRunti
   }
  });
 }
-module.exports={programTable,programFingerprint,verifyProgram,encodeModuleFrame,writeModuleFrame,initializeModuleRuntime,
+module.exports={programTable,programFingerprint,verifyProgram,withVerifiedProgramConstruction,encodeModuleFrame,writeModuleFrame,initializeModuleRuntime,
  consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,createRuntimeModuleBoundary};

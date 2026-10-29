@@ -8,6 +8,7 @@ const protocol=require('./github-module-protocol.cjs');
 const {GitHubModuleTransport}=require('./github-module-transport.cjs');
 const {physicalPath}=require('./runtime-roots.cjs');
 const {checkedNativeCacheRoot}=require('./module-data-binding.cjs');
+const {withSnapshotValidation}=require('./module-data-adapters.cjs');
 const {fail,requireValue,authorized,hash,integer,TAG,COMMIT}=protocol;
 const RECORD=['catalogSequence','pointerDigest','manifestSha256','releaseTag','releaseCommit','identityDigest'];
 const OFFLINE=new Set(['unreachable','timeout','rate_limited']);
@@ -228,6 +229,7 @@ class GitHubModules{
   for(const dataset of manifest.value.datasets){
    const adapter=this.registry[dataset.kind],dataRoot=path.join(root,dataset.datasetId),files={};
    const dataStat=await fsp.lstat(dataRoot);requireValue(dataStat.isDirectory()&&!dataStat.isSymbolicLink(),'Unsafe module dataset directory');
+   await withSnapshotValidation(adapter,{signal},async validate=>{
    for(const object of dataset.objects){
     canceled(signal);const relative=dataset.datasetId+'/'+adapter.roles[object.role].path,file=path.join(root,...relative.split('/'));
     let parent=path.dirname(file);
@@ -236,7 +238,8 @@ class GitHubModules{
     const stamp=await fsp.lstat(file,{bigint:true}),actual=await fileDigest(file,{signal,identity:stamp});requireValue(actual.bytes===object.bytes&&actual.sha256===object.sha256,'Module role cache integrity failed');verified.push({file,receipt:{stamp,bytes:object.bytes,sha256:object.sha256}});expected.add(relative);files[object.role]=file;
     let ancestor=path.posix.dirname(relative);while(ancestor!=='.'){expectedDirectories.add(ancestor);ancestor=path.posix.dirname(ancestor);}
    }
-   requireValue(await adapter.validateSnapshot({dataset:structuredClone(dataset),root:dataRoot,files:{...files},signal})===true,'Compiled module reader validation failed');
+   requireValue(await validate({dataset:structuredClone(dataset),root:dataRoot,files:{...files},signal})===true,'Compiled module reader validation failed');
+   });
    datasets.push({kind:dataset.kind,datasetId:dataset.datasetId,revisionId:dataset.revisionId,root:dataRoot,files,objects:structuredClone(dataset.objects)});
   }
   const walk=async(directory,prefix='')=>{for(const entry of await fsp.readdir(directory,{withFileTypes:true})){const relative=prefix+entry.name,p=path.join(directory,entry.name);requireValue(!entry.isSymbolicLink(),'Snapshot reparse point refused');if(entry.isDirectory()){requireValue(expectedDirectories.delete(relative),'Unexpected module snapshot directory');await walk(p,relative+'/');}else requireValue(entry.isFile()&&expected.delete(relative),'Unexpected module snapshot file');}};

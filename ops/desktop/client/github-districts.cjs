@@ -26,9 +26,10 @@ const publicTransport=Object.freeze({
 });
 const fingerprint=stat=>[String(stat.dev),String(stat.ino),String(stat.size),String(stat.mtimeNs),String(stat.ctimeNs)].join('|');
 async function digest(file,signal){
+ canceled(signal);
  const before=await fsp.lstat(file,{bigint:true});requireValue(before.isFile()&&!before.isSymbolicLink(),'Unsafe GitHub district file');
  const hash=crypto.createHash('sha256');let bytes=0;
- for await(const chunk of fs.createReadStream(file,{highWaterMark:4*1024*1024})){canceled(signal);hash.update(chunk);bytes+=chunk.length;}
+ for await(const chunk of fs.createReadStream(file,{highWaterMark:4*1024*1024,signal})){canceled(signal);hash.update(chunk);bytes+=chunk.length;}
  requireValue(fingerprint(await fsp.lstat(file,{bigint:true}))===fingerprint(before)&&BigInt(bytes)===before.size,'GitHub district file changed while verifying');
  return {bytes,sha256:hash.digest('hex'),fingerprint:fingerprint(before)};
 }
@@ -74,11 +75,12 @@ function configurationFor(configuration,entry,root,authorization){
  return {...base,[field]:{schemaVersion:2,district:configuration.district,cacheRoot:root,catalogueSha256:entry.manifestSha256}};
 }
 class GitHubDistricts{
- constructor({resources,profile,root,publicKeys,store,previousStore=null,transport=publicTransport,checkExisting,extract,onStatus=()=>{},signal,now=Date.now,statfs=fsp.statfs}){
+ constructor({resources,profile,root,publicKeys,store,previousStore=null,transport=publicTransport,checkExisting,prepareCheckExisting=null,extract,onStatus=()=>{},signal,now=Date.now,statfs=fsp.statfs}){
   requireValue(typeof profile==='string'&&typeof root==='string'&&publicKeys&&Object.keys(publicKeys).length>0&&Object.keys(publicKeys).length<=8&&store?.read&&store?.write&&typeof transport?.read==='function'&&typeof transport.download==='function'&&typeof checkExisting==='function'&&typeof extract==='function','GitHub district provider requires pinned keys and protected storage');
   for(const [id,value]of Object.entries(publicKeys))requireValue(/^[A-Za-z0-9._-]{1,100}$/.test(id)&&typeof value==='string'&&Buffer.from(value,'base64').length===32&&Buffer.from(value,'base64').toString('base64')===value,'Invalid GitHub district verification key');
   requireValue(previousStore===null||typeof previousStore.read==='function','Invalid previous public dataset journal');
-  Object.assign(this,{resources,profile:path.resolve(profile),root:path.resolve(root),publicKeys:structuredClone(publicKeys),store,previousStore,transport,checkExisting,extract,onStatus,signal,now,statfs});this.states=new Map();this.busy=false;
+  requireValue(prepareCheckExisting===null||typeof prepareCheckExisting==='function','Invalid native reader preparation');
+  Object.assign(this,{resources,profile:path.resolve(profile),root:path.resolve(root),publicKeys:structuredClone(publicKeys),store,previousStore,transport,checkExisting,prepareCheckExisting,extract,onStatus,signal,now,statfs});this.states=new Map();this.busy=false;
  }
  status(configuration,phase,extra={}){const previous=this.states.get(configuration.district),retained={};for(const key of ['releaseTag','catalogueSequence','checkedAt','verifiedAt'])if(previous?.[key]!==undefined)retained[key]=previous[key];const value={provider:'github',repository:REPOSITORY,district:configuration.district,phase,cached:previous?.cached||false,canRefresh:true,...retained,...extra};this.states.set(configuration.district,value);this.onStatus(structuredClone(value));return structuredClone(value);}
  info(configuration){return this.states.has(configuration?.district)?structuredClone(this.states.get(configuration.district)):null;}
@@ -132,6 +134,18 @@ class GitHubDistricts{
    if(missing)continue;
    for(const district of IDS){try{await fsp.lstat(path.join(current,district));return true;}catch(error){if(error.code!=='ENOENT')throw error;}}
   }
+  // A retained compressed download still needs its signed inventory. Presence
+  // is conservative here; reuse and retirement verify the actual archive bytes.
+  let downloads=this.root;
+  for(const part of ['', 'github-districts','downloads']){
+   if(part)downloads=path.join(downloads,part);
+   let stat;try{stat=await fsp.lstat(downloads);}catch(error){if(error.code==='ENOENT')return false;throw error;}
+   if(stat.isSymbolicLink()||!stat.isDirectory())return true;
+  }
+  for(const asset of manifest.assets.values()){
+   requireValue(/^[a-f0-9]{64}$/.test(asset.sha256));
+   try{await fsp.lstat(path.join(downloads,asset.sha256+'.zip'));return true;}catch(error){if(error.code!=='ENOENT')throw error;}
+  }
   return false;
  }
  async commit(state){
@@ -173,21 +187,38 @@ class GitHubDistricts{
   await walk(directory);requireValue(seen.size===expected.size,'Public district inventory is incomplete');
  }
  async verifyDirectory(directory,district,files,{managed=false}={}){
+  let reader;
+  const drainReader=async()=>{const owned=reader;reader=null;await owned?.cancel();};
   try{
    if(managed)await safeDirectory(this.realRoot,directory);else{const stat=await fsp.lstat(directory);requireValue(stat.isDirectory()&&!stat.isSymbolicLink());}
    if(managed)await this.verifyInventory(directory,files);
-   const verified=[];
-   for(const item of files){
-    const file=path.join(directory,item.role);if(path.dirname(file)!==directory)await safeDirectory(directory,path.dirname(file));const actual=await digest(file,this.signal);if(actual.bytes!==item.bytes||actual.sha256!==item.sha256)return false;
-    verified.push({file,fingerprint:actual.fingerprint});
-    if(item.role.endsWith('.sqlite3')){for(const suffix of ['-wal','-shm','-journal'])if(await fsp.lstat(file+suffix).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;}))return false;
-     const header=Buffer.alloc(20),handle=await fsp.open(file,'r');try{requireValue((await handle.read(header,0,20,0)).bytesRead===20&&header.subarray(0,16).toString('latin1')==='SQLite format 3\0'&&header[18]===1&&header[19]===1);}finally{await handle.close();}}
-   }
-   canceled(this.signal);if(await this.checkExisting(directory,district)!==true)return false;
+   reader=this.prepareCheckExisting?.(directory,district,{signal:this.signal});
+   requireValue(!reader||typeof reader.run==='function'&&typeof reader.cancel==='function','Invalid native reader preparation');
+   const verified=new Array(files.length),reads=new AbortController();let next=0,failed;
+   const abort=()=>reads.abort(this.signal?.reason);this.signal?.addEventListener('abort',abort,{once:true});if(this.signal?.aborted)abort();
+   const worker=async()=>{
+    while(!failed&&!reads.signal.aborted){
+     const index=next++;if(index>=files.length)return;const item=files[index];
+     try{
+      canceled(reads.signal);const file=path.join(directory,item.role);if(path.dirname(file)!==directory)await safeDirectory(directory,path.dirname(file));
+      const actual=await digest(file,reads.signal);requireValue(actual.bytes===item.bytes&&actual.sha256===item.sha256,'GitHub district file integrity failed');
+      if(item.role.endsWith('.sqlite3')){for(const suffix of ['-wal','-shm','-journal'])requireValue(!await fsp.lstat(file+suffix).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;}),'GitHub district database has sidecars');
+       const header=Buffer.alloc(20),handle=await fsp.open(file,'r');try{requireValue((await handle.read(header,0,20,0)).bytesRead===20&&header.subarray(0,16).toString('latin1')==='SQLite format 3\0'&&header[18]===1&&header[19]===1);}finally{await handle.close();}}
+      canceled(reads.signal);verified[index]={file,fingerprint:actual.fingerprint};
+     }catch(error){failed??=error;reads.abort(error);return;}
+    }
+   };
+   try{
+    // Both readers settle before native checks or returning a failure. A failed
+    // or cancelled sibling cannot leave background reads behind this operation.
+    const results=await Promise.allSettled([worker(),worker()]);const rejected=results.find(result=>result.status==='rejected');
+    if(rejected)throw rejected.reason;if(failed)throw failed;canceled(reads.signal);
+   }finally{this.signal?.removeEventListener('abort',abort);}
+   canceled(this.signal);const valid=reader?await reader.run():await this.checkExisting(directory,district);await drainReader();canceled(this.signal);if(valid!==true)return false;
    for(const item of verified){const stat=await fsp.lstat(item.file,{bigint:true});requireValue(!stat.isSymbolicLink()&&fingerprint(stat)===item.fingerprint,'GitHub district files changed during metadata validation');if(item.file.endsWith('.sqlite3'))for(const suffix of ['-wal','-shm','-journal'])if(await fsp.lstat(item.file+suffix).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;}))return false;}
    if(managed)await this.verifyInventory(directory,files);
    return true;
-  }catch(error){if(this.signal?.aborted)throw error;return false;}
+  }catch(error){if(this.signal?.aborted)throw error;return false;}finally{await drainReader();}
  }
  summary(bundle){return {releaseTag:bundle.releaseTag,catalogueSequence:bundle.catalogSequence,verifiedAt:bundle.verifiedAt,cached:true};}
  async useVerified(configuration,state,entry,{offline=false,authorization}={}){
@@ -211,7 +242,7 @@ class GitHubDistricts{
    // have it open. A new catalogue receives a new directory.
    const occupied=await fsp.lstat(place).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;});requireValue(!occupied,'Existing GitHub district cache failed verification');
    const space=await this.statfs(this.root),need=asset.bytes+files.reduce((sum,item)=>sum+item.bytes,0)+512*1024*1024;requireValue(Number(space.bavail)*Number(space.bsize)>=need,'Insufficient GitHub district staging space');
-   let archiveReady=false;try{const actual=await digest(archive,this.signal);archiveReady=actual.bytes===asset.bytes&&actual.sha256===asset.sha256;}catch(error){if(error.code!=='ENOENT')throw error;}
+   let archiveReady=false;try{const actual=await digest(archive,this.signal);requireValue(actual.bytes===asset.bytes&&actual.sha256===asset.sha256,'Existing GitHub district archive failed verification');archiveReady=true;}catch(error){if(error.code!=='ENOENT')throw error;}
    if(!archiveReady){
     const temporary=archive+'.'+crypto.randomUUID()+'.part';
     let progressAt=0,progressBytes=-8*1024*1024;
@@ -264,7 +295,8 @@ class GitHubDistricts{
    await this.initialize();const state=await this.readState(authorization),selected=configuration.standaloneGitHubData,active=state.active[configuration.district];
    requireValue(active?.source==='cache'&&active.manifestSha256===selected.catalogueSha256&&path.resolve(selected.cacheRoot)===this.root,'Only the active verified public district may retire previous caches');
    const manifests=Object.keys(state.catalogues).map(key=>this.catalogue(state,key).manifest);
-   const result=await require('./public-district-cache.cjs').retirePublicDistrictCaches({root:this.root,configuration,manifests});
+   const staged=state.staged[configuration.district],stagedGeneration=staged?.source==='cache'?{schemaVersion:2,district:configuration.district,catalogueSha256:staged.manifestSha256}:null;
+   const result=await require('./public-district-cache.cjs').retirePublicDistrictCaches({root:this.root,configuration,manifests,stagedGeneration});
    await this.commit(state);return result;
   }finally{this.busy=false;}
  }

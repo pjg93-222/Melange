@@ -8,6 +8,18 @@ function fixture(t){const f=environment();t.after(()=>f.cleanup());return f;}
 function roleFile(candidate,f){return path.join(candidate.snapshotRoot,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json');}
 function next(f,sequence=2,bytes=Buffer.from('{"aggregate":42,"revision":2}')){f.remote=signed('mentat',{keys:f.remote.keys,sequence,bytes});}
 
+for(const mode of ['success','hash failure','cancel','drain mutation'])test(`module prewarm provider ${mode} preserves the hash and final mutation barriers`,async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),candidate=await p.prepare(f.selected),file=roleFile(candidate,f),adapter=f.options.registry['mentat.fixture.v1'],read=adapter.validateSnapshot,controller=new AbortController(),events=[],before=structuredClone(f.journal);
+ const stream=fs.createReadStream;t.mock.method(fs,'createReadStream',function(target,...options){const result=stream.call(this,target,...options);if(target===file){events.push('hash');result.once('end',()=>events.push('hashed'));}return result;});
+ adapter.prepareSnapshot=async options=>{assert.deepEqual(Object.keys(options),['signal']);assert.equal(options.signal,controller.signal);events.push('prewarm');if(mode==='cancel')controller.abort();return {
+  validateSnapshot:async input=>{assert.equal(events.at(-1),'hashed');events.push('reader');return read(input);},
+  cancel:async()=>{events.push('drain');if(mode==='drain mutation')fs.writeFileSync(file,Buffer.alloc(f.remote.bytes.length,120));}
+ };};
+ if(mode==='hash failure')fs.writeFileSync(file,Buffer.alloc(f.remote.bytes.length,120));
+ const result=p.stage(f.selected,{signal:controller.signal});if(mode==='success'){await result;assert.deepEqual(events,['prewarm','hash','hashed','reader','drain']);}else{await assert.rejects(result);assert.equal(events.at(-1),'drain');assert.equal(events.includes('reader'),mode==='drain mutation');}
+ assert.equal(events[0],'prewarm');assert.deepEqual(f.journal,before);
+});
+
 test('a fixed transparently redirected native cache adopts one physical root before metadata, segments and snapshot checks',async t=>{
  const f=fixture(t),local=path.join(fs.realpathSync.native(f.temporary),'local');fs.mkdirSync(local);const redirect=redirectedLocalCache(t,local);
  const previous=process.env.LOCALAPPDATA;t.after(()=>{if(previous===undefined)delete process.env.LOCALAPPDATA;else process.env.LOCALAPPDATA=previous;});process.env.LOCALAPPDATA=local;

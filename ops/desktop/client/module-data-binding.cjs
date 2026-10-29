@@ -6,6 +6,7 @@ const {canonical}=require('./access-client.cjs');
 const {exact}=require('./dataset-protocol.cjs');
 const protocol=require('./github-module-protocol.cjs');
 const {physicalPath}=require('./runtime-roots.cjs');
+const {withSnapshotValidation}=require('./module-data-adapters.cjs');
 const SOURCE_FIELDS=['schemaVersion','appId','repository','catalogSequence','releaseTag','releaseCommit','pointerDigest','manifestSha256','cacheRoot'];
 const {requireValue,fail}=protocol;
 function canceled(signal){if(signal?.aborted)throw fail('cancelled','Module binding verification cancelled');}
@@ -123,12 +124,14 @@ async function validateModuleBinding({appId,profile,configuration,publicKeys,reg
   const snapshotRoot=path.join(cacheRoot,'snapshots',manifest.sha256),datasets=[],expectedFiles=new Set(),expectedDirectories=new Set();await view.directory(snapshotRoot);
   for(const dataset of manifest.value.datasets){
    canceled(signal);const adapter=registry[dataset.kind],root=path.join(snapshotRoot,dataset.datasetId),files={};await view.directory(root);
+   await withSnapshotValidation(adapter,{signal},async validate=>{
    for(const object of dataset.objects){
     const relative=dataset.datasetId+'/'+adapter.roles[object.role].path,file=path.join(snapshotRoot,...relative.split('/'));
     await view.read(file,object.bytes,{bytes:object.bytes,sha256:object.sha256});files[object.role]=file;expectedFiles.add(relative);
     let parent=path.posix.dirname(relative);while(parent!=='.'){expectedDirectories.add(parent);parent=path.posix.dirname(parent);}
    }
-   requireValue(await adapter.validateSnapshot({dataset:structuredClone(dataset),root,files:{...files},signal})===true,'Compiled module reader rejected binding');
+   requireValue(await validate({dataset:structuredClone(dataset),root,files:{...files},signal})===true,'Compiled module reader rejected binding');
+   });
    datasets.push({kind:dataset.kind,datasetId:dataset.datasetId,revisionId:dataset.revisionId,root,files,objects:structuredClone(dataset.objects)});
   }
   await view.closure(snapshotRoot,expectedFiles,expectedDirectories);await view.unchanged();canceled(signal);

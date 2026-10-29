@@ -9,6 +9,84 @@ const {districtConfiguration,verifyDistrictAsync}=require('../district-switch.cj
 const {REPOSITORY,POINTER_PATH,IDS,ROLES,assetURL}=protocol;
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value));
+function controlledHashStreams(t,directory,{holdAbort=-1,autoAfter=Infinity}={}){
+ const {Readable}=require('node:stream'),original=fs.createReadStream,entries=[],waiters=[];let active=0,peak=0;
+ fs.createReadStream=function(file,options){
+  if(path.dirname(file)!==directory)return original.call(this,file,options);
+  const index=entries.length;let destroyStarted,closed;const entry={file,startedDestroy:new Promise(resolve=>{destroyStarted=resolve;}),closed:new Promise(resolve=>{closed=resolve;})};
+  const stream=new Readable({signal:options.signal,read(){},destroy(error,done){let finished=false;entry.finishDestroy=()=>{if(!finished){finished=true;done(error);}};destroyStarted(error);if(!(error&&index===holdAbort))entry.finishDestroy();}});
+  entry.release=bytes=>{if(!stream.destroyed){stream.push(bytes||fs.readFileSync(file));stream.push(null);}};
+  entry.destroy=()=>stream.destroy();stream.once('close',()=>{active--;closed();});active++;peak=Math.max(peak,active);entries.push(entry);
+  for(const ready of waiters.splice(0))ready();if(index>=autoAfter)queueMicrotask(()=>entry.release());return stream;
+ };
+ t.after(()=>{fs.createReadStream=original;for(const entry of entries){entry.finishDestroy?.();entry.destroy();}});
+ return {entries,get active(){return active;},get peak(){return peak;},async count(number){while(entries.length<number)await new Promise(resolve=>waiters.push(resolve));}};
+}
+function fixtureFiles(f){return protocol.manifest(f.world.manifest,protocol.pointer(f.world.envelope,f.publicKeys)).dataFiles['co-05'];}
+
+test('district native warmup starts before hashes but receives no input until all hashes pass',{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const streams=controlledHashStreams(t,f.legacy,{autoAfter:2}),files=fixtureFiles(f);let prepared=0,sent=0,drained=0;
+ const p=f.create({checkExisting:()=>assert.fail('Unexpected second probe'),prepareCheckExisting:(directory,district)=>{
+  assert.equal(directory,f.legacy);assert.equal(district,'co-05');assert.equal(streams.entries.length,0);prepared++;
+  return {run:async()=>{assert.equal(streams.active,0);assert.equal(streams.entries.length,files.length);sent++;return true;},cancel:async()=>{drained++;}};
+ }});
+ const running=p.verifyDirectory(f.legacy,'co-05',files);await streams.count(2);assert.equal(prepared,1);assert.equal(sent,0);
+ streams.entries[1].release();streams.entries[0].release();assert.equal(await running,true);assert.equal(sent,1);assert.equal(drained,1);
+});
+
+test('district final mutation checks run after native warmup drainage',async t=>{
+ const f=fixture(t);f.writeLegacy();const file=path.join(f.legacy,'density.json');
+ const p=f.create({prepareCheckExisting:()=>({run:async()=>true,cancel:async()=>{const bytes=fs.readFileSync(file);bytes[0]^=1;fs.writeFileSync(file,bytes);}})});
+ assert.equal(await p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)),false);
+});
+
+for(const reason of ['hash failure','abort'])test(`district ${reason} drains hashes and unsent native warmup before returning`,{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const streams=controlledHashStreams(t,f.legacy,{holdAbort:0}),controller=new AbortController();let cancelled,finishCancel,sent=0,settled=false;
+ const cancelStarted=new Promise(resolve=>{cancelled=resolve;}),cancelDone=new Promise(resolve=>{finishCancel=resolve;});
+ const p=f.create({signal:controller.signal,prepareCheckExisting:()=>({run:async()=>{sent++;return true;},cancel:async()=>{assert.equal(streams.active,0);cancelled();await cancelDone;}})});
+ const running=p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)).then(value=>{settled=true;return {value};},error=>{settled=true;return {error};});
+ await streams.count(2);if(reason==='abort')controller.abort();else{const bad=fs.readFileSync(streams.entries[1].file);bad[0]^=1;streams.entries[1].release(bad);}
+ await streams.entries[0].startedDestroy;streams.entries[0].finishDestroy();await cancelStarted;
+ assert.equal(settled,false);assert.equal(sent,0);assert.equal(streams.entries.length,2);finishCancel();const result=await running;
+ if(reason==='abort')assert.ok(result.error);else assert.equal(result.value,false);assert.equal(f.checks.length,0);
+});
+
+test('two district hash readers overlap with bounded concurrency and preserve out-of-order results',{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const files=fixtureFiles(f),streams=controlledHashStreams(t,f.legacy,{autoAfter:2});let native=0;
+ const p=f.create({checkExisting:async()=>{native++;assert.equal(streams.active,0);return true;}}),running=p.verifyDirectory(f.legacy,'co-05',files);
+ await streams.count(2);assert.equal(streams.entries.length,2);assert.equal(streams.active,2);
+ streams.entries[1].release();await streams.count(3);assert.equal(streams.active<=2,true);streams.entries[0].release();
+ assert.equal(await running,true);assert.equal(streams.peak,2);assert.equal(streams.active,0);assert.equal(native,1);
+ assert.deepEqual(streams.entries.map(item=>path.basename(item.file)).sort(),files.map(item=>item.role).sort());
+});
+
+test('failed district hash cancels and drains its sibling before failure and schedules no more files',{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const streams=controlledHashStreams(t,f.legacy,{holdAbort:0}),p=f.create();let settled=false;
+ const running=p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)).then(value=>{settled=true;return value;});
+ await streams.count(2);const wrong=fs.readFileSync(streams.entries[1].file);wrong[0]^=1;streams.entries[1].release(wrong);
+ await streams.entries[0].startedDestroy;assert.equal(settled,false);assert.equal(streams.entries.length,2);assert.equal(f.checks.length,0);
+ streams.entries[0].finishDestroy();assert.equal(await running,false);assert.equal(streams.active,0);assert.equal(f.checks.length,0);
+});
+
+test('aborted district hash drains both readers and preserves abort outward semantics',{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const streams=controlledHashStreams(t,f.legacy,{holdAbort:0}),controller=new AbortController(),p=f.create({signal:controller.signal});let settled=false;
+ const running=p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)).then(value=>{settled=true;return {value};},error=>{settled=true;return {error};});
+ await streams.count(2);controller.abort();await streams.entries[0].startedDestroy;assert.equal(settled,false);assert.equal(streams.entries.length,2);assert.equal(f.checks.length,0);
+ streams.entries[0].finishDestroy();const result=await running;assert.ok(result.error);assert.equal(streams.active,0);assert.equal(f.checks.length,0);
+});
+
+for(const mutation of ['bytes','sidecar'])test(`parallel district verification still refuses ${mutation} changed during native reader`,async t=>{
+ const f=fixture(t);f.writeLegacy();const file=path.join(f.legacy,mutation==='bytes'?'density.json':'contacts.sqlite3');
+ const p=f.create({checkExisting:async()=>{if(mutation==='bytes'){const old=fs.statSync(file),bytes=fs.readFileSync(file);bytes[0]^=1;fs.writeFileSync(file,bytes);fs.utimesSync(file,old.atime,old.mtime);}else fs.writeFileSync(file+'-wal','fixture');return true;}});
+ assert.equal(await p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)),false);
+});
+
+test('parallel district hash failure leaves accepted active and high-water state unchanged',async t=>{
+ const f=fixture(t),p=f.create();const effective=await p.ensure(f.config,f.authorization),before=structuredClone(f.state);
+ const directory=runtimeRoots('terrier',f.profile,effective).data,file=path.join(directory,'density.json'),raw=fs.readFileSync(file);raw[0]^=1;fs.writeFileSync(file,raw);
+ await assert.rejects(p.ensure(effective,f.authorization),/cache failed verification/);assert.deepEqual(f.state,before);
+});
+
 function fixture(t,{snapshots=false}={}){
  const temporary=fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(),'github-district-fixture-')));t.after(()=>fs.rmSync(temporary,{recursive:true,force:true,maxRetries:5}));
  const profile=path.join(temporary,'profile'),root=path.join(profile,'packs'),legacy=path.join(temporary,'legacy');fs.mkdirSync(root,{recursive:true});fs.mkdirSync(legacy);
@@ -250,7 +328,7 @@ test('managed snapshot caches reject unsigned extra derived files',async t=>{
  assert.equal(fs.readFileSync(file,'utf8'),'{"unlisted":true}');
 });
 
-test('same-district upgrades retain signed inventories across restart until both cache generations retire',async t=>{
+test('same-district upgrades retain signed inventories for the remaining compressed archive after unpacked caches retire',async t=>{
  const f=fixture(t,{snapshots:true}),authorization=standaloneAuthorization(),configuration={dataDirectory:f.legacy,district:'co-05'},first=f.world;
  const initial=await f.create().ensure(configuration,authorization),previous=structuredClone(f.state),oldKey=previous.latest,oldHash=initial.standaloneGitHubData.catalogueSha256;
  const oldV2=path.join(f.root,'github-districts','datasets-v2',oldHash,'co-05'),oldV1=path.join(f.root,'github-districts','datasets',oldHash,'co-05');
@@ -259,10 +337,79 @@ test('same-district upgrades retain signed inventories across restart until both
  assert.ok(current.catalogues[oldKey]);assert.notEqual(current.latest,oldKey);assert.ok(fs.existsSync(oldV1)&&fs.existsSync(oldV2));
  const restarted=f.create();await restarted.initialize();assert.ok((await restarted.readState(authorization)).catalogues[oldKey]);
  const result=await restarted.retireInactive(upgraded,authorization);
- assert.ok(result.retired.includes(oldV1)&&result.retired.includes(oldV2));assert.equal(f.state.catalogues[oldKey],undefined);
+ assert.ok(result.retired.includes(oldV1)&&result.retired.includes(oldV2));assert.ok(f.state.catalogues[oldKey]);
  assert.equal(f.state.latest,current.latest);assert.deepEqual(f.state.active,current.active);assert.deepEqual(f.state.staged,current.staged);
  assert.ok(fs.existsSync(path.join(f.root,'github-districts','datasets-v2',upgraded.standaloneGitHubData.catalogueSha256,'co-05')));
  f.world=first;await assert.rejects(f.create().ensure(upgraded,authorization),/rollback/);
+});
+
+test('retiring an older live district preserves staged newer data for a fresh zero-download start, then retires the old generation',async t=>{
+ const f=fixture(t,{snapshots:true}),authorization=standaloneAuthorization(),provider=f.create(),first=f.world;
+ const initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),oldDirectory=provider.directory(initial.standaloneGitHubData.catalogueSha256,'co-05'),oldArchive=path.join(f.root,'github-districts/downloads',sha(first.archives.get('co-05'))+'.zip');
+ f.world=f.build(2);await provider.discover(initial,authorization);const staged=structuredClone(f.state),newDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05'),newArchive=path.join(f.root,'github-districts/downloads',sha(f.world.archives.get('co-05'))+'.zip'),downloads=f.downloads.length;
+ assert.equal(downloads,2);await provider.retireInactive(initial,authorization);assert.deepEqual(f.state,staged);
+ for(const target of [oldDirectory,newDirectory,oldArchive,newArchive])assert.ok(fs.existsSync(target),target);
+ const restarted=f.create(),upgraded=await restarted.ensure(initial,authorization);assert.equal(f.downloads.length,downloads);assert.equal(f.state.active['co-05'].catalogSequence,2);assert.equal(f.state.staged['co-05'],undefined);
+ const retired=await restarted.retireInactive(upgraded,authorization);assert.ok(retired.retired.includes(oldDirectory));for(const target of [oldArchive,newDirectory,newArchive])assert.ok(fs.existsSync(target),target);
+ const stream=fs.createReadStream;t.mock.method(fs,'createReadStream',function(file,...args){assert.ok(!file.endsWith('.zip'),'Journal authority preservation must not rehash full archives');return stream.call(this,file,...args);});await restarted.commit(structuredClone(f.state));assert.ok(Object.values(f.state.catalogues).some(item=>item.envelope.payload===first.envelope.payload));
+ f.world=first;await assert.rejects(restarted.ensure(upgraded,authorization),/rollback/);assert.equal(f.downloads.length,downloads);
+});
+
+test('retirement retains only the live and latest staged generations after repeated newer staging',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),activeDirectory=provider.directory(f.state.active['co-05'].manifestSha256,'co-05');
+ f.world=f.build(2);await provider.discover(initial,authorization);const supersededKey=f.state.latest,supersededDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05'),supersededArchive=path.join(f.root,'github-districts/downloads',sha(f.world.archives.get('co-05'))+'.zip');
+ f.world=f.build(3);await provider.discover(initial,authorization);const stagedDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05');
+ const result=await provider.retireInactive(initial,authorization);for(const target of [supersededDirectory,supersededArchive])assert.ok(result.retired.includes(target),target);for(const target of [activeDirectory,stagedDirectory])assert.ok(fs.existsSync(target),target);
+ assert.equal(f.state.catalogues[supersededKey],undefined);assert.equal(Object.keys(f.state.catalogues).length,2);assert.equal(f.state.active['co-05'].catalogSequence,1);assert.equal(f.state.staged['co-05'].catalogSequence,3);
+});
+
+test('switching to another public district retires both unpacked generations and keeps its recent compressed download',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),oldDirectory=provider.directory(f.state.active['co-05'].manifestSha256,'co-05');
+ f.world=f.build(2);await provider.discover(initial,authorization);const stagedDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05'),stagedArchive=path.join(f.root,'github-districts/downloads',sha(f.world.archives.get('co-05'))+'.zip');
+ const nextAuthorization={...authorization,principal:{mode:'standalone',districtId:'or-05'}},switched=await provider.ensure(districtConfiguration(initial,'or-05',IDS),nextAuthorization);
+ const result=await provider.retireInactive(switched,nextAuthorization);for(const target of [oldDirectory,stagedDirectory])assert.ok(result.retired.includes(target),target);assert.ok(fs.existsSync(stagedArchive));assert.ok(fs.existsSync(provider.directory(switched.standaloneGitHubData.catalogueSha256,'or-05')));
+});
+
+for(const mutation of ['owner','root','active descriptor','staged manifest'])test(`retirement refuses ${mutation} mismatch before removing active or staged data`,async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ f.world=f.build(2);await provider.discover(initial,authorization);const activeDirectory=provider.directory(f.state.active['co-05'].manifestSha256,'co-05'),stagedDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05');
+ const selected=structuredClone(initial),approval=structuredClone(authorization);
+ if(mutation==='owner')approval.identity.accountId=crypto.randomUUID();
+ if(mutation==='root')selected.standaloneGitHubData.cacheRoot=path.join(f.root,'other');
+ if(mutation==='active descriptor')selected.standaloneGitHubData.catalogueSha256=f.state.staged['co-05'].manifestSha256;
+ if(mutation==='staged manifest')f.state={...f.state,staged:{...f.state.staged,'co-05':{...f.state.staged['co-05'],manifestSha256:'c'.repeat(64)}}};
+ const before=structuredClone(f.state);await assert.rejects(provider.retireInactive(selected,approval));assert.deepEqual(f.state,before);assert.ok(fs.existsSync(activeDirectory));assert.ok(fs.existsSync(stagedDirectory));assert.equal(f.downloads.length,2);
+});
+
+test('retention never turns changed staged bytes into accepted startup data',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ f.world=f.build(2);await provider.discover(initial,authorization);const file=path.join(provider.directory(f.state.staged['co-05'].manifestSha256,'co-05'),'scores.sqlite3'),bytes=fs.readFileSync(file);bytes[bytes.length-1]^=1;fs.writeFileSync(file,bytes);const before=structuredClone(f.state);
+ await provider.retireInactive(initial,authorization);await assert.rejects(f.create().ensure(initial,authorization),/failed verification/);assert.deepEqual(f.state,before);assert.deepEqual(fs.readFileSync(file),bytes);assert.equal(f.downloads.length,2);
+});
+
+test('recent compressed district downloads survive repeated switches while unpacked caches retire and reused archives are rehashed',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create();let current=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),archiveReads=0;
+ const stream=fs.createReadStream;t.mock.method(fs,'createReadStream',function(file,...args){if(file.endsWith('.zip'))archiveReads++;return stream.call(this,file,...args);});
+ for(const [index,district]of ['or-05','co-05','or-05','co-05'].entries()){
+  const previous=provider.directory(current.standaloneGitHubData.catalogueSha256,current.district),approval={...authorization,principal:{mode:'standalone',districtId:district}},reads=archiveReads;
+  current=await provider.ensure(districtConfiguration(current,district,IDS),approval);if(index>0)assert.ok(archiveReads>reads,'Reused compressed archive must be hashed before extraction');await provider.retireInactive(current,approval);
+  assert.equal(fs.existsSync(previous),false);assert.equal(f.downloads.length,2);assert.equal(fs.readdirSync(path.join(f.root,'github-districts/downloads')).length,2);
+ }
+ assert.equal(f.extractCount,5);
+});
+
+test('a third recent district archive evicts the eligible oldest download and keeps only current unpacked data',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create();let current=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ const archive=district=>path.join(f.root,'github-districts/downloads',sha(f.world.archives.get(district))+'.zip');
+ for(const district of ['or-05','ct-01']){const approval={...authorization,principal:{mode:'standalone',districtId:district}};current=await provider.ensure(districtConfiguration(current,district,IDS),approval);if(district==='or-05'){fs.utimesSync(archive('co-05'),1,1);fs.utimesSync(archive('or-05'),2,2);}await provider.retireInactive(current,approval);}
+ assert.equal(f.downloads.length,3);assert.equal(fs.existsSync(archive('co-05')),false);assert.ok(fs.existsSync(archive('or-05'))&&fs.existsSync(archive('ct-01')));assert.equal(fs.readdirSync(path.dirname(archive('ct-01'))).length,2);
+ for(const district of ['co-05','or-05'])assert.equal(fs.existsSync(provider.directory(current.standaloneGitHubData.catalogueSha256,district)),false);
+});
+
+test('a retained compressed archive with changed bytes fails closed on reuse and is never replaced',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),approval={...authorization,principal:{mode:'standalone',districtId:'or-05'}};
+ const other=await provider.ensure(districtConfiguration(initial,'or-05',IDS),approval);await provider.retireInactive(other,approval);const archive=path.join(f.root,'github-districts/downloads',sha(f.world.archives.get('co-05'))+'.zip'),bytes=fs.readFileSync(archive);bytes[bytes.length-1]^=1;fs.writeFileSync(archive,bytes);const before=structuredClone(f.state);
+ await assert.rejects(provider.ensure(districtConfiguration(other,'co-05',IDS),authorization),/archive.*verification/i);assert.deepEqual(fs.readFileSync(archive),bytes);assert.equal(f.downloads.length,2);assert.deepEqual(f.state,before);
 });
 
 test('unsafe cached catalogue paths retain inventory without following their junction',async t=>{

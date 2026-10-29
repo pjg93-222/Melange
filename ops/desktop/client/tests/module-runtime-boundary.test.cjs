@@ -6,7 +6,7 @@ const {ModuleDataStartup,compiledApplicationContract}=require('../module-data-st
 const {GitHubModules}=require('../github-modules.cjs');
 const {environment,sha}=require('./fixtures/github-module-fixture.cjs');
 const mainFile=path.join(__dirname,'..','main.cjs'),main=fs.readFileSync(mainFile,'utf8');
-function fixture(t,{appId='mentat',healthChange=null,onPipe=null,onSpawn=null,rendererFactory=null}={}){
+function fixture(t,{appId='mentat',healthChange=null,onPipe=null,onSpawn=null,rendererFactory=null,beforeConstruct=null}={}){
  const data=environment(appId),resources=path.join(data.temporary,'installed'),sources=path.join(resources,'sources'),bootstrap=path.join(resources,'bootstrap');
  fs.mkdirSync(sources,{recursive:true});fs.mkdirSync(bootstrap);fs.writeFileSync(path.join(sources,'app.py'),'# Generated fixture consumer\n');fs.writeFileSync(path.join(bootstrap,'desktop_backend.py'),'# Generated fixture bootstrap\n');
  const programFiles=[['source','app.py',sources],['bootstrap','desktop_backend.py',bootstrap]].map(([root,name,base])=>{const raw=fs.readFileSync(path.join(base,name));return{root,path:name,bytes:raw.length,sha256:sha(raw)};});
@@ -30,20 +30,90 @@ function fixture(t,{appId='mentat',healthChange=null,onPipe=null,onSpawn=null,re
  vm.runInNewContext(fs.readFileSync(runtimeFile,'utf8'),{module,require:name=>Object.hasOwn(dependencies,name)?dependencies[name]:realRequire(name),structuredClone,process:{platform:'win32'},URL,setTimeout,clearTimeout},{filename:runtimeFile});
  runtime=new module.exports.Runtime(appId,data.profile,resources,{authorize:data.options.authorize,rendererFactory});
  const context={standaloneMode:false,definition:{id:appId},userData:data.profile,runtime,resources,refuseModuleDataSettings:module.exports.refuseModuleDataSettings,applicationConfig:{desktopAccessTrust:{updatePublicKeysByApp:{[appId]:data.remote.publicKeys}}},app:{getAppPath:()=>resources},path,process:{execPath:path.join(resources,'desktop.exe')},
-  updateStatus:message=>{assert.equal(message,'Preparing reviewed public data. Larger sources can take several minutes.');calls.push('preparing');},read:()=>selected,ensureAccess:async()=>({authorize:data.options.authorize}),accessLifecycle:{generation:0,suspended:false},askingClose:false,closing:false,
+  updateStatus:message=>{assert.equal(message,'Preparing reviewed public data. Larger sources can take several minutes.');calls.push('preparing');},readerDiagnostic:()=>{},read:()=>selected,ensureAccess:async()=>({authorize:data.options.authorize}),accessLifecycle:{generation:0,suspended:false},askingClose:false,closing:false,
   window:{isDestroyed:()=>false,webContents:{send:(_name,state)=>messages.push(state)}},powerSaveBlocker:{start:()=>1,stop(){}},
   require:name=>{
-   if(name==='./module-data-startup.cjs')return{ModuleDataStartup,compiledApplicationContract:()=>contract};
+   if(name==='./module-data-startup.cjs')return{ModuleDataStartup,withCompiledApplicationContract:(_appId,_context,construct)=>native.withVerifiedProgramConstruction(runtime,contract,proof=>construct(proof?contract:null,proof||undefined))};
    if(name==='./module-data-runtime-boundary.cjs')return native;
    if(name==='./github-modules.cjs')return{GitHubModules:class extends GitHubModules{constructor(options){super({...options,cacheRoot:data.options.cacheRoot,transport:data.transport,store:data.store,minimumFreeBytes:0});}}};
    if(name==='./access-state.cjs')return{accessStateStore:()=>data.store};throw new Error('Unexpected factory dependency '+name);
   }};
  const start=main.indexOf('function createModuleDataStartup()'),end=main.indexOf("\napp.on('second-instance'",start);assert.ok(start>=0&&end>start);vm.runInNewContext(main.slice(start,end),context,{filename:mainFile});
- const startup=context.createModuleDataStartup();t.after(async()=>{await startup.shutdown();await runtime.stop();data.cleanup();});
- return{data,contract,runtime,startup,calls,spawned,messages,context,sources,bootstrap,get frame(){return frame;},get selected(){return selected;},set selected(value){selected=value;}};
+ const constructionReads=[],open=fs.openSync;let startup;
+ fs.openSync=function(file,...args){if(file===path.join(sources,'app.py')||file===path.join(bootstrap,'desktop_backend.py'))constructionReads.push(file);return open.call(this,file,...args);};
+ try{beforeConstruct?.({sources,bootstrap});startup=context.createModuleDataStartup();}finally{fs.openSync=open;}
+ t.after(async()=>{await startup.shutdown();await runtime.stop();data.cleanup();});
+ return{data,contract,runtime,startup,calls,spawned,messages,context,sources,bootstrap,constructionReads,get frame(){return frame;},get selected(){return selected;},set selected(value){selected=value;}};
 }
+function constructionBoundary(f,proof,overrides={}){return native.createRuntimeModuleBoundary({appId:f.contract.appId,profile:f.data.profile,publicKeys:f.data.remote.publicKeys,
+ contract:f.contract,getRuntime:()=>f.runtime,getSelected:()=>f.selected,authorize:f.data.options.authorize,constructionProof:proof,...overrides});}
+
+test('construction proof cannot be forged, cloned, replayed or used for another exact contract/runtime',t=>{
+ const f=fixture(t);
+ for(const proof of [{},Object.freeze({runtime:f.runtime,contract:f.contract})])assert.equal(constructionBoundary(f,proof).supportsContract(f.contract),false);
+ let escaped;
+ native.withVerifiedProgramConstruction(f.runtime,f.contract,proof=>{
+  escaped=proof;
+  assert.equal(constructionBoundary(f,structuredClone(proof)).supportsContract(f.contract),false);
+  const other={};native.initializeModuleRuntime(other,()=>({source:f.sources,bootstrap:f.bootstrap}));
+  assert.equal(constructionBoundary(f,proof,{getRuntime:()=>other}).supportsContract(f.contract),false);
+  const copy={...f.contract};assert.equal(constructionBoundary(f,proof,{contract:copy}).supportsContract(copy),false);
+  assert.equal(constructionBoundary(f,proof).supportsContract(f.contract),true);
+  assert.equal(constructionBoundary(f,proof).supportsContract(f.contract),false);
+ });
+ assert.equal(constructionBoundary(f,escaped).supportsContract(f.contract),false);
+});
+
+test('construction proof expires on throw, thenable return and a queued microtask',async t=>{
+ const f=fixture(t);let escaped,queued;
+ let called=false;assert.throws(()=>native.withVerifiedProgramConstruction(f.runtime,f.contract,async()=>{called=true;}),/Native module/);assert.equal(called,false);
+ assert.throws(()=>require('../module-data-startup.cjs').withCompiledApplicationContract('mentat',undefined,async()=>{called=true;}),/Module data/);assert.equal(called,false);
+ assert.throws(()=>native.withVerifiedProgramConstruction(f.runtime,f.contract,proof=>{escaped=proof;throw new Error('fixture throw');}),/fixture throw/);
+ assert.equal(constructionBoundary(f,escaped).supportsContract(f.contract),false);
+ assert.throws(()=>native.withVerifiedProgramConstruction(f.runtime,f.contract,proof=>{escaped=proof;return Promise.resolve();}),/Native module/);
+ assert.equal(constructionBoundary(f,escaped).supportsContract(f.contract),false);
+ native.withVerifiedProgramConstruction(f.runtime,f.contract,proof=>{queued=new Promise(resolve=>queueMicrotask(()=>resolve(constructionBoundary(f,proof).supportsContract(f.contract))));});
+ assert.equal(await queued,false);
+});
+
+test('construction proofs do not cross nested scopes or mutable program-root mappings',t=>{
+ const f=fixture(t),other=fixture(t,{appId:'melange'});
+ native.withVerifiedProgramConstruction(f.runtime,f.contract,first=>{
+  native.withVerifiedProgramConstruction(other.runtime,other.contract,second=>{
+   assert.equal(constructionBoundary(other,first).supportsContract(other.contract),false);
+   assert.equal(constructionBoundary(f,second).supportsContract(f.contract),false);
+   assert.equal(constructionBoundary(other,second).supportsContract(other.contract),true);
+  });
+  assert.equal(constructionBoundary(f,first).supportsContract(f.contract),true);
+ });
+ const changing={},roots={source:f.sources,bootstrap:f.bootstrap};native.initializeModuleRuntime(changing,()=>roots);
+ native.withVerifiedProgramConstruction(changing,f.contract,proof=>{
+  roots.source=other.sources;
+  assert.equal(constructionBoundary(f,proof,{getRuntime:()=>changing}).supportsContract(f.contract),false);
+ });
+});
+
+test('initial program corruption still leaves the main factory unsupported before provider work',t=>{
+ const f=fixture(t,{beforeConstruct:({sources})=>fs.appendFileSync(path.join(sources,'app.py'),'# changed')});
+ assert.equal(f.startup.supported,false);assert.deepEqual(f.data.requests,[]);assert.equal(f.data.journal,null);assert.equal(f.spawned.length,0);
+});
+
+test('same-size program tamper with restored mtime after construction is freshly refused before preparation',async t=>{
+ const f=fixture(t),file=path.join(f.sources,'app.py'),before=fs.statSync(file),raw=fs.readFileSync(file);raw[2]^=1;
+ fs.writeFileSync(file,raw);fs.utimesSync(file,before.atime,before.mtime);
+ await assert.rejects(f.startup.start(f.selected,await f.data.options.authorize()));
+ assert.equal(f.spawned.length,0);assert.equal(f.data.journal,null);assert.deepEqual(f.data.requests,[]);
+});
+
+test('program mutation after later runtime authorization is not covered by construction proof',async t=>{
+ const f=fixture(t),authorize=f.runtime.authorize;
+ f.runtime.authorize=async configuration=>{const approved=await authorize(configuration);fs.appendFileSync(path.join(f.sources,'app.py'),'# changed after authorization');return approved;};
+ await assert.rejects(f.startup.start(f.selected,await f.data.options.authorize()));
+ assert.equal(f.spawned.length,0);assert.equal(f.data.journal?.active,null);
+});
 for(const appId of ['melange','mentat'])test(`actual ${appId} main factory reaches native Runtime framing and only commits exact owned health`,async t=>{
  const f=fixture(t,{appId}),original=structuredClone(f.selected);assert.equal(f.startup.supported,true);
+ assert.deepEqual(f.constructionReads.sort(),[path.join(f.sources,'app.py'),path.join(f.bootstrap,'desktop_backend.py')].sort(),'Construction hashes each program file once');
  const origin=await f.startup.start(f.selected,await f.data.options.authorize());assert.equal(origin,'http://127.0.0.1:43212');
  assert.equal(f.data.journal.active.catalogSequence,1);assert.equal(f.spawned.length,1);assert.equal(f.spawned[0].options.stdio[0],'pipe');
  const args=f.spawned[0].args;assert.equal(args[args.indexOf('--profile-root')+1],f.data.profile);assert.ok(args.includes('--desktop-module-input'));
