@@ -1,8 +1,9 @@
-"""Independently inspect a native Windows release; never execute its payload.
+"""Independently inspect a native Windows release; never launch its native payload.
 
 The build controller supplies frozen client/source exports and its gated staging
 tree. This verifier compares actual archive bytes to those inputs, independently
-enumerates every PE header, and obtains fresh Windows signature verdicts.
+enumerates every PE header, and obtains fresh Windows signature verdicts. The
+source-bound Node contract-construction check creates no backend, UI or profile.
 """
 from __future__ import annotations
 
@@ -19,6 +20,8 @@ import os
 from pathlib import Path
 import re
 import shutil
+import struct
+import subprocess
 import sys
 
 HERE = Path(__file__).resolve().parent
@@ -362,6 +365,150 @@ def client_manifest(client):
     return files
 
 
+def asar_member_bytes(archive, name):
+    """Read one already-censused member without executing or extracting client code."""
+    name = legacy.safe_name(name)
+    with Path(archive).open("rb") as stream:
+        lead = stream.read(16)
+        require(len(lead) == 16, "Truncated contract ASAR header")
+        first, header_size, _, json_size = struct.unpack("<IIII", lead)
+        require(first == 4 and 0 < json_size <= 16 * 1024**2 and header_size >= json_size + 8,
+                "Unsupported contract ASAR header")
+        node = json.loads(stream.read(json_size))
+        for part in name.split("/"):
+            node = node.get("files", {}).get(part)
+            require(isinstance(node, dict) and not node.get("link") and not node.get("unpacked"),
+                    "Missing or redirected compiled ASAR inventory")
+        require("files" not in node and type(node.get("size")) is int and 0 < node["size"] <= 2 * 1024**2,
+                "Invalid compiled ASAR inventory size")
+        offset = int(node.get("offset", -1))
+        require(offset >= 0 and 8 + header_size + offset + node["size"] <= Path(archive).stat().st_size,
+                "Compiled ASAR inventory lies outside archive")
+        stream.seek(8 + header_size + offset)
+        raw = stream.read(node["size"])
+        require(len(raw) == node["size"], "Truncated compiled ASAR inventory")
+        return raw
+
+
+def compiled_module_tables(*, app, javascript, python, program_map, config):
+    """Join both compiled authorities to the actual packaged program, not its source inventory."""
+    text = javascript.decode("utf-8-sig")
+    matches = list(re.finditer(r"\bconst\s+APPLICATION_SPECS\s*=\s*freeze\(\s*", text))
+    require(len(matches) == 1, "Compiled JavaScript module table is missing or ambiguous")
+    js, end = json.JSONDecoder().raw_decode(text, matches[0].end())
+    require(re.fullmatch(r"\s*\);\s*module\.exports\s*=\s*Object\.freeze\(\{APPLICATION_SPECS\}\);\s*",
+                         text[end:]), "Compiled JavaScript module table is not a closed literal")
+    def literal(node):
+        if isinstance(node, ast.Call):
+            require(isinstance(node.func, ast.Name) and node.func.id == "MappingProxyType"
+                    and len(node.args) == 1 and not node.keywords,
+                    "Compiled Python module table contains executable selectors")
+            return literal(node.args[0])
+        if isinstance(node, ast.Dict):
+            keys = [literal(key) for key in node.keys]
+            require(all(type(key) is str for key in keys) and len(set(keys)) == len(keys),
+                    "Compiled Python module table has duplicate or invalid keys")
+            return dict(zip(keys, (literal(value) for value in node.values)))
+        if isinstance(node, (ast.Tuple, ast.List)):
+            return [literal(value) for value in node.elts]
+        if isinstance(node, ast.Constant) and type(node.value) in (str, int, bool, type(None)):
+            return node.value
+        raise Refused("Compiled Python module table is not a closed literal")
+    assignments = [node.value for node in ast.parse(python.decode("utf-8-sig")).body
+                   if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)
+                       and target.id == "APPLICATION_SPECS" for target in node.targets)]
+    require(len(assignments) == 1, "Compiled Python module table is missing or ambiguous")
+    py = literal(assignments[0])
+    require(js == py and isinstance(js, dict) and set(js) == {"melange", "mentat"},
+            "Packaged JavaScript/Python compiled module tables disagree")
+    spec = js[app]
+    fields = {"schemaVersion", "appId", "contractId", "programFingerprint", "programFiles",
+              "requiredKinds", "publicReaders", "privateBoundaries", "startupTimeoutMs"}
+    require(isinstance(spec, dict) and set(spec) == fields and type(spec["schemaVersion"]) is int
+            and spec["schemaVersion"] == 1 and spec["appId"] == app
+            and spec["contractId"] == app + ".public-data.v1", "Invalid compiled application identity")
+    files = spec["programFiles"]
+    require(isinstance(files, list) and 0 < len(files) <= 512, "Invalid compiled program table")
+    seen, total = set(), 0
+    for row in files:
+        require(isinstance(row, dict) and set(row) == {"root", "path", "bytes", "sha256"}
+                and row["root"] in ("source", "bootstrap") and isinstance(row["path"], str)
+                and 0 < len(row["path"]) <= 400
+                and all(re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9._-]{0,127}", part)
+                        and not part.endswith(".") for part in row["path"].split("/"))
+                and type(row["bytes"]) is int and 0 <= row["bytes"] <= 16 * 1024**2
+                and isinstance(row["sha256"], str) and re.fullmatch(r"[a-f0-9]{64}", row["sha256"]),
+                "Invalid compiled program descriptor")
+        key = row["root"] + "/" + row["path"].lower()
+        require(key not in seen and not row["path"].endswith(("module_application_inventory.py", "module-application-inventory.cjs")),
+                "Duplicate or recursive compiled program descriptor")
+        seen.add(key)
+        total += row["bytes"]
+        prefix = "resources/runtime/" + app + ("/sources/" if row["root"] == "source" else "/bootstrap/")
+        require(program_map.get(prefix + row["path"]) == {"size": row["bytes"], "sha256": row["sha256"]},
+                "Compiled program descriptor differs from actual packaged bytes: " + key)
+    require(total <= 64 * 1024**2, "Compiled program table exceeds native budget")
+    ordered = sorted(files, key=lambda row: (row["root"], row["path"]))
+    fingerprint = hashlib.sha256(json.dumps(ordered, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    require(fingerprint == spec["programFingerprint"], "Compiled program fingerprint differs from its literal table")
+    modes = config.get("desktopPublicData", {})
+    require(isinstance(modes, dict), "Packaged public data mode is invalid")
+    mode = modes.get(app)
+    require(mode in (None, "paged-v1") and (mode != "paged-v1" or app == "melange"),
+            "Unsupported packaged public data mode")
+    paged = app == "melange" and mode == "paged-v1"
+    access_mode = config.get("desktopAccessMode", "managed")
+    authentication = config.get("desktopAuthentication", "password")
+    require(access_mode in ("standalone", "managed") and authentication in ("windows", "password")
+            and (authentication != "windows" or access_mode == "standalone"),
+            "Invalid packaged module authentication mode")
+    return {"status": "passed", "appId": app, "programFingerprint": fingerprint,
+            "programFileCount": len(files), "programBytes": total,
+            "javascriptSha256": hashlib.sha256(javascript).hexdigest(),
+            "pythonSha256": hashlib.sha256(python).hexdigest(),
+            "publicDataMode": mode, "accessMode": access_mode, "authentication": authentication,
+            "contractId": "melange.public-data.pages.v1" if paged else spec["contractId"],
+            "requiredKinds": ["melange.official-payroll-pages.v1"] if paged else spec["requiredKinds"],
+            "literalTablesEqual": True, "matchesActualPackagedProgram": True}
+
+
+def compiled_module_runtime(*, app, client, extracted, expected):
+    """Construct the real, byte-bound client contract without launching an application or backend."""
+    script = r'''
+const fs=require('node:fs'),path=require('node:path');
+const request=JSON.parse(fs.readFileSync(0,'utf8'));
+const {Runtime}=require(path.join(request.client,'runtime.cjs'));
+const {withCompiledApplicationContract}=require(path.join(request.client,'module-data-startup.cjs'));
+const {createRuntimeModuleBoundary}=require(path.join(request.client,'module-data-runtime-boundary.cjs'));
+const runtime=new Runtime(request.app,request.profile,request.resources,{allowStandalone:request.accessMode==='standalone',authentication:request.authentication});
+const result=withCompiledApplicationContract(request.app,{runtime,resources:request.resources,publicDataMode:request.mode},(contract,proof)=>{
+ if(!contract)throw new Error('Packaged application contract is unsupported');
+ const boundary=createRuntimeModuleBoundary({appId:request.app,profile:request.profile,contract,constructionProof:proof,
+   getRuntime:()=>runtime,getSelected:()=>({}),authorize:async()=>{throw new Error('Acceptance never authorizes a launch');}});
+ if(!boundary||boundary.supportsContract(contract)!==true||boundary.supportsContract(contract)!==true)throw new Error('Packaged native boundary rejects its contract');
+ return {status:'passed',contractId:contract.contractId,programFingerprint:contract.programFingerprint,
+   programFileCount:contract.programFiles.length,requiredKinds:contract.requiredKinds,boundarySupported:true};
+});
+process.stdout.write(JSON.stringify(result));
+'''
+    node = shutil.which("node")
+    require(node is not None, "Node is required for the packaged application-contract acceptance")
+    request = {"app": app, "client": str(client), "resources": str(extracted / "resources"),
+               "profile": str(extracted.parent / "unused-module-acceptance-profile"),
+               "mode": expected["publicDataMode"], "accessMode": expected["accessMode"],
+               "authentication": expected["authentication"]}
+    result = subprocess.run([node, "-e", script], input=json.dumps(request).encode(), capture_output=True,
+                            timeout=120, creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+    require(result.returncode == 0, "Actual packaged application contract/native boundary is unsupported")
+    value = json.loads(result.stdout)
+    require(value.get("status") == "passed" and value.get("boundarySupported") is True
+            and all(value.get(key) == expected[key] for key in ("contractId", "programFingerprint", "programFileCount", "requiredKinds")),
+            "Actual packaged application contract differs from compiled-table acceptance")
+    return {**value, "scope": "Real byte-bound packaged client contract and Runtime roots; no backend/UI/profile writes",
+            "clientSource": "Frozen client bytes already matched to actual ASAR by verify_sources",
+            "programRoots": "Actual extracted native program"}
+
+
 def verify_sources(*, app, version, program_files, program_map, members, client, staged, trust, installer_format="legacy-nsis-v1"):
     require(installer_format in INSTALLER_FORMATS, "Unsupported native installer format")
     names = client_manifest(client)
@@ -414,8 +561,23 @@ def verify_sources(*, app, version, program_files, program_map, members, client,
         expected_boot[name] = {"sha256": legacy.digest(packaging / name), "size": info.st_size}
     actual_boot = {name[len(prefix + "bootstrap/"):]: value for name, value in program_map.items() if name.startswith(prefix + "bootstrap/")}
     same_tree(actual_boot, expected_boot, "Frozen runtime bootstrap")
+    module_table = {"status": "not-applicable", "reason": "district-application-or-legacy-client"}
+    if app in ("melange", "mentat"):
+        name = "module-application-inventory.cjs"
+        python_name = prefix + "bootstrap/module_application_inventory.py"
+        declares_modules = name in members or python_name in program_files
+        needs_modules = config.get("desktopAccessMode") == "standalone" and config.get("desktopAuthentication") == "windows"
+        if declares_modules or needs_modules:
+            require(name in members and python_name in program_files,
+                    "Packaged application is missing its compiled module declarations")
+            javascript = asar_member_bytes(program_files["resources/app.asar"], name)
+            require(hashlib.sha256(javascript).hexdigest() == members[name]["sha256"],
+                    "Compiled ASAR module declaration changed during inspection")
+            module_table = compiled_module_tables(app=app, javascript=javascript,
+                python=program_files[python_name].read_bytes(), program_map=program_map, config=config)
     return {"clientFiles": expected_client, "runtimeSources": staged_map, "runtimeBootstrap": expected_boot,
             "nativeBuildInputs": build_inputs, "publicReleaseCertificate": program_map["resources/" + certificate],
+            "compiledModuleTable": module_table,
             "sourceManifests": {"releaseFiles": legacy.digest(client / "release-files.cjs"),
                                 "buildRuntime": legacy.digest(packaging / "build_runtime.py"),
                                 "stagedSources": legacy.digest(staged_inventory_path)}}, package
@@ -591,6 +753,13 @@ def verify(args):
         print(json.dumps({"phase": "complete-native-signature-census", "appId": args.app, "files": len(items)}), flush=True)
         rows = legacy.signatures(items, native, preserve_execution_policy=True)
         check_verdicts(rows, items, expected, app_map, nsis_map, args.app, args.version)
+        module_acceptance = None
+        compiled = source_evidence["compiledModuleTable"]
+        if compiled["status"] == "passed":
+            print(json.dumps({"phase": "actual-compiled-module-contract", "appId": args.app,
+                              "publicDataMode": compiled["publicDataMode"]}), flush=True)
+            module_acceptance = compiled_module_runtime(app=args.app, client=client,
+                extracted=extracted, expected=compiled)
         require(rows["installer"]["sha256"] == report["installerSha256"], "Outer installer changed during signature verification")
         same_tree(scan(extracted)[2], app_map, "Final extracted application")
         if outer != extracted:
@@ -619,6 +788,7 @@ def verify(args):
             embeddedAsarIntegrityVerified=True, asarHeaderSha256=asar_header_hash,
             completeNativeCensus=True, desktopUninstaller=False,
             noUninstaller=absence, sourceEvidence=source_evidence, applicationFiles=app_map, nsisFiles=nsis_map,
+            compiledModuleAcceptance=module_acceptance,
             sourceProvenance=provenance_binding,
             nativeSignatureRows=rows, inputFilesUnchanged=True)
     return report

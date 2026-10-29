@@ -649,5 +649,115 @@ class SourceOverlayFixture(unittest.TestCase):
             n.source_provenance(**args)
 
 
+class CompiledModuleBridgeFixture(unittest.TestCase):
+    """Tiny literal authorities join an actual file map; no inventory is monkeypatched."""
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.rows, self.mapping = [], {}
+        for root, name, raw in (("source", "reader.py", b"reviewed public reader"),
+                                ("bootstrap", "desktop_backend.py", b"reviewed native bootstrap")):
+            file = self.root / root / name
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_bytes(raw)
+            row = {"root": root, "path": name, "bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
+            self.rows.append(row)
+            for app in ("melange", "mentat"):
+                prefix = "resources/runtime/" + app + ("/sources/" if root == "source" else "/bootstrap/")
+                self.mapping[prefix + name] = {"size": file.stat().st_size, "sha256": n.legacy.digest(file)}
+        self.specs = {}
+        for app in ("melange", "mentat"):
+            self.specs[app] = {"schemaVersion": 1, "appId": app, "contractId": app + ".public-data.v1",
+                "programFingerprint": self.fingerprint(self.rows), "programFiles": copy.deepcopy(self.rows),
+                "requiredKinds": ["melange.official-payroll-observations.v1" if app == "melange" else "mentat.public-fec-tables.v1"],
+                "publicReaders": [app + ".public-data.catalogue"], "privateBoundaries": [app + ".original.console"],
+                "startupTimeoutMs": 600000 if app == "melange" else 300000}
+
+    @staticmethod
+    def fingerprint(rows):
+        ordered = sorted(rows, key=lambda row: (row["root"], row["path"]))
+        return hashlib.sha256(json.dumps(ordered, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+    def encoded(self, js=None, py=None):
+        javascript = ("const APPLICATION_SPECS=freeze(" + json.dumps(js or self.specs) + ");\n"
+                      "module.exports=Object.freeze({APPLICATION_SPECS});\n").encode()
+        python = ("from types import MappingProxyType\nAPPLICATION_SPECS=MappingProxyType(" + repr(py or self.specs) + ")\n").encode()
+        return javascript, python
+
+    def check(self, *, app="mentat", js=None, py=None, mode=None):
+        javascript, python = self.encoded(js, py)
+        return n.compiled_module_tables(app=app, javascript=javascript, python=python,
+            program_map=self.mapping, config={"desktopPublicData": {app: mode}} if mode else {})
+
+    def test_real_file_map_and_both_literals_agree(self):
+        result = self.check()
+        self.assertEqual(result["status"], "passed")
+        self.assertEqual(result["programFileCount"], 2)
+        self.assertTrue(result["matchesActualPackagedProgram"])
+
+    def test_stale_pin_fails_even_when_source_inventory_and_packaged_map_agree(self):
+        # The old release gate accepted this coherent actual/staged file map;
+        # the compiled authority still expects the original reader bytes.
+        self.mapping["resources/runtime/mentat/sources/reader.py"] = {
+            "size": 7, "sha256": hashlib.sha256(b"changed").hexdigest()}
+        with self.assertRaisesRegex(n.Refused, "descriptor differs from actual packaged bytes"):
+            self.check()
+
+    def test_cross_language_difference_is_refused(self):
+        changed = copy.deepcopy(self.specs)
+        changed["mentat"]["programFiles"][0]["sha256"] = "a" * 64
+        with self.assertRaisesRegex(n.Refused, "tables disagree"):
+            self.check(py=changed)
+
+    def test_fingerprint_is_recomputed_not_borrowed_from_matching_literals(self):
+        self.specs["mentat"]["programFingerprint"] = "b" * 64
+        with self.assertRaisesRegex(n.Refused, "fingerprint differs"):
+            self.check()
+
+    def test_actual_packaged_paged_mode_selects_the_paged_contract(self):
+        value = self.check(app="melange", mode="paged-v1")
+        self.assertEqual(value["contractId"], "melange.public-data.pages.v1")
+        self.assertEqual(value["requiredKinds"], ["melange.official-payroll-pages.v1"])
+        self.assertEqual(self.check(app="melange")["requiredKinds"], ["melange.official-payroll-observations.v1"])
+        with self.assertRaisesRegex(n.Refused, "Unsupported packaged public data mode"):
+            self.check(app="mentat", mode="paged-v1")
+
+    def test_duplicates_redirects_boolean_sizes_and_missing_members_are_refused(self):
+        for replacement in ({"root": "source", "path": "../reader.py"}, {"bytes": True},
+                            {"path": "module_application_inventory.py"}):
+            with self.subTest(replacement=replacement):
+                before = copy.deepcopy(self.specs)
+                self.specs["mentat"]["programFiles"][0].update(replacement)
+                with self.assertRaises(n.Refused):
+                    self.check()
+                self.specs = before
+        self.specs["mentat"]["programFiles"].append(copy.deepcopy(self.rows[0]))
+        with self.assertRaisesRegex(n.Refused, "Duplicate"):
+            self.check()
+        self.specs["mentat"]["programFiles"].pop()
+        del self.mapping["resources/runtime/mentat/sources/reader.py"]
+        with self.assertRaisesRegex(n.Refused, "descriptor differs"):
+            self.check()
+
+    def test_python_expression_and_javascript_dynamic_suffix_are_not_executed(self):
+        javascript, python = self.encoded()
+        with self.assertRaisesRegex(n.Refused, "not a closed literal"):
+            n.compiled_module_tables(app="mentat", javascript=javascript + b"doNotExecute();",
+                python=python, program_map=self.mapping, config={})
+        python = b"APPLICATION_SPECS = unknown_selector()"
+        with self.assertRaisesRegex(n.Refused, "executable selectors"):
+            n.compiled_module_tables(app="mentat", javascript=javascript, python=python,
+                program_map=self.mapping, config={})
+
+    def test_asar_reader_uses_actual_member_bytes_and_refuses_missing_members(self):
+        javascript, _ = self.encoded()
+        archive = self.root / "app.asar"
+        archive.write_bytes(asar_bytes({"module-application-inventory.cjs": javascript}))
+        self.assertEqual(n.asar_member_bytes(archive, "module-application-inventory.cjs"), javascript)
+        with self.assertRaisesRegex(n.Refused, "Missing or redirected"):
+            n.asar_member_bytes(archive, "missing.cjs")
+
+
 if __name__ == "__main__":
     unittest.main()
