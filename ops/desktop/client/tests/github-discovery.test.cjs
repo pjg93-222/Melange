@@ -10,15 +10,36 @@ function release(version='1.0.0'){
  return {draft:false,prerelease:false,tag_name:'desktop-v'+version,assets};
 }
 function options(t,extra={}){return {directory:directory(t),repository:repo,validate:values=>discoveryMetadata(values,repo),random:()=>0,...extra};}
-test('three apps and restarted receivers share one bounded discovery refresh until six-hour jittered TTL',async t=>{
+test('three apps and restarted receivers share one refresh until the cache expires before the next 15-minute timer',async t=>{
  const root=directory(t);let now=Date.now(),calls=0;
  const create=appId=>new GitHubSource({appId,repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0.5},readJSON:async()=>{calls++;return [release()];}});
  const sources=['melange','mentat','terrier'].map(create);
  for(const source of sources)assert.equal((await source.latest()).version,'1.0.0');assert.equal(calls,1);
  assert.match(sources[2].discoverySummary(),/cached release list checked.*Next discovery/);
- now+=TTL;assert.equal((await create('melange').latest()).version,'1.0.0');assert.equal(calls,1);
- now+=JITTER/2+1;await create('mentat').latest();assert.equal(calls,2);
+ assert.equal(TTL,14*60*1000);assert.equal(JITTER,0);
+ now+=TTL-1;assert.equal((await create('melange').latest()).version,'1.0.0');assert.equal(calls,1);
+ now++;await create('mentat').latest();assert.equal(calls,2);
  const independent=new GitHubSource({appId:'melange',repository:'owner/other',cacheDirectory:root,readJSON:async()=>{calls++;return [];}});await independent.latest();assert.equal(calls,3);
+});
+test('upgraded receivers shorten a valid legacy six-hour cache without deleting its usable metadata',async t=>{
+ const root=directory(t);let now=Date.now(),calls=0,version='1.0.25';
+ const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return [release(version)];}});
+ const initial=create();await initial.latest();const checked=now,legacyNext=checked+6*60*60*1000+20*60*1000;
+ const db=initial.cache.cacheDB();db.prepare('UPDATE discovery SET next=? WHERE id=1').run(legacyNext);db.close();
+ version='1.0.26';now+=TTL-1;const upgraded=create();assert.equal((await upgraded.latest()).version,'1.0.25');assert.equal(calls,1);
+ assert.equal(upgraded.discoveryInfo.nextCheckAt,checked+TTL);
+ now++;assert.equal((await upgraded.latest()).version,'1.0.26');assert.equal(calls,2);assert.equal(upgraded.discoveryInfo.cached,false);
+ const stored=upgraded.cache.cacheDB();try{const row=stored.prepare('SELECT checked,next FROM discovery WHERE id=1').get();assert.equal(row.checked,now);assert.equal(row.next,now+TTL);}finally{stored.close();}
+});
+test('legacy cache migration retains persisted quota cooldown and offline fallback',async t=>{
+ const root=directory(t);let now=Date.now(),calls=0,version='1.0.25';
+ const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return [release(version)];}});
+ const initial=create();await initial.latest();const checked=now;
+ const db=initial.cache.cacheDB();db.prepare('UPDATE discovery SET next=? WHERE id=1').run(checked+6*60*60*1000);db.close();
+ await initial.cache.note(rateLimit(429,{'retry-after':'3600'}));version='1.0.26';now+=15*60*1000;
+ const upgraded=create();assert.equal((await upgraded.latest()).version,'1.0.25');assert.equal(calls,1);assert.equal(upgraded.discoveryInfo.backoffUntil,checked+3600000);
+ await assert.rejects(upgraded.refreshDiscovery(),/API retry after/);assert.equal(calls,1);
+ now=checked+3600001;assert.equal((await upgraded.latest()).version,'1.0.26');assert.equal(calls,2);
 });
 test('empty discovery is cached across apps/restarts and trust plus update never doubles the scan',async t=>{
  const root=directory(t);let calls=0;
@@ -28,7 +49,7 @@ test('empty discovery is cached across apps/restarts and trust plus update never
  assert.equal(await a.request(enrollment,'/v1/apps/melange/updates?platform=win32&arch=x64&version=1.0.0'),null);
  assert.equal(await create('terrier').latest(),null);assert.equal(await create('melange').latest(),null);assert.equal(calls,1);
 });
-test('manual checks discover 26 from a cached25 list without waiting six hours; repeated clicks share a recent success',async t=>{
+test('manual checks discover 26 from a cached25 list before automatic expiry; repeated clicks share a recent success',async t=>{
  const root=directory(t);let now=Date.now(),calls=0,version='1.0.25';
  const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return [release(version)];}});
  const source=create();assert.equal((await source.latest()).version,'1.0.25');version='1.0.26';now+=MANUAL_INTERVAL;

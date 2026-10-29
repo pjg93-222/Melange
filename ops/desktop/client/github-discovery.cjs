@@ -3,7 +3,9 @@
 // remain in the updater. SQLite provides cross-process locks released on crash.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {DatabaseSync}=require('node:sqlite');
-const TTL=6*60*60*1000,JITTER=30*60*1000,MANUAL_INTERVAL=60*1000,MAX_DELAY=7*24*60*60*1000,MAX_BYTES=4*1024*1024;
+// Expire before the 15-minute lifecycle timer: a full 15-minute cache measured
+// after a fetch can otherwise miss that timer's next tick and wait 30 minutes.
+const TTL=14*60*1000,JITTER=0,LEGACY_TTL=6*60*60*1000,LEGACY_JITTER=30*60*1000,MANUAL_INTERVAL=60*1000,MAX_DELAY=7*24*60*60*1000,MAX_BYTES=4*1024*1024;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function rateLimit(status,headers={},body=''){
  const limited=status===429||(status===403&&(String(headers['x-ratelimit-remaining'])==='0'||headers['retry-after']!==undefined||/rate limit|abuse detection/i.test(body)));
@@ -35,8 +37,12 @@ class DiscoveryCache{
  read(db){
   const row=db.prepare('SELECT repository,checked,next,payload FROM discovery WHERE id=1').get();if(!row)return null;
   const now=this.now();
-  if(row.repository!==this.repository||!Number.isSafeInteger(row.checked)||row.checked<0||row.checked>now+300000||!Number.isSafeInteger(row.next)||row.next<row.checked+TTL||row.next>row.checked+TTL+JITTER||typeof row.payload!=='string'||Buffer.byteLength(row.payload)>MAX_BYTES)return null;
-  try{return {checkedAt:row.checked,nextCheckAt:row.next,releases:this.validate(JSON.parse(row.payload))};}catch{return null;}
+  if(row.repository!==this.repository||!Number.isSafeInteger(row.checked)||row.checked<0||row.checked>now+300000||!Number.isSafeInteger(row.next)||typeof row.payload!=='string'||Buffer.byteLength(row.payload)>MAX_BYTES)return null;
+  const current=row.next===row.checked+TTL,legacy=row.next>=row.checked+LEGACY_TTL&&row.next<=row.checked+LEGACY_TTL+LEGACY_JITTER;
+  if(!current&&!legacy)return null;
+  // Preserve a valid old list as an offline fallback, but never inherit the old
+  // six-hour wait after upgrading. The separate persisted quota cooldown stays.
+  try{return {checkedAt:row.checked,nextCheckAt:row.checked+TTL,releases:this.validate(JSON.parse(row.payload))};}catch{return null;}
  }
  cooldown(){
   let db;try{db=this.cooldownDB();const row=db.prepare('SELECT repository,recorded,until FROM cooldown WHERE id=1').get();if(!row)return 0;
