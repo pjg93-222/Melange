@@ -167,8 +167,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "fec/paths.py",
-        "bytes": 8857,
-        "sha256": "485a4e67e2c3809ae55805121ca223366feac9ae1b27cf5877ac07d6fb690aba"
+        "bytes": 10280,
+        "sha256": "88cebc6f534f5c30351bdc3daadbf58f666a604b58f8dea187aff66c39f64aa6"
       },
       {
         "root": "source",
@@ -489,7 +489,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "570e84f9436e5b1ce87851d45dd82dcb814f0aaa897573dfc9b0bd9c083e6d3f",
+    "programFingerprint": "fe26e23f737a3b792fc5ca2a124ff5024e5b4f3873417a8b1d38ec8298b1219a",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -938,8 +938,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/evidence-flow.js",
-        "bytes": 22598,
-        "sha256": "e587d779088236d9d015ff60bbf5c8586bed00d24b1bbbcde6c809bf988ba442"
+        "bytes": 22956,
+        "sha256": "c57d040b8186ded7832a00ddafe3cafe0c2c3f19a9d1c9687a741cf14488a430"
       },
       {
         "root": "source",
@@ -986,26 +986,26 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/flow-chart.js",
-        "bytes": 94429,
-        "sha256": "7ea3518ff3d8a74b7e447ddc249f267661d7fc4341d2b4a9121e23a3f6ad0ced"
+        "bytes": 99420,
+        "sha256": "37b8c7aa8d79e0156caa7e3a7c518a3fb33a12580d002935bb4a09c725942263"
       },
       {
         "root": "source",
         "path": "mentat/app/flow-layout.js",
-        "bytes": 58238,
-        "sha256": "fce536dd3354c9cf2981788fcafc91600a0a77df0c92331aaed9c2de23ae4cf2"
+        "bytes": 58534,
+        "sha256": "7b35ea63585bd813157febc3640655a2fb53ef3227ef8e5a4042cfaf5ece6fbb"
       },
       {
         "root": "source",
         "path": "mentat/app/flow.css",
-        "bytes": 24155,
-        "sha256": "0899f52ec079a4535f51e7374cdf675023a3b422c13cd7844b2d6f0fd6253adc"
+        "bytes": 24757,
+        "sha256": "2a95f95f842184509b32c9c835f9f3c7f806ca3f8da3b21ff84953f793d7c896"
       },
       {
         "root": "source",
         "path": "mentat/app/flow_data.py",
-        "bytes": 132789,
-        "sha256": "949a62aa5e521945bcf2516ac778c447284e69dfdae6228188c3c64c095b5bda"
+        "bytes": 148966,
+        "sha256": "0f9d7e22b2129ce58d48c981f7532292f2d77b04c6814a0130c345b3a10fd949"
       },
       {
         "root": "source",
@@ -1076,8 +1076,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/graph_data.py",
-        "bytes": 79551,
-        "sha256": "5b5e380365cd221e7c379e69d0e971abc912390bf403809ba50d379e4e1ff9f0"
+        "bytes": 83391,
+        "sha256": "558b84314bddefb440bd5b577331cab65bcecc51d62c73d310695499501b6ea9"
       },
       {
         "root": "source",
@@ -1736,8 +1736,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/tools/committee_activity_reader.py",
-        "bytes": 11121,
-        "sha256": "de305c53d2706f12bd7aca53264a5d9d8e853dbef8ca0613f05e7c17d1678537"
+        "bytes": 14001,
+        "sha256": "a7760ddfdea216e1fded8ac51ebd0ced62692dc60cf30dd78f1d9da4a27cd662"
       },
       {
         "root": "source",
@@ -2040,7 +2040,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "7db1eb2da89ac8727bce3177adadbd2ea1cd968d6ba0b3017335f68fa2ced269",
+    "programFingerprint": "592ae68fe4b7d90d3c98406efcf4b25102945ebe3e75cfb5d21c192371b1d68e",
     "requiredKinds": [
       "mentat.public-fec-tables.v1"
     ],

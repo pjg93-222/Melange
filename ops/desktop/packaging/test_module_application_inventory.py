@@ -1,5 +1,6 @@
 """Compiled declarations cannot substitute for installed program verification."""
 import ast
+import json
 from pathlib import Path
 from types import MappingProxyType
 import tempfile
@@ -12,6 +13,15 @@ from module_public_input_installers import PUBLIC_KINDS, PUBLIC_IDS, PRIVATE_IDS
 
 
 class CompiledInventoryTests(unittest.TestCase):
+    def test_committed_javascript_and_python_declarations_are_identical(self):
+        source = (Path(__file__).parent.parent / 'client' / 'module-application-inventory.cjs').read_text(encoding='utf-8')
+        javascript = json.loads(source.split('const APPLICATION_SPECS=freeze(', 1)[1].split(');\nmodule.exports', 1)[0])
+        python = {app: {key: [dict(row) for row in value] if key == 'programFiles'
+                       else list(value) if isinstance(value, tuple) else value
+                       for key, value in spec.items()}
+                  for app, spec in inventory.APPLICATION_SPECS.items()}
+        self.assertEqual(javascript, python)
+
     def test_paged_melange_contract_is_explicit_and_preserves_legacy_selection(self):
         legacy=application_contract('melange','melange.public-data.v1')
         paged=application_contract('melange','melange.public-data.pages.v1')
