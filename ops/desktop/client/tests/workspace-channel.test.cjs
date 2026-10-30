@@ -4,7 +4,27 @@ const protocol=require('../github-module-protocol.cjs'),{GitHubModules}=require(
 const {validateModuleBinding}=require('../module-data-binding.cjs');
 const {GitHubModuleTransport}=require('../github-module-transport.cjs');
 const {CHANNEL}=require('../workspace-data-contract.cjs');
+const {WORKSPACE_KINDS}=require('../workspace-data-contract.cjs');
+const {createWorkspaceModuleDataRegistry}=require('../module-data-adapters.cjs');
 const {environment,signed}=require('./fixtures/github-module-fixture.cjs');
+test('real compiled workspace registries accept only the four exact archive roles in their native channel',()=>{
+ for(const appId of ['melange','mentat']){
+  const registry=createWorkspaceModuleDataRegistry({appId,sourceRoot:path.resolve('compiled-workspace-source'),probe:async()=>true});
+  assert.equal(protocol.checkedRegistry(appId,registry,WORKSPACE_KINDS[appId],CHANNEL.id),registry);
+  assert.throws(()=>protocol.checkedRegistry(appId,registry,WORKSPACE_KINDS[appId]),/archived module data/);
+  for(const [kind,adapter] of Object.entries(registry))for(const [role,spec] of Object.entries(adapter.roles))if(spec.path.endsWith('.zip')){
+   const clone=(selectedKind=kind,selectedRole=role,path=spec.path,maxBytes=spec.maxBytes)=>({[selectedKind]:{...adapter,roles:{[selectedRole]:{path,maxBytes}}}});
+   for(const bad of [clone(kind,role,spec.path.replace(/\.zip$/,'.txt')),clone(kind,role,spec.path+'.exe'),
+       clone(kind,'unknown-role'),clone(appId+'.unknown-archive.v1'),clone(kind,role,spec.path,spec.maxBytes-1),
+       clone(kind,role,spec.path.replace('analysis','unreviewed'))]){
+    // The industry role has no "analysis" substring, so its unchanged path
+    // is tested by the other deliberately invalid variants only.
+    if(Object.values(bad)[0].roles[role]?.path===spec.path&&Object.keys(bad)[0]===kind&&Object.keys(Object.values(bad)[0].roles)[0]===role&&Object.values(bad)[0].roles[role].maxBytes===spec.maxBytes)continue;
+    assert.throws(()=>protocol.checkedRegistry(appId,bad,Object.keys(bad),CHANNEL.id));
+   }
+  }
+ }
+});
 function fixture(t,appId){
  const pub=environment(appId),workspace=environment(appId);t.after(()=>{workspace.cleanup();pub.cleanup();});
  const remote=signed(appId,{keys:pub.remote.keys});remote.value.purpose=protocol.configuration(appId,CHANNEL.id).purpose;remote.manifest.purpose=remote.value.purpose+'sets';remote.rebind();workspace.remote=remote;

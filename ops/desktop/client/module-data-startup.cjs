@@ -37,7 +37,7 @@ function applicationContract(appId,context){
    const result=await desktopProbe(command,probeMode,request,{signal,timeout:spec.startupTimeoutMs});
    if(signal?.aborted)throw failure();current();return result;
   }});
-  return {contract:checkedContract(appId,{...spec,registry}),roots:Object.freeze({source:sourceRoot,bootstrap:bootstrapRoot})};
+  return {contract:checkedContract(appId,{...spec,registry},workspace?'workspace-v1':'public-v1'),roots:Object.freeze({source:sourceRoot,bootstrap:bootstrapRoot})};
  }catch{return null;}
 }
 function withCompiledApplicationContract(appId,context,construct){
@@ -53,14 +53,14 @@ function failure(){const error=new Error('Module data activation is unavailable.
 function fingerprint(value){try{return crypto.createHash('sha256').update(canonical(value)).digest('hex');}catch{throw failure();}}
 function freeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}
 function names(value){return Array.isArray(value)&&value.length>0&&value.every(name=>typeof name==='string'&&/^[a-z0-9][a-z0-9._-]{0,127}$/.test(name))&&new Set(value).size===value.length;}
-function checkedContract(appId,contract){
+function checkedContract(appId,contract,channel='public-v1'){
  if(contract===null)return null;
  if(!contract||Object.keys(contract).sort().join('|')!=='appId|contractId|privateBoundaries|programFiles|programFingerprint|publicReaders|registry|requiredKinds|schemaVersion|startupTimeoutMs'||
     contract.schemaVersion!==1||contract.appId!==appId||typeof contract.contractId!=='string'||!/^[a-z0-9][a-z0-9._-]{0,127}$/.test(contract.contractId)||
     typeof contract.programFingerprint!=='string'||!/^[a-f0-9]{64}$/.test(contract.programFingerprint)||
     !names(contract.requiredKinds)||!names(contract.publicReaders)||!names(contract.privateBoundaries)||
     !Number.isSafeInteger(contract.startupTimeoutMs)||contract.startupTimeoutMs<1000||contract.startupTimeoutMs>600000)throw failure();
- try{programTable(contract.programFiles);if(programFingerprint(contract.programFiles)!==contract.programFingerprint)throw failure();checkedRegistry(appId,contract.registry,contract.requiredKinds);}catch{throw failure();}
+ try{programTable(contract.programFiles);if(programFingerprint(contract.programFiles)!==contract.programFingerprint)throw failure();checkedRegistry(appId,contract.registry,contract.requiredKinds,channel);}catch{throw failure();}
  return freeze(contract);
 }
 function moduleHealthBinding(candidate,contract){

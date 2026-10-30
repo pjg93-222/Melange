@@ -24,7 +24,7 @@ class WorkspaceDataStartup{
  constructor({appId,getSelected,getGeneration,getRuntime,authorize,createPublicProvider,createWorkspaceProvider,publicContract,workspaceContract,boundary,
               canStage=()=>false,keepAwake,onStatus=()=>{},requireInstalledContract=true,...controllerOptions}){
   if([getSelected,getGeneration,getRuntime,authorize,createPublicProvider,createWorkspaceProvider,canStage,onStatus].some(value=>typeof value!=='function'))throw failure();
-  this.appId=appId;this.getRuntime=getRuntime;this.stageEligible=canStage;this.publicContract=checkedContract(appId,publicContract);this.workspaceContract=checkedContract(appId,workspaceContract);
+  this.appId=appId;this.getRuntime=getRuntime;this.stageEligible=canStage;this.publicContract=checkedContract(appId,publicContract);this.workspaceContract=checkedContract(appId,workspaceContract,'workspace-v1');
   this.closed=false;this.liveLease=null;this.pair=null;this.requireInstalledContract=requireInstalledContract;
   try{this.supported=Boolean(this.publicContract&&this.workspaceContract&&boundary&&boundary.programFingerprint===this.publicContract.programFingerprint&&
    boundary.workspaceProgramFingerprint===this.workspaceContract.programFingerprint&&typeof boundary.supportsContracts==='function'&&

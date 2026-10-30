@@ -41,7 +41,7 @@ class GitHubModules{
  constructor({appId,publicKeys,profile,cacheRoot,protectedRoots=[],store,previousStore=null,registry,requiredKinds=Object.keys(registry||{}),effectiveConfiguration,authorize,transport,now=Date.now,minimumFreeBytes=512*1024**2,channel='public-v1'}){
   requireValue(['public-v1',WORKSPACE_CHANNEL.id].includes(channel),'Unsupported compiled module channel');
   this.channel=channel;this.cacheName=channel===WORKSPACE_CHANNEL.id?WORKSPACE_CHANNEL.cacheName:'github-module-data';this.sourceField=channel===WORKSPACE_CHANNEL.id?WORKSPACE_CHANNEL.sourceField:'ownerGitHubModuleData';
-  this.appId=appId;this.app=protocol.configuration(appId,channel);protocol.checkedRegistry(appId,registry,requiredKinds);
+  this.appId=appId;this.app=protocol.configuration(appId,channel);protocol.checkedRegistry(appId,registry,requiredKinds,channel);
   if(!store?.read||!store?.write||typeof authorize!=='function'||typeof effectiveConfiguration!=='function'||!publicKeys||typeof publicKeys!=='object')throw fail('integrity','Native module data dependencies are required');
   if(previousStore!==null&&(typeof previousStore?.read!=='function'||previousStore===store))throw fail('integrity','A separate previous public data journal is required');
   requireValue(channel==='public-v1'||previousStore===null,'Workspace state cannot import public-channel journals');

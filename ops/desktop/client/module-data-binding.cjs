@@ -100,7 +100,7 @@ async function validateModuleBinding({appId,profile,configuration,publicKeys,reg
  try{
   requireValue(['public-v1',WORKSPACE_CHANNEL.id].includes(channel),'Unsupported compiled module channel');
   const cacheName=channel===WORKSPACE_CHANNEL.id?WORKSPACE_CHANNEL.cacheName:'github-module-data',sourceField=channel===WORKSPACE_CHANNEL.id?WORKSPACE_CHANNEL.sourceField:'ownerGitHubModuleData';
-  canceled(signal);const app=protocol.configuration(appId,channel);protocol.checkedRegistry(appId,registry,requiredKinds);
+  canceled(signal);const app=protocol.configuration(appId,channel);protocol.checkedRegistry(appId,registry,requiredKinds,channel);
   requireValue(configuration&&typeof configuration==='object'&&!Array.isArray(configuration)&&typeof configuration.dataDirectory==='string'&&path.isAbsolute(configuration.dataDirectory),'Original module workspace is required');
   requireValue(!Object.hasOwn(configuration,'ownerGitHubData'),'Unexpected module workspace override');
   requireValue(!Object.hasOwn(configuration,channel===WORKSPACE_CHANNEL.id?'ownerGitHubModuleData':WORKSPACE_CHANNEL.sourceField),'Mixed module binding channels refused');

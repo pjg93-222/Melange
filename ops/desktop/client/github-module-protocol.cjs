@@ -39,8 +39,14 @@ function authorized(appId,selected,authorization){
  const {accepted,owner}=authorization||{},grant=accepted?.grant,bindings=owner?.dataBindings;
  return Boolean(accepted?.revoked===false&&grant?.appId===appId&&owner?.mode==='existing-owner'&&owner.appId===appId&&owner.grantId===grant.grantId&&owner.accountIdentity===grant.accountIdentity&&typeof grant.grantId==='string'&&typeof grant.accountIdentity==='string'&&Array.isArray(bindings)&&bindings.length===1&&bindings[0]?.districtId===null&&bindings[0]?.localUserId===null&&bindings[0]?.localUsername===null&&hash(bindings[0]?.dataRootHash));
 }
-function checkedRegistry(appId,registry,requiredKinds=Object.keys(registry||{})){
- configuration(appId);requireValue(registry&&typeof registry==='object'&&!Array.isArray(registry),'Compiled module adapters are required');
+const WORKSPACE_ARCHIVE_ROLES=Object.freeze([
+ Object.freeze(['melange','melange.industry-pages.v1','pages','industry/pages.data.zip',64*1024**2]),
+ Object.freeze(['melange','melange.staffer-analysis.v1','records','staffer/analysis.data.zip',4*1024**3]),
+ Object.freeze(['mentat','mentat.report-analysis.v1','supplemental-reports','analysis/reports.data.zip',64*1024**2]),
+ Object.freeze(['mentat','mentat.report-analysis.v1','facts','analysis/facts.data.zip',2*1024**3])
+]);
+function checkedRegistry(appId,registry,requiredKinds=Object.keys(registry||{}),channel='public-v1'){
+ configuration(appId,channel);requireValue(registry&&typeof registry==='object'&&!Array.isArray(registry),'Compiled module adapters are required');
  requireValue(Array.isArray(requiredKinds)&&requiredKinds.length>0&&requiredKinds.length<=32&&new Set(requiredKinds).size===requiredKinds.length,'Compiled required datasets are unavailable');
  let budget=0;
  for(const [kind,adapter] of Object.entries(registry)){
@@ -49,7 +55,10 @@ function checkedRegistry(appId,registry,requiredKinds=Object.keys(registry||{}))
   const paths=new Set();
   for(const [role,spec] of Object.entries(adapter.roles)){
    requireValue(/^[a-z][a-z0-9_.-]{0,63}$/.test(role)&&spec&&relative(spec.path)&&integer(spec.maxBytes,MAX_TOTAL)&&spec.maxBytes>0&&!paths.has(spec.path.toLowerCase()),'Invalid compiled module role');
-   requireValue(!/\.(?:html?|[cm]?js|exe|dll|cmd|bat|ps1|sh|py|r|zip|gz|br|7z|tar)$/i.test(spec.path),'Executable or archived module data is unsupported');
+   const closed=channel===workspace.CHANNEL.id?WORKSPACE_ARCHIVE_ROLES.filter(row=>row[0]===appId&&row[1]===kind):[];
+   const archive=closed.some(row=>row[2]===role&&row[3]===spec.path&&row[4]===spec.maxBytes);
+   requireValue(closed.length===0||archive,'Invalid compiled workspace archive role');
+   requireValue(archive||!/\.(?:html?|[cm]?js|exe|dll|cmd|bat|ps1|sh|py|r|zip|gz|br|7z|tar)$/i.test(spec.path),'Executable or archived module data is unsupported');
    paths.add(spec.path.toLowerCase());
   }
   budget+=adapter.maxTotalBytes;
@@ -77,7 +86,7 @@ function pointer(appId,envelope,publicKeys,previous={},channel='public-v1'){
 }
 function manifest(appId,bytes,checked,registry,requiredKinds=Object.keys(registry||{}),channel='public-v1'){
  try{
-  const app=configuration(appId,channel);checkedRegistry(appId,registry,requiredKinds);
+  const app=configuration(appId,channel);checkedRegistry(appId,registry,requiredKinds,channel);
   requireValue(Buffer.isBuffer(bytes)&&bytes.length===checked.value.manifest.bytes&&crypto.createHash('sha256').update(bytes).digest('hex')===checked.value.manifest.sha256,'GitHub module manifest integrity failed');
   const value=strictJson(bytes);exact(value,['schemaVersion','purpose','appId','repository','releaseTag','datasets']);
   requireValue(value.schemaVersion===1&&value.purpose===app.purpose+'sets'&&value.appId===appId&&value.repository===app.repository&&value.releaseTag===checked.value.releaseTag&&Array.isArray(value.datasets)&&value.datasets.length>0&&value.datasets.length<=32,'Unsupported GitHub module manifest');
