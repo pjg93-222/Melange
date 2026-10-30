@@ -11,7 +11,9 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
+import module_application_contracts
 from module_application_contracts import (ApplicationContract, ProgramFile, ModuleInputError, DataIntakeBlocked,
     application_contract, canonical, program_fingerprint, verify_program)
 from module_data_handoff import (InstalledInputs, MAX_FRAME, installed_health,
@@ -73,6 +75,12 @@ class HandoffTests(unittest.TestCase):
             original_data_root=self.roots['data'], state_root=self.roots['state'], bootstrap_root=self.roots['bootstrap'],
             lookup=lambda app, name: self.contract if (app, name) == ('mentat', self.contract.contract_id) else None)
         self.before = (self.original.read_bytes(), self.original.stat().st_mtime_ns)
+        module_application_contracts._VERIFIED.clear()
+        self.addCleanup(module_application_contracts._VERIFIED.clear)
+        self.stderr = io.StringIO()
+        stderr = patch('sys.stderr', self.stderr)
+        stderr.start()
+        self.addCleanup(stderr.stop)
 
     def tearDown(self):
         self.assertEqual((self.original.read_bytes(), self.original.stat().st_mtime_ns), self.before)
@@ -313,6 +321,91 @@ class HandoffTests(unittest.TestCase):
         self.assertEqual(installed_health(installed)['contractId'], self.contract.contract_id)
         ready[0] = False
         with self.assertRaises(ModuleInputError): installed_health(installed)
+
+    def install(self):
+        return install_handoff(self.prepare(), object(), {name: object() for name in self.contract.private_boundaries})
+
+    def test_ordinary_health_reuses_install_verification(self):
+        with patch('module_data_handoff.verify_program', wraps=verify_program) as scans:
+            installed = self.install()
+            self.assertEqual(scans.call_count, 4)  # prepare twice, install twice
+            full = installed_health(installed)
+            scans.reset_mock()
+            for _ in range(50):
+                self.assertEqual(installed_health(installed, full=False), full)
+            self.assertEqual(scans.call_count, 0)
+        self.assertEqual(self.stderr.getvalue().count('DESKTOP_PROGRAM_VERIFIED kind=module\n'), 2)
+        self.assertNotIn(str(self.root), self.stderr.getvalue())
+
+    def test_concurrent_ordinary_health_single_flight(self):
+        installed = self.install()
+        module_application_contracts._VERIFIED.clear()
+        gate, started, calls, results, errors = threading.Event(), threading.Event(), [], [], []
+        def slow(*args, **kwargs):
+            calls.append(1)
+            started.set()
+            gate.wait(5)
+            return verify_program(*args, **kwargs)
+        def work():
+            try:
+                results.append(installed_health(installed, full=False))
+            except Exception as error:
+                errors.append(error)
+        with patch('module_data_handoff.verify_program', side_effect=slow):
+            threads = [threading.Thread(target=work) for _ in range(20)]
+            for thread in threads:
+                thread.start()
+            self.assertTrue(started.wait(5))
+            time.sleep(0.2)
+            gate.set()
+            for thread in threads:
+                thread.join(10)
+        self.assertEqual((len(calls), len(results), errors), (1, 20, []))
+
+    def test_full_health_detects_change_and_poisons_generation(self):
+        installed = self.install()
+        self.assertEqual(installed_health(installed, full=False)['contractId'], self.contract.contract_id)
+        with (self.roots['source'] / 'consumer.py').open('ab') as stream:
+            stream.write(b'# appended after install\n')
+        with patch('module_data_handoff.verify_program', wraps=verify_program) as scans:
+            with self.assertRaises(ModuleInputError): installed_health(installed)
+            self.assertEqual(scans.call_count, 1)
+            scans.reset_mock()
+            with self.assertRaises(ModuleInputError): installed_health(installed, full=False)
+            self.assertEqual(scans.call_count, 0)  # the poisoned generation never re-verifies
+
+    def test_ordinary_health_rejects_swapped_program_root(self):
+        installed = self.install()
+        source = self.roots['source']
+        raw = (source / 'consumer.py').read_bytes()
+        source.rename(source.with_name('source-moved'))
+        source.mkdir()
+        (source / 'consumer.py').write_bytes(raw)
+        with self.assertRaises(ModuleInputError): installed_health(installed, full=False)
+
+    def test_cache_never_crosses_launch_nonce(self):
+        with patch('module_data_handoff.verify_program', wraps=verify_program) as scans:
+            self.install()
+            second = {**self.message, 'launchNonce': base64.urlsafe_b64encode(b'm' * 32).rstrip(b'=').decode()}
+            prepared = self.prepare(second)
+            scans.reset_mock()
+            installed = install_handoff(prepared, object(), {name: object() for name in self.contract.private_boundaries})
+            self.assertEqual(scans.call_count, 2)  # its own pre-install scan and its own generation scan
+            scans.reset_mock()
+            self.assertEqual(installed_health(installed, full=False)['launchNonce'], second['launchNonce'])
+            self.assertEqual(scans.call_count, 0)
+        self.assertEqual(len(module_application_contracts._VERIFIED), 2)
+
+    def test_binding_change_still_fails_ordinary_health(self):
+        ready = [True]
+        original = self.contract.install_readers
+        def installer(*args):
+            return replace(original(*args), verify=lambda: ready[0])
+        self.contract = replace(self.contract, install_readers=installer)
+        installed = self.install()
+        self.assertEqual(installed_health(installed, full=False)['contractId'], self.contract.contract_id)
+        ready[0] = False
+        with self.assertRaises(ModuleInputError): installed_health(installed, full=False)
 
     def test_installer_cannot_substitute_the_actual_server(self):
         original = self.contract.install_readers

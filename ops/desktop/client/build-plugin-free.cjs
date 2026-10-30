@@ -213,6 +213,9 @@ function build({appId, version, program, output, makensis, appExecutable, appAsa
   const selected = sourceOverlay(retainedFiles, appId, version, overlayManifest);
   selected.files.set(executable, appExecutable);
   selected.files.set('resources/app.asar', appAsar);
+  // The installer's running-instance guard probes this exact payload file.
+  const backendExecutable = 'resources\\runtime\\' + app.id + '\\python\\python.exe';
+  if (!selected.files.has(backendExecutable.replace(/\\/g, '/'))) throw new Error('Payload is missing the backend interpreter: ' + backendExecutable);
   const fileCount = selected.files.size;
   let compiler = path.resolve(makensis);
   if (fs.statSync(compiler).isDirectory()) {
@@ -250,7 +253,7 @@ function build({appId, version, program, output, makensis, appExecutable, appAsa
   fs.writeFileSync(include, payloadInclude(selected.files), {flag:'wx'});
   const includeHash = digest(include);
   const definitions = {
-    PF_PRODUCT:app.name, PF_APP_ID:app.applicationId, PF_VERSION:version, PF_EXE:executable,
+    PF_PRODUCT:app.name, PF_APP_ID:app.applicationId, PF_VERSION:version, PF_EXE:executable, PF_BACKEND_EXE:backendExecutable,
     PF_PAYLOAD_INCLUDE:include,
     PF_OUTPUT:output, PF_ICON:icon, PF_LANGUAGE:language, PF_COMPRESSION:compression,
     PF_ROOT:layout.LAYOUT.rootName, PF_FOLDER:layout.fill(layout.LAYOUT.appFolder, {product:app.name, version}),

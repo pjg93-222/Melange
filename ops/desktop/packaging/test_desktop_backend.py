@@ -202,7 +202,7 @@ class BackendBoundaryTests(unittest.TestCase):
         thread.start()
         url = 'http://127.0.0.1:' + str(server.server_port) + backend.HEALTH_PATH
         try:
-            def health(latch, actual):
+            def health(latch, actual, **_):
                 self.assertIs(actual, server)
                 return {'channel': 'public' if latch is public else 'workspace'}
             with patch('module_data_handoff.server_installed_health', side_effect=health) as check:
@@ -217,6 +217,37 @@ class BackendBoundaryTests(unittest.TestCase):
                 with self.assertRaises(HTTPError) as failed:
                     urllib.request.urlopen(urllib.request.Request(url, headers={backend.TOKEN_HEADER: 'x'*32}))
                 self.assertEqual(failed.exception.code, 503)
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join()
+
+    def test_ordinary_route_uses_cached_health_and_health_path_full(self):
+        public, workspace, prepared = object(), object(), object()
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *args): pass
+        guarded = backend.guarded_handler(Handler, 'x'*32, 'mentat', module_installation=public,
+                                          workspace_installation=workspace, workspace_inputs=prepared)
+        server = ThreadingHTTPServer(('127.0.0.1', 0), guarded)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        base = 'http://127.0.0.1:' + str(server.server_port)
+        headers = {backend.TOKEN_HEADER: 'x'*32}
+        def answer(handler, _inputs):
+            handler.send_response(204)
+            handler.end_headers()
+            return True
+        try:
+            with patch('module_data_handoff.server_installed_health', return_value={'ok': True}) as check, \
+                    patch('module_workspace_installers.handle_workspace_request', side_effect=answer) as handled:
+                urllib.request.urlopen(urllib.request.Request(base + '/ordinary', headers=headers)).close()
+                handled.assert_called_once()
+                self.assertEqual([(call.args[0], call.kwargs) for call in check.call_args_list],
+                                 [(workspace, {'full': False})])
+                check.reset_mock()
+                urllib.request.urlopen(urllib.request.Request(base + backend.HEALTH_PATH, headers=headers)).close()
+                self.assertEqual([(call.args[0], call.kwargs) for call in check.call_args_list],
+                                 [(public, {'full': True}), (workspace, {'full': False})])
         finally:
             server.shutdown()
             server.server_close()

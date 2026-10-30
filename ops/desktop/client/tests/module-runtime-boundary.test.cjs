@@ -7,6 +7,22 @@ const {GitHubModules}=require('../github-modules.cjs');
 const {environment,signed,sha}=require('./fixtures/github-module-fixture.cjs');
 const mainFile=path.join(__dirname,'..','main.cjs'),main=fs.readFileSync(mainFile,'utf8');
 
+test('paired program verification scans the shared program once per phase and rechecks after a yield',async t=>{
+ const f=fixture(t,{workspace:true}),files=[path.join(f.sources,'app.py'),path.join(f.bootstrap,'desktop_backend.py')],reads=[];
+ const open=fs.openSync;t.mock.method(fs,'openSync',function(file,...args){if(files.includes(file))reads.push(file);return open.call(this,file,...args);});
+ assert.equal(f.startup.boundary.supportsContracts(f.contract,f.workspaceContract),true);assert.deepEqual(reads.sort(),[...files].sort());
+ await Promise.resolve();fs.appendFileSync(files[0],'# changed after the first verification');
+ assert.equal(f.startup.boundary.supportsContracts(f.contract,f.workspaceContract),false);
+});
+
+test('paired program verification refuses a changed workspace table despite a reused fingerprint',t=>{
+ const f=fixture(t,{workspace:true}),workspaceContract={...f.workspaceContract,programFiles:structuredClone(f.workspaceContract.programFiles)};
+ const boundary=native.createRuntimeWorkspaceBoundary({appId:'mentat',profile:f.data.profile,publicKeys:f.data.remote.publicKeys,publicContract:f.contract,workspaceContract,
+  getRuntime:()=>f.runtime,getSelected:()=>f.selected,authorize:f.data.options.authorize});
+ assert.equal(boundary.supportsContracts(f.contract,workspaceContract),true);workspaceContract.programFiles[0].sha256='0'.repeat(64);
+ assert.equal(boundary.supportsContracts(f.contract,workspaceContract),false);
+});
+
 for(const appId of ['melange','mentat'])test(appId+' actual main workspace factory sends only the opaque paired frame and confirms both native digests',async t=>{
  const f=fixture(t,{appId,workspace:true});const origin=await f.startup.start(f.selected,await f.data.options.authorize());
  assert.equal(origin,f.runtime.origin);assert.deepEqual(Object.keys(f.frame).sort(),['publicInput','schemaVersion','workspaceInput']);

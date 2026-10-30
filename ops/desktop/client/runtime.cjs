@@ -8,7 +8,7 @@ const path=require('node:path');
 const {appDefinition}=require('./apps.cjs');
 const {backendCommand,backendEnvironment}=require('./backend-command.cjs');
 const {runtimeRoots,prepareRuntimeRoots,validatedLaunchPath,refuseInstalledOverlap}=require('./runtime-roots.cjs');
-const {initializeModuleRuntime,consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,writeModuleFrame,verifyProgram}=require('./module-data-runtime-boundary.cjs');
+const {initializeModuleRuntime,consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,writeModuleFrame,verifyProgram,verifyProgramPair}=require('./module-data-runtime-boundary.cjs');
 const {observeStartupData}=require('./startup-data-diagnostic.cjs');
 // One value per app process, never written anywhere: Terrier's approved owner session is bound to this native launch.
 const OWNER_SESSION_KEY=crypto.randomBytes(32).toString('base64url');
@@ -125,7 +125,7 @@ class Runtime {
       if(moduleInput){setActiveModule(this,moduleInput,child);moduleInput.claimChild(child);check();
         intake=observeStartupData(child,{appId,launchNonce:moduleInput.launchNonce,programFingerprint:moduleInput.contract.programFingerprint,
           sourceDigests:{public:moduleInput.binding.sourceDigest,...(moduleInput.workspaceBinding?{workspace:moduleInput.workspaceBinding.sourceDigest}:{})},
-          guard:()=>{moduleInput.guard();verifyProgram(this,moduleInput.contract);if(moduleInput.workspaceContract)verifyProgram(this,moduleInput.workspaceContract);}});
+          guard:()=>{moduleInput.guard();verifyProgramPair(this,moduleInput.contract,moduleInput.workspaceContract);}});
         if(child.stdout){const output=fs.createWriteStream(path.join(logs,'backend.log'),{flags:'a',mode:0o600});output.on('error',()=>{child.stdout.unpipe(output);child.stdout.resume();});child.stdout.pipe(output);}
         await writeModuleFrame(child,moduleInput.frame(roots),moduleInput.signal);check();}
       if(districtInput){

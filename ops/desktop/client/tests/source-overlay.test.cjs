@@ -171,6 +171,7 @@ test('duplicate JSON properties cannot acquire a producer receipt',t=>{
 async function compilerFixture(t,mutation){
   const f=fixture(t),asar=require('@electron/asar'),vm=require('node:vm'),{createRequire}=require('node:module');
   f.write(f.program,'Terrier.exe','inert main fixture');
+  f.write(f.program,'resources/runtime/terrier/python/python.exe','inert backend interpreter fixture');
   const client=path.join(f.root,'client');fs.mkdirSync(client);
   fs.writeFileSync(path.join(client,'package.json'),JSON.stringify({name:'terrier-desktop',version:'1.0.31',desktopAppConfig:{appId:'terrier',desktopUninstaller:false}}));
   await asar.createPackage(client,path.join(f.program,'resources/app.asar'));
@@ -196,6 +197,10 @@ test('producer rechecks its closed overlay and exact generated include after com
     assert.equal(fs.existsSync(c.output+'.build.json'),false,'failed compiler input proof cannot create receipt');
   }
   const c=await compilerFixture(t),before=fs.readFileSync(c.f.base),result=c.run();
-  assert.equal(c.calls(),1);assert.ok(result.sourceOverlay);assert.equal(result.inputFileCount,4);
+  assert.equal(c.calls(),1);assert.ok(result.sourceOverlay);assert.equal(result.inputFileCount,5);
   assert.deepEqual(fs.readFileSync(c.f.base),before);assert.equal(result.payloadIncludeSha256,hash(fs.readFileSync(result.payloadInclude)));
+});
+test('producer refuses a payload without the backend interpreter the installer guard probes',async t=>{
+  const c=await compilerFixture(t);fs.rmSync(path.join(c.f.program,'resources/runtime/terrier/python/python.exe'));
+  assert.throws(c.run,/backend interpreter/);assert.equal(c.calls(),0);
 });

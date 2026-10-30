@@ -69,7 +69,7 @@ function readReceipt(attempt,{readFile=fs.readFileSync,lstat=fs.lstatSync,realpa
   if(lines.shift()!=='[activation]')throw new Error('Invalid installer progress section');
   for(const line of lines){const at=line.indexOf('=');if(at<1)throw new Error('Invalid installer progress field');const key=line.slice(0,at),value=line.slice(at+1);if(Object.hasOwn(values,key)||/[\x00-\x1f]/.test(value))throw new Error('Invalid installer progress field');values[key]=value;}
   if(Object.keys(values).sort().join('|')!=='app|code|outcome|schema|target|token|version'||values.schema!=='1'||values.app!==attempt.appId||values.version!==attempt.version||values.token!==attempt.token||!samePath(values.target,attempt.target)||
-    !((values.outcome==='complete'&&values.code==='0')||(values.outcome==='failed'&&['2','3','4','5'].includes(values.code))))throw new Error('Installer progress identity mismatch');
+    !((values.outcome==='complete'&&values.code==='0')||(values.outcome==='failed'&&['2','3','4','5','6'].includes(values.code))))throw new Error('Installer progress identity mismatch');
   return {status:values.outcome,code:Number(values.code)};
 }
 function matchingProcess(value,attempt){

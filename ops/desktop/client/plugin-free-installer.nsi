@@ -105,6 +105,32 @@ Function pfAcceptToken
   done:
 FunctionEnd
 
+; A running copy holds its program files open, so overwriting them fails midway
+; with "access denied". Probe each file by opening it for append: a running image
+; refuses write access, and a successful open is closed without writing a byte.
+Function pfRequireNotRunning
+  StrCpy $2 "$INSTDIR\${PF_EXE}"
+  Goto probe
+  next:
+    StrCmp $2 "$INSTDIR\${PF_EXE}" 0 done
+    StrCpy $2 "$INSTDIR\${PF_BACKEND_EXE}"
+  probe:
+    IfFileExists $2 0 next
+    ClearErrors
+    FileOpen $0 $2 a
+    IfErrors locked
+    FileClose $0
+    Goto next
+  locked:
+    MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "${PF_PRODUCT} ${PF_VERSION} is running. Close it, wait a few seconds, then Retry." /SD IDCANCEL IDRETRY probe
+    StrCpy $pfActivationOutcome "failed"
+    StrCpy $pfActivationCode "6"
+    Call pfWriteActivation
+    SetErrorLevel 6
+    Quit
+  done:
+FunctionEnd
+
 Function .onInit
   SetShellVarContext current
   StrCpy $pfUpdated "0"
@@ -149,6 +175,7 @@ Function .onInit
     SetErrorLevel 2
     Quit
   ready:
+  Call pfRequireNotRunning
 FunctionEnd
 
 Section "${PF_PRODUCT}"

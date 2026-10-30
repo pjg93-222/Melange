@@ -1,4 +1,5 @@
 """Generated context/negative-verdict tests; program verifier is explicitly mocked."""
+import contextlib
 import copy
 import io
 import json
@@ -8,6 +9,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
+import module_application_contracts
 from module_application_contracts import ModuleInputError
 import terrier_runtime_handoff as handoff
 
@@ -38,6 +40,8 @@ class DistrictRuntimeHandoffTests(unittest.TestCase):
         self.program = patch.object(handoff, 'verify_district_program', return_value='2' * 64)
         self.verify_program = self.program.start()
         self.addCleanup(self.program.stop)
+        module_application_contracts._VERIFIED.clear()
+        self.addCleanup(module_application_contracts._VERIFIED.clear)
 
     def create(self):
         return handoff.DistrictRuntimeInput(copy.deepcopy(self.value), self.options)
@@ -80,6 +84,22 @@ class DistrictRuntimeHandoffTests(unittest.TestCase):
         self.assertTrue(context.commit(self.value['commitToken']))
         self.assertEqual(context.health()['phase'], 'active')
         self.assertFalse(context.commit(self.value['commitToken']))
+
+    def test_district_health_poll_does_not_rehash(self):
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            context = self.create()
+        self.assertEqual(stderr.getvalue().count('DESKTOP_PROGRAM_VERIFIED kind=district\n'), 1)
+        class Reader:
+            def commit(self): pass
+            def health(self): return {'snapshot': 'co-cd005-123456abcdef', 'phase': 'prepared'}
+        context.reader = Reader()
+        self.verify_program.reset_mock()
+        for _ in range(10):
+            self.assertEqual(context.health()['phase'], 'prepared')
+        self.assertEqual(self.verify_program.call_count, 0)
+        self.assertTrue(context.commit(self.value['commitToken']))
+        self.assertGreaterEqual(self.verify_program.call_count, 1)
 
     def test_late_file_mutation_blocks_commit_without_changing_reader(self):
         context = self.create()

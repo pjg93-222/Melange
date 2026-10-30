@@ -50,6 +50,14 @@ function verifyProgram(runtime,contract){
  }
  return roots;
 }
+function verifyProgramPair(runtime,contract,workspaceContract){
+ // Both channels bind the identical installed program. Verify that equality
+ // again on every call, then scan it once in this synchronous phase. Nothing is
+ // cached across an await, a later startup, authorization or health check.
+ if(workspaceContract)requireValue(programFingerprint(contract.programFiles)===contract.programFingerprint&&
+  programFingerprint(workspaceContract.programFiles)===workspaceContract.programFingerprint&&contract.programFingerprint===workspaceContract.programFingerprint);
+ return verifyProgram(runtime,contract);
+}
 // A construction proof saves only the immediately repeated constructor scan.
 // It cannot authorize startup, survive a yield, or be supplied as JSON/settings.
 function withVerifiedProgramConstruction(runtime,contract,construct,expectedRoots){
@@ -90,7 +98,7 @@ function writeModuleFrame(child,frame,signal,maximum=MAX_FRAME){
 }
 function consumeModuleCapability(runtime,capability,configuration){
  const record=CAPABILITIES.get(capability);requireValue(record&&record.runtime===runtime&&!record.consumed&&!runtime.child&&record.selectedFingerprint===digest(configuration));
- record.guard();verifyProgram(runtime,record.contract);if(record.workspaceContract)verifyProgram(runtime,record.workspaceContract);record.consumed=true;return record;
+ record.guard();verifyProgramPair(runtime,record.contract,record.workspaceContract);record.consumed=true;return record;
 }
 function activeModule(runtime){return RUNTIMES.get(runtime)?.active||null;}
 function setActiveModule(runtime,record,child){const support=RUNTIMES.get(runtime);requireValue(support&&record.runtime===runtime&&record.consumed&&runtime.child===child);support.active={record,child};}
@@ -111,8 +119,7 @@ function checkWarmModule(runtime,configuration,approval){
  const active=activeModule(runtime);if(!active)return;
  const record=active.record;requireValue(runtime.child===active.child&&digest(configuration)===record.selectedFingerprint&&digest(record.getSelected())===record.selectedFingerprint&&
   authorized(record.appId,configuration,approval)&&authorizationIdentity(approval)===record.authorizationIdentity);
- verifyProgram(runtime,record.contract);
- if(record.workspaceContract)verifyProgram(runtime,record.workspaceContract);
+ verifyProgramPair(runtime,record.contract,record.workspaceContract);
 }
 function createRuntimeModuleBoundary({appId,profile,publicKeys,contract,getRuntime,getSelected,authorize,protectedRoots=[],onPreparing=()=>{},constructionProof}){
  if(!contract||!['melange','mentat'].includes(appId)||typeof getRuntime!=='function'||typeof getSelected!=='function'||typeof authorize!=='function'||typeof onPreparing!=='function')return null;
@@ -165,7 +172,7 @@ function createRuntimeWorkspaceBoundary({appId,profile,publicKeys,publicContract
   requireValue(workspaceContract.contractId===appId+'.workspace.v1'&&publicContract.programFingerprint===workspaceContract.programFingerprint);
  }catch{return null;}
  let initial=publicConstructionProof!==undefined||workspaceConstructionProof!==undefined?{publicConstructionProof,workspaceConstructionProof}:null;
- const verify=runtime=>{const left=verifyProgram(runtime,publicContract),right=verifyProgram(runtime,workspaceContract);requireValue(left.source===right.source&&left.bootstrap===right.bootstrap);return left;};
+ const verify=runtime=>verifyProgramPair(runtime,publicContract,workspaceContract);
  const supported=(left,right)=>{try{
   requireValue(left===publicContract&&right===workspaceContract);
   if(initial){const proofs=initial;initial=null;constructionSupport(proofs.publicConstructionProof,getRuntime(),publicContract);constructionSupport(proofs.workspaceConstructionProof,getRuntime(),workspaceContract);}
@@ -204,5 +211,5 @@ function createRuntimeWorkspaceBoundary({appId,profile,publicKeys,publicContract
   }
  });
 }
-module.exports={programTable,programFingerprint,verifyProgram,withVerifiedProgramConstruction,encodeModuleFrame,writeModuleFrame,initializeModuleRuntime,
+module.exports={programTable,programFingerprint,verifyProgram,verifyProgramPair,withVerifiedProgramConstruction,encodeModuleFrame,writeModuleFrame,initializeModuleRuntime,
  consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,createRuntimeModuleBoundary,createRuntimeWorkspaceBoundary};

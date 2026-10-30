@@ -11,8 +11,9 @@ from pathlib import Path
 import re
 import sqlite3
 
-from module_application_contracts import canonical, require
+from module_application_contracts import canonical, require, verify_generation
 from module_data_handoff import read_frame, _parse
+import terrier_district
 from terrier_district import DistrictDataBlocked, verify_district_program
 from terrier_github_snapshot import BASE_FILES, regular_file, snapshot_role
 
@@ -89,8 +90,13 @@ class DistrictRuntimeInput:
         require(valid_session(value) and not value['locked'])
         return value['userSid'], value['sessionId']
 
-    def program(self):
-        require(verify_district_program(self.source) == self.value['programFingerprint'])
+    def program(self, full=True):
+        boot = Path(terrier_district.__file__).resolve().parent  # the root verify_district_program binds
+        key = ('district', self.value['launchNonce'], self.value['programFingerprint'],
+               os.path.normcase(self.source), os.path.normcase(boot))
+        verify_generation(key, (self.source, boot),
+            lambda: require(verify_district_program(self.source) == self.value['programFingerprint']),
+            full=full, kind='district')
         if self.identity is not None:
             require(self.current_principal() == self.principal)
 
@@ -100,8 +106,8 @@ class DistrictRuntimeInput:
             'launchNonce': self.value['launchNonce'], 'programFingerprint': self.value['programFingerprint'],
             'sourceDigests': {'district': self.value['sourceDigest']}, 'reason': reason})
 
-    def data_call(self, work):
-        self.program()
+    def data_call(self, work, full=True):
+        self.program(full)
         try:
             return work()
         except DistrictActivationBlocked:
@@ -139,7 +145,7 @@ class DistrictRuntimeInput:
         def checked():
             self.unchanged()
             return self.reader.health()
-        status = self.data_call(checked)
+        status = self.data_call(checked, full=False)
         return {name: self.value[name] for name in ('schemaVersion', 'appId', 'launchNonce', 'programFingerprint', 'sourceDigest', 'district', 'rootsDigest')} | status
 
     def commit(self, token):

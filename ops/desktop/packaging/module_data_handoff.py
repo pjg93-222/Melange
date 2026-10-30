@@ -21,7 +21,7 @@ from types import MappingProxyType
 import weakref
 
 from module_application_contracts import (ApplicationContract, ModuleInputError, DataIntakeBlocked,
-    application_contract, canonical, require, verify_program)
+    application_contract, canonical, require, verify_generation, verify_program)
 
 MAX_FRAME = 64 * 1024
 _SOURCE_FIELDS = frozenset(('schemaVersion', 'appId', 'repository', 'catalogSequence', 'releaseTag',
@@ -251,11 +251,11 @@ def complete_server_installation(latch, server):
     state['installed'], state['server'] = installed, server
 
 
-def server_installed_health(latch, server):
+def server_installed_health(latch, server, *, full=True):
     require(type(latch) is ServerInstallation and latch in _SERVER_INSTALLATIONS)
     state = _SERVER_INSTALLATIONS[latch]
     require(state['installed'] is not None and state['server'] is server)
-    return installed_health(state['installed'])
+    return installed_health(state['installed'], full=full)
 
 
 def prepare_handoff(stream, *, app_id, profile_root, source_root, original_data_root, state_root,
@@ -374,7 +374,7 @@ def install_handoff(prepared, server, original_private_contexts):
                 and type(result.private_boundaries) is dict and set(result.private_boundaries) == set(originals)
                 and all(result.private_boundaries[key] is original_private_contexts[key] is originals[key] for key in originals)
                 and callable(result.verify) and result.verify() is True)
-        verify_program(prepared.contract, source_root=prepared.roots['sourceRoot'], bootstrap_root=prepared.bootstrap_root)
+        _verify_generation(prepared, full=True)
         installed = _InstalledHandoff(result.application)
         coverage = {'publicReaders': sorted(result.public_readers), 'privateBoundaries': sorted(originals)}
         _INSTALLED[installed] = {'prepared': prepared, 'verify': result.verify,
@@ -389,7 +389,15 @@ def install_handoff(prepared, server, original_private_contexts):
         raise ModuleInputError() from None
 
 
-def installed_health(installed):
+def _verify_generation(prepared, *, full):
+    source, boot = prepared.roots['sourceRoot'], prepared.bootstrap_root
+    key = ('module', prepared.launch_nonce, prepared.contract.program_fingerprint,
+           os.path.normcase(source), os.path.normcase(boot))
+    return verify_generation(key, (source, boot),
+        lambda: verify_program(prepared.contract, source_root=source, bootstrap_root=boot), full=full, kind='module')
+
+
+def installed_health(installed, *, full=True):
     """Fresh scalar copy; paths, reader objects and capabilities never reach HTTP."""
     prepared = None
     try:
@@ -397,7 +405,7 @@ def installed_health(installed):
         record = _INSTALLED[installed]
         prepared = record['prepared']
         require(record['verify']() is True)
-        verify_program(prepared.contract, source_root=prepared.roots['sourceRoot'], bootstrap_root=prepared.bootstrap_root)
+        _verify_generation(prepared, full=full)
         return dict(record['health'])
     except Exception as error:
         if type(error) is DataIntakeBlocked and type(prepared) is PreparedHandoff:

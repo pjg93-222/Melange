@@ -71,7 +71,7 @@ def guarded_handler(handler, token, app_id, *, module_installation=None, workspa
                 from module_data_handoff import server_installed_health, ModuleInputError
                 from module_workspace_installers import handle_workspace_request
                 try:
-                    server_installed_health(workspace_installation, self.server)
+                    server_installed_health(workspace_installation, self.server, full=False)
                     if handle_workspace_request(self, workspace_inputs):
                         return False
                 except ModuleInputError as error:
@@ -105,9 +105,9 @@ def guarded_handler(handler, token, app_id, *, module_installation=None, workspa
                 if self.path == HEALTH_PATH and module_installation is not None:
                     from module_data_handoff import server_installed_health, ModuleInputError
                     try:
-                        payload['moduleData'] = server_installed_health(module_installation, self.server)
+                        payload['moduleData'] = server_installed_health(module_installation, self.server, full=True)
                         if workspace_installation is not None:
-                            payload['workspaceData'] = server_installed_health(workspace_installation, self.server)
+                            payload['workspaceData'] = server_installed_health(workspace_installation, self.server, full=False)
                     except ModuleInputError as error:
                         from module_application_contracts import DataIntakeBlocked
                         if type(error) is DataIntakeBlocked and workspace_inputs is not None:

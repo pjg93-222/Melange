@@ -11,6 +11,8 @@ import os
 from pathlib import Path
 import re
 import stat
+import sys
+import threading
 from types import MappingProxyType
 
 
@@ -208,6 +210,39 @@ def verify_program(contract, *, source_root, bootstrap_root):
     require(type(contract) is ApplicationContract)
     return verify_compiled_files(contract.program_files, contract.program_fingerprint,
                                  source_root=source_root, bootstrap_root=bootstrap_root)
+
+
+_VERIFIED, _VERIFY_LOCK = {}, threading.Lock()
+
+
+def _root_ids(roots):
+    return tuple((r, (lambda i: (i.st_dev, i.st_ino, i.st_mode))(_regular(Path(r), True))) for r in roots)
+
+
+def verify_generation(key, roots, verify, *, full, kind):
+    """One full scan per launch generation; ordinary callers only recheck root identity."""
+    try:
+        state = _VERIFIED.get(key)
+        if not full and state:
+            require(_root_ids(roots) == state)
+            return True
+        with _VERIFY_LOCK:  # ponytail: one process-wide lock, at most 2 generations per process
+            state = _VERIFIED.get(key)
+            require(state is not False)  # a poisoned generation fails closed until restart
+            if not full and state:
+                require(_root_ids(roots) == state)
+                return True
+            try:
+                verify()
+            except Exception:
+                _VERIFIED[key] = False
+                raise
+            _VERIFIED[key] = _root_ids(roots)
+            sys.stderr.write('DESKTOP_PROGRAM_VERIFIED kind=' + kind + '\n')  # stderr: stdout carries diagnostics
+            sys.stderr.flush()
+            return True
+    except OSError:
+        raise ModuleInputError() from None
 
 
 def verify_compiled_files(files, fingerprint, *, source_root, bootstrap_root):
