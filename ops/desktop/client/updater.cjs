@@ -173,15 +173,25 @@ class DesktopUpdater {
     return verified;
   }
   packageOf(item){const m=JSON.parse(Buffer.from(item.envelope.payload,'base64'));return {sequence:String(m.sequence),path:this.packagePath(m),manifest:m};}
-  // Rollback baselines: only the installed and the immediately previous version keep an installer (plus any
-  // in-flight pending or rollback target). Called once a new version is confirmed running.
+  // A healthy confirmed release keeps its installer and any in-flight update/recovery.
+  // Previous signed envelopes remain in state; recovery downloads those installers on demand.
   pruneBaselines(state=this.readState()){
+    if(!this.applicationReady||this.nativeInstallation===false||!this.packaged||
+       state.installed?.phase!=='installed'||state.installed.version!==this.version||
+       this.startupPending(state)||state.suspendedVersions?.includes(this.version)||
+       (state.pending?.version===this.version&&state.pending.phase==='failed'))return;
     const live=state.recovery&&!['completed','failed'].includes(state.recovery.phase)?[state.recovery.target]:[];
-    const items=[state.installed,state.previous,state.pending,...live].filter(item=>item?.envelope);
-    const sequences=new Set(),versions=new Set([state.installed,state.previous].filter(Boolean).map(item=>item.version));
-    for(const item of items)try{sequences.add(this.packageOf(item).sequence);}catch{return;}
-    const sweep=(root,keep)=>{try{for(const name of fs.readdirSync(root))if(!keep.has(name))fs.rmSync(path.join(root,name),{recursive:true,force:true});}catch{}};
-    sweep(path.join(this.userData,'updates'),sequences);if(this.baselineRoot)sweep(this.baselineRoot,versions);
+    const items=[state.installed,state.pending,...live].filter(Boolean),sequences=[],versions=[];
+    let currentSequence;
+    try{for(const item of items){
+      const manifest=this.packageOf(item).manifest;
+      if(manifest.appId!==this.appId||manifest.version!==item.version||!semver.valid(item.version)||!Number.isSafeInteger(manifest.sequence)||manifest.sequence<1)return;
+      sequences.push(manifest.sequence);versions.push(item.version);
+      if(item===state.installed)currentSequence=manifest.sequence;
+    }}catch{return;}
+    require('./installer-cache.cjs').pruneInstallerCache({appId:this.appId,currentVersion:this.version,currentSequence,
+      updatesRoots:[this.userData,this.legacyUserData].filter(Boolean).map(root=>path.join(root,'updates')),
+      baselineRoot:this.baselineRoot,nativeCacheDirectory:this.installLayout?.cacheDirectory,keepSequences:sequences,keepVersions:versions});
   }
   // The first installer's own copy (placed by installer.nsh) is COPIED to the rollback installer location, without any
   // download. The baseline itself stays until the rollback has completed and the target is confirmed running.
@@ -411,6 +421,7 @@ class DesktopUpdater {
       enrollment=applyKeyTransitions(enrollment,trust.transitions);this.saveEnrollment(enrollment);
       const outbox=this.readState().outbox;if(outbox)await this.report(enrollment,outbox.status,outbox.errorCode);
       await this.ensureRecoveryBaseline(enrollment);
+      this.pruneBaselines();
       const query=new URLSearchParams({platform:this.platform,arch:this.arch,version:this.version});
       const envelope=await this.request(enrollment,'/v1/apps/'+this.appId+'/updates?'+query,{token:enrollment.deviceToken});
       if(!envelope){if(!this.ready)this.onStatus(notice?'No newer signed update. '+notice:'No newer signed update.');return;}
@@ -451,6 +462,7 @@ class DesktopUpdater {
   markApplicationReady(){
     const becameReady=!this.applicationReady;
     this.applicationReady=true;this.applicationDeferred=null;
+    this.pruneBaselines();
     // Keep-2 pruning and legacy program-folder cleanup (DL-spec 2.5, 2.6): once per run, after a successful launch, never fatal.
     if(this.installLayout&&!this.layoutSwept){this.layoutSwept=true;try{Promise.resolve(this.installLayout.sweep(this.readState())).catch(()=>{});}catch{}}
     if(becameReady){try{

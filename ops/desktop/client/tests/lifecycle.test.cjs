@@ -326,13 +326,13 @@ test('startup failure during automatic native verification cannot confirm stale 
   assert.notEqual(f.state.installedVersion,'1.1.0');assert.equal(f.downloads,1);
 });
 
-test('installed status requires backend readiness and preserves previous authorized package',async t=>{
+test('installed status requires backend readiness and preserves previous authorization without its installer',async t=>{
   const f=fixture(t),client=f.client();await client.check();await client.activateAfterClose();
   f.version='1.1.0';const next=f.client();await next.check();assert.equal(f.state.pending.version,'1.1.0');assert.equal(f.state.installed.version,'1.0.0');
   next.markApplicationReady();await next.check();assert.equal(f.state.pending,null);assert.equal(f.state.installed.version,'1.1.0');
   f.envelope=f.sign('1.2.0',2);await next.check();await next.activateAfterClose();
   f.version='1.2.0';const latest=f.client();latest.markApplicationReady();await latest.check();
-  assert.equal(f.state.installed.version,'1.2.0');assert.equal(f.state.previous.version,'1.1.0');assert.ok(fs.existsSync(path.join(f.directory,'updates','2','Terrier.exe')));
+  assert.equal(f.state.installed.version,'1.2.0');assert.equal(f.state.previous.version,'1.1.0');assert.ok(f.state.previous.envelope);assert.equal(fs.existsSync(path.join(f.directory,'updates','2','Terrier.exe')),false);
 });
 
 test('unconfirmed running update can discover and activate a corrective release without promoting its baseline',async t=>{
@@ -461,9 +461,10 @@ test('local recovery refuses tampered retained packages and installs nothing',as
   f.version='1.1.0';const second=f.client();second.markApplicationReady();await second.check();
   f.envelope=f.sign('1.2.0',2);await second.check();await second.activateAfterClose();
   f.version='1.2.0';const third=f.client();third.markApplicationReady();await third.check();
+  fs.mkdirSync(path.join(f.directory,'updates','2'),{recursive:true});
   fs.writeFileSync(path.join(f.directory,'updates','2','Terrier.exe'),'corrupt');
   // Offline, the corrupt copy is deleted and nothing can replace it: refused, nothing installs.
-  const offline=f.client('Fixture Publisher',{download:async()=>{throw new Error('offline');}});offline.markApplicationReady();
+  const offline=f.client('Fixture Publisher',{download:async()=>{throw new Error('offline');}});
   await assert.rejects(()=>offline.beginRecovery(),/offline/);assert.equal(fs.existsSync(path.join(f.directory,'updates','2','Terrier.exe')),false);
   assert.equal(await offline.activateAfterClose(),false);assert.equal(f.installs,2);
   // Online, the fallback download is hash-checked against the signed manifest like any other.
@@ -639,15 +640,15 @@ test('a requested rollback beats a pending update at launch, and starts by parki
   }
 });
 
-test('rollback installs from local copies without any network; the first installer supplies the very first copy',async t=>{
+test('an unconfirmed update can roll back offline from the retained first installer',async t=>{
   const f=fixture(t),bytes=fs.readFileSync(path.join(f.directory,'updates','1','Terrier.exe'));
   f.state={};fs.rmSync(path.join(f.directory,'updates','1'),{recursive:true});
   const baselineRoot=path.join(f.directory,'baseline'),offline=async()=>{throw new Error('offline');};
   // installer.nsh put the running installer here under whatever name it had.
   fs.mkdirSync(path.join(baselineRoot,'1.0.0'),{recursive:true});fs.writeFileSync(path.join(baselineRoot,'1.0.0','Terrier Setup (1).exe'),bytes);
   const first=f.client('Fixture Publisher',{baselineRoot});await first.check();await first.activateAfterClose();
-  f.version='1.1.0';const second=f.client('Fixture Publisher',{baselineRoot});second.markApplicationReady();await second.check();
-  assert.equal(f.state.previous.version,'1.0.0');assert.ok(f.state.previous.envelope,'the signed manifest of the baseline is kept locally');
+  f.version='1.1.0';const second=f.client('Fixture Publisher',{baselineRoot});await second.check();
+  assert.equal(f.state.installed.version,'1.0.0');assert.ok(f.state.installed.envelope,'the signed manifest of the baseline is kept locally');
   const downloads=f.downloads;f.offline=true;second.download=offline;
   assert.equal(await second.beginRecovery(),'1.0.0');assert.equal(f.downloads,downloads);assert.equal(f.state.recovery.phase,'prepared');
   assert.equal(fs.readdirSync(path.join(baselineRoot,'1.0.0')).length,1,'the baseline is copied, not moved: it stays until the rollback completed');
@@ -662,17 +663,20 @@ test('rollback installs from local copies without any network; the first install
   assert.equal(await b.beginRecovery(),'1.0.0');assert.equal(g.downloads,before+1);assert.equal(fs.existsSync(path.join(root,'1.0.0','Terrier.exe')),false);
 });
 
-test('once a new version is confirmed running only it and the previous version keep installers',async t=>{
+test('a healthy update removes previous installers, retains recovery metadata, and downloads rollback on demand',async t=>{
   const f=fixture(t),baselineRoot=path.join(f.directory,'baseline'),mk=()=>f.client('Fixture Publisher',{baselineRoot});
   fs.mkdirSync(path.join(baselineRoot,'1.0.0'),{recursive:true});fs.writeFileSync(path.join(baselineRoot,'1.0.0','Terrier.exe'),'old');
   const has=n=>fs.existsSync(path.join(f.directory,'updates',String(n)));
   const first=mk();await first.check();await first.activateAfterClose();
   f.version='1.1.0';const second=mk();second.markApplicationReady();await second.check();
-  assert.deepEqual([has(1),has(2)],[true,true]);assert.equal(fs.existsSync(path.join(baselineRoot,'1.0.0')),true);
+  assert.deepEqual([has(1),has(2)],[false,true]);assert.equal(fs.existsSync(path.join(baselineRoot,'1.0.0')),false);
+  assert.equal(f.state.previous.version,'1.0.0');assert.ok(f.state.previous.envelope);
   f.envelope=f.sign('1.2.0',2);await second.check();await second.activateAfterClose();
-  assert.deepEqual([has(1),has(2),has(3)],[true,true,true],'nothing is pruned before the new version is confirmed running');
+  assert.deepEqual([has(1),has(2),has(3)],[false,true,true],'the installed version is kept until its replacement starts successfully');
   f.version='1.2.0';const third=mk();third.markApplicationReady();await third.check();
-  assert.deepEqual([has(1),has(2),has(3)],[false,true,true]);assert.equal(fs.existsSync(path.join(baselineRoot,'1.0.0')),false);
+  assert.deepEqual([has(1),has(2),has(3)],[false,false,true]);assert.equal(fs.existsSync(path.join(baselineRoot,'1.0.0')),false);
+  const before=f.downloads;assert.equal(await third.beginRecovery(),'1.1.0');assert.equal(f.downloads,before+1);
+  assert.equal(has(2),true);third.pruneBaselines();assert.equal(has(2),true,'an active recovery download remains protected');
 });
 
 test('launch install stops waiting after repeated "no verdict" and reads the relaunch choice after preparation',async t=>{
@@ -705,7 +709,7 @@ test('a rollback copy is deleted only when its own bytes fail the hash check; an
   const baselineRoot=path.join(f.directory,'baseline'),baseline=path.join(baselineRoot,'1.0.0','Terrier.exe'),retained=path.join(f.directory,'updates','1','Terrier.exe');
   fs.mkdirSync(path.dirname(baseline),{recursive:true});fs.writeFileSync(baseline,bytes);
   const mk=extra=>f.client('Fixture Publisher',{baselineRoot,...extra});
-  const first=mk();await first.check();await first.activateAfterClose();f.version='1.1.0';const second=mk();second.markApplicationReady();await second.check();
+  const first=mk();await first.check();await first.activateAfterClose();f.version='1.1.0';const second=mk();await second.check(); // Unconfirmed startup retains offline recovery copies.
   // Authenticode refusal (untrusted certificate): the verified copy and the baseline both stay.
   f.nativeValid=false;await assert.rejects(()=>mk().beginRecovery(),/Native signature refused/);
   assert.ok(fs.existsSync(retained),'cached copy kept');assert.ok(fs.existsSync(baseline),'baseline kept');assert.equal(f.state.recovery.phase,'failed');
@@ -730,7 +734,7 @@ test('a transient read error (EBUSY) on a rollback copy is not an integrity fail
   const baselineRoot=path.join(f.directory,'baseline'),baseline=path.join(baselineRoot,'1.0.0','Terrier.exe'),retained=path.join(f.directory,'updates','1','Terrier.exe');
   fs.mkdirSync(path.dirname(baseline),{recursive:true});fs.writeFileSync(baseline,bytes);
   const mk=extra=>f.client('Fixture Publisher',{baselineRoot,...extra});
-  const first=mk();await first.check();await first.activateAfterClose();f.version='1.1.0';const second=mk();second.markApplicationReady();await second.check();
+  const first=mk();await first.check();await first.activateAfterClose();f.version='1.1.0';const second=mk();await second.check(); // Unconfirmed startup retains offline recovery copies.
   // Antivirus holds the freshly copied installer open: reading it fails with EBUSY, which says nothing about its bytes.
   const read=fs.createReadStream;fs.createReadStream=(file,...rest)=>{if(String(file).endsWith('Terrier.exe'))throw Object.assign(new Error('EBUSY: resource busy or locked'),{code:'EBUSY'});return read.call(fs,file,...rest);};
   try{await assert.rejects(()=>mk({download:async()=>{throw new Error('offline');}}).beginRecovery(),/offline/);}finally{fs.createReadStream=read;}
@@ -745,7 +749,7 @@ test('a corrupt copy locked against delete and replace stops recovery before any
   const baselineRoot=path.join(f.directory,'baseline'),baseline=path.join(baselineRoot,'1.0.0','Terrier.exe'),retained=path.join(f.directory,'updates','1','Terrier.exe');
   fs.mkdirSync(path.dirname(baseline),{recursive:true});fs.writeFileSync(baseline,bytes);
   const mk=extra=>f.client('Fixture Publisher',{baselineRoot,...extra});
-  const first=mk();await first.check();await first.activateAfterClose();f.version='1.1.0';const second=mk();second.markApplicationReady();await second.check();
+  const first=mk();await first.check();await first.activateAfterClose();f.version='1.1.0';const second=mk();await second.check(); // Unconfirmed startup retains offline recovery copies.
   fs.mkdirSync(path.dirname(retained),{recursive:true});fs.writeFileSync(retained,'corrupt');fs.writeFileSync(baseline,'corrupt');
   // Another program holds the corrupt retained copy open with read sharing only (as Windows does for a running .exe):
   // it reads fine, but deleting it, renaming onto it or overwriting it fails with EPERM.
