@@ -232,14 +232,19 @@ def verify_generation(key, roots, verify, *, full, kind):
             if not full and state:
                 require(_root_ids(roots) == state)
                 return True
+            before = _root_ids(roots)  # captured before the scan so a mid-scan root swap cannot be blessed
             try:
                 verify()
+                require(_root_ids(roots) == before)
             except Exception:
                 _VERIFIED[key] = False
                 raise
-            _VERIFIED[key] = _root_ids(roots)
-            sys.stderr.write('DESKTOP_PROGRAM_VERIFIED kind=' + kind + '\n')  # stderr: stdout carries diagnostics
-            sys.stderr.flush()
+            _VERIFIED[key] = before
+            try:  # a diagnostic must never fail startup
+                sys.stderr.write('DESKTOP_PROGRAM_VERIFIED kind=' + kind + '\n')  # stderr: stdout carries diagnostics
+                sys.stderr.flush()
+            except (OSError, ValueError, AttributeError):
+                pass
             return True
     except OSError:
         raise ModuleInputError() from None

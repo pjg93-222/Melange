@@ -396,6 +396,30 @@ class HandoffTests(unittest.TestCase):
             self.assertEqual(scans.call_count, 0)
         self.assertEqual(len(module_application_contracts._VERIFIED), 2)
 
+    def test_failed_diagnostic_write_never_fails_the_scan(self):
+        class Broken:
+            def write(self, _text): raise OSError('closed pipe')
+            def flush(self): raise OSError('closed pipe')
+        with patch('sys.stderr', Broken()):
+            installed = self.install()
+            self.assertEqual(installed_health(installed)['contractId'], self.contract.contract_id)
+
+    def test_root_swapped_during_full_scan_poisons_generation(self):
+        installed = self.install()
+        source = self.roots['source']
+        def swapping(*args, **kwargs):
+            result = verify_program(*args, **kwargs)
+            raw = (source / 'consumer.py').read_bytes()
+            source.rename(source.with_name('source-moved'))
+            source.mkdir()
+            (source / 'consumer.py').write_bytes(raw)
+            return result
+        with patch('module_data_handoff.verify_program', side_effect=swapping):
+            with self.assertRaises(ModuleInputError): installed_health(installed)
+        with patch('module_data_handoff.verify_program', wraps=verify_program) as scans:
+            with self.assertRaises(ModuleInputError): installed_health(installed, full=False)
+            self.assertEqual(scans.call_count, 0)
+
     def test_binding_change_still_fails_ordinary_health(self):
         ready = [True]
         original = self.contract.install_readers

@@ -101,6 +101,26 @@ class DistrictRuntimeHandoffTests(unittest.TestCase):
         self.assertTrue(context.commit(self.value['commitToken']))
         self.assertGreaterEqual(self.verify_program.call_count, 1)
 
+    def test_district_wrong_program_digest_poisons_generation(self):
+        context = self.create()
+        context.reader = SimpleNamespace(commit=lambda: None, health=lambda: {})
+        self.verify_program.return_value = '3' * 64
+        with self.assertRaises(ModuleInputError):
+            context.commit(self.value['commitToken'])
+        self.verify_program.reset_mock()
+        with self.assertRaises(ModuleInputError):
+            context.health()
+        self.verify_program.assert_not_called()
+
+    def test_district_swapped_source_root_fails_ordinary_health(self):
+        context = self.create()
+        context.reader = SimpleNamespace(commit=lambda: None, health=lambda: {})
+        source = self.options.source_root
+        source.rename(source.with_name('source-moved'))
+        source.mkdir()
+        with self.assertRaises(ModuleInputError):
+            context.health()
+
     def test_late_file_mutation_blocks_commit_without_changing_reader(self):
         context = self.create()
         context.reader = SimpleNamespace(commit=lambda: self.fail('No active commit permitted'))
