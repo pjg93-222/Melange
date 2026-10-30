@@ -72,23 +72,27 @@ function sourceOverlay(files, appId, version, manifestFile) {
   if (![JSON.stringify(manifest),JSON.stringify(manifest,null,2)+'\n'].includes(text) || stamp(manifestFile)!==manifestStamp) {
     throw new Error('Source overlay manifest must be unchanged canonical JSON');
   }
+  const prefix = 'resources/runtime/' + appId + '/';
+  // Keep the producer's narrow reviewed closure aligned with independent native
+  // verification. Only the fixed cache helper may be absent from the old base.
+  const allowed = new Set(['bootstrap/terrier_standalone.py','bootstrap/module_application_inventory.py',
+    'bootstrap/module_application_contracts.py','bootstrap/module_public_input_installers.py',
+    'bootstrap/native_access_state.py','bootstrap/module_catalogue_cache.py',
+    'source-inventory.json','source-provenance.json',
+    ...(appId === 'terrier' ? ['sources/server/research/street_views.py'] : []),
+    ...(appId === 'melange' ? ['sources/fec/surfaces/melange_public_data.py'] : [])].map(name => prefix + name));
+  const additions = new Set([prefix + 'bootstrap/module_catalogue_cache.py']);
   if (!exactKeys(manifest, ['schemaVersion','appId','version','clientCommit','sourceCommit','files']) ||
       manifest.schemaVersion !== 1 || manifest.appId !== appId || manifest.version !== version ||
       !/^[a-f0-9]{40}$/.test(manifest.clientCommit) || !/^[a-f0-9]{40}$/.test(manifest.sourceCommit) ||
-      !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > 5) {
+      !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > allowed.size) {
     throw new Error('Invalid source overlay identity');
   }
-  const prefix = 'resources/runtime/' + appId + '/';
-  // Deliberately replacement-only and limited to these reviewed release inputs.
-  // Adding another source path requires a producer and independent-verifier review.
-  const allowed = new Set(['bootstrap/terrier_standalone.py','bootstrap/module_application_inventory.py',
-    'source-inventory.json','source-provenance.json',
-    ...(appId === 'terrier' ? ['sources/server/research/street_views.py'] : [])].map(name => prefix + name));
   const root = physical(path.join(path.dirname(manifestFile), 'files'), true);
   const actual = payloadFiles(root, '\0'), selected = new Map(files), seen = new Set(), inputs = [];
   for (const row of manifest.files) {
     if (!exactKeys(row, ['path','bytes','sha256']) || !allowed.has(row.path) || seen.has(row.path) ||
-        !files.has(row.path) || !Number.isSafeInteger(row.bytes) || row.bytes < 0 || row.bytes > 16*1024*1024 ||
+        (!files.has(row.path) && !additions.has(row.path)) || !Number.isSafeInteger(row.bytes) || row.bytes < 0 || row.bytes > 16*1024*1024 ||
         typeof row.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(row.sha256)) throw new Error('Invalid source overlay member');
     seen.add(row.path);
     const source = actual.get(row.path);

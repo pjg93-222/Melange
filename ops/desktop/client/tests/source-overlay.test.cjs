@@ -32,6 +32,51 @@ test('all three apps accept their own bootstrap and metadata replacements',t=>{
     f.save();assert.equal(f.run().replacements.length,4);
   }
 });
+test('reviewed eight and nine member overlays add only the fixed helper and emit a closed payload',t=>{
+  for(const app of ['melange','mentat','terrier']){
+    const f=fixture(t,app),helper=f.prefix+'bootstrap/module_catalogue_cache.py';
+    const changes=['bootstrap/module_application_inventory.py','bootstrap/module_application_contracts.py',
+      'bootstrap/module_public_input_installers.py','bootstrap/native_access_state.py',
+      'source-inventory.json','source-provenance.json',
+      ...(app==='melange'?['sources/fec/surfaces/melange_public_data.py']:[]),
+      ...(app==='terrier'?['sources/server/research/street_views.py']:[])];
+    for(const name of changes){f.write(f.program,f.prefix+name,'retained '+name);f.replace(f.prefix+name,'reviewed '+name);}
+    f.replace(helper,'reviewed fixed cache helper');f.save();
+    const before=producer.payloadFiles(f.program,'unused.exe');
+    const oldBytes=new Map([...before].map(([name,file])=>[name,fs.readFileSync(file)]));
+    const out=f.run(),expected=app==='mentat'?8:9;
+    assert.equal(out.replacements.length,expected);assert.equal(out.inputs.length,expected+1);
+    assert.equal(out.files.size,expected+1);assert.equal(out.files.get(helper),path.join(f.overlay,'files',helper));
+    assert.equal(fs.existsSync(path.join(f.program,helper)),false);
+    const include=producer.payloadInclude(out.files);
+    assert.equal((include.match(/^  File /gm)||[]).length,out.files.size);
+    assert.equal((include.match(/\/oname=module_catalogue_cache\.py/g)||[]).length,1);
+    for(const [name,raw] of oldBytes)assert.deepEqual(fs.readFileSync(before.get(name)),raw);
+    assert.equal(out.files.get('vendor.dll'),before.get('vendor.dll'));
+  }
+});
+test('new helper exception cannot add other bootstrap, cross-app, or native members',t=>{
+  for(const app of ['melange','mentat','terrier']){
+    const f=fixture(t,app),helper=f.prefix+'bootstrap/module_catalogue_cache.py';
+    f.replace(helper,'reviewed fixed cache helper');f.save();assert.ok(f.run().files.has(helper));
+    const row=f.value.files[1];
+    for(const name of [f.prefix+'bootstrap/module_application_contracts.py',f.prefix+'bootstrap/arbitrary.py',
+      'resources/runtime/other/bootstrap/module_catalogue_cache.py',helper.toUpperCase()]){
+      row.path=name;f.save();assert.throws(f.run,/Invalid source overlay member/);
+    }
+    row.path=helper;
+    const raw=Buffer.from('MZ native content in added helper');
+    fs.writeFileSync(path.join(f.overlay,'files',helper),raw);
+    Object.assign(row,{bytes:raw.length,sha256:hash(raw)});f.save();assert.throws(f.run,/native images/);
+  }
+});
+test('overlay member budget follows each exact application allowlist',t=>{
+  for(const app of ['melange','mentat','terrier']){
+    const f=fixture(t,app),limit=app==='mentat'?8:9;
+    while(f.value.files.length<=limit)f.value.files.push({...f.value.files[0]});
+    f.save();assert.throws(f.run,/Invalid source overlay identity/);
+  }
+});
 test('Terrier committed route replacement is permitted without vendor or native overrides',t=>{
   const f=fixture(t),name=f.prefix+'sources/server/research/street_views.py';
   f.write(f.program,name,'old guard');f.replace(name,'new guard');f.save();assert.ok(f.run().files.has(name));

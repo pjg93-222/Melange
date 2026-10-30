@@ -42,6 +42,7 @@ class RefreshInventoryTests(unittest.TestCase):
         (self.here / 'terrier_standalone.py').write_bytes(b'new standalone boundary')
         (self.here / 'desktop_credentials.py').write_bytes(b'new Windows identity helper')
         (self.here / 'terrier_github_snapshot.py').write_bytes(b'reviewed public snapshot activation')
+        (self.here / 'module_catalogue_cache.py').write_bytes(b'reviewed user-bound validation cache')
         (self.source / 'new_source.py').write_bytes(b'new reviewed source')
         for target, value in (('HERE', self.here), ('ROOT', self.source), ('ADDITIONS', {'melange': ('new_source.py',)})):
             instance = patch.object(refresh, target, value)
@@ -60,7 +61,10 @@ class RefreshInventoryTests(unittest.TestCase):
                              [row for row in self.specs[app]['programFiles'] if row['root'] == 'source'])
             self.assertEqual(spec['programFingerprint'], hashlib.sha256(refresh.encoded(spec['programFiles'])).hexdigest())
             bootstrap = {row['path']: row for row in spec['programFiles'] if row['root'] == 'bootstrap'}
-            self.assertEqual(set(bootstrap), {'old_bootstrap.py', 'terrier_standalone.py', 'desktop_credentials.py', 'terrier_github_snapshot.py'})
+            expected = {'old_bootstrap.py', 'terrier_standalone.py', 'desktop_credentials.py', 'terrier_github_snapshot.py'}
+            if app == 'melange':
+                expected.add('module_catalogue_cache.py')
+            self.assertEqual(set(bootstrap), expected)
             for name, row in bootstrap.items():
                 raw = (self.here / name).read_bytes()
                 self.assertEqual((row['bytes'], row['sha256']), (len(raw), hashlib.sha256(raw).hexdigest()))
@@ -71,6 +75,7 @@ class RefreshInventoryTests(unittest.TestCase):
         for app, spec in python_specs.items():
             files = {(row['root'], row['path']): row for row in spec['programFiles']}
             self.assertIn(('bootstrap', 'terrier_standalone.py'), files)
+            self.assertEqual(('bootstrap', 'module_catalogue_cache.py') in files, app == 'melange')
             self.assertEqual(files[('source', app + '/app.py')]['sha256'], hashlib.sha256(b'changed source').hexdigest())
             self.assertEqual(('source', 'new_source.py') in files, app == 'melange')
 
