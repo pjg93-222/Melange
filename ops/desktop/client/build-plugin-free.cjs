@@ -61,6 +61,69 @@ function exactKeys(value, keys) {
   return value && !Array.isArray(value) && typeof value === 'object' &&
     Object.keys(value).sort().join('|') === [...keys].sort().join('|');
 }
+const BOOTSTRAP_OVERLAY33 = Object.freeze([
+  'data_release_fetch.py',
+  'desktop_audit.py',
+  'desktop_backend.py',
+  'desktop_credentials.py',
+  'desktop_figure_renderer.py',
+  'desktop_migrations.py',
+  'desktop_workspace.py',
+  'melange_bootstrap.py',
+  'melange_data_paths.py',
+  'melange_module_data.py',
+  'melange_public_payroll_normalize.py',
+  'melange_public_payroll_projection.py',
+  'melange_public_provenance.py',
+  'mentat_layout.py',
+  'mentat_module_data.py',
+  'module_application_contracts.py',
+  'module_application_inventory.py',
+  'module_catalogue_cache.py',
+  'module_data_handoff.py',
+  'module_data_launch.py',
+  'module_data_snapshot.py',
+  'module_public_input_installers.py',
+  'module_workspace_combined_ui.py',
+  'module_workspace_handoff.py',
+  'module_workspace_industry_ui.py',
+  'module_workspace_inputs.py',
+  'module_workspace_installers.py',
+  'module_workspace_render.py',
+  'module_workspace_ui_templates.py',
+  'native_access_state.py',
+  'native_credentials.py',
+  'terrier_district.py',
+  'terrier_github_snapshot.py',
+  'terrier_owner.py',
+  'terrier_runtime_handoff.py',
+  'terrier_standalone.py',
+  'workspace_archive.py',
+  'workspace_cache.py',
+  'workspace_data_contract.py',
+  'workspace_graph.py',
+  'workspace_melange.py',
+  'workspace_mentat.py',
+  'workspace_sqlite.py',
+]);
+const BOOTSTRAP_ADDITIONS33 = Object.freeze([
+  'desktop_workspace.py',
+  'module_workspace_combined_ui.py',
+  'module_workspace_handoff.py',
+  'module_workspace_industry_ui.py',
+  'module_workspace_inputs.py',
+  'module_workspace_installers.py',
+  'module_workspace_render.py',
+  'module_workspace_ui_templates.py',
+  'terrier_runtime_handoff.py',
+  'workspace_archive.py',
+  'workspace_cache.py',
+  'workspace_data_contract.py',
+  'workspace_graph.py',
+  'workspace_melange.py',
+  'workspace_mentat.py',
+  'workspace_sqlite.py',
+]);
 function sourceOverlay(files, appId, version, manifestFile) {
   if (!manifestFile) return {files:new Map(files), inputs:[]};
   manifestFile = physical(manifestFile);
@@ -73,15 +136,19 @@ function sourceOverlay(files, appId, version, manifestFile) {
     throw new Error('Source overlay manifest must be unchanged canonical JSON');
   }
   const prefix = 'resources/runtime/' + appId + '/';
-  // Keep the producer's narrow reviewed closure aligned with independent native
-  // verification. Only the fixed cache helper may be absent from the old base.
-  const allowed = new Set(['bootstrap/terrier_standalone.py','bootstrap/module_application_inventory.py',
+  // Legacy releases retain their old closure. Release33 separately enumerates
+  // the reviewed helpers that may be absent from the exact sealed32 baseline.
+  const legacyAllowed = new Set(['bootstrap/terrier_standalone.py','bootstrap/module_application_inventory.py',
     'bootstrap/module_application_contracts.py','bootstrap/module_public_input_installers.py',
     'bootstrap/native_access_state.py','bootstrap/module_catalogue_cache.py',
     'source-inventory.json','source-provenance.json',
     ...(appId === 'terrier' ? ['sources/server/research/street_views.py'] : []),
     ...(appId === 'melange' ? ['sources/fec/surfaces/melange_public_data.py'] : [])].map(name => prefix + name));
-  const additions = new Set([prefix + 'bootstrap/module_catalogue_cache.py']);
+  const allowed = version === '1.0.33' ? new Set([...BOOTSTRAP_OVERLAY33.map(name => prefix + 'bootstrap/' + name),
+    prefix + 'source-inventory.json', prefix + 'source-provenance.json',
+    ...(appId === 'melange' ? [prefix + 'sources/fec/surfaces/staffer_graph_snapshot.py', prefix + 'sources/fec/surfaces/staffer_live_service.py'] : [])]) : legacyAllowed;
+  const additions = version === '1.0.33' ? new Set(BOOTSTRAP_ADDITIONS33.map(name => prefix + 'bootstrap/' + name))
+    : new Set([prefix + 'bootstrap/module_catalogue_cache.py']);
   if (!exactKeys(manifest, ['schemaVersion','appId','version','clientCommit','sourceCommit','files']) ||
       manifest.schemaVersion !== 1 || manifest.appId !== appId || manifest.version !== version ||
       !/^[a-f0-9]{40}$/.test(manifest.clientCommit) || !/^[a-f0-9]{40}$/.test(manifest.sourceCommit) ||

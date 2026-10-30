@@ -13,6 +13,7 @@ function fixture(appId,{settings,role='owner',portable=false,suspended=false,acc
  const events=[],authorized=[],started=[],resumed=[],revealed=[];
  const approved=approval||{accepted:{grant:{appId,role}},owner:role==='owner'?{mode:'existing-owner'}:null,session:role==='recipient'?{mode:'local-session'}:null};
  const context={module:{exports:{}},URL,background:true,openingAccess:false,closing:false,moduleDataStartup:null,portable,packs:appId==='terrier'?{}:null,definition:{id:appId},refuseModuleDataSettings,
+  startupRetry:{begin(){},cancel(){},defer:()=>true},
   read:name=>{assert.equal(name,'settings.json');events.push('read');if(readError)throw new Error('Synthetic settings read failure');return selected;},
   updateStatus:message=>{events.push('status');assert.equal(message,'Application startup failed. Check local logs.');},
   loadingStatus:async()=>{events.push('loading');},
@@ -22,6 +23,8 @@ function fixture(appId,{settings,role='owner',portable=false,suspended=false,acc
   updater:{markApplicationFailed:async()=>events.push('failed'),markApplicationReady:()=>events.push('ready')},
   window:{hide:()=>events.push('hide'),show:()=>events.push('show'),loadURL:async value=>{events.push('loadURL');url=value;},webContents:{getURL:()=>url}},
   require:name=>{
+   if(name==='./startup-failure.cjs')return require('../startup-failure.cjs');
+   if(name==='./district-runtime-input.cjs')return{discardDistrictConfiguration:async()=>false};
    if(name==='./access-gate.cjs')return {authorizeAvailable:async gate=>{assert.equal(gate,context.accessGate);events.push('authorizeAvailable');if(accessError)throw new Error('Synthetic unavailable access');}};
    if(name==='./access-lifecycle.cjs')return {terrierSession:async()=>true};
    throw new Error('Unexpected native launch dependency');
@@ -100,6 +103,11 @@ test('backend startup errors still use the same failure UI and clear openingAcce
  const f=fixture('melange',{startupError:true});await assert.rejects(f.launch(false),/Synthetic backend startup failure/);
  assert.deepEqual(f.events.slice(-4),['status','loading','failed','setup']);assert.equal(f.events.includes('accessUI'),false);assert.equal(f.context.openingAccess,false);
 });
+for(const reason of ['cancelled','authorization','context'])test('pre-backend '+reason+' pauses without blaming the installed binary',async()=>{
+ const f=fixture('mentat');f.context.updateStatus=()=>{};
+ f.context.moduleDataStartup={supported:true,start:async()=>{throw Object.assign(new Error('Context changed'),{code:reason});}};
+ await f.launch(false);assert.equal(f.context.runtime.child,null);assert.equal(f.events.includes('failed'),false);assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('setup'),false);assert.equal(f.context.openingAccess,false);
+});
 
 test('an exited backend replaces the loading text before deferred update-failure reporting',async()=>{
  const f=fixture('mentat',{startupError:true}),messages=[];let finish;
@@ -131,6 +139,30 @@ test('settings read failures use startup UI before any launch-dependent access p
 });
 
 const {startupFixture}=require('./fixtures/module-startup-fixture.cjs');
+for(const reason of ['timeout','unreachable','proxy','rate_limited'])test('actual main defers cold '+reason+' then reveals only after a fresh successful retry',async t=>{
+ const native=startupFixture(t),pointer=native.data.transport.currentPointer;let first=true;
+ native.data.transport.currentPointer=async(...args)=>{if(first){first=false;throw Object.assign(new Error('private network detail'),{reason,retryableNetwork:true,retryAfterMs:30000});}return pointer(...args);};
+ const f=fixture('mentat',{settings:native.selected,nativeFixture:native,approval:await native.data.options.authorize()});
+ f.context.updateStatus=()=>f.events.push('status');f.context.updater.markApplicationDeferred=error=>{assert.equal(error.dataReason,reason);f.events.push('deferred');};
+ f.context.startupRetry.defer=error=>{assert.equal(error.retryAfterMs,30000);f.events.push('retry-scheduled');return true;};
+ await f.launch(false);assert.equal(native.runtime.child,null);assert.equal(native.data.journal?.active??null,null);
+ assert.equal(f.events.includes('deferred'),true);assert.equal(f.events.includes('retry-scheduled'),true);assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('failed'),false);assert.equal(f.events.includes('setup'),false);
+ await f.launch(false);assert.ok(native.data.journal.active);assert.equal(f.events.includes('ready'),true);assert.equal(f.events.includes('failed'),false);
+});
+test('actual main keeps externally rejected data blocked without retry or release suspension',async t=>{
+ const native=startupFixture(t);native.data.transport.currentPointer=async()=>{throw Object.assign(new Error('bad external TLS or data signature'),{reason:'integrity'});};
+ const f=fixture('mentat',{settings:native.selected,nativeFixture:native,approval:await native.data.options.authorize()});
+ f.context.updateStatus=()=>{};f.context.updater.markApplicationDeferred=error=>{assert.equal(error.retryable,false);f.events.push('deferred');};
+ f.context.startupRetry.defer=()=>assert.fail('Integrity failure must not retry automatically');
+ await f.launch(false);assert.equal(native.runtime.child,null);assert.equal(f.events.includes('deferred'),true);assert.equal(f.events.includes('failed'),false);assert.equal(f.events.includes('ready'),false);assert.equal(f.events.includes('setup'),true);
+});
+test('installed program damage discovered after a network failure remains fatal in actual main',async t=>{
+ let damaged=false;const native=startupFixture(t,{changeBoundary:boundary=>{const supports=boundary.supportsContract;boundary.supportsContract=value=>!damaged&&supports(value);}});
+ native.data.transport.currentPointer=async()=>{damaged=true;throw Object.assign(new Error('network'),{reason:'timeout',retryableNetwork:true});};
+ const f=fixture('mentat',{settings:native.selected,nativeFixture:native,approval:await native.data.options.authorize()});
+ f.context.updater.markApplicationDeferred=()=>assert.fail('Program damage cannot defer');
+ await assert.rejects(f.launch(false));assert.equal(f.events.includes('failed'),true);assert.equal(f.events.includes('ready'),false);assert.equal(native.runtime.child,null);
+});
 for(const appId of ['melange','mentat']){
  test(`actual ${appId} main launch uses the native coordinator and reveals only after fixture health and journal commit`,async t=>{
   const native=startupFixture(t,{appId}),approval=await native.data.options.authorize(),f=fixture(appId,{settings:native.selected,nativeFixture:native,approval});

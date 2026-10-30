@@ -77,10 +77,13 @@ test('preload exposes a read, argument-free refresh and a removable data status 
  assert.deepEqual(calls,[['desktop:district-data'],['desktop:district-data-refresh']]);let received;
  const remove=exposed.onDistrictData(value=>{received=value;});const state={phase:'ready'};listeners.get('desktop:district-data-status')({},state);assert.equal(received,state);remove();assert.equal(listeners.size,0);
 });
-test('owner data failures stay on the loading boundary and cannot mark a binary update as failed',async()=>{
+test('known owner data failures defer without raw errors while unknown program failures stay fatal',async()=>{
  const source=fs.readFileSync(path.join(__dirname,'..','main.cjs'),'utf8');
  const start=source.indexOf('async function prepareDistrictData(){'),end=source.indexOf('// Learned revocation:',start);assert.ok(start>0&&end>start);
- const notices=[],settings={...configuration},context={standaloneMode:false,read:()=>settings,prepareOwnerDistrict:async()=>{throw new Error('private/path and private response');},closing:false,downloads:{signal:{aborted:false}},districtLog:text=>notices.push(text),loadingStatus:text=>notices.push(text)};
+ const notices=[],settings={...configuration},failure=require('../startup-failure.cjs'),protocol=require('../github-district-protocol.cjs');let error=new protocol.DistrictDataError('private/path and private response');
+ const context={runtime:{},standaloneMode:false,read:()=>settings,prepareOwnerDistrict:async()=>{throw error;},closing:false,downloads:{signal:{aborted:false}},districtLog:text=>notices.push(text),loadingStatus:text=>notices.push(text),require:name=>name==='./district-data-probe.cjs'?{verifyDistrictProgram:()=>{}}:require(path.join(__dirname,'..',name))};
  vm.createContext(context);vm.runInContext(source.slice(start,end)+';globalThis.prepare=prepareDistrictData;',context);
- assert.equal(await context.prepare(),false);assert.equal(notices.length,2);assert.match(notices[1],/Existing files were preserved/);assert.doesNotMatch(notices.join(' '),/private\/path|private response/);
+ await assert.rejects(context.prepare(),value=>failure.isDataStartupFailure(value)&&value.dataReason==='integrity'&&!value.message.includes('private/path'));
+ error=Object.assign(new Error('synthetic socket timeout'),{retryableNetwork:true,reason:'timeout'});await assert.rejects(context.prepare(),value=>failure.isDataStartupFailure(value)&&value.retryable);
+ error=new TypeError('synthetic installed code failure');await assert.rejects(context.prepare(),value=>value===error);assert.deepEqual(notices,[]);
 });

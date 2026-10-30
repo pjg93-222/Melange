@@ -77,12 +77,12 @@ function encodeModuleFrame(value){
  const bytes=Buffer.from(canonical(value),'utf8');requireValue(bytes.length>=2&&bytes.length<=MAX_FRAME);
  const header=Buffer.alloc(4);header.writeUInt32BE(bytes.length);return Buffer.concat([header,bytes]);
 }
-function writeModuleFrame(child,frame,signal){
+function writeModuleFrame(child,frame,signal,maximum=MAX_FRAME){
  return new Promise((resolve,reject)=>{
   const input=child.stdin;let done=false,timer=null;
   const finish=error=>{if(done)return;done=true;clearTimeout(timer);child.removeListener('exit',exited);signal?.removeEventListener('abort',aborted);error?reject(failure()):resolve();};
   const failed=()=>finish(failure()),exited=()=>finish(failure()),aborted=()=>{input?.destroy();finish(failure());};
-  if(!input||signal?.aborted||!Buffer.isBuffer(frame)||frame.length>MAX_FRAME+4){finish(failure());return;}
+  if(!input||signal?.aborted||!Buffer.isBuffer(frame)||!Number.isSafeInteger(maximum)||maximum<MAX_FRAME||maximum>2*1024**2||frame.length>maximum+4){finish(failure());return;}
   input.on('error',failed);input.once('close',()=>input.removeListener('error',failed));child.once('exit',exited);signal?.addEventListener('abort',aborted,{once:true});
   timer=setTimeout(()=>{input.destroy();finish(failure());},5000);timer.unref?.();
   try{input.end(frame,error=>finish(error));}catch{finish(failure());}
@@ -90,24 +90,29 @@ function writeModuleFrame(child,frame,signal){
 }
 function consumeModuleCapability(runtime,capability,configuration){
  const record=CAPABILITIES.get(capability);requireValue(record&&record.runtime===runtime&&!record.consumed&&!runtime.child&&record.selectedFingerprint===digest(configuration));
- record.guard();verifyProgram(runtime,record.contract);record.consumed=true;return record;
+ record.guard();verifyProgram(runtime,record.contract);if(record.workspaceContract)verifyProgram(runtime,record.workspaceContract);record.consumed=true;return record;
 }
 function activeModule(runtime){return RUNTIMES.get(runtime)?.active||null;}
 function setActiveModule(runtime,record,child){const support=RUNTIMES.get(runtime);requireValue(support&&record.runtime===runtime&&record.consumed&&runtime.child===child);support.active={record,child};}
 function clearActiveModule(runtime,child){const support=RUNTIMES.get(runtime);if(support&&(!child||support.active?.child===child))support.active=null;}
 function matchesModuleHealth(runtime,value,binding){
  const active=activeModule(runtime);if(!active||runtime.child!==active.child||!value||value.pid!==active.child.pid||value.appId!==runtime.definition.id)return false;
- const record=active.record,data=value.moduleData;
- return exact(data,['schemaVersion','contractId','programFingerprint','sourceDigest','sourceFingerprint','launchNonce','coverageDigest'])&&
-  data.schemaVersion===1&&data.launchNonce===record.launchNonce&&data.coverageDigest===record.coverageDigest&&
-  Object.entries(record.binding).every(([key,expected])=>data[key]===expected)&&
-  (!binding||exact(binding,Object.keys(record.binding))&&Object.entries(record.binding).every(([key,expected])=>binding[key]===expected));
+ const record=active.record;
+ const matches=(data,expected,coverage,wanted)=>exact(data,['schemaVersion','contractId','programFingerprint','sourceDigest','sourceFingerprint','launchNonce','coverageDigest'])&&
+  data.schemaVersion===1&&data.launchNonce===record.launchNonce&&data.coverageDigest===coverage&&Object.entries(expected).every(([key,item])=>data[key]===item)&&
+  (!wanted||exact(wanted,Object.keys(expected))&&Object.entries(expected).every(([key,item])=>wanted[key]===item));
+ if(record.workspaceBinding){
+  if(binding&&!exact(binding,['moduleData','workspaceData']))return false;
+  return matches(value.moduleData,record.binding,record.coverageDigest,binding?.moduleData)&&matches(value.workspaceData,record.workspaceBinding,record.workspaceCoverageDigest,binding?.workspaceData);
+ }
+ return matches(value.moduleData,record.binding,record.coverageDigest,binding);
 }
 function checkWarmModule(runtime,configuration,approval){
  const active=activeModule(runtime);if(!active)return;
  const record=active.record;requireValue(runtime.child===active.child&&digest(configuration)===record.selectedFingerprint&&digest(record.getSelected())===record.selectedFingerprint&&
   authorized(record.appId,configuration,approval)&&authorizationIdentity(approval)===record.authorizationIdentity);
  verifyProgram(runtime,record.contract);
+ if(record.workspaceContract)verifyProgram(runtime,record.workspaceContract);
 }
 function createRuntimeModuleBoundary({appId,profile,publicKeys,contract,getRuntime,getSelected,authorize,protectedRoots=[],onPreparing=()=>{},constructionProof}){
  if(!contract||!['melange','mentat'].includes(appId)||typeof getRuntime!=='function'||typeof getSelected!=='function'||typeof authorize!=='function'||typeof onPreparing!=='function')return null;
@@ -154,5 +159,50 @@ function createRuntimeModuleBoundary({appId,profile,publicKeys,contract,getRunti
   }
  });
 }
+function createRuntimeWorkspaceBoundary({appId,profile,publicKeys,publicContract,workspaceContract,getRuntime,getSelected,authorize,protectedRoots=[],onPreparing=()=>{},publicConstructionProof,workspaceConstructionProof}){
+ if(!publicContract||!workspaceContract||!['melange','mentat'].includes(appId)||[getRuntime,getSelected,authorize,onPreparing].some(value=>typeof value!=='function'))return null;
+ try{for(const contract of [publicContract,workspaceContract])requireValue(contract.appId===appId&&programFingerprint(contract.programFiles)===contract.programFingerprint);
+  requireValue(workspaceContract.contractId===appId+'.workspace.v1'&&publicContract.programFingerprint===workspaceContract.programFingerprint);
+ }catch{return null;}
+ let initial=publicConstructionProof!==undefined||workspaceConstructionProof!==undefined?{publicConstructionProof,workspaceConstructionProof}:null;
+ const verify=runtime=>{const left=verifyProgram(runtime,publicContract),right=verifyProgram(runtime,workspaceContract);requireValue(left.source===right.source&&left.bootstrap===right.bootstrap);return left;};
+ const supported=(left,right)=>{try{
+  requireValue(left===publicContract&&right===workspaceContract);
+  if(initial){const proofs=initial;initial=null;constructionSupport(proofs.publicConstructionProof,getRuntime(),publicContract);constructionSupport(proofs.workspaceConstructionProof,getRuntime(),workspaceContract);}
+  else verify(getRuntime());return true;
+ }catch{return false;}};
+ const coverage=contract=>digest({publicReaders:[...contract.publicReaders].sort(),privateBoundaries:[...contract.privateBoundaries].sort()});
+ return Object.freeze({programFingerprint:publicContract.programFingerprint,workspaceProgramFingerprint:workspaceContract.programFingerprint,supportsContracts:supported,
+  async start({runtime,configuration,publicCandidate,workspaceCandidate,lease,claimChild}){
+   requireValue(runtime===getRuntime()&&supported(publicContract,workspaceContract)&&!runtime.child&&typeof claimChild==='function');
+   const selected=structuredClone(configuration),selectedFingerprint=digest(selected),generation=runtime.generation||0;
+   const guard=()=>{lease.assertCurrent();requireValue(!lease.signal.aborted&&runtime===getRuntime()&&(runtime.generation||0)===generation&&digest(getSelected())===selectedFingerprint);};
+   guard();requireValue(digest(lease.originalSelected)===selectedFingerprint);
+   const sourceOf=(candidate,field,contract)=>{const effective=structuredClone(candidate.effectiveConfiguration),source=effective[field];delete effective[field];requireValue(digest(effective)===selectedFingerprint&&source?.appId===appId&&source.manifestSha256===candidate.manifestSha256&&source.pointerDigest===candidate.pointerDigest);
+    return {source,binding:Object.freeze({contractId:contract.contractId,programFingerprint:contract.programFingerprint,sourceDigest:source.manifestSha256,sourceFingerprint:digest(source)})};};
+   const pub=sourceOf(publicCandidate,'ownerGitHubModuleData',publicContract),workspace=sourceOf(workspaceCandidate,'ownerGitHubWorkspaceData',workspaceContract);
+   const approval=await authorize(selected);guard();requireValue(authorized(appId,selected,approval));const roots=verify(runtime),launchNonce=crypto.randomBytes(32).toString('base64url');
+   const record={runtime,appId,contract:publicContract,workspaceContract,generation,selectedFingerprint,getSelected,guard,binding:pub.binding,workspaceBinding:workspace.binding,launchNonce,signal:lease.signal,consumed:false,
+    wire:'workspace',source:structuredClone(pub.source),workspaceSource:structuredClone(workspace.source),authorizationIdentity:authorizationIdentity(approval),
+    startupTimeoutMs:Math.max(publicContract.startupTimeoutMs,workspaceContract.startupTimeoutMs),claimChild,coverageDigest:coverage(publicContract),workspaceCoverageDigest:coverage(workspaceContract),
+    validate:async()=>{guard();verify(runtime);
+     for(const [candidate,contract,channel,binding] of [[publicCandidate,publicContract,'public-v1',pub.binding],[workspaceCandidate,workspaceContract,'workspace-v1',workspace.binding]]){
+      const checked=await validateModuleBinding({appId,profile,configuration:candidate.effectiveConfiguration,publicKeys,registry:contract.registry,requiredKinds:contract.requiredKinds,signal:lease.signal,protectedRoots,channel});guard();requireValue(checked.snapshotRoot===candidate.snapshotRoot&&digest(checked.source)===binding.sourceFingerprint);
+     }
+    },
+    checkAuthorization:current=>{guard();requireValue(authorized(appId,selected,current)&&authorizationIdentity(current)===authorizationIdentity(approval));verify(runtime);},
+    frame:runtimeRoots=>{const common={schemaVersion:1,appId,profileRoot:profile,sourceRoot:roots.source,originalDataRoot:runtimeRoots.data,stateRoot:runtimeRoots.state,launchNonce};
+     return encodeModuleFrame({schemaVersion:1,
+      publicInput:{...common,contractId:publicContract.contractId,programFingerprint:publicContract.programFingerprint,source:structuredClone(pub.source),binding:pub.binding},
+      workspaceInput:{...common,contractId:workspaceContract.contractId,programFingerprint:workspaceContract.programFingerprint,source:structuredClone(workspace.source),binding:workspace.binding}});
+    }};
+   const capability=Object.freeze({});CAPABILITIES.set(capability,record);onPreparing();guard();const origin=await runtime.start(selected,capability);guard();requireValue(activeModule(runtime)?.record===record);
+   return Object.freeze({moduleData:pub.binding,workspaceData:workspace.binding,origin,child:runtime.child});
+  },
+  async verifyHealth({runtime,lease,binding}){lease.assertCurrent();if(runtime!==getRuntime()||!supported(publicContract,workspaceContract))return false;
+   const active=activeModule(runtime);if(!active?.record.workspaceBinding)return false;active.record.guard();const result=await runtime.verifyModuleHealth(binding);lease.assertCurrent();active.record.guard();return result===true&&activeModule(runtime)===active;
+  }
+ });
+}
 module.exports={programTable,programFingerprint,verifyProgram,withVerifiedProgramConstruction,encodeModuleFrame,writeModuleFrame,initializeModuleRuntime,
- consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,createRuntimeModuleBoundary};
+ consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,createRuntimeModuleBoundary,createRuntimeWorkspaceBoundary};

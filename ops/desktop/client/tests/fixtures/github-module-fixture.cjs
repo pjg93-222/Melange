@@ -2,6 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto');
 const {canonical}=require('../../access-client.cjs');
 const protocol=require('../../github-module-protocol.cjs');
+const {networkFailure,RETRYABLE}=require('../../network-transport.cjs');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 function signed(appId='mentat',{registry,sequence=1,bytes=Buffer.from('{"aggregate":42}'),keys=crypto.generateKeyPairSync('ed25519')}={}){
  const kind=appId+'.fixture.v1';
@@ -22,8 +23,8 @@ function environment(appId='mentat'){
  let revoked=false,owner=true,journal=null,remote=signed(appId),network=null;const offsets=[],requests=[];
  const authorize=async()=>({accepted:{revoked,grant},owner:owner?{mode:'existing-owner',appId,grantId:grant.grantId,accountIdentity:grant.accountIdentity,dataBindings:[{districtId:null,dataRootHash:sha(Buffer.from(original)),localUserId:null,localUsername:null}]}:null});
  const transport={
-  resolveMain:async()=>{requests.push('main');if(network)throw protocol.fail(network,'Synthetic network unavailable');return 'b'.repeat(40);},
-  pointer:async()=>{requests.push('pointer');return Buffer.from(canonical(remote.envelope));},
+  currentPointer:async()=>transport.pointer(),
+  pointer:async()=>{requests.push('pointer');if(network)throw RETRYABLE.has(network)?networkFailure(network,'Synthetic network unavailable'):protocol.fail(network,'Synthetic refusal');return Buffer.from(canonical(remote.envelope));},
   verifyRelease:async()=>{requests.push('release');return true;},
   manifest:async()=>{requests.push('manifest');return remote.manifestBytes;},
   segment:async(_tag,item,{offset,onChunk})=>{requests.push(item.asset);offsets.push(offset);const raw=remote.objects.get(item.asset);for(let n=offset;n<raw.length;n+=3)await onChunk(raw.subarray(n,Math.min(n+3,raw.length)));return raw.length-offset;}

@@ -22,11 +22,12 @@ function deadline(error,now,random){
  return now+Math.min(MAX_DELAY,Math.max(60*1000,requested||60*60*1000))+Math.floor(random()*60000);
 }
 class DiscoveryCache{
- constructor({directory,repository,validate,now=Date.now,random=Math.random,onStatus=()=>{},waitMs=2000}){
+ constructor({directory,repository,validate,now=Date.now,random=Math.random,onStatus=()=>{},waitMs=2000,cooldownScope='api'}){
+  if(!['api','cdn'].includes(cooldownScope))throw new Error('Invalid GitHub cooldown scope');
   this.repository=repository;this.validate=validate;this.now=now;this.random=random;this.onStatus=onStatus;this.waitMs=waitMs;
   this.directory=path.resolve(directory);fs.mkdirSync(this.directory,{recursive:true,mode:0o700});
   const id=crypto.createHash('sha256').update(repository).digest('hex');
-  this.filename=path.join(this.directory,id+'.sqlite');this.cooldownFile=path.join(this.directory,id+'-cooldown.sqlite');
+  this.filename=path.join(this.directory,id+'.sqlite');this.cooldownFile=path.join(this.directory,id+(cooldownScope==='cdn'?'-cdn':'')+'-cooldown.sqlite');
  }
  open(filename,sql){
   if(fs.existsSync(filename)){const stat=fs.lstatSync(filename);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>MAX_BYTES*3)throw new Error('GitHub discovery cache is invalid');}

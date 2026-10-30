@@ -9,6 +9,21 @@ const {spawnSync}=require('node:child_process');
 // Each app updates from its own public repository; the variable, when set, overrides it (2026-10-15 correction).
 const EXPECTED={melange:'pjg93-222/melange',mentat:'pjg93-222/mentat',terrier:'pjg93-222/geo'};
 
+test('workspace distribution is an explicit compiled M/M mode and cannot be selected for Terrier or from unknown values',()=>{
+ const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-workspace-build-'));
+ try{
+  for(const appId of Object.keys(EXPECTED)){
+   fs.mkdirSync(path.join(fixture,appId,'bootstrap'),{recursive:true});fs.mkdirSync(path.join(fixture,appId,'python','bin'),{recursive:true});
+   fs.writeFileSync(path.join(fixture,appId,'bootstrap','desktop_backend.py'),'');fs.writeFileSync(path.join(fixture,appId,'python','python.exe'),'');fs.writeFileSync(path.join(fixture,appId,'python','bin','python3'),'');
+   for(const mode of ['disabled','workspace-v1','renderer-path']){
+    const child=spawnSync(process.execPath,['-e',"const config=require('./builder.cjs');process.stdout.write(JSON.stringify(config.extraMetadata.desktopAppConfig.desktopWorkspaceData))"],{cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env:{...process.env,DESKTOP_APP_ID:appId,DESKTOP_RUNTIME_ROOT:fixture,DESKTOP_ACCESS_TRUST:'',DESKTOP_WORKSPACE_DATA_MODE:mode}});
+    if(mode==='renderer-path'){assert.notEqual(child.status,0);assert.match(child.stderr,/workspace/);}
+    else{assert.equal(child.status,0,child.stderr);assert.deepEqual(JSON.parse(child.stdout),mode==='workspace-v1'&&appId!=='terrier'?{[appId]:'workspace-v1'}:{});}
+   }
+  }
+ }finally{assert.equal(path.dirname(fixture),path.resolve(os.tmpdir()));assert.ok(path.basename(fixture).startsWith('desktop-workspace-build-'));fs.rmSync(fixture,{recursive:true,force:true});}
+});
+
 function updateSource(fixture,appId,repository){
   const env={...process.env,DESKTOP_APP_ID:appId,DESKTOP_RUNTIME_ROOT:fixture,DESKTOP_ACCESS_TRUST:''};
   delete env.DESKTOP_GITHUB_REPOSITORY;delete env.DESKTOP_UPDATE_PROVIDER;

@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
 const producer=require('../build-plugin-free.cjs');
 const hash=raw=>crypto.createHash('sha256').update(raw).digest('hex');
-function fixture(t,app='terrier'){
+function fixture(t,app='terrier',version='1.0.31'){
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-source-overlay-'));
   t.after(()=>{assert.equal(fs.realpathSync.native(root),root);fs.rmSync(root,{recursive:true,force:true});});
   const program=path.join(root,'base'),overlay=path.join(root,'overlay'),manifest=path.join(overlay,'manifest.json');
@@ -10,13 +10,48 @@ function fixture(t,app='terrier'){
   const write=(folder,relative,raw)=>{const file=path.join(folder,relative);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,raw);return file;};
   const base=write(program,name,'old reviewed bootstrap\n');
   write(program,'vendor.dll','retained vendor fixture');
-  const value={schemaVersion:1,appId:app,version:'1.0.31',clientCommit:'a'.repeat(40),sourceCommit:'b'.repeat(40),files:[]};
+  const value={schemaVersion:1,appId:app,version,clientCommit:'a'.repeat(40),sourceCommit:'b'.repeat(40),files:[]};
   function replace(relative,raw){write(path.join(overlay,'files'),relative,raw);value.files.push({path:relative,bytes:Buffer.byteLength(raw),sha256:hash(raw)});}
   replace(name,'new reviewed bootstrap\n');
   const save=()=>fs.writeFileSync(manifest,JSON.stringify(value));save();
   return {root,program,overlay,manifest,prefix,name,base,value,write,replace,save,
-    run:()=>producer.sourceOverlay(producer.payloadFiles(program,'Terrier.exe'),app,'1.0.31',manifest)};
+    run:()=>producer.sourceOverlay(producer.payloadFiles(program,'Terrier.exe'),app,version,manifest)};
 }
+
+test('release33 adds only its explicitly reviewed workspace helpers and preserves every vendor/base byte',t=>{
+  for(const app of ['melange','mentat','terrier']){
+    const f=fixture(t,app,'1.0.33'),added=['desktop_workspace.py','terrier_runtime_handoff.py','module_workspace_handoff.py',
+      'workspace_data_contract.py','module_workspace_installers.py','module_workspace_inputs.py','workspace_melange.py',
+      'workspace_mentat.py','workspace_archive.py','workspace_sqlite.py','workspace_cache.py','workspace_graph.py',
+      'module_workspace_render.py','module_workspace_combined_ui.py','module_workspace_industry_ui.py','module_workspace_ui_templates.py'];
+    for(const name of added)f.replace(f.prefix+'bootstrap/'+name,'reviewed new helper '+name);
+    f.write(f.program,f.prefix+'bootstrap/desktop_backend.py','retained native boundary');
+    f.replace(f.prefix+'bootstrap/desktop_backend.py','reviewed paired native boundary');f.save();
+    const before=producer.payloadFiles(f.program,'unused.exe'),out=f.run();assert.equal(out.files.size,before.size+added.length);
+    assert.equal(out.files.get('vendor.dll'),before.get('vendor.dll'));assert.equal(fs.readFileSync(f.base,'utf8'),'old reviewed bootstrap\n');
+    const row=f.value.files[1],name=row.path;row.path=f.prefix+'bootstrap/native_credentials.py';f.save();assert.throws(f.run,/Invalid source overlay member/);
+    row.path=f.prefix+'bootstrap/unreviewed.py';f.save();assert.throws(f.run,/Invalid source overlay member/);row.path=name;f.save();
+  }
+});
+
+test('release33 permits only the two Melange sources; old reader and Terrier route are strictly inherited',t=>{
+  for(const app of ['melange','mentat','terrier']){
+    const f=fixture(t,app,'1.0.33');
+    const graph=f.prefix+'sources/fec/surfaces/staffer_graph_snapshot.py';f.write(f.program,graph,'old graph');f.replace(graph,'exact Git graph');f.save();
+    if(app==='melange')assert.ok(f.run().files.has(graph));else assert.throws(f.run,/Invalid source overlay member/);
+    for(const source of ['fec/surfaces/melange_public_data.py','server/research/street_views.py']){
+      f.value.files[1].path=f.prefix+'sources/'+source;f.write(f.program,f.value.files[1].path,'retained source');f.save();assert.throws(f.run,/Invalid source overlay member/);
+    }
+  }
+});
+
+test('release33 exact native activity service is permitted only under Melange source closure',t=>{
+  for(const app of ['melange','mentat','terrier']){
+    const f=fixture(t,app,'1.0.33'),name=f.prefix+'sources/fec/surfaces/staffer_live_service.py';
+    f.write(f.program,name,'retained activity service');f.replace(name,'exact reviewed native activity slot');f.save();
+    if(app==='melange')assert.ok(f.run().files.has(name));else assert.throws(f.run,/Invalid source overlay member/);
+  }
+});
 test('source overlay replaces only exact approved bytes and leaves immutable base unchanged',t=>{
   const f=fixture(t),before=fs.readFileSync(f.base),out=f.run();
   assert.equal(out.files.size,2);assert.equal(out.files.get('vendor.dll'),path.join(f.program,'vendor.dll'));

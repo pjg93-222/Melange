@@ -88,7 +88,55 @@ def _fingerprint(file):
     return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
 
 
-def activate_snapshot(source, data, state, district):
+class PreparedSnapshot:
+    """An actual candidate reader; active state changes only on native commit."""
+    def __init__(self, key, manifest, verify, *, retain_reader=False):
+        self.key, self.manifest, self.verify = key, manifest, verify
+        self.committed = False
+        self.retain_reader = retain_reader
+        self.previous_active = None
+        if retain_reader:
+            from server.research.models import Snapshot
+            self.previous_active = tuple(sorted(Snapshot.objects.filter(active=True).values_list('key', flat=True)))
+
+    def commit(self):
+        from django.db import transaction
+        from server.research import bundles
+        from server.research.models import Snapshot, AuditEvent
+        self.verify()
+        with transaction.atomic():
+            if self.previous_active is not None:
+                current = tuple(sorted(Snapshot.objects.filter(active=True).values_list('key', flat=True)))
+                if current != self.previous_active and current != (self.key,):
+                    raise ValueError('Another district source became active before this candidate.')
+            snapshot, _ = Snapshot.objects.get_or_create(key=self.key, defaults={'manifest': self.manifest})
+            if snapshot.manifest != self.manifest:
+                raise ValueError('An existing snapshot row has conflicting content.')
+            changed = not snapshot.active or Snapshot.objects.filter(active=True).exclude(pk=snapshot.pk).exists()
+            if changed:
+                Snapshot.objects.filter(active=True).exclude(pk=snapshot.pk).update(active=False)
+                snapshot.active = True
+                snapshot.save(update_fields=['active'])
+                AuditEvent.objects.create(actor='desktop public district data', action='snapshot.import', detail={'snapshot': self.key})
+            self.verify()
+        self.committed = True
+        if self.retain_reader:
+            # Raw readers are keyed by explicit immutable snapshot key. Clear
+            # the derived current-active caches without reparsing that reader.
+            for clear in tuple(bundles.dependents):
+                clear()
+        else:
+            bundles.load.cache_clear()
+
+    def health(self):
+        from server.research.models import Snapshot
+        self.verify()
+        if self.committed and list(Snapshot.objects.filter(active=True).values_list('key', flat=True)) != [self.key]:
+            raise ValueError('The active snapshot differs from the prepared reader.')
+        return {'snapshot': self.key, 'phase': 'active' if self.committed else 'prepared'}
+
+
+def activate_snapshot(source, data, state, district, *, defer_activation=False):
     """Validate authentic summary data, preserve old snapshots/views, and activate transactionally."""
     from django.db import transaction
     from server.research import bundles
@@ -106,6 +154,8 @@ def activate_snapshot(source, data, state, district):
     if root.is_symlink() or root.resolve(strict=True) != root:
         raise ValueError('Unsafe local snapshot state.')
     target = root / key
+    if defer_activation:
+        bundles.load.cache_clear()
     if target.exists():
         if target.is_symlink() or not target.is_dir() or target.resolve(strict=True) != target:
             raise ValueError('Unsafe existing snapshot state.')
@@ -142,15 +192,20 @@ def activate_snapshot(source, data, state, district):
                 shutil.rmtree(stage)
     if any(_fingerprint(directory / name) != before[name] for name in BASE_FILES):
         raise ValueError('Public summary changed during validation or activation.')
-    with transaction.atomic():
-        snapshot, _ = Snapshot.objects.get_or_create(key=key, defaults={'manifest': manifest})
-        if snapshot.manifest != manifest:
-            raise ValueError('An existing snapshot row has conflicting content.')
-        changed = not snapshot.active or Snapshot.objects.filter(active=True).exclude(pk=snapshot.pk).exists()
-        if changed:
-            Snapshot.objects.filter(active=True).exclude(pk=snapshot.pk).update(active=False)
-            snapshot.active = True
-            snapshot.save(update_fields=['active'])
-            AuditEvent.objects.create(actor='desktop public district data', action='snapshot.import', detail={'snapshot': key})
-    bundles.load.cache_clear()
+    target_before = {name: _fingerprint(regular_file(target / name, target)) for name in BASE_FILES}
+    def verify():
+        if (any(_fingerprint(regular_file(directory / name, directory)) != before[name] for name in BASE_FILES)
+                or any(_fingerprint(regular_file(target / name, target)) != target_before[name] for name in BASE_FILES)):
+            raise ValueError('Snapshot input changed around reader activation.')
+    prepared = PreparedSnapshot(key, manifest, verify, retain_reader=defer_activation)
+    if defer_activation:
+        # Read the explicit candidate key, never the old active database pointer.
+        for name in sorted(BASE_FILES):
+            actual = bundles.load(key, name)
+            expected = manifest if name == 'manifest.json' else payload[name]
+            if actual != expected:
+                raise ValueError('The actual candidate reader differs from verified data.')
+        verify()
+        return prepared
+    prepared.commit()
     return {'snapshot': key, 'activated': True}

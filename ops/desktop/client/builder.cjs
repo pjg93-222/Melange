@@ -25,6 +25,9 @@ if(desktopAccessMode==='standalone'&&(updateProvider!=='github'||desktopScrapeBr
 const publicDataMode=process.env.DESKTOP_PUBLIC_DATA_MODE||'legacy';
 if(!['legacy','paged-v1'].includes(publicDataMode)||(publicDataMode==='paged-v1'&&selected.id!=='melange'))throw new Error('Unsupported public data mode for this application');
 const desktopPublicData=publicDataMode==='paged-v1'?{melange:'paged-v1'}:{};
+const workspaceDataMode=process.env.DESKTOP_WORKSPACE_DATA_MODE||'disabled';
+if(!['disabled','workspace-v1'].includes(workspaceDataMode))throw new Error('Unsupported workspace data mode');
+const desktopWorkspaceData=workspaceDataMode==='workspace-v1'&&['melange','mentat'].includes(selected.id)?{[selected.id]:'workspace-v1'}:{};
 if(!fs.existsSync(icon))throw new Error('Original application icon is missing.');
 require('./backend-command.cjs').backendCommand(__dirname,selected.id,process.platform,runtimeRoot);
 const releaseSigning=require('./release-signing.cjs').options(selected,{withoutUninstaller:true,builtinInstaller:true});
@@ -40,7 +43,7 @@ module.exports={
   extraResources:[{from:runtime,to:'runtime/'+selected.id,filter:['**/*','!sources/**/state/**','!sources/**/*.{sqlite,sqlite3,db,sqlite-wal,sqlite-shm,sqlite-journal,sqlite3-wal,sqlite3-shm,sqlite3-journal,db-wal,db-shm,db-journal}']},
    // Public release certificate only (no longer used by the app; kept for publisher-trust.cjs and turn-on-updates.cmd).
    {from:path.join(__dirname,'melange-systems-desktop-release.cer'),to:'melange-systems-desktop-release.cer'}],
-  extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,desktopUninstaller:false,desktopAccessMode,desktopAuthentication,windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource,desktopScrapeBroker,desktopPublicData}},
+  extraMetadata:{name:selected.id+'-desktop',description:selected.name+' independent local desktop application',desktopAppConfig:{appId:selected.id,desktopUninstaller:false,desktopAccessMode,desktopAuthentication,windowsPublisherName:process.env.WINDOWS_PUBLISHER_NAME||null,desktopAccessTrust:accessTrust,desktopUpdateSource,desktopScrapeBroker,desktopPublicData,desktopWorkspaceData}},
   // build-native.cjs completes the signed directory with the shared built-in
   // installer. Electron-builder's NSIS target would restore external plug-ins.
   win:{target:['dir'],icon,signtoolOptions:process.env.WINDOWS_PUBLISHER_NAME?{publisherName:process.env.WINDOWS_PUBLISHER_NAME}:undefined,verifyUpdateCodeSignature:true,...releaseSigning.win},

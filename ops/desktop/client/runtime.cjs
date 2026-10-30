@@ -8,11 +8,12 @@ const path=require('node:path');
 const {appDefinition}=require('./apps.cjs');
 const {backendCommand,backendEnvironment}=require('./backend-command.cjs');
 const {runtimeRoots,prepareRuntimeRoots,validatedLaunchPath,refuseInstalledOverlap}=require('./runtime-roots.cjs');
-const {initializeModuleRuntime,consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,writeModuleFrame}=require('./module-data-runtime-boundary.cjs');
+const {initializeModuleRuntime,consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,writeModuleFrame,verifyProgram}=require('./module-data-runtime-boundary.cjs');
+const {observeStartupData}=require('./startup-data-diagnostic.cjs');
 // One value per app process, never written anywhere: Terrier's approved owner session is bound to this native launch.
 const OWNER_SESSION_KEY=crypto.randomBytes(32).toString('base64url');
 function freePort(){return new Promise((resolve,reject)=>{const s=net.createServer();s.once('error',reject);s.listen(0,'127.0.0.1',()=>{const port=s.address().port;s.close(()=>resolve(port));});});}
-function health(origin,token,appId){return new Promise(resolve=>{const request=http.get(origin+'/__desktop/health',{headers:{'X-Desktop-Token':token},timeout:1000},response=>{let body='';response.on('data',c=>{body+=c;if(body.length>4096)response.destroy();});response.on('error',()=>resolve(null));response.on('close',()=>resolve(null));response.on('end',()=>{try{const value=JSON.parse(body);if(response.statusCode!==200||value.appId!==appId){resolve(null);return;}resolve({launchPath:validatedLaunchPath(appId,value.launchPath),...(Object.hasOwn(value,'moduleData')?{appId:value.appId,pid:value.pid,moduleData:value.moduleData}:{})});}catch{resolve(null);}});});request.on('timeout',()=>request.destroy());request.on('error',()=>resolve(null));});}
+function health(origin,token,appId){return new Promise(resolve=>{const request=http.get(origin+'/__desktop/health',{headers:{'X-Desktop-Token':token},timeout:1000},response=>{let body='';response.on('data',c=>{body+=c;if(body.length>4096)response.destroy();});response.on('error',()=>resolve(null));response.on('close',()=>resolve(null));response.on('end',()=>{try{const value=JSON.parse(body);if(response.statusCode!==200||value.appId!==appId){resolve(null);return;}resolve({launchPath:validatedLaunchPath(appId,value.launchPath),...(Object.hasOwn(value,'moduleData')?{appId:value.appId,pid:value.pid,moduleData:value.moduleData}:{}),...(Object.hasOwn(value,'workspaceData')?{workspaceData:value.workspaceData}:{}),...(Object.hasOwn(value,'districtData')?{appId:value.appId,pid:value.pid,districtData:value.districtData}:{})});}catch{resolve(null);}});});request.on('timeout',()=>request.destroy());request.on('error',()=>resolve(null));});}
 async function probe(origin,token,appId){return Boolean(await health(origin,token,appId));}
 function activity(origin,token,appId){return new Promise(resolve=>{
   if(!origin||!token){resolve(null);return;}
@@ -24,7 +25,7 @@ function activity(origin,token,appId){return new Promise(resolve=>{
 });}
 function refuseModuleDataSettings(configuration){
   // Settings cannot turn their source descriptor into a native launch capability.
-  if(configuration!==null&&configuration!==undefined&&Object.hasOwn(configuration,'ownerGitHubModuleData'))throw new Error('GitHub module data startup is unavailable in this build.');
+  if(configuration!==null&&configuration!==undefined&&['ownerGitHubModuleData','ownerGitHubWorkspaceData'].some(key=>Object.hasOwn(configuration,key)))throw new Error('GitHub module data startup is unavailable in this build.');
 }
 const childExited=child=>Boolean(child&&(child.exitCode!=null||child.signalCode!=null));
 function waitForChildExit(child,timeout){
@@ -46,9 +47,13 @@ function requestWindowsStop(child){
   });
 }
 class Runtime {
-  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,allowStandalone=false,authentication='password',confine=null,logRoot=null}={}){this.allowStandalone=allowStandalone===true;if(!['windows','password'].includes(authentication)||(authentication==='windows'&&!this.allowStandalone))throw new Error('Unsupported runtime authentication mode');this.authentication=authentication;this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
+  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,allowStandalone=false,authentication='password',confine=null,logRoot=null,districtInputRequired=false}={}){this.districtInputRequired=districtInputRequired===true;this.allowStandalone=allowStandalone===true;if(!['windows','password'].includes(authentication)||(authentication==='windows'&&!this.allowStandalone))throw new Error('Unsupported runtime authentication mode');this.authentication=authentication;this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
     initializeModuleRuntime(this,()=>{const command=backendCommand(this.resources,this.definition.id);return {source:path.join(command.runtime,'sources'),bootstrap:path.join(command.runtime,'bootstrap')};});}
   async start(configuration,capability){
+    const districtInput=this.definition.id==='terrier'?require('./district-runtime-input.cjs').consumeDistrictConfiguration(this,configuration):null;
+    try{
+    if(this.districtInputRequired&&(configuration.standaloneGitHubData||configuration.terrierGitHubData)&&!districtInput)throw require('./startup-failure.cjs').programFailure();
+    if(districtInput)await districtInput.validate();
     if(this.stopPromise||(this.stoppingChild&&!childExited(this.stoppingChild)))throw new Error('Application shutdown is still pending.');
     if(this.stoppingChild){if(this.child===this.stoppingChild)this.child=null;this.stoppingChild=null;}
     refuseModuleDataSettings(configuration);
@@ -71,6 +76,7 @@ class Runtime {
     if(desired.standaloneDistrictData&&!this.allowStandalone)throw new Error('Local district data is unavailable in this build.');
     if(desired.standaloneDistrictData&&authorization.mode!=='standalone')throw new Error('Local district authorization is required.');
     if(this.child){if(JSON.stringify(desired)!==JSON.stringify(this.roots))throw new Error('Close the app before changing its district or data directory.');
+      if(districtInput){const child=this.child,ready=await health(this.origin,this.token,this.definition.id);check();if(this.child!==child||!districtInput.matchesWarm(ready,this.roots))throw require('./startup-failure.cjs').programFailure();await districtInput.commit();check();}
       checkWarmModule(this,configuration,authorization);
       if(activeModule(this)){const child=this.child,ready=await health(this.origin,this.token,this.definition.id);check();if(this.child!==child||!matchesModuleHealth(this,ready))throw new Error('Native module input is unavailable.');}
       this.configuration=configuration;return this.origin;}
@@ -106,22 +112,47 @@ class Runtime {
     if(appId==='terrier'&&authorization.mode==='standalone'&&this.authentication==='windows')args.push('--windows-session');
     if(roots.legacyOwner) args.push('--legacy-owner',roots.legacyOwner,'--owner-root',ownerRoot);
     if(roots.githubDistrictData===true) args.push('--github-district-data');
-    if(moduleInput)args.push('--desktop-module-input','--profile-root',this.userData);
+    if(moduleInput)args.push(moduleInput.wire==='workspace'?'--desktop-workspace-input':'--desktop-module-input','--profile-root',this.userData);
+    if(districtInput)args.push('--desktop-district-input','--profile-root',this.userData);
     let child;
-    try{child=spawn(binary,args,{cwd:runtime,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:[moduleInput?'pipe':'ignore',log,log]});}catch(error){if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});this.renderer=null;this.scrape=null;throw error;}finally{fs.closeSync(log);}
+    try{child=spawn(binary,args,{cwd:runtime,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:[moduleInput||districtInput?'pipe':'ignore',moduleInput||districtInput?'pipe':log,log]});}catch(error){if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});this.renderer=null;this.scrape=null;throw error;}finally{fs.closeSync(log);}
     this.child=child;
+    let intake=null;
     let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');clearActiveModule(this,child);if(this.child===child){this.child=null;this.configuration=null;}if(renderer&&this.renderer===renderer){this.renderer=null;Promise.resolve(renderer.close()).catch(()=>{});}if(scrape&&this.scrape===scrape){this.scrape=null;Promise.resolve(scrape.close()).catch(()=>{});}});
     try{
-      if(moduleInput){setActiveModule(this,moduleInput,child);moduleInput.claimChild(child);check();await writeModuleFrame(child,moduleInput.frame(roots),moduleInput.signal);check();}
+      if(moduleInput){setActiveModule(this,moduleInput,child);moduleInput.claimChild(child);check();
+        intake=observeStartupData(child,{appId,launchNonce:moduleInput.launchNonce,programFingerprint:moduleInput.contract.programFingerprint,
+          sourceDigests:{public:moduleInput.binding.sourceDigest,...(moduleInput.workspaceBinding?{workspace:moduleInput.workspaceBinding.sourceDigest}:{})},
+          guard:()=>{moduleInput.guard();verifyProgram(this,moduleInput.contract);if(moduleInput.workspaceContract)verifyProgram(this,moduleInput.workspaceContract);}});
+        if(child.stdout){const output=fs.createWriteStream(path.join(logs,'backend.log'),{flags:'a',mode:0o600});output.on('error',()=>{child.stdout.unpipe(output);child.stdout.resume();});child.stdout.pipe(output);}
+        await writeModuleFrame(child,moduleInput.frame(roots),moduleInput.signal);check();}
+      if(districtInput){
+        const frame=districtInput.frame(roots,path.join(runtime,'sources'));intake=observeStartupData(child,districtInput.diagnostic());
+        if(child.stdout){const output=fs.createWriteStream(path.join(logs,'backend.log'),{flags:'a',mode:0o600});output.on('error',()=>{child.stdout.unpipe(output);child.stdout.resume();});child.stdout.pipe(output);}
+        await writeModuleFrame(child,frame,undefined,districtInput.maximum);check();
+      }
+      let districtCommitted=false;
       const deadline=Date.now()+(moduleInput?moduleInput.startupTimeoutMs:120000);
-      while(Date.now()<deadline){check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');const ready=await health(this.origin,this.token,appId);check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');if(ready&&(!moduleInput||matchesModuleHealth(this,ready))){this.launchPath=ready.launchPath;this.configuration=configuration;return this.origin;}await new Promise(r=>setTimeout(r,250));}
+      while(Date.now()<deadline){check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');const ready=await health(this.origin,this.token,appId);check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');
+        if(districtInput&&ready&&!districtCommitted&&districtInput.matches(ready,'prepared')){await districtInput.commitNative(this.origin,this.token);check();districtCommitted=true;continue;}
+        if(ready&&(!moduleInput||matchesModuleHealth(this,ready))&&(!districtInput||districtInput.matches(ready,'active'))){if(districtInput){await districtInput.commit();check();}intake?.markHealthy();this.launchPath=ready.launchPath;this.configuration=configuration;return this.origin;}await new Promise(r=>setTimeout(r,250));}
       throw new Error('Application startup timed out. See backend.log.');
     }catch(error){
+      const blocked=intake&&!require('./startup-failure.cjs').isDataStartupFailure(error)?await intake.blockedAfterExit({waitForExit:Boolean(districtInput)}):null;if(blocked)throw blocked;
       // Module teardown follows the coordinator's protected provider drain.
       // Ordinary starts retain their existing immediate owned-child cleanup.
       if(!moduleInput&&this.child===child)await this.stop();
       throw error;
     }
+    }catch(error){
+      if(districtInput){
+        require('./district-data-probe.cjs').verifyDistrictProgram(this);
+        if(this.child)await this.stop();
+        try{await this.authorize(configuration);}catch{const paused=new Error('The current Windows sign-in is unavailable.');paused.code=paused.reason='authorization';throw paused;}
+        if(['EACCES','EPERM','ENOENT','EBUSY','ENOSPC','EDQUOT','EIO','EROFS'].includes(error?.code))throw require('./startup-failure.cjs').dataStartupFailure({reason:'storage'});
+      }
+      throw error;
+    }finally{await districtInput?.close();}
   }
   originalConfiguration(){return this.configuration===null?null:structuredClone(this.configuration);}
   async verifyModuleHealth(binding){const active=activeModule(this),child=this.child,generation=this.generation||0,origin=this.origin,token=this.token;if(!active||active.child!==child)return false;const value=await health(origin,token,this.definition.id);return this.child===child&&(this.generation||0)===generation&&this.origin===origin&&this.token===token&&activeModule(this)===active&&matchesModuleHealth(this,value,binding);}

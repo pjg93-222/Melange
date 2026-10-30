@@ -9,9 +9,10 @@ const {GitHubModuleTransport}=require('./github-module-transport.cjs');
 const {physicalPath}=require('./runtime-roots.cjs');
 const {checkedNativeCacheRoot}=require('./module-data-binding.cjs');
 const {withSnapshotValidation}=require('./module-data-adapters.cjs');
+const {CHANNEL:WORKSPACE_CHANNEL}=require('./workspace-data-contract.cjs');
 const {fail,requireValue,authorized,hash,integer,TAG,COMMIT}=protocol;
 const RECORD=['catalogSequence','pointerDigest','manifestSha256','releaseTag','releaseCommit','identityDigest'];
-const OFFLINE=new Set(['unreachable','timeout','rate_limited']);
+const OFFLINE=new Set(['unreachable','timeout','rate_limited','proxy']);
 // Large public tables are streamed sequentially. Bounded 4 MiB reads avoid
 // thousands of Windows I/O round trips while retaining every integrity check.
 const READ_BYTES=4*1024*1024;
@@ -37,15 +38,18 @@ async function fileDigest(file,{signal,identity}={}){
  return {bytes,sha256:h.digest('hex')};
 }
 class GitHubModules{
- constructor({appId,publicKeys,profile,cacheRoot,protectedRoots=[],store,previousStore=null,registry,requiredKinds=Object.keys(registry||{}),effectiveConfiguration,authorize,transport,now=Date.now,minimumFreeBytes=512*1024**2}){
-  this.appId=appId;this.app=protocol.configuration(appId);protocol.checkedRegistry(appId,registry,requiredKinds);
+ constructor({appId,publicKeys,profile,cacheRoot,protectedRoots=[],store,previousStore=null,registry,requiredKinds=Object.keys(registry||{}),effectiveConfiguration,authorize,transport,now=Date.now,minimumFreeBytes=512*1024**2,channel='public-v1'}){
+  requireValue(['public-v1',WORKSPACE_CHANNEL.id].includes(channel),'Unsupported compiled module channel');
+  this.channel=channel;this.cacheName=channel===WORKSPACE_CHANNEL.id?WORKSPACE_CHANNEL.cacheName:'github-module-data';this.sourceField=channel===WORKSPACE_CHANNEL.id?WORKSPACE_CHANNEL.sourceField:'ownerGitHubModuleData';
+  this.appId=appId;this.app=protocol.configuration(appId,channel);protocol.checkedRegistry(appId,registry,requiredKinds);
   if(!store?.read||!store?.write||typeof authorize!=='function'||typeof effectiveConfiguration!=='function'||!publicKeys||typeof publicKeys!=='object')throw fail('integrity','Native module data dependencies are required');
   if(previousStore!==null&&(typeof previousStore?.read!=='function'||previousStore===store))throw fail('integrity','A separate previous public data journal is required');
+  requireValue(channel==='public-v1'||previousStore===null,'Workspace state cannot import public-channel journals');
   if(typeof profile!=='string'||!path.isAbsolute(profile)||!fs.statSync(profile).isDirectory()||fs.lstatSync(profile).isSymbolicLink())throw fail('integrity','An existing native profile is required');
   if(!Array.isArray(protectedRoots)||protectedRoots.some(root=>typeof root!=='string'||!path.isAbsolute(root))||!integer(minimumFreeBytes))throw fail('integrity','Invalid native module data boundaries');
-  this.profile=fs.realpathSync.native(profile);this.publicKeys=structuredClone(publicKeys);this.store=store;this.previousStore=previousStore;this.registry=registry;this.requiredKinds=[...requiredKinds];this.effectiveConfiguration=effectiveConfiguration;this.authorize=authorize;this.transport=transport||new GitHubModuleTransport(appId);this.now=now;this.minimumFreeBytes=minimumFreeBytes;
+  this.profile=fs.realpathSync.native(profile);this.publicKeys=structuredClone(publicKeys);this.store=store;this.previousStore=previousStore;this.registry=registry;this.requiredKinds=[...requiredKinds];this.effectiveConfiguration=effectiveConfiguration;this.authorize=authorize;this.transport=transport||new GitHubModuleTransport(appId,{channel});this.now=now;this.minimumFreeBytes=minimumFreeBytes;
   const localBase=process.env.LOCALAPPDATA?fs.realpathSync.native(path.resolve(process.env.LOCALAPPDATA)):null;
-  const choices=[{base:this.profile,root:path.join(this.profile,'packs','github-module-data')},...(localBase?[{base:localBase,root:path.join(localBase,'MelangeData',appId,'github-module-data')}]:[])];
+  const choices=[{base:this.profile,root:path.join(this.profile,'packs',this.cacheName)},...(localBase?[{base:localBase,root:path.join(localBase,'MelangeData',appId,this.cacheName)}]:[])];
   const chosen=cacheRoot?choices.find(choice=>physicalPath(choice.root)===physicalPath(cacheRoot)):choices.at(-1);
   if(!chosen)throw fail('integrity','Unapproved native module cache root');
   this.cacheRoot=path.resolve(chosen.root);this.cacheBase=fs.realpathSync.native(chosen.base);this.protectedRoots=[path.join(this.profile,'state'),...protectedRoots];
@@ -59,7 +63,7 @@ class GitHubModules{
   this.tail=work.catch(()=>{});return work;
  }
  async owner(selected){
-  if(Object.hasOwn(selected||{},'ownerGitHubModuleData')||Object.hasOwn(selected||{},'ownerGitHubData'))throw fail('authorization','Original owner configuration is required');
+  if(['ownerGitHubModuleData','ownerGitHubWorkspaceData','ownerGitHubData'].some(key=>Object.hasOwn(selected||{},key)))throw fail('authorization','Original owner configuration is required');
   let authorization;try{authorization=await this.authorize(structuredClone(selected));}catch{throw fail('authorization','Verified local access is required for public data');}
   if(!authorized(this.appId,selected,authorization))throw fail('authorization','Verified local access is required for public data');
   if(authorization.mode==='standalone')return digest(Buffer.from(canonical({mode:'standalone',identity:authorization.identity,selectedRoot:physicalPath(selected.dataDirectory),selected})));
@@ -200,7 +204,7 @@ class GitHubModules{
   if(previous.highwater.catalogSequence){
    try{
     const envelope=protocol.parseJson(await this.read(await this.file('pointers/'+previous.highwater.pointerDigest+'.json'),32768));
-    const checked=protocol.pointer(this.appId,envelope,this.publicKeys,previous.highwater);
+    const checked=protocol.pointer(this.appId,envelope,this.publicKeys,previous.highwater,this.channel);
     requireValue(checked.digest===previous.highwater.pointerDigest&&checked.value.catalogSequence===previous.highwater.catalogSequence,'Previous public data high-water does not match its signed pointer');
     next.highwater=structuredClone(previous.highwater);
    }catch{throw fail('integrity','Previous public data high-water could not be verified; existing data was preserved');}
@@ -218,9 +222,9 @@ class GitHubModules{
  async metadata(record){
   safeRecord(record);
   const envelope=protocol.parseJson(await this.read(await this.file('pointers/'+record.pointerDigest+'.json'),32768));
-  const checked=protocol.pointer(this.appId,envelope,this.publicKeys);
+  const checked=protocol.pointer(this.appId,envelope,this.publicKeys,{},this.channel);
   requireValue(checked.digest===record.pointerDigest&&checked.value.catalogSequence===record.catalogSequence&&checked.value.releaseTag===record.releaseTag&&checked.value.releaseCommit===record.releaseCommit&&checked.value.manifest.sha256===record.manifestSha256,'Cached module pointer changed');
-  const manifest=protocol.manifest(this.appId,await this.read(await this.file('manifests/'+record.manifestSha256+'.json'),protocol.MAX_MANIFEST),checked,this.registry,this.requiredKinds);
+  const manifest=protocol.manifest(this.appId,await this.read(await this.file('manifests/'+record.manifestSha256+'.json'),protocol.MAX_MANIFEST),checked,this.registry,this.requiredKinds,this.channel);
   return {checked,manifest};
  }
  async validateSnapshot(root,manifest,{signal}={}){
@@ -252,8 +256,8 @@ class GitHubModules{
   const source={schemaVersion:1,appId:this.appId,repository:this.app.repository,catalogSequence:record.catalogSequence,releaseTag:record.releaseTag,releaseCommit:record.releaseCommit,pointerDigest:record.pointerDigest,manifestSha256:record.manifestSha256,cacheRoot:this.cacheRoot};
   const effective=await this.effectiveConfiguration({originalSelected:structuredClone(selected),snapshotRoot:root,datasets:structuredClone(datasets),source:structuredClone(source)});
   requireValue(effective&&typeof effective==='object'&&!Array.isArray(effective),'Compiled module configuration binding failed');
-  const {ownerGitHubModuleData,...original}=effective;
-  requireValue(canonical(original)===canonical(selected)&&canonical(ownerGitHubModuleData)===canonical(source),'Module binding must preserve original configuration and exact native source');
+  const original={...effective},boundSource=original[this.sourceField];delete original[this.sourceField];
+  requireValue(canonical(original)===canonical(selected)&&canonical(boundSource)===canonical(source),'Module binding must preserve original configuration and exact native source');
   return Object.freeze({schemaVersion:1,appId:this.appId,repository:this.app.repository,catalogueSequence:record.catalogSequence,releaseTag:record.releaseTag,pointerDigest:record.pointerDigest,manifestSha256:record.manifestSha256,snapshotRoot:root,effectiveConfiguration:structuredClone(effective),status:this.status(phase,record,{onStatus,cached:true,totalBytes:manifest.totalBytes,receivedBytes:manifest.totalBytes})});
  }
  async disk(bytes){const stat=await fsp.statfs(this.cacheRoot);if(stat.bavail*stat.bsize<bytes+this.minimumFreeBytes)throw fail('storage','Insufficient module data staging space');}
@@ -346,9 +350,19 @@ class GitHubModules{
  async check(selected,options,identity,background){
   const state=await this.state(),{signal,onStatus}=options;this.status('checking',null,{onStatus});
   try{
-   const commit=await this.transport.resolveMain({signal}),envelope=protocol.parseJson(await this.transport.pointer(commit,{signal})),checked=protocol.pointer(this.appId,envelope,this.publicKeys,state.highwater);
-   await this.transport.verifyRelease(checked.value,{signal});
-   const manifest=protocol.manifest(this.appId,await this.transport.manifest(checked.value,{signal}),checked,this.registry,this.requiredKinds),record=this.record(checked,manifest,identity);
+   const envelope=protocol.parseJson(await this.transport.currentPointer({signal})),checked=protocol.pointer(this.appId,envelope,this.publicKeys,state.highwater,this.channel);
+   const prior=state.accepted,value=checked.value;
+   let manifest;
+   if(prior&&prior.identityDigest===identity&&prior.pointerDigest===checked.digest&&prior.catalogSequence===value.catalogSequence&&prior.releaseTag===value.releaseTag&&prior.releaseCommit===value.releaseCommit&&prior.manifestSha256===value.manifest.sha256){
+    // Only the protected accepted journal attests a prior successful public/tag
+    // REST check. A loose cache file or high-water alone cannot create one.
+    // Reverify both signed envelopes with CURRENT keys: exact envelope equality
+    // binds the key ID/epoch as well as repo, tag, commit and manifest bytes.
+    const cached=await this.metadata(prior);
+    if(canonical(cached.checked.envelope)===canonical(checked.envelope))manifest=protocol.manifest(this.appId,cached.manifest.bytes,checked,this.registry,this.requiredKinds,this.channel);
+   }
+   if(!manifest){await this.transport.verifyRelease(value,{signal});manifest=protocol.manifest(this.appId,await this.transport.manifest(value,{signal}),checked,this.registry,this.requiredKinds,this.channel);}
+   const record=this.record(checked,manifest,identity);
    requireValue(await this.owner(selected)===identity,'Owner approval changed during module check');canceled(signal);
    await this.immutable('pointers/'+checked.digest+'.json',Buffer.from(canonical(envelope)));await this.immutable('manifests/'+manifest.sha256+'.json',manifest.bytes);
    state.highwater={catalogSequence:record.catalogSequence,pointerDigest:record.pointerDigest};state.accepted=record;await this.save(state);
@@ -362,7 +376,7 @@ class GitHubModules{
    const unchanged=state.active?.pointerDigest===record.pointerDigest&&state.active?.identityDigest===identity;
    return this.candidate(record,selected,identity,{...options,phase:background&&!unchanged?'update-ready':'ready'});
   }catch(error){
-   if(OFFLINE.has(error?.reason)&&state.active)return this.candidate(state.active,selected,identity,{...options,phase:'offline'});
+   if(error?.retryableNetwork===true&&OFFLINE.has(error.reason)&&state.active)return this.candidate(state.active,selected,identity,{...options,phase:'offline'});
    if(error?.reason)throw error;throw fail('storage','Module data preparation failed');
   }
  }

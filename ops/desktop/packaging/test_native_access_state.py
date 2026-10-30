@@ -10,6 +10,28 @@ import native_access_state as state
 
 @unittest.skipUnless(os.name == 'nt', 'Actual Windows DPAPI required')
 class ProtectedStateTests(unittest.TestCase):
+    def test_workspace_high_water_is_separate_from_public_channels_and_each_owner_mode(self):
+        with tempfile.TemporaryDirectory(prefix='workspace Jos\u00e9 state ') as directory:
+            root = Path(directory)
+            kinds = ('github-module-local-state', 'github-module-state',
+                     'github-workspace-local-state', 'github-workspace-state')
+            for index, kind in enumerate(kinds):
+                state.write(root, kind, {'catalogSequence': index + 1})
+            public_ciphertexts = {kind: (root / ('access-' + kind + '.dpapi')).read_bytes() for kind in kinds[:2]}
+            for destination in kinds[2:]:
+                target = root / ('access-' + destination + '.dpapi')
+                original = target.read_bytes()
+                for other in kinds:
+                    if other != destination:
+                        target.write_bytes((root / ('access-' + other + '.dpapi')).read_bytes())
+                        with self.assertRaises(state.StateError):
+                            state.read(root, destination)
+                target.write_bytes(original)
+            for index, kind in enumerate(kinds):
+                self.assertEqual(state.read(root, kind), {'catalogSequence': index + 1})
+            for kind, original in public_ciphertexts.items():
+                self.assertEqual((root / ('access-' + kind + '.dpapi')).read_bytes(), original)
+
     def test_local_public_journals_remain_separate_from_managed_authority(self):
         with tempfile.TemporaryDirectory(prefix='local-public-state-fixture-') as directory:
             root = Path(directory)

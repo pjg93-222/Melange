@@ -5,6 +5,7 @@ const {watchNetwork}=require('../lifecycle.cjs');
 const {verifyEnvelope}=require('../trust.cjs');
 const {activity}=require('../runtime.cjs');
 const http=require('node:http');
+const {dataStartupFailure}=require('../startup-failure.cjs');
 
 function fixture(t){
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-lifecycle-'));
@@ -24,14 +25,137 @@ function fixture(t){
   state={installed:{envelope:seed,version:'1.0.0',phase:'installed'},sequence:1,manifestHash:crypto.createHash('sha256').update(Buffer.from(seed.payload,'base64')).digest('hex'),acceptedVersion:'1.0.0'};
   const clients=[];
   function client(publisherName='Fixture Publisher',extra={}){
-    let staged;
-    const native={configOnDisk:{value:Promise.resolve({publisherName:'Fixture Publisher'})},setFeedURL(){},async checkForUpdates(){nativeChecks++;const active=state.recovery&&['staged','prepared'].includes(state.recovery.phase)?state.recovery.target.envelope:state.pending?.envelope||envelope;const m=JSON.parse(Buffer.from(active.payload,'base64'));return {updateInfo:{version:m.version,files:[m.package]}};},async downloadUpdate(){staged=path.join(directory,'native.exe');fs.writeFileSync(staged,bytes);return [staged];},quitAndInstall(){assert.ok(state.pending?.phase==='activating'||state.recovery?.phase==='activating','Transaction must be durable before native activation');this.quitAndInstallCalled=true;installs++;}};
-    const updater=new DesktopUpdater({appId:'terrier',version,userData:directory,platform:'win32',arch:'x64',publisherName,packaged:true,autoUpdater:native,loadEnrollment:()=>enrollment,saveEnrollment(){},readState:()=>structuredClone(state),writeState:value=>{state=structuredClone(value);},onStatus:message=>status.push(message),verifyNativePackage:async()=>{if(!nativeValid)throw new Error('Native signature refused');},makeFeed:async()=>({url:'http://127.0.0.1/fixture/',close(){}}),request:async(p,url,options)=>{if(offline)throw new Error('offline');if(url.endsWith('/trust'))return {transitions:[]};if(url.includes('/recovery?'))return seed;if(url==='/v1/status'){assert.match(options.body.errorCode||'',/^[A-Z0-9_]*$/);return {};}return envelope;},download:async(p,token,m,target)=>{downloads++;fs.mkdirSync(target,{recursive:true});const destination=path.join(target,m.package.name);fs.writeFileSync(destination,bytes);return destination;},...extra});
+    let staged,feedManifest;
+    const native={configOnDisk:{value:Promise.resolve({publisherName:'Fixture Publisher'})},setFeedURL(){},async checkForUpdates(){nativeChecks++;const active=state.recovery&&['staged','prepared'].includes(state.recovery.phase)?state.recovery.target.envelope:state.pending?.envelope||envelope;const m=feedManifest||JSON.parse(Buffer.from(active.payload,'base64'));return {updateInfo:{version:m.version,files:[m.package]}};},async downloadUpdate(){staged=path.join(directory,'native.exe');fs.writeFileSync(staged,bytes);return [staged];},quitAndInstall(){assert.ok(state.pending?.phase==='activating'||state.recovery?.phase==='activating','Transaction must be durable before native activation');this.quitAndInstallCalled=true;installs++;}};
+    const updater=new DesktopUpdater({appId:'terrier',version,userData:directory,platform:'win32',arch:'x64',publisherName,packaged:true,autoUpdater:native,loadEnrollment:()=>enrollment,saveEnrollment(){},readState:()=>structuredClone(state),writeState:value=>{state=structuredClone(value);},onStatus:message=>status.push(message),verifyNativePackage:async()=>{if(!nativeValid)throw new Error('Native signature refused');},makeFeed:async manifest=>{feedManifest=manifest;return {url:'http://127.0.0.1/fixture/',close(){}};},request:async(p,url,options)=>{if(offline)throw new Error('offline');if(url.endsWith('/trust'))return {transitions:[]};if(url.includes('/recovery?'))return seed;if(url==='/v1/status'){assert.match(options.body.errorCode||'',/^[A-Z0-9_]*$/);return {};}return envelope;},download:async(p,token,m,target)=>{downloads++;fs.mkdirSync(target,{recursive:true});const destination=path.join(target,m.package.name);fs.writeFileSync(destination,bytes);return destination;},...extra});
     clients.push(updater);return updater;
   }
   t.after(()=>clients.forEach(c=>c.close()));
   return {client,sign,enrollment,get state(){return state;},set state(v){state=v;},set seed(v){seed=v;},set nativeValid(v){nativeValid=v;},set offline(v){offline=v;},set version(v){version=v;},set envelope(v){envelope=v;},get envelope(){return envelope;},get downloads(){return downloads;},get installs(){return installs;},get nativeChecks(){return nativeChecks;},get status(){return status;},directory};
 }
+
+function pending33Fixture(t,{legacy=false}={}){
+ const f=fixture(t),old=f.sign('1.0.31',21),pending=f.sign('1.0.33',23);
+ f.version='1.0.33';f.envelope=pending;f.seed=pending;
+ const hash=envelope=>crypto.createHash('sha256').update(Buffer.from(envelope.payload,'base64')).digest('hex');
+ f.state={installed:{envelope:old,version:'1.0.31',phase:'installed'},pending:{envelope:pending,version:'1.0.33',phase:'activating'},sequence:24,acceptedVersion:'1.0.33',manifestHash:hash(pending)};
+ fs.mkdirSync(path.join(f.directory,'updates','24'),{recursive:true});fs.copyFileSync(path.join(f.directory,'updates','1','Terrier.exe'),path.join(f.directory,'updates','24','Terrier.exe'));
+ const client=f.client('Fixture Publisher',legacy?{userData:path.join(f.directory,'moved'),legacyUserData:f.directory}:{});
+ return {f,client,old,pending};
+}
+function deferredRecovery33Fixture(t){
+ const {f}=pending33Fixture(t),target={version:'1.0.33',phase:'installed',envelope:f.sign('1.0.33',23)},from={version:'1.0.34',phase:'installed',envelope:f.sign('1.0.34',24)};
+ const hash=envelope=>crypto.createHash('sha256').update(Buffer.from(envelope.payload,'base64')).digest('hex');
+ f.state={installed:from,previous:target,pending:null,sequence:25,manifestHash:hash(from.envelope),acceptedVersion:'1.0.34',
+  recovery:{target,manifestHash:hash(target.envelope),fromVersion:'1.0.34',phase:'prepared',requestedAt:new Date().toISOString()}};
+ f.envelope=f.sign('1.0.35',25);const client=f.client();client.markApplicationDeferred(dataStartupFailure({reason:'timeout',retryableNetwork:true}));
+ return {f,client,target,from};
+}
+test('forward and recovery downloads receive the actual verified signed manifest hash',async t=>{
+ const f=fixture(t),first=f.client(),download=first.download,seen=[];
+ first.download=(...args)=>{seen.push(args[4]);return download(...args);};await first.check();
+ assert.equal(seen.length,1);assert.equal(seen[0].manifestHash,crypto.createHash('sha256').update(Buffer.from(f.envelope.payload,'base64')).digest('hex'));assert.equal(typeof seen[0].onProgress,'function');
+ await first.activateAfterClose();f.version='1.1.0';const ready=f.client();ready.markApplicationReady();await ready.check();
+ const recovery=f.client('Fixture Publisher',{userData:path.join(f.directory,'missing-new-cache')}),fallback=recovery.download;let received;
+ recovery.download=(...args)=>{received=args[4];return fallback(...args);};await recovery.beginRecovery();
+ assert.equal(received.manifestHash,crypto.createHash('sha256').update(Buffer.from(f.state.recovery.target.envelope.payload,'base64')).digest('hex'));assert.equal(typeof received.onProgress,'function');
+});
+
+test('native prefetch reports resumed signed bytes then hash/signature phases without progress changing state',async t=>{
+ const f=fixture(t),client=f.client(),original=client.download;let late;
+ client.download=async(...args)=>{
+  const total=args[2].package.size,callback=args[4].onProgress,before=structuredClone(f.state);late=callback;
+  callback({received:5,total,resumed:true});const count=f.status.length;
+  callback({received:6,total,resumed:true});assert.equal(f.status.length,count,'rapid chunks are throttled');
+  callback({received:7,total:total+1,resumed:true});callback({received:7,total,resumed:5});assert.equal(f.status.length,count,'untrusted counters are ignored');
+  callback({received:total,total,resumed:true});assert.deepEqual(f.state,before);return original(...args);
+ };
+ await client.check();assert.ok(client.ready);assert.ok(f.status.some(message=>/resuming saved download/.test(message)));
+ const hash=f.status.findIndex(message=>message==='Download complete. Checking update 1.1.0 hashes…'),native=f.status.findIndex(message=>message==='Verifying update 1.1.0 hashes and Windows signature…');
+ assert.ok(hash>=0&&native>hash);const count=f.status.length;late({received:0,total:34,resumed:false});assert.equal(f.status.length,count,'settled transfer cannot overwrite final status');
+});
+test('a data-deferred current recovery33 stages35, survives35 restart, and confirms only real35 health',async t=>{
+ const {f,client,target}=deferredRecovery33Fixture(t);await client.check();
+ assert.equal(f.state.pending.version,'1.0.35');assert.equal(f.state.pending.phase,'prepared');assert.equal(f.state.sequence,26);assert.equal(f.state.recovery.phase,'prepared');
+ assert.equal(client.lastConfirmedBaseline(f.enrollment,f.state).version,'1.0.33');assert.equal(await client.activateAfterClose(),true);
+ f.version='1.0.35';const restarted=f.client();restarted.prepareRecovery=()=>assert.fail('Do not re-enter old recovery33');await restarted.check();
+ assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.recovery.phase,'prepared');assert.equal(restarted.applicationReady,undefined);assert.equal(f.state.installed.version,'1.0.34');
+ restarted.markApplicationReady();await new Promise(queueMicrotask);await restarted.checkPromise;
+ assert.equal(f.state.installed.version,'1.0.35');assert.deepEqual(f.state.previous,target);assert.equal(f.state.pending,null);assert.equal(f.state.recovery,null);
+ assert.equal(f.state.supersededRecovery.phase,'superseded');assert.equal(f.state.supersededRecovery.previousPhase,'prepared');assert.equal(f.state.supersededRecovery.supersededBy.version,'1.0.35');assert.equal(f.state.sequence,26);assert.equal(f.state.suspendedVersions,undefined);
+});
+test('failed35 discovered from a data-deferred33 recovery can stage36 while retaining verified33',async t=>{
+ const {f,client}=deferredRecovery33Fixture(t);await client.check();await client.activateAfterClose();f.version='1.0.35';
+ const failed=f.client();await failed.markApplicationFailed();f.envelope=f.sign('1.0.36',26);await failed.check();
+ assert.equal(f.state.pending.version,'1.0.36');assert.equal(f.state.pending.phase,'prepared');assert.equal(f.state.sequence,27);assert.deepEqual(f.state.suspendedVersions,['1.0.35']);
+ assert.equal(f.state.recovery.phase,'prepared');assert.equal(failed.lastConfirmedBaseline(f.enrollment,f.state).version,'1.0.33');assert.equal(await failed.activateAfterClose(),true);
+});
+test('a second data outage in corrective35 cannot erase the original33 recovery binding or block36',async t=>{
+ const {f,client,target}=deferredRecovery33Fixture(t);await client.check();await client.activateAfterClose();f.version='1.0.35';
+ const current=f.client();current.markApplicationDeferred(dataStartupFailure({reason:'rate_limited',retryableNetwork:true,retryAfterMs:60000}));
+ assert.equal(f.state.startupPendingVersion,'1.0.35');assert.equal(f.state.recovery.dataDeferredVersion,'1.0.33');
+ assert.equal(f.state.recovery.dataDeferredManifestHash,f.state.recovery.manifestHash);
+ f.envelope=f.sign('1.0.36',26);current.prepareRecovery=()=>assert.fail('Do not reenter original33 recovery');await current.check();
+ assert.equal(f.state.pending.version,'1.0.36');assert.equal(f.state.pending.phase,'prepared');assert.equal(current.lastConfirmedBaseline(f.enrollment,f.state).version,'1.0.33');assert.equal(await current.activateAfterClose(),true);
+ f.version='1.0.36';const ready=f.client();ready.prepareRecovery=()=>assert.fail('No old recovery during36 startup');await ready.check();assert.equal(f.state.installed.version,'1.0.34');
+ ready.markApplicationReady();await new Promise(queueMicrotask);await ready.checkPromise;
+ assert.equal(f.state.installed.version,'1.0.36');assert.deepEqual(f.state.previous,target);assert.equal(f.state.recovery,null);assert.equal(f.state.supersededRecovery.supersededBy.version,'1.0.36');assert.equal(f.state.sequence,27);assert.equal(f.state.suspendedVersions,undefined);
+});
+test('real33 recovery health can complete while preserving an already staged35 correction',async t=>{
+ const {f,client}=deferredRecovery33Fixture(t);await client.check();client.markApplicationReady();await new Promise(queueMicrotask);await client.checkPromise;
+ assert.equal(f.state.installed.version,'1.0.33');assert.equal(f.state.recovery.phase,'completed');assert.equal(f.state.pending.version,'1.0.35');assert.equal(f.state.pending.phase,'prepared');assert.equal(await client.activateAfterClose(),true);
+});
+test('deferred recovery rejects the original34 even without a suspended-version entry',async t=>{
+ const {f,client,from}=deferredRecovery33Fixture(t);f.envelope=from.envelope;await client.check();
+ assert.equal(f.state.pending,null);assert.equal(f.state.sequence,25);assert.equal(f.state.suspendedVersions,undefined);assert.equal(f.downloads,0);assert.equal(await client.activateAfterClose(),false);assert.match(f.status.at(-1),/newer than 1\.0\.34/);
+});
+for(const kind of ['unmarked','wrong-version','wrong-hash','tampered-target','failed'])test('recovery correction refuses '+kind+' data-deferral authorization',async t=>{
+ const {f,client}=deferredRecovery33Fixture(t),state=f.state;
+ if(kind==='unmarked')delete state.recovery.dataDeferredVersion;
+ if(kind==='wrong-version')state.recovery.dataDeferredVersion='1.0.99';
+ if(kind==='wrong-hash')state.recovery.dataDeferredManifestHash='f'.repeat(64);
+ if(kind==='tampered-target')state.recovery.target.envelope.signature=Buffer.alloc(64).toString('base64');
+ if(kind==='failed')state.recovery.phase='failed';f.state=state;
+ await client.check();assert.equal(f.downloads,0);assert.equal(f.state.pending,null);assert.equal(f.state.sequence,25);
+});
+test('a forged superseding pending35 cannot bypass or complete the retained recovery33',async t=>{
+ const {f,client}=deferredRecovery33Fixture(t);await client.check();const state=f.state;state.pending.envelope.signature=Buffer.alloc(64).toString('base64');f.state=state;f.version='1.0.35';
+ const restarted=f.client();restarted.markApplicationReady();await new Promise(queueMicrotask);await restarted.checkPromise;
+ assert.equal(f.state.installed.version,'1.0.34');assert.equal(f.state.recovery.phase,'prepared');assert.equal(f.state.supersededRecovery,undefined);assert.equal(await restarted.activateAfterClose(),false);
+});
+for(const reason of ['timeout','rate_limited','proxy','unreachable','integrity'])test('real updater pending33 survives '+reason+' data deferral and confirms only successful retry',async t=>{
+ const {f,client}=pending33Fixture(t),before=structuredClone(f.state);
+ const error=dataStartupFailure({reason,retryableNetwork:reason!=='integrity',retryAfterMs:60000});
+ client.markApplicationDeferred(error);await client.check();
+ assert.equal(client.applicationReady,false);assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.startupPendingVersion,'1.0.33');
+ assert.deepEqual(f.state.installed,before.installed);assert.equal(f.state.sequence,24);assert.equal(f.state.manifestHash,before.manifestHash);assert.equal(f.state.suspendedVersions,undefined);
+ const restarted=f.client();await restarted.check();assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.installed.version,'1.0.31');
+ restarted.markApplicationReady();await new Promise(queueMicrotask);await restarted.checkPromise;
+ assert.equal(f.state.pending,null);assert.equal(f.state.installed.version,'1.0.33');assert.equal(f.state.previous.version,'1.0.31');assert.equal(f.state.startupPendingVersion,null);assert.equal(f.state.suspendedVersions,undefined);
+});
+test('a data-deferred33 still discovers and stages a newer signed correction without losing its confirmed baseline',async t=>{
+ const {f,client}=pending33Fixture(t),error=dataStartupFailure({reason:'timeout',retryableNetwork:true});client.markApplicationDeferred(error);
+ f.envelope=f.sign('1.0.34',24);await client.check();
+ assert.equal(f.state.pending.version,'1.0.34');assert.equal(f.state.pending.phase,'prepared');assert.equal(f.state.sequence,25);assert.equal(f.state.installed.version,'1.0.31');assert.equal(client.applicationReady,false);
+ const ready=client.ready;assert.ok(ready);client.markApplicationDeferred(error);
+ assert.equal(client.ready,ready);assert.equal(f.state.pending.version,'1.0.34');assert.equal(f.state.suspendedVersions,undefined);
+});
+test('legacy installer location cannot confirm a deferred pending33, even after restarting the updater',async t=>{
+ const {f,client}=pending33Fixture(t,{legacy:true});client.markApplicationDeferred(dataStartupFailure({reason:'proxy',retryableNetwork:true}));
+ const restarted=f.client('Fixture Publisher',{userData:path.join(f.directory,'moved'),legacyUserData:f.directory});await restarted.check();
+ assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.installed.version,'1.0.31');
+ restarted.markApplicationReady();await new Promise(queueMicrotask);await restarted.checkPromise;assert.equal(f.state.installed.version,'1.0.33');assert.equal(f.state.pending,null);
+});
+test('a deferred outcome during installer verification cannot overwrite newer waiting state with stale readiness',async t=>{
+ const {f}=pending33Fixture(t);let entered,release;const waiting=new Promise(resolve=>{entered=resolve;}),resume=new Promise(resolve=>{release=resolve;});
+ const client=f.client('Fixture Publisher',{verifyNativePackage:async()=>{entered();await resume;}});client.markApplicationReady();await waiting;
+ client.markApplicationDeferred(dataStartupFailure({reason:'rate_limited',retryableNetwork:true,retryAfterMs:60000}));release();await client.checkPromise;
+ assert.equal(f.state.pending.phase,'activating');assert.equal(f.state.installed.version,'1.0.31');assert.equal(client.applicationReady,false);assert.equal(f.state.suspendedVersions,undefined);
+});
+test('an unbranded deferral cannot suppress an actual program failure',async t=>{
+ const {f,client}=pending33Fixture(t);assert.throws(()=>client.markApplicationDeferred({code:'startup_deferred',retryable:true}),/native data-startup/);
+ await client.markApplicationFailed();await client.check();assert.equal(f.state.pending.phase,'failed');assert.deepEqual(f.state.suspendedVersions,['1.0.33']);assert.equal(f.state.installed.version,'1.0.31');
+});
 
 test('download never arms quit hooks; explicit close persists transaction before native install',async t=>{
   const f=fixture(t),client=f.client();await client.check();

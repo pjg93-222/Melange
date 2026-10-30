@@ -33,11 +33,20 @@ const ERROR_MESSAGES=Object.freeze({
  unreachable:'GitHub module data is unavailable.',
  timeout:'The module data check timed out.',
  rate_limited:'GitHub module data is temporarily unavailable.',
+ proxy:'The network proxy is unavailable.',
+ program:'The installed application could not be verified or started.',
  context:'The selected workspace changed.',
  transition:'Module data activation is unavailable.'
 });
 function failure(code){const error=new Error(ERROR_MESSAGES[code]||ERROR_MESSAGES.integrity);error.code=error.reason=Object.hasOwn(ERROR_MESSAGES,code)?code:'integrity';return error;}
-function safeFailure(error){return failure(typeof error?.reason==='string'?error.reason:typeof error?.code==='string'?error.code:'integrity');}
+function safeFailure(error){
+ const safe=failure(typeof error?.reason==='string'?error.reason:typeof error?.code==='string'?error.code:'integrity');
+ if(error?.retryableNetwork===true&&['timeout','unreachable','proxy','rate_limited'].includes(safe.code)){
+  safe.retryableNetwork=true;
+  if(Number.isSafeInteger(error.retryAfterMs)&&error.retryAfterMs>=1000&&error.retryAfterMs<=3600000)safe.retryAfterMs=error.retryAfterMs;
+ }
+ return safe;
+}
 function appRepository(appId){if(!Object.hasOwn(REPOSITORIES,appId))throw new Error('Unsupported module data application.');return REPOSITORIES[appId];}
 function timestamp(value){return typeof value==='string'&&value.length===24&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString()===value;}
 function freeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}
@@ -75,7 +84,7 @@ class GitHubModuleController{
   let selected;
   try{selected=structuredClone(this.getSelected());}catch{throw failure('authorization');}
   if(!selected||typeof selected!=='object'||Array.isArray(selected)||
-     ['ownerGitHubData','ownerGitHubModuleData','githubModuleData','effectiveConfiguration','snapshotRoot'].some(key=>Object.hasOwn(selected,key)))throw failure('authorization');
+     ['ownerGitHubData','ownerGitHubModuleData','ownerGitHubWorkspaceData','githubModuleData','effectiveConfiguration','snapshotRoot'].some(key=>Object.hasOwn(selected,key)))throw failure('authorization');
   let fingerprint;try{fingerprint=canonical(selected);}catch{throw failure('authorization');}
   return {selected:freeze(selected),fingerprint,epoch:this.epoch};
  }

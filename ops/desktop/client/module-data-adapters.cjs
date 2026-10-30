@@ -71,6 +71,7 @@ function registryFor({appId,sourceRoot,probe,prepareProbe},kinds,maps){
 function createModuleDataRegistry(options){return registryFor(options,CORE_KINDS,ROLE_MAPS);}
 function createPublicModuleDataRegistry(options){return registryFor(options,PUBLIC_KINDS,PUBLIC_ROLES);}
 function createPagedModuleDataRegistry(options){return registryFor(options,PAGED_KINDS,PAGED_ROLES);}
+function createWorkspaceModuleDataRegistry(options){const workspace=require('./workspace-data-contract.cjs');return registryFor(options,workspace.WORKSPACE_KINDS,workspace.roleMaps());}
 async function withSnapshotValidation(adapter,options,work){
  if(adapter.prepareSnapshot!==undefined&&typeof adapter.prepareSnapshot!=='function')throw new Error('Compiled module validator is unavailable');
  const session=adapter.prepareSnapshot?await adapter.prepareSnapshot(options):null;
@@ -80,4 +81,4 @@ async function withSnapshotValidation(adapter,options,work){
   return await work((session||adapter).validateSnapshot.bind(session||adapter));
  }finally{if(session&&typeof session.cancel==='function')await session.cancel();}
 }
-module.exports={CORE_KINDS,ROLE_MAPS,PUBLIC_KINDS,PUBLIC_ROLES,PAGED_KINDS,PAGED_ROLES,createModuleDataRegistry,createPublicModuleDataRegistry,createPagedModuleDataRegistry,withSnapshotValidation};
+module.exports={CORE_KINDS,ROLE_MAPS,PUBLIC_KINDS,PUBLIC_ROLES,PAGED_KINDS,PAGED_ROLES,createModuleDataRegistry,createPublicModuleDataRegistry,createPagedModuleDataRegistry,createWorkspaceModuleDataRegistry,withSnapshotValidation};

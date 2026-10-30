@@ -5,6 +5,7 @@ const http=require('node:http');
 const crypto=require('node:crypto');
 const semver=require('semver');
 const {verifyWindowsPackage}=require('./native-signature.cjs');
+const {isDataStartupFailure}=require('./startup-failure.cjs');
 const activation=require('./installer-activation.cjs');
 const {jsonRequest,verifyEnvelope,applyKeyTransitions,downloadVerified,verifyPackageFile}=require('./trust.cjs');
 const VERIFY_RETRY_MS=6*60*60*1000;
@@ -45,6 +46,19 @@ class DesktopUpdater {
   }
   identity(){return {appId:this.appId,version:this.version,platform:this.platform,arch:this.arch};}
   packagePath(manifest){return path.join(this.userData,'updates',String(manifest.sequence),manifest.package.name);}
+  async downloadWithProgress(enrollment,verified){
+    const m=verified.manifest,total=m.package.size;let active=true,lastAt=-Infinity,lastReceived=-1;
+    this.onStatus('Downloading verified update '+m.version+'…');
+    const emit=message=>{try{this.onStatus(message);}catch{}};
+    const onProgress=value=>{
+      if(!active||!value||!Number.isSafeInteger(value.received)||value.received<lastReceived||value.received<0||value.received>total||value.total!==total||typeof value.resumed!=='boolean')return;
+      if(value.received===total){lastReceived=total;emit('Download complete. Checking update '+m.version+' hashes…');return;}
+      const now=Date.now();if(now-lastAt<1000&&value.received!==total)return;lastAt=now;lastReceived=value.received;
+      emit('Downloading verified update '+m.version+': '+Math.floor(value.received/total*100)+'% ('+(value.received/1e6).toFixed(1)+' / '+(total/1e6).toFixed(1)+' MB)'+(value.resumed?' — resuming saved download.':'.'));
+    };
+    try{return await this.download(enrollment,enrollment.deviceToken,m,path.dirname(this.packagePath(m)),{manifestHash:verified.manifestHash,onProgress});}
+    finally{active=false;}
+  }
   async report(enrollment,status,errorCode){
     const body={appId:this.appId,version:this.version,status,...(errorCode?{errorCode}:{})};
     this.writeState({...this.readState(),outbox:body});
@@ -82,7 +96,27 @@ class DesktopUpdater {
     return state.startupPendingVersion===this.version||
       (state.pending?.version===this.version&&state.pending.phase!=='failed');
   }
+  deferredDataRecovery(state=this.readState()){
+    const recovery=state.recovery,target=recovery?.target;
+    return recovery&&['staged','prepared','activating'].includes(recovery.phase)&&target?.phase==='installed'&&
+      recovery.dataDeferredVersion===target.version&&recovery.dataDeferredManifestHash===recovery.manifestHash&&/^[a-f0-9]{64}$/.test(recovery.dataDeferredManifestHash)&&
+      semver.valid(target.version)===target.version&&semver.valid(recovery.fromVersion)===recovery.fromVersion&&semver.gt(recovery.fromVersion,target.version)?recovery:null;
+  }
+  correctiveRecoveryPending(state=this.readState()){
+    const recovery=this.deferredDataRecovery(state);
+    return recovery&&['staged','prepared','activating','failed'].includes(state.pending?.phase)&&semver.valid(state.pending?.version)&&semver.gt(state.pending.version,recovery.fromVersion)?recovery:null;
+  }
+  supersededRecoveryRecord(recovery,verified){
+    const record={schemaVersion:1,phase:'superseded',previousPhase:recovery.phase,fromVersion:recovery.fromVersion,
+      target:{version:recovery.target.version,phase:'installed',envelope:recovery.target.envelope},manifestHash:recovery.manifestHash,
+      dataDeferredVersion:recovery.dataDeferredVersion,dataDeferredManifestHash:recovery.dataDeferredManifestHash,supersededBy:{version:verified.manifest.version,manifestHash:verified.manifestHash}};
+    if(!this.deferredDataRecovery({recovery,startupPendingVersion:recovery.target.version})||
+       !semver.gt(record.supersededBy.version,record.fromVersion)||!/^[a-f0-9]{64}$/.test(record.supersededBy.manifestHash)||Buffer.byteLength(JSON.stringify(record))>65536)throw new Error('Invalid superseded recovery record.');
+    return record;
+  }
   lastConfirmedBaseline(enrollment,state){
+    const recovery=this.deferredDataRecovery(state);
+    if(recovery){this.verifyRecovery(enrollment,recovery);return recovery.target;}
     const candidate=state.installed;
     if(candidate?.phase!=='installed'||!semver.valid(candidate.version)||!semver.lt(candidate.version,this.version))throw new Error('A previously confirmed version is required while local startup is unconfirmed or failed.');
     const verified=verifyEnvelope(candidate.envelope,enrollment,{...this.identity(),version:candidate.version},{});
@@ -91,6 +125,8 @@ class DesktopUpdater {
   }
   async ensureRecoveryBaseline(enrollment,fetch=true){
     let state=this.readState(),candidate=state.installed;
+    const deferredRecovery=this.deferredDataRecovery(state);
+    if(deferredRecovery&&!this.applicationReady){this.verifyRecovery(enrollment,deferredRecovery);return deferredRecovery.target;}
     const startupWasPending=this.startupPending(state);
     if(state.suspendedVersions?.includes(this.version)||(this.startupPending(state)&&(!this.applicationReady||!fetch))){
       // Approval/setup can delay readiness without proving a broken installation.
@@ -162,6 +198,7 @@ class DesktopUpdater {
   }
   async prepare(enrollment,pending,recovery=null){
     const verified=recovery?this.verifyRecovery(enrollment,recovery):verifyEnvelope(pending.envelope,enrollment,this.identity(),this.readState()),m=verified.manifest;
+    this.onStatus('Verifying update '+m.version+' hashes and Windows signature…');
     await this.verifyNativeFile(this.packagePath(m),m);
     if(this.ready?.manifestHash===verified.manifestHash)return;
     this.feed?.close();this.feed=await this.makeFeed(m,this.packagePath(m));
@@ -220,7 +257,7 @@ class DesktopUpdater {
       const state=this.readState(),target=this.recoveryCandidate(state);
       const manifestHash=crypto.createHash('sha256').update(Buffer.from(target.envelope.payload,'base64')).digest('hex');
       const recovery={target,manifestHash,fromVersion:this.version,phase:'staged',requestedAt:new Date().toISOString()};
-      const m=this.verifyRecovery(enrollment,recovery).manifest;this.ready=null;
+      const verified=this.verifyRecovery(enrollment,recovery),m=verified.manifest;this.ready=null;
       // Local installer first, so a rollback needs no network: one retained from an earlier update, or a copy of the
       // installer the first install kept. A copy failing the hash check is deleted (with its baseline source). Only a
       // missing or deleted copy is fetched now (hash-checked on download); prepare() then runs the full hash and
@@ -235,7 +272,7 @@ class DesktopUpdater {
       if(!local){const source=this.adoptBaseline(m);if(source){local=await intact();if(!local&&corrupt)await drop(source);}}
       // A corrupt copy that is still locked cannot be replaced at this path, so a download could not land: stop before fetching.
       if(!local&&corrupt&&fs.existsSync(cached))throw new Error('The saved installer for version '+target.version+' is in use by another program. Close it and try again.');
-      if(!local){await this.nativeTrust();await this.download(enrollment,enrollment.deviceToken,m,path.dirname(cached));}
+      if(!local){await this.nativeTrust();await this.downloadWithProgress(enrollment,verified);}
       // A requested rollback beats any other pending update, which must not resurface after it. The running
       // version's own awaiting-startup record is kept.
       const latest=this.readState();
@@ -272,11 +309,17 @@ class DesktopUpdater {
   }
   async recover(enrollment){
     let state=this.readState();const recovery=state.recovery;
-    if(recovery&&!['completed','failed'].includes(recovery.phase)){
+    const corrective=this.correctiveRecoveryPending(state);
+    if(corrective){
+      this.verifyRecovery(enrollment,corrective);
+      const pending=verifyEnvelope(state.pending.envelope,enrollment,this.identity(),state).manifest;
+      if(pending.version!==state.pending.version||!semver.gt(pending.version,corrective.fromVersion))throw new Error('Invalid corrective recovery candidate.');
+    }
+    if(recovery&&!['completed','failed'].includes(recovery.phase)&&(!corrective||(recovery.target.version===this.version&&this.applicationReady))){
       this.verifyRecovery(enrollment,recovery);
       if(recovery.target.version===this.version){
         if(this.applicationReady){
-          this.writeState({...state,installed:recovery.target,pending:null,previous:null,...(state.startupPendingVersion?{startupPendingVersion:null}:{}),recovery:{...recovery,phase:'completed'},suspendedVersions:[...new Set([...(state.suspendedVersions||[]),recovery.fromVersion])]});
+          this.writeState({...state,installed:recovery.target,pending:corrective?state.pending:null,previous:null,...(state.startupPendingVersion?{startupPendingVersion:null}:{}),recovery:{...recovery,phase:'completed'},suspendedVersions:[...new Set([...(state.suspendedVersions||[]),recovery.fromVersion])]});
           this.pruneBaselines();
           // The rolled-back-to version is confirmed running and its installer now lives with the retained ones.
           if(this.baselineRoot)try{fs.rmSync(path.join(this.baselineRoot,recovery.target.version),{recursive:true,force:true});}catch{}
@@ -307,7 +350,8 @@ class DesktopUpdater {
       const {path:cached,manifest}=this.packageOf(pending),legacy=this.legacyUserData&&path.join(this.legacyUserData,'updates',String(manifest.sequence),manifest.package.name);
       const installer=[cached,legacy].find(file=>file&&fs.existsSync(file));
       const legacyInstall=Boolean(legacy&&installer===legacy);
-      if(!this.applicationReady&&!legacyInstall){const notice='Updated app awaits a successful local startup.';this.onStatus(notice);return notice;}
+      const waitingForHealth=current=>!this.applicationReady&&(!legacyInstall||current.startupPendingVersion===this.version||this.applicationDeferred);
+      if(waitingForHealth(state)){const notice='Updated app awaits a successful local startup.';this.onStatus(notice);return notice;}
       const verified=verifyEnvelope(pending.envelope,enrollment,this.identity(),state);
       if(installer)await this.verifyNativeFile(installer,verified.manifest);
       // Startup may fail while the retained installer's signature/hash is awaited.
@@ -315,8 +359,11 @@ class DesktopUpdater {
       state=this.readState();
       if(!state.pending||state.pending.version!==this.version||state.pending.phase==='failed'||
         state.suspendedVersions?.includes(this.version)||envelopeHash(state.pending.envelope)!==verified.manifestHash)return;
-      if(!this.applicationReady&&!legacyInstall){const notice='Updated app awaits a successful local startup.';this.onStatus(notice);return notice;}
-      this.writeState({...state,previous:state.installed||state.previous||null,installed:{...pending,phase:'installed'},pending:null,installedVersion:this.version,...(state.startupPendingVersion?{startupPendingVersion:null}:{})});
+      if(waitingForHealth(state)){const notice='Updated app awaits a successful local startup.';this.onStatus(notice);return notice;}
+      const superseded=this.correctiveRecoveryPending(state);
+      if(superseded)this.verifyRecovery(enrollment,superseded);
+      this.writeState({...state,previous:superseded?superseded.target:state.installed||state.previous||null,installed:{...pending,phase:'installed'},pending:null,installedVersion:this.version,...(state.startupPendingVersion?{startupPendingVersion:null}:{}),
+        ...(superseded?{recovery:null,supersededRecovery:this.supersededRecoveryRecord(superseded,verified)}:{})});
       // Only now, with pending cleared, keep the verified legacy copy at the current path too, so a later offline rollback to
       // this release finds it; a pending release is therefore never at both paths. Every later use re-verifies the copy, and a
       // failed copy only means that rollback downloads the installer.
@@ -357,7 +404,7 @@ class DesktopUpdater {
       this.onStatus('Checking for updates…');
       enrollment=this.loadEnrollment();if(!enrollment){this.onStatus('Update receiver is not initialized. It will retry when protected update credentials are available.');return;}
       const notice=await this.recover(enrollment);
-      if(this.ready?.recovery||['staged','prepared','activating'].includes(this.readState().recovery?.phase))return;
+      if(this.ready?.recovery||(['staged','prepared','activating'].includes(this.readState().recovery?.phase)&&!this.deferredDataRecovery()))return;
       const inFlight=this.readState().pending;
       if(inFlight?.phase==='activating'&&inFlight.version!==this.version)return;
       const trust=await this.request(enrollment,'/v1/apps/'+this.appId+'/trust',{token:enrollment.deviceToken});
@@ -369,6 +416,8 @@ class DesktopUpdater {
       if(!envelope){if(!this.ready)this.onStatus(notice?'No newer signed update. '+notice:'No newer signed update.');return;}
       const previous=this.readState(),verified=verifyEnvelope(envelope,enrollment,this.identity(),previous),m=verified.manifest;
       if(m.version===this.version){this.onStatus(notice?'No newer signed update. '+notice:'Already current.');return;}
+      const deferredRecovery=this.deferredDataRecovery(previous);
+      if(deferredRecovery&&!semver.gt(m.version,deferredRecovery.fromVersion)){this.onStatus('Waiting for a signed correction newer than '+deferredRecovery.fromVersion+'. The confirmed recovery baseline is retained.');return;}
       if(previous.suspendedVersions?.includes(m.version)){this.onStatus('Recovered release remains suspended. Awaiting a corrected release.');return;}
       if(previous.pending?.phase==='failed'&&previous.pending.version===m.version){this.onStatus('Failed release remains suspended. Awaiting a corrected release.');return;}
       if(this.ready?.manifestHash===verified.manifestHash)return;
@@ -383,8 +432,7 @@ class DesktopUpdater {
       // transaction, including when download/preparation fails or the app exits.
       const unconfirmed=this.startupPending(previous)?{startupPendingVersion:this.version}:{};
       this.writeState({...previous,...unconfirmed,sequence:m.sequence,manifestHash:verified.manifestHash,acceptedVersion:m.version,pending:null});
-      this.onStatus('Downloading verified update '+m.version+'…');
-      await this.download(enrollment,enrollment.deviceToken,m,path.dirname(this.packagePath(m)));
+      await this.downloadWithProgress(enrollment,verified);
       const pending={envelope,version:m.version,fromVersion:this.version,phase:'staged',createdAt:new Date().toISOString()};
       this.writeState({...this.readState(),pending});await this.preparePending(enrollment,pending);
       this.onStatus('Update '+m.version+' verified. Installs after you close this app.'+(this.publisherWarning?' '+this.publisherWarning:''));
@@ -402,7 +450,7 @@ class DesktopUpdater {
   }
   markApplicationReady(){
     const becameReady=!this.applicationReady;
-    this.applicationReady=true;
+    this.applicationReady=true;this.applicationDeferred=null;
     // Keep-2 pruning and legacy program-folder cleanup (DL-spec 2.5, 2.6): once per run, after a successful launch, never fatal.
     if(this.installLayout&&!this.layoutSwept){this.layoutSwept=true;try{Promise.resolve(this.installLayout.sweep(this.readState())).catch(()=>{});}catch{}}
     if(becameReady){try{
@@ -412,8 +460,18 @@ class DesktopUpdater {
       }
     }catch{}}
   }
+  markApplicationDeferred(error){
+    if(!isDataStartupFailure(error))throw new Error('An authenticated native data-startup outcome is required.');
+    this.applicationReady=false;this.applicationDeferred=error.dataReason;this.startupConfirmationRequested=false;
+    const state=this.readState(),currentPending=state.pending?.version===this.version&&state.pending.phase!=='failed',
+      currentRecovery=state.recovery?.target.version===this.version&&!['completed','failed'].includes(state.recovery.phase);
+    // Existing field also protects legacy/background confirmation after restart.
+    // Preserve every phase, envelope, high-water, last-good and staged newer fix.
+    if(currentPending||currentRecovery)this.writeState({...state,startupPendingVersion:this.version,...(currentRecovery?{recovery:{...state.recovery,dataDeferredVersion:this.version,dataDeferredManifestHash:state.recovery.manifestHash}}:{})});
+    this.onStatus(error.message);
+  }
   async markApplicationFailed(){
-    this.applicationReady=false;this.ready=null;
+    this.applicationReady=false;this.applicationDeferred=null;this.ready=null;
     const state=this.readState();
     if(state.recovery?.target.version===this.version&&!['completed','failed'].includes(state.recovery.phase))this.writeState({...state,recovery:{...state.recovery,phase:'failed'}});
     else if(state.pending?.version===this.version)this.writeState({...state,pending:{...state.pending,phase:'failed'}});
@@ -433,7 +491,7 @@ class DesktopUpdater {
       const state=this.readState(),pending=state.pending;
       if(this.osShutdown||this.busy||!pending||!['staged','prepared'].includes(pending.phase)||pending.version===this.version)return null;
       // A requested rollback always beats a pending update.
-      if(['staged','prepared','activating'].includes(state.recovery?.phase))return null;
+      if(['staged','prepared','activating'].includes(state.recovery?.phase)&&!this.correctiveRecoveryPending(state))return null;
       const strikes=state.launchUnavailable;
       if(strikes?.manifestHash===envelopeHash(pending.envelope)&&strikes.count>=MAX_LAUNCH_UNAVAILABLE)return null;
       const enrollment=this.loadEnrollment();return enrollment?{pending,enrollment}:null;
@@ -467,6 +525,8 @@ class DesktopUpdater {
       if(recovery?recovery.phase!=='prepared':!state.pending||state.pending.phase!=='prepared')return false;
       const verified=recovery?this.verifyRecovery(enrollment,recovery):verifyEnvelope(state.pending.envelope,enrollment,this.identity(),state);
       if(verified.manifestHash!==this.ready.manifestHash)throw new Error('Staged update identity changed');
+      const deferredRecovery=this.deferredDataRecovery(state);
+      if(!recovery&&deferredRecovery&&!semver.gt(verified.manifest.version,deferredRecovery.fromVersion))throw new Error('A correction must be newer than the original recovery source.');
       if(!recovery)await this.ensureRecoveryBaseline(enrollment,false);
       await this.verifyNativeFile(this.packagePath(verified.manifest),verified.manifest);
       for(const filename of this.ready.nativeFiles)await this.verifyNativeFile(filename,verified.manifest);

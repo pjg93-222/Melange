@@ -2,13 +2,18 @@
 // A separate signature domain and sequence from application binary updates.
 const crypto=require('node:crypto');
 const {canonical}=require('./access-client.cjs');
-const {exact,hash,integer,strictJson}=require('./dataset-protocol.cjs');
+const {exact:datasetExact,hash,integer,strictJson:datasetJson}=require('./dataset-protocol.cjs');
+const dataErrors=new WeakSet();
+class DistrictDataError extends Error{constructor(message='GitHub district data could not be verified.'){super(message);dataErrors.add(this);}}
+const isDistrictDataError=error=>Boolean(error&&dataErrors.has(error));
+function exact(value,fields){try{return datasetExact(value,fields);}catch(error){throw new DistrictDataError(error.message);}}
+function strictJson(value){try{return datasetJson(value);}catch(error){throw new DistrictDataError(error.message);}}
 const REPOSITORY='pjg93-222/Geo',POINTER_PATH='docs/district-testsets/current.json';
 const IDS=Object.freeze(['co-05','or-05','ct-01']);
 const ROLES=Object.freeze(['contacts.sqlite3','density.json','roads.sqlite3','scores.sqlite3','street.sqlite3','walk.sqlite3']);
 const COMMIT=/^[a-f0-9]{40}$/,TAG=/^district-testsets-\d{4}-\d{2}-\d{2}(?:-[a-z0-9][a-z0-9.-]{0,40})?$/;
 const MAX_MANIFEST=2*1024*1024,MAX_FILE=3*1024**3,MAX_ARCHIVE=2*1024**3-1;
-function requireValue(value,message='Invalid GitHub district metadata'){if(!value)throw new Error(message);}
+function requireValue(value,message='Invalid GitHub district metadata'){if(!value)throw new DistrictDataError(message);}
 function assetURL(releaseTag,name){
  requireValue(TAG.test(releaseTag)&&typeof name==='string'&&/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,150}$/.test(name));
  return 'https://github.com/'+REPOSITORY+'/releases/download/'+releaseTag+'/'+name;
@@ -80,4 +85,4 @@ function authorized(configuration,authorization){
  const {accepted,owner,principal}=authorization||{},grant=accepted?.grant,district=configuration?.district;
  return Boolean(configuration?.terrierLegacy&&IDS.includes(district)&&accepted?.revoked===false&&grant?.appId==='terrier'&&Array.isArray(grant.districtIds)&&grant.districtIds.includes(district)&&owner?.mode==='existing-owner'&&owner.appId==='terrier'&&owner.grantId===grant.grantId&&owner.accountIdentity===grant.accountIdentity&&owner.dataBindings?.some(item=>item.districtId===district)&&principal?.mode==='existing-owner'&&principal.districtId===district&&['serverId','deviceId','principalId','accountIdentity'].every(key=>typeof grant[key]==='string'&&principal[key]===grant[key]));
 }
-module.exports={REPOSITORY,POINTER_PATH,IDS,ROLES,COMMIT,TAG,MAX_MANIFEST,MAX_FILE,MAX_ARCHIVE,assetURL,pointer,manifest,authorized,standaloneAuthorized,requireValue};
+module.exports={REPOSITORY,POINTER_PATH,IDS,ROLES,COMMIT,TAG,MAX_MANIFEST,MAX_FILE,MAX_ARCHIVE,assetURL,pointer,manifest,authorized,standaloneAuthorized,requireValue,DistrictDataError,isDistrictDataError};

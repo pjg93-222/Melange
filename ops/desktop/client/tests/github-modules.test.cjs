@@ -3,6 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const {GitHubModules,fileDigest}=require('../github-modules.cjs');
 const {fail}=require('../github-module-protocol.cjs');
+const {networkFailure}=require('../network-transport.cjs');
 const {environment,signed,sha,redirectedLocalCache}=require('./fixtures/github-module-fixture.cjs');
 function fixture(t){const f=environment();t.after(()=>f.cleanup());return f;}
 function roleFile(candidate,f){return path.join(candidate.snapshotRoot,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json');}
@@ -232,15 +233,27 @@ for(const appId of ['melange','mentat'])test(`${appId} unchanged staged checks v
  const validate=t.mock.method(p,'validateSnapshot'),adapter=t.mock.method(f.options.registry[appId+'.fixture.v1'],'validateSnapshot'),write=t.mock.method(f.store,'write');
  f.requests.length=0;const unchanged=await p.stage(f.selected);
  assert.equal(unchanged.status.phase,'ready');assert.equal(unchanged.status.updateAvailable,undefined);assert.equal(validate.mock.callCount(),1);assert.equal(adapter.mock.callCount(),1);assert.equal(write.mock.callCount(),1);
- assert.deepEqual(f.requests,['main','pointer','release','manifest']);assert.deepEqual(f.journal,before);assert.deepEqual(f.selected,selected);assert.equal(fs.readFileSync(account,'utf8'),'owner state');
+ assert.deepEqual(f.requests,['pointer']);assert.deepEqual(f.journal,before);assert.deepEqual(f.selected,selected);assert.equal(fs.readFileSync(account,'utf8'),'owner state');
  const prepared=await p.prepare(f.selected);assert.equal(validate.mock.callCount(),2);assert.equal(adapter.mock.callCount(),2);const requests=f.requests.length;
  await p.commitActive(prepared,f.selected);assert.equal(validate.mock.callCount(),3);assert.equal(adapter.mock.callCount(),3);assert.equal(f.requests.length,requests);assert.deepEqual(f.journal,before);
+});
+test('a protected accepted binding avoids repeated REST, while loose cached metadata and a changed owner do not',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.prepare(f.selected);assert.equal(f.requests.filter(value=>value==='release').length,1);
+ f.requests.length=0;await new GitHubModules(f.options).prepare(f.selected);assert.deepEqual(f.requests,['pointer']);
+ await f.store.write({...f.journal,accepted:null});f.requests.length=0;await p.prepare(f.selected);assert(f.requests.includes('release'));assert(f.requests.includes('manifest'));
+ f.grant.accountIdentity='second-approved-owner@example.invalid';f.requests.length=0;await p.prepare(f.selected);assert(f.requests.includes('release'),'A different owner cannot inherit the prior REST attestation');
+});
+test('a different signed key epoch cannot reuse an accepted binding even when payload digest is unchanged',async t=>{
+ const crypto=require('node:crypto'),f=fixture(t),p=new GitHubModules(f.options);await p.prepare(f.selected);const before=structuredClone(f.journal),keys=crypto.generateKeyPairSync('ed25519');
+ const envelope={...f.remote.envelope,keyId:'rotated-test',signature:crypto.sign(null,Buffer.from(f.remote.envelope.payload,'base64'),keys.privateKey).toString('base64')};
+ p.publicKeys['rotated-test']=keys.publicKey.export({format:'der',type:'spki'}).subarray(-32).toString('base64');f.transport.currentPointer=async()=>Buffer.from(JSON.stringify(envelope));f.requests.length=0;
+ await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');assert(f.requests.includes('release'));assert.deepEqual(f.journal,before,'The immutable old envelope is retained rather than relabeled as the new epoch');
 });
 test('a restarted provider revalidates a staged newer snapshot once without activating or downloading it again',async t=>{
  const f=fixture(t),p=new GitHubModules(f.options);await p.commitActive(await p.prepare(f.selected),f.selected);next(f);await p.stage(f.selected);
  const before=structuredClone(f.journal),restarted=new GitHubModules(f.options),validate=t.mock.method(restarted,'validateSnapshot'),write=t.mock.method(f.store,'write');f.requests.length=0;
  const repeated=await restarted.stage(f.selected);assert.equal(repeated.status.phase,'update-ready');assert.equal(repeated.status.updateAvailable,true);assert.equal(validate.mock.callCount(),1);assert.equal(write.mock.callCount(),1);
- assert.deepEqual(f.requests,['main','pointer','release','manifest']);assert.deepEqual(f.journal,before);assert.equal(f.journal.active.catalogSequence,1);assert.equal(f.journal.staged.catalogSequence,2);
+ assert.deepEqual(f.requests,['pointer']);assert.deepEqual(f.journal,before);assert.equal(f.journal.active.catalogSequence,1);assert.equal(f.journal.staged.catalogSequence,2);
 });
 for(const [field,value] of Object.entries({catalogSequence:1,pointerDigest:'1'.repeat(64),manifestSha256:'2'.repeat(64),releaseTag:'module-data-2026-10-21-other',releaseCommit:'b'.repeat(40),identityDigest:'3'.repeat(64)}))test(`a different staged ${field} cannot skip materialization`,async t=>{
  const f=fixture(t);next(f);const p=new GitHubModules(f.options);await p.prepare(f.selected);const expected=structuredClone(f.journal.staged),state=structuredClone(f.journal);state.staged={...state.staged,[field]:value};await f.store.write(state);
@@ -250,7 +263,7 @@ for(const [field,value] of Object.entries({catalogSequence:1,pointerDigest:'1'.r
 test('an exact staged record with a missing snapshot rematerializes from verified segments',async t=>{
  const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected),before=structuredClone(f.journal);fs.renameSync(first.snapshotRoot,path.join(f.temporary,'removed-snapshot'));
  const materialize=t.mock.method(p,'materialize');f.requests.length=0;const recovered=await p.prepare(f.selected);
- assert.equal(materialize.mock.callCount(),1);assert.deepEqual(fs.readFileSync(roleFile(recovered,f)),f.remote.bytes);assert.deepEqual(f.requests,['main','pointer','release','manifest']);assert.deepEqual(f.journal,before);
+ assert.equal(materialize.mock.callCount(),1);assert.deepEqual(fs.readFileSync(roleFile(recovered,f)),f.remote.bytes);assert.deepEqual(f.requests,['pointer']);assert.deepEqual(f.journal,before);
 });
 for(const mutation of ['bytes','extra','junction','hardlink','missing-role','reader'])test(`an exact staged record still refuses ${mutation} snapshot corruption`,async t=>{
  const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected);await p.commitActive(first,f.selected);const before=structuredClone(f.journal),file=roleFile(first,f),backup=path.join(f.temporary,'original-snapshot');
@@ -303,13 +316,13 @@ test('bad signatures, lower sequences and equivocation never become an offline s
 });
 test('a failed higher revision keeps active usable without lowering the accepted high-water',async t=>{
  const f=fixture(t),p=new GitHubModules(f.options);await p.commitActive(await p.prepare(f.selected),f.selected);next(f);
- f.transport.segment=async()=>{throw fail('unreachable','Synthetic segment unavailable');};const old=await p.prepare(f.selected);
+ f.transport.segment=async()=>{throw networkFailure('unreachable','Synthetic segment unavailable');};const old=await p.prepare(f.selected);
  assert.equal(old.status.phase,'offline');assert.equal(old.catalogueSequence,1);assert.equal(f.journal.highwater.catalogSequence,2);assert.equal(f.journal.active.catalogSequence,1);
  next(f,1);await assert.rejects(p.prepare(f.selected),/rollback/);
 });
 test('revocation is checked when queued work actually begins and again after network work',async t=>{
  const f=fixture(t),p=new GitHubModules(f.options);let release,entered;
- const waiting=new Promise(resolve=>{entered=resolve;});f.transport.resolveMain=async()=>{f.requests.push('held-main');entered();await new Promise(resolve=>{release=resolve;});return 'b'.repeat(40);};
+ const originalPointer=f.transport.currentPointer;const waiting=new Promise(resolve=>{entered=resolve;});f.transport.currentPointer=async()=>{f.requests.push('held-main');entered();await new Promise(resolve=>{release=resolve;});return originalPointer();};
  const first=p.prepare(f.selected);await waiting;const queued=p.stage(f.selected);f.revoked=true;release();
  await assert.rejects(first,error=>error.reason==='authorization');await assert.rejects(queued,error=>error.reason==='authorization');assert.equal(f.journal,null);assert.equal(f.requests.filter(x=>x==='held-main').length,1);
 });

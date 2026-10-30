@@ -5,7 +5,7 @@ const {backendEnvironment}=require('./backend-command.cjs');
 const canceled=()=>new Error('Local data verification canceled.');
 // Bootstrap imports may warm while trusted callers hash. No input is sent until
 // run(), and every failure waits for the owned process/streams to close.
-function prepareDesktopProbe(command,mode,{timeout=30000,limit=32768,signal,prewarmTimeout=30000,onDiagnostic=()=>{},beforeSpawn=()=>{}}={}){
+function prepareDesktopProbe(command,mode,{timeout=30000,limit=32768,signal,prewarmTimeout=30000,onDiagnostic=()=>{},beforeSpawn=()=>{},classifyFailure=null}={}){
  let used=false,cancelled=false,attempt;const diagnostics=[];
  const record=(phase,reason,started)=>{const value=Object.freeze({phase,reason,elapsedMs:Math.round(performance.now()-started)});diagnostics.push(value);try{onDiagnostic(value);}catch{}};
  function begin(warming){
@@ -15,7 +15,16 @@ function prepareDesktopProbe(command,mode,{timeout=30000,limit=32768,signal,prew
   const report=reason=>{if(reported)return;reported=true;record(sent?'reader':'prewarm',reason,started);};
   const close=code=>{
    if(closed)return;closed=true;clearTimeout(timer);signal?.removeEventListener('abort',abort);
-   let value;if(!error){if(!sent||code!==0)error=new Error('Local data verification failed.');else try{value=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{error=new Error('Invalid local verification response.');}}
+   let value;if(!error){
+    if(!sent)error=new Error('Local data verification failed.');
+    else{
+     try{value=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{error=new Error('Invalid local verification response.');}
+     if(!error&&code!==0){
+      let classified;try{classified=typeof classifyFailure==='function'?classifyFailure(value):null;}catch(failure){classified=failure;}
+      error=classified instanceof Error?classified:new Error('Local data verification failed.');value=undefined;
+     }
+    }
+   }
    if(error&&!reported)report(!sent?'early-exit':'invalid-result');complete({error,value,expired});
   };
   const stop=(failure,reason,{expire=false}={})=>{

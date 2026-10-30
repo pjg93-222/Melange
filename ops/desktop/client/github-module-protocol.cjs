@@ -5,6 +5,7 @@ const crypto=require('node:crypto');
 const path=require('node:path');
 const {canonical}=require('./access-client.cjs');
 const {exact,strictJson}=require('./dataset-protocol.cjs');
+const workspace=require('./workspace-data-contract.cjs');
 const MAX_MANIFEST=2*1024**2,MAX_SEGMENT=1024**3,MAX_TOTAL=32*1024**3;
 const MAX_SEGMENTS=256,POINTER_PATH='docs/desktop-data/current.json';
 const HASH=/^[a-f0-9]{64}$/,COMMIT=/^[a-f0-9]{40}$/;
@@ -13,7 +14,10 @@ const TAG=/^module-data-\d{4}-\d{2}-\d{2}(?:-[a-z0-9][a-z0-9.-]{0,40})?$/;
 const APPS=Object.freeze({melange:Object.freeze({repository:'pjg93-222/melange',purpose:'melange-public-module-data'}),mentat:Object.freeze({repository:'pjg93-222/mentat',purpose:'mentat-public-module-data'})});
 function fail(reason='integrity',message='GitHub module data verification failed'){const error=new Error(message);error.reason=reason;return error;}
 function requireValue(value,message){if(!value)throw fail('integrity',message);}
-function configuration(appId){if(!Object.hasOwn(APPS,appId))throw fail('integrity','Unsupported GitHub module');return APPS[appId];}
+function configuration(appId,channel='public-v1'){
+ if(!Object.hasOwn(APPS,appId)||!['public-v1',workspace.CHANNEL.id].includes(channel))throw fail('integrity','Unsupported GitHub module');
+ return channel===workspace.CHANNEL.id?workspace.configuration(appId):APPS[appId];
+}
 function integer(value,max=Number.MAX_SAFE_INTEGER){return Number.isSafeInteger(value)&&value>=0&&value<=max;}
 function hash(value){return typeof value==='string'&&HASH.test(value);}
 function parseJson(bytes){try{return strictJson(bytes);}catch{throw fail('integrity','Invalid GitHub module JSON');}}
@@ -53,8 +57,8 @@ function checkedRegistry(appId,registry,requiredKinds=Object.keys(registry||{}))
  requireValue(budget<=MAX_TOTAL&&requiredKinds.every(kind=>Object.hasOwn(registry,kind)),'Compiled module budget or required kind is invalid');
  return registry;
 }
-function pointer(appId,envelope,publicKeys,previous={}){
- const app=configuration(appId);
+function pointer(appId,envelope,publicKeys,previous={},channel='public-v1'){
+ const app=configuration(appId,channel);
  try{
   exact(envelope,['schemaVersion','keyId','payload','signature']);
   requireValue(envelope.schemaVersion===1&&typeof envelope.keyId==='string'&&Object.hasOwn(publicKeys||{},envelope.keyId)&&typeof envelope.payload==='string'&&envelope.payload.length<16384&&typeof envelope.signature==='string','Untrusted GitHub module pointer');
@@ -71,9 +75,9 @@ function pointer(appId,envelope,publicKeys,previous={}){
   return {value,digest,envelope:structuredClone(envelope)};
  }catch(error){if(error?.reason)throw error;throw fail();}
 }
-function manifest(appId,bytes,checked,registry,requiredKinds=Object.keys(registry||{})){
+function manifest(appId,bytes,checked,registry,requiredKinds=Object.keys(registry||{}),channel='public-v1'){
  try{
-  const app=configuration(appId);checkedRegistry(appId,registry,requiredKinds);
+  const app=configuration(appId,channel);checkedRegistry(appId,registry,requiredKinds);
   requireValue(Buffer.isBuffer(bytes)&&bytes.length===checked.value.manifest.bytes&&crypto.createHash('sha256').update(bytes).digest('hex')===checked.value.manifest.sha256,'GitHub module manifest integrity failed');
   const value=strictJson(bytes);exact(value,['schemaVersion','purpose','appId','repository','releaseTag','datasets']);
   requireValue(value.schemaVersion===1&&value.purpose===app.purpose+'sets'&&value.appId===appId&&value.repository===app.repository&&value.releaseTag===checked.value.releaseTag&&Array.isArray(value.datasets)&&value.datasets.length>0&&value.datasets.length<=32,'Unsupported GitHub module manifest');

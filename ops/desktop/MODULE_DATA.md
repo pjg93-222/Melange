@@ -20,8 +20,16 @@ to GitHub.
 ## Signed inputs and cache
 
 Each compiled app repository has a fixed `docs/desktop-data/current.json` pointer.
-The transport resolves `main` to an immutable commit, verifies the signed pointer
-and release-tag binding, then verifies the exact manifest bytes. The manifest
+The 1.0.33 transport reads that fixed raw-CDN pointer, verifies its signature and
+sequence, and verifies the public prerelease and release-tag/commit binding when
+accepting a new pointer. Unchanged pointers reuse only a protected, owner/profile-
+bound accepted record, after rechecking the exact signed envelope under current
+compiled keys and the hash-bound cached manifest. Loose cache files, a high-water
+alone, another owner, or a different signing epoch cannot supply that attestation.
+Older protected journals remain readable; they already recorded the result only
+after the earlier release/tag checks. This removes steady anonymous REST polling,
+while a first acceptance still performs bounded GitHub release/tag queries.
+The exact manifest bytes are then verified. The manifest
 selects compiled kinds and roles; it cannot supply filesystem paths, commands,
 executable content, downloaded adapters, or arbitrary URLs.
 
@@ -30,6 +38,16 @@ hashes and the concatenated whole-file hash must match. Limits are 32 segments
 per role, 256 per catalogue, 32 datasets, a 2 MiB manifest, and a compiled total
 budget no greater than 32 GiB. A compiled reader can decode a fixed data format
 from an opaque role; there is no generic archive extraction.
+
+Segment transfers have a 30-second idle limit and a separate signed-size-aware
+total budget, between two and thirty minutes per attempt. Useful progress
+refreshes the idle limit; awaiting local disk writes does not count as network
+idleness. Partial files remain bounded and exclusive, and resume requires exact
+206 status, remaining Content-Length, Content-Range, identity encoding, and the
+final segment and whole-role hashes. Cancellation and integrity failures never
+promote a partial file. Recognized network/proxy/rate-limit errors are explicitly
+marked for the native startup retry path; certificate, storage, source, and hash
+failures cannot acquire that retry authority.
 
 The cache is native-derived and separate from original workspaces, account state,
 and application files. Downloads use validated exclusive partial files and
@@ -74,6 +92,17 @@ an internal caller assertion after native signature and owner checks, never a
 downloaded field or proof of authorization by itself. The bridge reports whether
 signature authority came from native JavaScript or an additional trusted Python
 callback. It does not independently establish owner access or journal high-water.
+
+A failed raw-host connection may use GitHub's Contents API RAW-media response for
+the same compiled repository, ref and pointer path. Only explicitly typed
+transport timeouts or unreachable connections enable this alternative. TLS,
+HTTP404, framing, schema, signature, hash and rollback failures do not. The
+returned bytes still pass the same pinned signature, public-release/tag and
+owner-bound high-water checks. API-origin cooldown does not block a recovered
+raw host or immutable assets. Normal successful raw checks use no REST calls;
+this availability fallback consumes the anonymous API quota and reports its
+limits honestly. Previously accepted data may be reused only under the existing
+verified offline policy.
 
 ## Implemented component contracts
 

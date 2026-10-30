@@ -2,13 +2,73 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {EventEmitter}=require('node:events');
 const {Readable}=require('node:stream');
-const {GitHubModuleTransport}=require('../github-module-transport.cjs');
+const {GitHubModuleTransport,transferBudget,MAX_TRANSFER_MS}=require('../github-module-transport.cjs');
 function fixture(handler,options={}){
  const calls=[];
  const request=(url,options,callback)=>{const req=new EventEmitter();req.destroy=()=>{req.destroyed=true;};req.end=()=>queueMicrotask(()=>handler({url,options,req,respond:(status,body='',headers={})=>{const bytes=Buffer.isBuffer(body)?body:Buffer.from(body);const incoming=Readable.from([bytes]);incoming.statusCode=status;incoming.headers={'content-length':String(bytes.length),...headers};callback(incoming);}}));calls.push({url,options,req});return req;};
  return {calls,transport:new GitHubModuleTransport('mentat',{request,...options})};
 }
 const tag='module-data-2026-10-21-fixture',commit='a'.repeat(40);
+
+test('current pointer retries only marked raw connectivity failure using identical fixed API raw ref/path',async()=>{
+ const f=fixture(({url,options,req,respond})=>{
+  if(url.hostname==='raw.githubusercontent.com'){req.emit('error',Object.assign(new Error('offline'),{code:'ENOTFOUND'}));return;}
+  assert.equal(options.headers.Accept,'application/vnd.github.raw+json');respond(200,'{"signed":"opaque"}');
+ },{channel:'workspace-v1'});
+ assert.equal((await f.transport.currentPointer()).toString(),'{"signed":"opaque"}');
+ assert.deepEqual(f.calls.map(call=>call.url.href),[
+  'https://raw.githubusercontent.com/pjg93-222/mentat/desktop-workspace-data/docs/desktop-workspace/current.json',
+  'https://api.github.com/repos/pjg93-222/mentat/contents/docs/desktop-workspace/current.json?ref=desktop-workspace-data']);
+ for(const url of ['https://api.github.com/repos/pjg93-222/mentat/contents/docs/desktop-workspace/current.json?ref=main',
+  'https://api.github.com/repos/other/private/contents/docs/desktop-workspace/current.json?ref=desktop-workspace-data',
+  'https://api.github.com/repos/pjg93-222/mentat/contents/secrets.json?ref=desktop-workspace-data'])
+  await assert.rejects(f.transport.fetch(url,{limit:32768,pointerRaw:true}),{reason:'integrity'});
+ assert.equal(f.calls.length,2);
+});
+
+test('pointer certificate, policy, missing-file, proxy, malformed and redirect failures never trigger API fallback',async()=>{
+ for(const kind of ['tls','403','404','407','302','framing']){
+  const f=fixture(({req,respond})=>{
+   if(kind==='tls')req.emit('error',Object.assign(new Error('certificate'),{code:'CERT_HAS_EXPIRED'}));
+   else if(kind==='framing')respond(200,'too large',{'content-length':'32769'});
+   else respond(Number(kind),'refused',kind==='302'?{location:'https://api.github.com/repos/pjg93-222/mentat/contents/docs/desktop-data/current.json?ref=main'}:{});
+  });
+  await assert.rejects(f.transport.currentPointer());assert.equal(f.calls.length,1,kind);
+ }
+ const bytes=fixture(({respond})=>respond(200,'not a signed JSON envelope'));
+ assert.equal((await bytes.transport.currentPointer()).toString(),'not a signed JSON envelope');assert.equal(bytes.calls.length,1);
+});
+
+test('API fallback quota does not block recovered raw pointer while each origin retains its own throttle',async()=>{
+ let offline=true,now=100000;
+ const f=fixture(({url,req,respond})=>{
+  if(url.hostname==='raw.githubusercontent.com'&&offline){req.emit('error',Object.assign(new Error('offline'),{code:'ECONNRESET'}));return;}
+  if(url.hostname==='api.github.com'){respond(429,'',{'retry-after':'60'});return;}
+  respond(200,'{}');
+ },{now:()=>now,random:()=>0});
+ await assert.rejects(f.transport.currentPointer(),{reason:'rate_limited'});assert.equal(f.calls.length,2);
+ offline=false;assert.equal((await f.transport.currentPointer()).toString(),'{}');assert.equal(f.calls.length,3);
+ offline=true;await assert.rejects(f.transport.currentPointer(),{reason:'rate_limited'});assert.equal(f.calls.length,4);
+ now+=61000;await assert.rejects(f.transport.currentPointer(),{reason:'rate_limited'});assert.equal(f.calls.length,6);
+ const raw=fixture(({respond})=>respond(429,'',{'retry-after':'60'}),{now:()=>100000,random:()=>0});
+ await assert.rejects(raw.transport.currentPointer(),{reason:'rate_limited'});await assert.rejects(raw.transport.currentPointer(),{reason:'rate_limited'});assert.equal(raw.calls.length,1);
+});
+test('large segment budget follows signed remaining size and is bounded separately from idle time',()=>{
+ assert(transferBudget(256*1024**2)>120000);assert.equal(transferBudget(1024**3),MAX_TRANSFER_MS);assert.equal(transferBudget(1),120000);assert(transferBudget(64*1024**2)>=transferBudget(1024));
+});
+test('paced body progress refreshes idle budget and slow local writes do not masquerade as network idleness',async()=>{
+ const {PassThrough}=require('node:stream');let interval;
+ const request=(_url,_options,callback)=>{const req=new EventEmitter();req.destroy=()=>clearInterval(interval);req.end=()=>queueMicrotask(()=>{const res=new PassThrough();res.statusCode=200;res.headers={'content-length':'5'};callback(res);let n=0;interval=setInterval(()=>{res.write(Buffer.from('x'));if(++n===5){clearInterval(interval);res.end();}},40);});return req;};
+ const transport=new GitHubModuleTransport('mentat',{request});let received=0;
+ assert.equal(await transport.fetch('https://github.com/pjg93-222/mentat/releases/download/'+tag+'/part.bin',{asset:true,limit:5,expectedBytes:5,deadlineMs:2000,idleMs:150,onChunk:async chunk=>{received+=chunk.length;}}),5);assert.equal(received,5);
+ const f=fixture(({respond})=>respond(200,'ab'));assert.equal(await f.transport.fetch('https://github.com/pjg93-222/mentat/releases/download/'+tag+'/part.bin',{asset:true,limit:2,expectedBytes:2,deadlineMs:2000,idleMs:50,onChunk:async()=>new Promise(resolve=>setTimeout(resolve,120))}),2);
+});
+test('a stalled transfer and a finite total budget both cancel the owned stream with a branded retry reason',async()=>{
+ const {PassThrough}=require('node:stream');
+ for(const active of [false,true]){let interval,body,request;const send=(_url,_options,callback)=>{request=new EventEmitter();request.destroy=()=>{request.destroyed=true;clearInterval(interval);};request.end=()=>queueMicrotask(()=>{body=new PassThrough();body.statusCode=200;body.headers={};callback(body);body.write(Buffer.from('x'));if(active)interval=setInterval(()=>body.write(Buffer.from('x')),20);});return request;};
+  const transport=new GitHubModuleTransport('mentat',{request:send});await assert.rejects(transport.fetch('https://github.com/pjg93-222/mentat/releases/download/'+tag+'/part.bin',{asset:true,limit:10000,deadlineMs:active?100:2000,idleMs:60,onChunk:async()=>{}}),error=>error.reason==='timeout'&&error.retryableNetwork===true&&error.retryAfterMs>=1000);assert.equal(request.destroyed,true);assert.equal(body.destroyed,true);
+ }
+});
 test('paged Melange channel has a separate fixed pointer and cannot alter legacy routing',async()=>{
  const legacy=new GitHubModuleTransport('melange'),paged=new GitHubModuleTransport('melange',{paged:true});
  const calls=[];paged.fetch=async url=>{calls.push(url);return Buffer.from('{}');};

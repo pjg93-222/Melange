@@ -45,6 +45,57 @@ tools here change repository visibility.
 > running session is never interrupted. None of the manifest, sequence,
 > anti-rollback, hash or exact-publisher checks changed.
 
+## Windows networking and static release discovery (1.0.33)
+
+The recipient uses Electron's native network stack after `app.ready`, including
+Windows system proxy/PAC configuration and normal certificate validation. Origin
+credentials and cookies are omitted. Redirects remain manual and pass the fixed
+GitHub host/path checks at every hop; all hash-bound responses request identity
+encoding. No certificate-error override, private relay, embedded GitHub token,
+or system-proxy change is introduced. An unresolved proxy authentication challenge
+is reported as unavailable; the app never collects a proxy password.
+
+Binary discovery reads the existing canonical latest-release asset for each
+compiled repository:
+`https://github.com/<owner>/<repository>/releases/latest/download/<app>-win32-x64.manifest.json`.
+This is the signed manifest already shipped with every stable desktop release;
+no additional feed branch, raw-host dependency or update service is needed for
+binary discovery. The client derives only the existing versioned release asset
+URLs. It still verifies update roots, app/repository/Windows-x64 identity,
+sequence/version, exact package size/hashes and the pinned native signer before
+staging or execution. Trust transitions remain in that release's existing
+`<app>-trust.json`; recovery reads the exact version selected by protected local
+recovery state. This migration does not rotate keys or change recovery authority.
+
+Binary partial downloads are named by the accepted signed payload hash and kept
+across recognized connection failures or cancellation. A crash-released native
+SQLite lock prevents concurrent writers. Resume requires exact remaining byte
+ranges and identity encoding; the retained handle is hashed with SHA-256 and
+SHA-512 before exclusive publication. File/parent identity, single-link ownership,
+size and write-time guards prevent substitutions and stale verification. Hash or
+framing failures remove only an identity-verified cache partial; other user files
+are preserved. The native publisher checks still run before staging/activation.
+
+The publisher must finish native acceptance and verify the public stable tag,
+manifest, trust sidecar and complete hosted installer readback before marking the
+desktop release as GitHub's latest release. Other release producers must not take
+that latest designation. Re-read the canonical latest manifest anonymously,
+verify its exact signed envelope and intended desktop tag, and exercise an older
+receiver's signed update/recovery checks before calling it delivered. Source
+commits and prepared metadata alone do not establish publication. An unavailable,
+missing or malformed latest asset is an update-check failure, never proof that
+an installed copy is up to date.
+
+The existing shared discovery cache and explicit refresh cooldown remain. Legacy
+REST backoff is kept separate from the new CDN-origin cooldown; it cannot block
+the new feed. Manual checks use a strictly allowlisted minute-bucket cache-busting
+query, still coalescing repeated clicks within one minute; periodic checks keep
+the fixed CDN URL. A
+failed or rate-limited check stays unavailable; cached information is identified
+as cached. Normal binary discovery uses no REST quota. Public data pointers also
+use the raw CDN, but accepting a new data pointer still verifies its public
+release/tag through bounded REST calls; unchanged protected bindings avoid them.
+
 ## From committed sources to a prepared installer
 
 1. Commit completed source to each app's own repository `main` (Melange to

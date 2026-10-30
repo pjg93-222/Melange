@@ -1,5 +1,5 @@
 'use strict';
-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
 const {spawnSync}=require('node:child_process');
 const {DiscoveryCache,rateLimit,deadline,TTL,JITTER,MANUAL_INTERVAL,MAX_DELAY}=require('../github-discovery.cjs');
 const {GitHubSource,discoveryMetadata}=require('../github-source.cjs');
@@ -9,21 +9,26 @@ function release(version='1.0.0'){
  const assets=['melange','mentat','terrier'].flatMap(app=>[app+'-win32-x64.manifest.json',app+'-trust.json',app+'-'+version+'-win32-x64.exe']).map(name=>({name,size:10,browser_download_url:'https://github.com/'+repo+'/releases/download/desktop-v'+version+'/'+name}));
  return {draft:false,prerelease:false,tag_name:'desktop-v'+version,assets};
 }
+const fixtureKeys=crypto.generateKeyPairSync('ed25519');
+function pointer(appId='terrier',version='1.0.0',repository=repo){
+ const body={schemaVersion:1,purpose:'melange-desktop-github-release',distribution:'public-installations',repository,appId,version,sequence:Number(version.split('.').at(-1))+1,platform:'win32',arch:'x64',sourceRefs:Object.fromEntries(['melange','mentat','terrier'].map(app=>[app,{repository:'owner/'+app,ref:'main',commit:'a'.repeat(40)}])),package:{name:appId+'-'+version+'-win32-x64.exe',size:10}};
+ const bytes=Buffer.from(JSON.stringify(body));return {schemaVersion:1,keyId:'fixture',payload:bytes.toString('base64'),signature:crypto.sign(null,bytes,fixtureKeys.privateKey).toString('base64')};
+}
 function options(t,extra={}){return {directory:directory(t),repository:repo,validate:values=>discoveryMetadata(values,repo),random:()=>0,...extra};}
-test('three apps and restarted receivers share one refresh until the cache expires before the next 15-minute timer',async t=>{
+test('same-app receivers and restarts share one refresh until the cache expires before the next 15-minute timer',async t=>{
  const root=directory(t);let now=Date.now(),calls=0;
- const create=appId=>new GitHubSource({appId,repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0.5},readJSON:async()=>{calls++;return [release()];}});
- const sources=['melange','mentat','terrier'].map(create);
+ const create=appId=>new GitHubSource({appId,repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0.5},readJSON:async()=>{calls++;return pointer(appId);}});
+ const sources=['melange','melange','melange'].map(create);
  for(const source of sources)assert.equal((await source.latest()).version,'1.0.0');assert.equal(calls,1);
  assert.match(sources[2].discoverySummary(),/cached release list checked.*Next discovery/);
  assert.equal(TTL,14*60*1000);assert.equal(JITTER,0);
  now+=TTL-1;assert.equal((await create('melange').latest()).version,'1.0.0');assert.equal(calls,1);
- now++;await create('mentat').latest();assert.equal(calls,2);
- const independent=new GitHubSource({appId:'melange',repository:'owner/other',cacheDirectory:root,readJSON:async()=>{calls++;return [];}});await independent.latest();assert.equal(calls,3);
+ now++;await create('melange').latest();assert.equal(calls,2);
+ const independent=new GitHubSource({appId:'melange',repository:'owner/other',cacheDirectory:root,readJSON:async()=>{calls++;return pointer('melange','1.0.0','owner/other');}});await independent.latest();assert.equal(calls,3);
 });
 test('upgraded receivers shorten a valid legacy six-hour cache without deleting its usable metadata',async t=>{
  const root=directory(t);let now=Date.now(),calls=0,version='1.0.25';
- const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return [release(version)];}});
+ const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return pointer('terrier',version);}});
  const initial=create();await initial.latest();const checked=now,legacyNext=checked+6*60*60*1000+20*60*1000;
  const db=initial.cache.cacheDB();db.prepare('UPDATE discovery SET next=? WHERE id=1').run(legacyNext);db.close();
  version='1.0.26';now+=TTL-1;const upgraded=create();assert.equal((await upgraded.latest()).version,'1.0.25');assert.equal(calls,1);
@@ -31,9 +36,9 @@ test('upgraded receivers shorten a valid legacy six-hour cache without deleting 
  now++;assert.equal((await upgraded.latest()).version,'1.0.26');assert.equal(calls,2);assert.equal(upgraded.discoveryInfo.cached,false);
  const stored=upgraded.cache.cacheDB();try{const row=stored.prepare('SELECT checked,next FROM discovery WHERE id=1').get();assert.equal(row.checked,now);assert.equal(row.next,now+TTL);}finally{stored.close();}
 });
-test('legacy cache migration retains persisted quota cooldown and offline fallback',async t=>{
+test('long-cache migration retains persisted CDN cooldown and offline fallback',async t=>{
  const root=directory(t);let now=Date.now(),calls=0,version='1.0.25';
- const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return [release(version)];}});
+ const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return pointer('terrier',version);}});
  const initial=create();await initial.latest();const checked=now;
  const db=initial.cache.cacheDB();db.prepare('UPDATE discovery SET next=? WHERE id=1').run(checked+6*60*60*1000);db.close();
  await initial.cache.note(rateLimit(429,{'retry-after':'3600'}));version='1.0.26';now+=15*60*1000;
@@ -41,17 +46,15 @@ test('legacy cache migration retains persisted quota cooldown and offline fallba
  await assert.rejects(upgraded.refreshDiscovery(),/API retry after/);assert.equal(calls,1);
  now=checked+3600001;assert.equal((await upgraded.latest()).version,'1.0.26');assert.equal(calls,2);
 });
-test('empty discovery is cached across apps/restarts and trust plus update never doubles the scan',async t=>{
- const root=directory(t);let calls=0;
- const create=appId=>new GitHubSource({appId,repository:repo,cacheDirectory:root,readJSON:async()=>{calls++;return [];}});
- const a=create('melange'),enrollment={source:'github',repository:repo,appId:'melange'};
- assert.deepEqual(await a.request(enrollment,'/v1/apps/melange/trust'),{transitions:[]});
- assert.equal(await a.request(enrollment,'/v1/apps/melange/updates?platform=win32&arch=x64&version=1.0.0'),null);
- assert.equal(await create('terrier').latest(),null);assert.equal(await create('melange').latest(),null);assert.equal(calls,1);
+test('empty generic discovery caches across restarts, while signed trust/update consumes only one CDN pointer',async t=>{
+ const config=options(t);let emptyCalls=0;assert.deepEqual(await new DiscoveryCache(config).get(async()=>{emptyCalls++;return [];}),[]);assert.deepEqual(await new DiscoveryCache(config).get(async()=>{emptyCalls++;return [];}),[]);assert.equal(emptyCalls,1);
+ const root=directory(t);let calls=0;const source=new GitHubSource({appId:'melange',repository:repo,cacheDirectory:root,readJSON:async url=>{if(url.endsWith('/melange-trust.json'))return {transitions:[]};calls++;return pointer('melange');}}),enrollment={source:'github',repository:repo,appId:'melange'};
+ assert.deepEqual(await source.request(enrollment,'/v1/apps/melange/trust'),{transitions:[]});assert.equal(await source.request(enrollment,'/v1/apps/melange/updates?platform=win32&arch=x64&version=1.0.0'),null);assert.equal(calls,1);
 });
+
 test('manual checks discover 26 from a cached25 list before automatic expiry; repeated clicks share a recent success',async t=>{
  const root=directory(t);let now=Date.now(),calls=0,version='1.0.25';
- const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return [release(version)];}});
+ const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;return pointer('terrier',version);}});
  const source=create();assert.equal((await source.latest()).version,'1.0.25');version='1.0.26';now+=MANUAL_INTERVAL;
  assert.equal((await source.latest()).version,'1.0.25');assert.equal(calls,1);
  assert.equal((await source.refreshDiscovery()).version,'1.0.26');assert.equal(calls,2);assert.equal(source.discoveryInfo.cached,false);
@@ -59,9 +62,9 @@ test('manual checks discover 26 from a cached25 list before automatic expiry; re
  now+=MANUAL_INTERVAL-1;await source.refreshDiscovery();assert.equal(calls,2);
  now++;await source.refreshDiscovery();assert.equal(calls,3);
 });
-test('manual checks honor a persisted API cooldown and never disguise refresh failures as a current result',async t=>{
+test('manual checks honor a persisted CDN cooldown and never disguise refresh failures as a current result',async t=>{
  const root=directory(t);let now=Date.now(),calls=0,failure=null;
- const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;if(failure)throw failure;return [release('1.0.25')];}});
+ const create=()=>new GitHubSource({appId:'terrier',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;if(failure)throw failure;return pointer('terrier','1.0.25');}});
  const source=create();await source.latest();now+=MANUAL_INTERVAL;
  failure=new Error('offline fixture');await assert.rejects(source.refreshDiscovery(),/refresh deferred/);assert.equal(calls,2);assert.match(source.discoverySummary(),/Refresh deferred/);
  failure=rateLimit(429,{'retry-after':'3600'});await assert.rejects(source.refreshDiscovery(),/API retry after/);assert.equal(calls,3);
@@ -82,15 +85,15 @@ test('concurrent manual refreshes reuse the newly committed list and preserve bo
   assert.equal(calls,1);assert.equal(status.refreshDeferred,true);
  }finally{held.exec('ROLLBACK');held.close();}
 });
-test('quota cooldown persists across apps/restart and blocks list and exact-tag APIs until reset',async t=>{
+test('CDN cooldown persists across receiver restart without blocking independent fixed recovery metadata',async t=>{
  const root=directory(t);let now=Date.now(),calls=0,limited=false;
- const create=appId=>new GitHubSource({appId,repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async()=>{calls++;if(limited)throw rateLimit(429,{'retry-after':'3600'});return [release()];}});
- await create('melange').latest();now+=TTL+1;limited=true;
- assert.equal((await create('mentat').latest()).version,'1.0.0');assert.equal(calls,2);
- const restarted=create('terrier');assert.equal((await restarted.latest()).version,'1.0.0');assert.equal(calls,2);assert.match(restarted.discoverySummary(),/API retry after/);
- await assert.rejects(restarted.request({source:'github',repository:repo,appId:'terrier'},'/v1/apps/terrier/recovery?platform=win32&arch=x64&version=1.0.0'),/paused until/);assert.equal(calls,2);
- now+=3600001;limited=false;await create('melange').latest();assert.equal(calls,3);
+ const create=()=>new GitHubSource({appId:'melange',repository:repo,cacheDirectory:root,cacheOptions:{now:()=>now,random:()=>0},readJSON:async url=>{calls++;if(limited&&url.includes('/releases/latest/download/'))throw rateLimit(429,{'retry-after':'3600'});return pointer('melange');}});
+ await create().latest();now+=TTL+1;limited=true;assert.equal((await create().latest()).version,'1.0.0');assert.equal(calls,2);
+ const restarted=create();assert.equal((await restarted.latest()).version,'1.0.0');assert.equal(calls,2);assert.match(restarted.discoverySummary(),/API retry after/);
+ assert((await restarted.request({source:'github',repository:repo,appId:'melange'},'/v1/apps/melange/recovery?platform=win32&arch=x64&version=1.0.0')).payload);assert.equal(calls,3,'Fixed release recovery has its own origin and signature checks');
+ now+=3600001;limited=false;await create().latest();assert.equal(calls,4);
 });
+
 test('rate-limit classification distinguishes plain403 and parses bounded reset/date/fallback deadlines',()=>{
  const now=Date.now();assert.equal(rateLimit(403,{},'Repository access denied'),null);
  assert.equal(rateLimit(404),null);assert.equal(rateLimit(403,{},'You have exceeded a secondary rate limit').githubRateLimit,true);

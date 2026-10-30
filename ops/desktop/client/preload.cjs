@@ -25,5 +25,6 @@ contextBridge.exposeInMainWorld('desktop',Object.freeze({
   rendererReady:()=>ipcRenderer.invoke('desktop:renderer-ready'),
   pair:value=>ipcRenderer.invoke('desktop:pair',value),
   launch:()=>ipcRenderer.invoke('desktop:launch'),
+  openWorkspaceSettings:()=>ipcRenderer.invoke('desktop:open-workspace-settings'),
   onStatus:callback=>{const listener=(_event,value)=>callback(String(value));ipcRenderer.on('desktop:status',listener);return()=>ipcRenderer.removeListener('desktop:status',listener);}
 }));

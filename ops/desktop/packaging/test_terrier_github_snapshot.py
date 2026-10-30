@@ -103,6 +103,49 @@ class PublicSnapshotTests(unittest.TestCase):
         self.assertEqual(Snapshot.objects.filter(active=True).count(), 1)
         self.assertEqual(AuditEvent.objects.filter(action='snapshot.import').count(), 1)
 
+    def test_prepared_actual_reader_uses_candidate_not_old_active_then_commits(self):
+        from server.research.models import Snapshot
+        from server.research import bundles
+        from terrier_github_snapshot import activate_snapshot
+        prior = Snapshot.objects.create(key='co-cd005-000000000000', manifest={'schema': 'cu-summary-v4'}, active=True)
+        prepared = activate_snapshot(self.source, self.data, self.state, 'co-05', defer_activation=True)
+        self.assertEqual(Snapshot.objects.get(active=True).pk, prior.pk)
+        self.assertEqual(prepared.health(), {'snapshot': self.key, 'phase': 'prepared'})
+        self.assertEqual(bundles.load(self.key, 'rows.json'), self.payload['rows.json'])
+        prepared.commit()
+        self.assertEqual(prepared.health(), {'snapshot': self.key, 'phase': 'active'})
+        self.assertEqual(Snapshot.objects.get(active=True).key, self.key)
+
+    def test_prepared_late_data_mutation_and_storage_failure_preserve_old_active(self):
+        from unittest.mock import patch
+        from server.research.models import Snapshot
+        from terrier_github_snapshot import activate_snapshot
+        prior = Snapshot.objects.create(key='co-cd005-000000000000', manifest={'schema': 'cu-summary-v4'}, active=True)
+        prepared = activate_snapshot(self.source, self.data, self.state, 'co-05', defer_activation=True)
+        rows = self.snapshot / 'rows.json'
+        original = rows.read_bytes()
+        rows.write_bytes(original + b'\n')
+        with self.assertRaises(ValueError):
+            prepared.commit()
+        self.assertEqual(Snapshot.objects.get(active=True).pk, prior.pk)
+        rows.write_bytes(original)
+        prepared = activate_snapshot(self.source, self.data, self.state, 'co-05', defer_activation=True)
+        with patch.object(Snapshot.objects, 'get_or_create', side_effect=sqlite3.OperationalError('synthetic locked state')):
+            with self.assertRaises(sqlite3.OperationalError):
+                prepared.commit()
+        self.assertEqual(Snapshot.objects.get(active=True).pk, prior.pk)
+
+    def test_prepared_candidate_cannot_replace_a_different_concurrent_native_activation(self):
+        from server.research.models import Snapshot
+        from terrier_github_snapshot import activate_snapshot
+        Snapshot.objects.create(key='co-cd005-000000000000', manifest={'schema': 'cu-summary-v4'}, active=True)
+        prepared = activate_snapshot(self.source, self.data, self.state, 'co-05', defer_activation=True)
+        Snapshot.objects.filter(active=True).update(active=False)
+        newer = Snapshot.objects.create(key='co-cd005-ffffffffffff', manifest={'schema': 'cu-summary-v4'}, active=True)
+        with self.assertRaises(ValueError):
+            prepared.commit()
+        self.assertEqual(Snapshot.objects.get(active=True).pk, newer.pk)
+
     def test_nonmatching_historical_snapshot_is_not_selected(self):
         other = copy.deepcopy(self.payload)
         other['manifest.json']['snapshot'] = 'co-cd005-ffffffffffff'

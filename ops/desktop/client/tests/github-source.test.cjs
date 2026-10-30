@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),crypto=require('node:crypto'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {Readable}=require('node:stream');const {EventEmitter}=require('node:events');
-const {GitHubSource,configuration,checkedURL,githubPolicy,enrollGitHub,response,json}=require('../github-source.cjs');
+const {GitHubSource,configuration,checkedURL,githubPolicy,enrollGitHub,response,json,discoveryMetadata,isResponseIntegrity}=require('../github-source.cjs');
 const {verifyEnvelope}=require('../trust.cjs');const {DesktopUpdater}=require('../updater.cjs');
 const repo='owner/desktop-updates';
 function fixture({cacheDirectory,cacheOptions}={}){
@@ -17,7 +17,7 @@ function fixture({cacheDirectory,cacheOptions}={}){
   releases.set(version,{draft:false,prerelease:false,tag_name:'desktop-v'+version,assets:[asset(name,bytes.length),asset('melange-win32-x64.manifest.json',JSON.stringify(envelope).length),asset('melange-trust.json',18)]});return manifest;
  }
  const seed=add('1.0.0',1),next=add('1.0.1',2),calls=[];let corrupt=false;
- const source=new GitHubSource({repository:repo,appId:'melange',cacheDirectory,cacheOptions,readJSON:async url=>{calls.push(url);if(url.includes('?per_page=100&page='))return [...releases.values()].reverse();if(url.includes('/tags/'))return releases.get(url.split('desktop-v')[1]);if(url.endsWith('/melange-trust.json'))return {transitions:[]};return manifests.get(url.split('/desktop-v')[1].split('/')[0]);},open:async url=>Readable.from(corrupt?Buffer.from('bad fixture'):packages.get(url.split('/').at(-1)))});
+ const source=new GitHubSource({repository:repo,appId:'melange',cacheDirectory,cacheOptions,readJSON:async url=>{calls.push(url);if(url.split('?')[0]==='https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json'){const published=[...releases.values()].filter(r=>r.draft===false&&r.prerelease===false).at(-1);return manifests.get(published.tag_name.slice(9));}if(url.endsWith('/melange-trust.json'))return {transitions:[]};return manifests.get(url.split('/desktop-v')[1].split('/')[0]);},open:async url=>Readable.from(corrupt?Buffer.from('bad fixture'):packages.get(url.split('/').at(-1)))});
  return {source,enrollment,seed,next,manifests,releases,packages,calls,set corrupt(value){corrupt=value;}};
 }
 test('GitHub source selects stable app assets, exact current recovery and rejects repository/audience/signature/replay changes',async()=>{
@@ -44,16 +44,32 @@ test('explicit discovery refresh feeds the existing signed update sequence witho
  assert.equal(f.source.discoveryInfo.cached,false);assert.doesNotMatch(f.source.discoverySummary(),/Using cached/);
  const envelope=await f.source.request(f.enrollment,updates);
  assert.equal(verifyEnvelope(envelope,f.enrollment,{appId:'melange',version:'1.0.0',platform:'win32',arch:'x64'}).manifest.version,'1.0.1');
- assert.equal(f.calls.filter(url=>url.includes('?per_page=100&page=')).length,2);
+ assert.equal(f.calls.filter(url=>url.includes('/releases/latest/download/melange-win32-x64.manifest.json')).length,2);assert.equal(f.calls.some(url=>url.startsWith('https://api.github.com/')),false);
  await f.source.request(f.enrollment,trust);assert.equal(f.source.discoveryInfo.cached,true);
 });
 
-test('manual discovery consumes empty results once and expires a refresh that was not consumed promptly',async()=>{
- let calls=0;const source=new GitHubSource({repository:repo,appId:'melange',readJSON:async()=>{calls++;return [];}}),enrollment={source:'github',repository:repo,appId:'melange'};
- assert.equal(await source.refreshDiscovery(),null);await source.request(enrollment,'/v1/apps/melange/trust');assert.equal(calls,1);
- await source.request(enrollment,'/v1/apps/melange/trust');assert.equal(calls,2);
- await source.refreshDiscovery();source.manualDiscovery.expiresAt=Date.now()-1;
- await source.request(enrollment,'/v1/apps/melange/trust');assert.equal(calls,4);
+test('manual discovery consumes the signed pointer once and expires a refresh not consumed promptly',async()=>{
+ const f=fixture(),count=()=>f.calls.filter(url=>url.includes('/releases/latest/download/melange-win32-x64.manifest.json')).length;
+ await f.source.refreshDiscovery();await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(count(),1);
+ await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(count(),2);
+ await f.source.refreshDiscovery();f.source.manualDiscovery.expiresAt=Date.now()-1;
+ await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(count(),4);
+});
+test('legacy REST cooldown cannot block CDN migration, while the old release cache remains useful',async t=>{
+ const {DiscoveryCache,rateLimit}=require('../github-discovery.cjs'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'github-cdn-migration-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));let now=Date.now();
+ const f=fixture({cacheDirectory:directory,cacheOptions:{now:()=>now,random:()=>0}}),legacy={version:'1.0.0',assets:f.releases.get('1.0.0').assets},old=new DiscoveryCache({directory,repository:repo,validate:value=>discoveryMetadata(value,repo),now:()=>now,random:()=>0});await old.get(async()=>[legacy]);await old.note(rateLimit(429,{'retry-after':'3600'}));
+ assert(old.cooldown()>now);assert.notEqual(old.cooldownFile,f.source.cache.cooldownFile);assert.equal((await f.source.latest()).version,'1.0.0');assert.equal(f.calls.length,0,'Useful cached release metadata survives the migration');
+ now+=60000;assert.equal((await f.source.refreshDiscovery()).version,'1.0.1');assert(old.cooldown()>now,'The old REST backoff was preserved, not reset');assert.equal(f.source.cache.cooldown(),0);
+});
+test('an automatic check with expired cached release metadata cannot claim up to date after a failed refresh',async t=>{
+ const {TTL}=require('../github-discovery.cjs'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'github-stale-auto-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));let now=Date.now();const f=fixture({cacheDirectory:directory,cacheOptions:{now:()=>now,random:()=>0}});f.releases.delete('1.0.1');await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(await f.source.request(f.enrollment,'/v1/apps/melange/updates?platform=win32&arch=x64&version=1.0.0'),null);
+ now+=TTL+1;const read=f.source.readJSON;f.source.readJSON=async(url,options)=>{if(url.includes('/releases/latest/download/'))throw require('../network-transport.cjs').networkFailure('unreachable','fixture latest host unavailable');return read(url,options);};await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(f.source.current.version,'1.0.0');assert.equal(f.source.discoveryInfo.refreshDeferred,true);
+ await assert.rejects(f.source.request(f.enrollment,'/v1/apps/melange/updates?platform=win32&arch=x64&version=1.0.0'),error=>error.reason==='unreachable'&&error.retryableNetwork===true);assert.equal((await f.source.request(f.enrollment,'/v1/apps/melange/recovery?platform=win32&arch=x64&version=1.0.0')).schemaVersion,1);
+});
+
+test('explicit refresh uses one allowlisted minute-bucket cache buster, while periodic discovery keeps its fixed URL',async()=>{
+ const f=fixture();await f.source.latest();await f.source.refreshDiscovery();assert.equal(f.calls[0],'https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json');assert.match(f.calls[1],/\/releases\/latest\/download\/melange-win32-x64\.manifest\.json\?refresh=[0-9]{1,12}$/);assert.equal(f.calls.some(url=>url.startsWith('https://api.github.com')),false);
+ assert.doesNotThrow(()=>checkedURL('https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json?refresh=123',true));for(const query of ['?refresh=1&refresh=2','?refresh=01','?refresh=%31','?token=secret','?refresh=1234567890123'])assert.throws(()=>checkedURL('https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json'+query,true));
 });
 
 test('repository capitalization is normalized only for GitHub owner/repo and signed source provenance is required',async()=>{
@@ -66,11 +82,16 @@ test('repository capitalization is normalized only for GitHub owner/repo and sig
  assert.equal(configuration({provider:'github',repository:'Owner/Desktop-Updates'}).repository,repo);
 });
 
-test('desktop discovery scans bounded pages independently of newer container tags and excludes drafts/prereleases',async()=>{
- const f=fixture(),calls=[],container={draft:false,prerelease:false,tag_name:'v2026.10.13.3',assets:[]};
- const source=new GitHubSource({repository:repo,appId:'melange',readJSON:async url=>{const page=Number(new URL(url).searchParams.get('page'));calls.push(page);return page===1?Array(100).fill(container):[f.releases.get('1.0.0'),{...f.releases.get('1.0.1'),draft:true},{...f.releases.get('1.0.1'),prerelease:true},f.releases.get('1.0.1')];}});
- assert.equal((await source.latest()).version,'1.0.1');assert.deepEqual(calls,[1,2]);
- calls.length=0;source.readJSON=async url=>{calls.push(url);return Array(100).fill(container);};assert.equal(await source.latest(),null);assert.equal(calls.length,5);
+test('desktop discovery uses the canonical latest signed asset and never falls back to REST or treats malformed metadata as no update',async()=>{
+ const f=fixture();assert.equal((await f.source.latest()).version,'1.0.1');assert.deepEqual(f.calls,['https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json']);
+ for(const value of [[],{},f.releases.get('1.0.1'),{...f.manifests.get('1.0.1'),extra:'not an envelope'}]){f.source.readJSON=async()=>value;await assert.rejects(f.source.latest(),/pointer/);}
+ const envelope=f.manifests.get('1.0.1');f.source.readJSON=async()=>({...envelope,signature:Buffer.alloc(64).toString('base64')});const item=await f.source.latest();const offered=await f.source.manifest(item);assert.throws(()=>verifyEnvelope(offered,f.enrollment,{appId:'melange',version:'1.0.0',platform:'win32',arch:'x64'}),/signature/);
+ for(const url of ['https://raw.githubusercontent.com/'+repo+'/main/current.json','https://raw.githubusercontent.com/'+repo+'/desktop-updates/other.json','https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json?token=x'])assert.throws(()=>checkedURL(url,false,true));
+});
+test('signed pointer descriptors do not invent API asset existence or sidecar sizes, and legacy cached API rows remain readable',async()=>{
+ const f=fixture(),item=await f.source.latest();assert.equal(item.kind,'signed-manifest-pointer');assert.equal(item.assets,undefined);assert.deepEqual(item.package,{name:f.next.package.name,size:f.next.package.size});
+ const legacy={version:'1.0.0',assets:f.releases.get('1.0.0').assets};assert.deepEqual(discoveryMetadata([legacy,item],repo),[legacy,item]);
+ const source=new GitHubSource({repository:repo,appId:'melange',readJSON:async url=>url.endsWith('/melange-trust.json')?{transitions:[]}:f.manifests.get('1.0.0')});source.cache={get:async()=>[legacy]};assert.equal((await source.latest()).version,'1.0.0');
 });
 test('public receiver does not require app access or send device tokens and preserves verified key transitions',async()=>{
  const publicKeys={root:crypto.randomBytes(32).toString('base64')};let saved=null;
@@ -88,17 +109,33 @@ test('GitHub source reuses signed baseline, hash checks and native activation wi
  const updater=new DesktopUpdater({appId:'melange',version:'1.0.0',platform:'win32',arch:'x64',userData:directory,packaged:true,publisherName:'Fixture Publisher',loadEnrollment:()=>f.enrollment,saveEnrollment:value=>Object.assign(f.enrollment,value),readState:()=>state,writeState:value=>{state=value;},request:f.source.request.bind(f.source),download:f.source.download.bind(f.source),autoUpdater:native,onStatus(){},verifyNativePackage:async()=>{},makeFeed:async(manifest,file)=>{currentManifest=manifest;currentFile=file;return {url:'http://127.0.0.1/fixture',close(){}};}});t.after(()=>updater.close());
  await updater.check();assert.equal(state.installed.version,'1.0.0');assert.equal(state.pending.version,'1.0.1');assert.equal(state.pending.phase,'prepared');assert.equal(installs,0);
  assert.equal(await updater.activateAfterClose(),true);assert.equal(installs,1);
- f.corrupt=true;await assert.rejects(f.source.download(f.enrollment,null,f.next,path.join(directory,'bad')),/integrity|size/);assert.deepEqual(fs.readdirSync(path.join(directory,'bad')),[]);
+ f.corrupt=true;const manifestHash=crypto.createHash('sha256').update(Buffer.from(f.manifests.get('1.0.1').payload,'base64')).digest('hex');await assert.rejects(f.source.download(f.enrollment,null,f.next,path.join(directory,'bad'),{manifestHash}),/integrity|size/);assert.deepEqual(fs.readdirSync(path.join(directory,'bad')),['.binary-transfer.sqlite']);
 });
+test('binary resume forwards only exact signed byte ranges through every redirect and refuses wrong framing',async t=>{
+ const https=require('node:https'),original=https.request,calls=[];let bad=null,hop=0;
+ https.request=(url,options,callback)=>{calls.push(options);const req=new EventEmitter();req.setTimeout=()=>{};req.destroy=error=>{if(error)req.emit('error',error);};req.end=()=>queueMicrotask(()=>{const res=Readable.from([Buffer.from('cd')]);res.statusCode=hop++===0?302:bad==='status'?200:206;res.headers=res.statusCode===302?{location:'https://release-assets.githubusercontent.com/public'}:{'content-length':bad==='length'?'3':'2','content-range':bad==='range'?'bytes 1-2/4':'bytes 2-3/4',...(bad==='encoding'?{'content-encoding':'gzip'}:{})};callback(res);});return req;};t.after(()=>{https.request=original;});
+ const consume=async()=>{const stream=await response('https://github.com/'+repo+'/asset',{asset:true,range:{offset:2,totalBytes:4}});const chunks=[];for await(const chunk of stream)chunks.push(chunk);return Buffer.concat(chunks).toString();};
+ assert.equal(await consume(),'cd');assert.equal(calls.length,2);assert(calls.every(options=>options.headers.Range==='bytes=2-'));
+ for(const mode of ['status','length','range','encoding']){bad=mode;hop=0;await assert.rejects(consume(),/range|unavailable|Encoded/);}
+});
+test('raw-media API metadata is restricted to fixed public data pointer routes and refuses redirects',async t=>{
+ const https=require('node:https'),original=https.request,calls=[];let redirect=false;
+ https.request=(url,options,callback)=>{calls.push({url:url.href,options});const req=new EventEmitter();req.setTimeout=()=>{};req.destroy=error=>{if(error)req.emit('error',error);};req.end=()=>queueMicrotask(()=>{const res=Readable.from([Buffer.from('{"pointer":true}')]);res.statusCode=redirect?302:200;res.headers=redirect?{location:'https://raw.githubusercontent.com/'+repo+'/main/docs/desktop-data/current.json'}:{};callback(res);});return req;};t.after(()=>{https.request=original;});
+ const target='https://api.github.com/repos/'+repo+'/contents/docs/district-testsets/current.json?ref=main';assert.deepEqual(await json(target,{apiRaw:true,maxBytes:16384}),{pointer:true});assert.equal(calls[0].options.headers.Accept,'application/vnd.github.raw+json');assert.equal(calls[0].options.headers.Authorization,undefined);
+ for(const url of [target.replace('ref=main','ref=attacker'),target+'&other=1',target.replace('current.json','other.json'),target.replace('api.github.com','github.com'),target.replace('district-testsets','desktop-workspace')])assert.throws(()=>response(url,{apiRaw:true}),/refused/);
+ redirect=true;await assert.rejects(json(target,{apiRaw:true}),/redirect/);
+});
+
 test('GitHub network redirects stay on HTTPS asset hosts, never forward credentials, and metadata is bounded',async t=>{
  const https=require('node:https'),original=https.request,requests=[];let mode='cdn',hops=0;
- https.request=(url,options,callback)=>{requests.push({url:url.href,options});const request=new EventEmitter();request.setTimeout=()=>{};request.end=()=>setImmediate(()=>{const stream=Readable.from(mode==='large'?Buffer.alloc(100):Buffer.from(mode==='secondary'?'You have exceeded a secondary rate limit':'{}'));stream.statusCode=mode==='quota'?429:['secondary','forbidden'].includes(mode)?403:(mode==='cdn'&&hops++===0)||mode==='bad'||mode==='loop'||mode==='api'?302:200;stream.headers=mode==='quota'?{'retry-after':'3600'}:stream.statusCode===302?{location:mode==='bad'?'https://evil.example/steal':mode==='api'?'https://api.github.com/other':'https://release-assets.githubusercontent.com/fixture?signature=opaque'}:{};callback(stream);});request.destroy=error=>request.emit('error',error);return request;};t.after(()=>{https.request=original;});
+ https.request=(url,options,callback)=>{requests.push({url:url.href,options});const request=new EventEmitter();request.setTimeout=()=>{};request.end=()=>setImmediate(()=>{const stream=Readable.from(mode==='large'?Buffer.alloc(100):Buffer.from(mode==='secondary'?'You have exceeded a secondary rate limit':mode==='malformed'?'{':'{}'));stream.statusCode=mode==='quota'?429:['secondary','forbidden'].includes(mode)?403:(mode==='cdn'&&hops++===0)||mode==='bad'||mode==='loop'||mode==='api'?302:200;stream.headers=mode==='quota'?{'retry-after':'3600'}:stream.statusCode===302?{location:mode==='bad'?'https://evil.example/steal':mode==='api'?'https://api.github.com/other':'https://release-assets.githubusercontent.com/fixture?signature=opaque'}:{};callback(stream);});request.destroy=error=>request.emit('error',error);return request;};t.after(()=>{https.request=original;});
  assert.deepEqual(await json('https://github.com/'+repo+'/releases/download/desktop-v1.0.0/fixture.json',{asset:true}),{});
  assert.equal(requests.length,2);for(const {options} of requests){assert.equal(options.rejectUnauthorized,true);assert.equal(options.headers.Authorization,undefined);assert.equal(options.headers.Cookie,undefined);}
  mode='bad';await assert.rejects(response('https://github.com/'+repo+'/asset',{asset:true}),/refused/);
  mode='api';await assert.rejects(response('https://api.github.com/repos/'+repo+'/releases'),/redirect/);
  mode='loop';await assert.rejects(response('https://github.com/'+repo+'/asset',{asset:true}),/redirect/);
- mode='large';await assert.rejects(json('https://api.github.com/repos/'+repo+'/releases',{maxBytes:10}),/limit/);
+ mode='large';await assert.rejects(json('https://api.github.com/repos/'+repo+'/releases',{maxBytes:10}),error=>isResponseIntegrity(error)&&/limit/.test(error.message));
+ mode='malformed';await assert.rejects(json('https://api.github.com/repos/'+repo+'/releases'),error=>isResponseIntegrity(error)&&error.cause instanceof SyntaxError);assert.equal(isResponseIntegrity(new TypeError('program fixture')),false);assert.equal(isResponseIntegrity(Object.assign(new Error('forged code'),{code:'GITHUB_RESPONSE_INTEGRITY'})),false);
  mode='quota';await assert.rejects(response('https://api.github.com/repos/'+repo+'/releases'),error=>error.githubRateLimit===true&&error.retryAfter==='3600');
  mode='secondary';await assert.rejects(response('https://api.github.com/repos/'+repo+'/releases'),error=>error.githubRateLimit===true);
  mode='forbidden';await assert.rejects(response('https://api.github.com/repos/'+repo+'/releases'),error=>!error.githubRateLimit&&/403/.test(error.message));

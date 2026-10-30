@@ -4,8 +4,23 @@ const {startupFixture}=require('./fixtures/module-startup-fixture.cjs');
 const mainFile=path.join(__dirname,'..','main.cjs'),source=fs.readFileSync(mainFile,'utf8');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function deferred(){let resolve;const promise=new Promise(done=>{resolve=done;});return {promise,resolve};}
-function actual(startText,endText,context){const start=source.indexOf(startText),end=source.indexOf(endText,start);assert.ok(start>=0&&end>start);if(!Object.hasOwn(context,'standaloneMode'))context.standaloneMode=false;vm.runInNewContext(source.slice(start,end),context,{filename:mainFile});return context;}
+function actual(startText,endText,context){const start=source.indexOf(startText),end=source.indexOf(endText,start);assert.ok(start>=0&&end>start);if(!Object.hasOwn(context,'standaloneMode'))context.standaloneMode=false;context.app??={isPackaged:false};context.applicationConfig??={};context.startupRetry??={cancel(){}};vm.runInNewContext(source.slice(start,end),context,{filename:mainFile});return context;}
 function bounded(promise){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Fixture staging did not enter within five seconds')),5000);})]).finally(()=>clearTimeout(timer));}
+test('workspace Settings IPC is argument-free, runtime authenticated, and cannot choose a renderer path',async()=>{
+ let handler,calls=0,trusted=true;const context={definition:{id:'melange'},ipcMain:{handle:(channel,fn)=>{assert.equal(channel,'desktop:open-workspace-settings');handler=fn;}},
+  runtimeOnly:()=>{if(!trusted)throw new Error('Untrusted application request.');},showSetup:async()=>{calls++;}};
+ actual("  ipcMain.handle('desktop:open-workspace-settings'",'\n  Menu.setApplicationMenu',context);
+ assert.equal(await handler({}),true);assert.equal(calls,1);
+ await assert.rejects(handler({},'C:/renderer-chosen-path'),/Unsupported/);assert.equal(calls,1);
+ trusted=false;await assert.rejects(handler({}),/Untrusted/);assert.equal(calls,1);
+ trusted=true;context.definition.id='terrier';await assert.rejects(handler({}),/Unsupported/);
+});
+test('workspace menu navigates only the fixed trusted route after fresh reveal checks',async()=>{
+ const navigated=[],runtime={child:{},origin:'http://127.0.0.1:43212',authorization:{owner:true},requestsAllowed:true};
+ const context={definition:{id:'melange'},closing:false,runtime,launch:async()=>{},accessLifecycle:{generation:3,canReveal:async()=>true},window:{loadURL:async url=>navigated.push(url)}};
+ actual('async function openDataWorkspace()',"\napp.on('second-instance'",context);await context.openDataWorkspace();assert.deepEqual(navigated,['http://127.0.0.1:43212/__desktop/workspace']);
+ context.accessLifecycle.canReveal=async()=>false;await context.openDataWorkspace();assert.equal(navigated.length,1);
+});
 
 test('actual district background timer waits fifteen minutes and requests skip-if-busy discovery',async()=>{
  const line=source.split('\n').find(value=>value.includes('districtDataInterval=setInterval('));assert.ok(line);
