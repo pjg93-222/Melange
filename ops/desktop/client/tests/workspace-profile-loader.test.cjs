@@ -3,7 +3,12 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const packaging=path.resolve(__dirname,'../../packaging');
 const source=fs.readFileSync(path.join(packaging,'module_workspace_render.py'),'utf8');
 const loader=/PROFILE_LOADER = r"""([\s\S]*?)"""/.exec(source)[1];
-const template=fs.readFileSync(path.resolve(__dirname,'../../../../fec/surfaces/templates/make_member_desk_00.tpl'),'utf8');
+const carrier=fs.readFileSync(path.join(packaging,'module_workspace_ui_templates.py')),declared=require('../module-application-inventory.cjs').APPLICATION_SPECS.melange.programFiles.find(row=>row.root==='bootstrap'&&row.path==='module_workspace_ui_templates.py');
+assert.equal(require('node:crypto').createHash('sha256').update(carrier).digest('hex'),declared.sha256);
+const compiled=JSON.parse(require('node:child_process').execFileSync('python',['-B','-c',"import json,sys;sys.path.insert(0,sys.argv[1]);from module_workspace_ui_templates import TEMPLATES,GIT_ORIGINS;print(json.dumps({'template':TEMPLATES['make_member_desk_00.tpl'],'origin':GIT_ORIGINS['fec/surfaces/templates/make_member_desk_00.tpl']}))",packaging],{encoding:'utf8',maxBuffer:1024**2,timeout:20000}));
+const template=compiled.template,templateBytes=Buffer.from(template);
+assert.equal(templateBytes.length,compiled.origin.bytes);assert.equal(require('node:crypto').createHash('sha256').update(templateBytes).digest('hex'),compiled.origin.sha256);
+assert.equal(compiled.origin.commit,'541e7272b724925aa68b090813e5362ed8ea839c');assert.equal(require('node:crypto').createHash('sha1').update(Buffer.concat([Buffer.from('blob '+templateBytes.length+'\0'),templateBytes])).digest('hex'),compiled.origin.gitBlob);
 const start=template.indexOf('window.__melangeProfileMerge=function(D2){'),end=template.indexOf('\n};',start)+3,stockMerge=template.slice(start,end);
 const fields=['articles','bills','bio','community','cook_pvi','district_brief','electoral','employers','financial','industry','partners','personal','psy','refs','staffdir'];
 const settle=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};

@@ -21,7 +21,7 @@ for(const appId of ['melange','mentat']){
    const account=path.join(f.original,'private-account.fixture');fs.writeFileSync(account,'private local fixture');
    f.options.authorize=async()=>local(appId);const provider=new GitHubModules(f.options);
    const candidate=await provider.prepare(f.selected);assert.ok(candidate);assert.equal(f.journal.active,null);
-   assert.deepEqual(f.requests.slice(0,4),['main','pointer','release','manifest']);
+   assert.deepEqual(f.requests.slice(0,3),['pointer','release','manifest']);assert.equal(f.requests.includes('main'),false);
    assert.equal(fs.readFileSync(account,'utf8'),'private local fixture');
    f.remote.envelope.signature=Buffer.alloc(64).toString('base64');
    await assert.rejects(provider.prepare(f.selected),/signature/);

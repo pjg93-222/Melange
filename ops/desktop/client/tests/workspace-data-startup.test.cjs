@@ -42,8 +42,8 @@ test('cold workspace network failure starts no child and preserves native retry 
  assert.ok(isDataStartupFailure(error));assert.equal(error.retryable,true);assert.equal(error.retryAfterMs,60000);assert.equal(f.runtime.child,null);assert.equal(f.events.includes('public-provider'),false);assert.equal(f.workspace.journal?.active??null,null);
 });
 test('a failed second activation write is data-blocked, retains both high-waters and stops only the owned child',async t=>{
- const f=fixture(t),write=f.workspace.store.write;f.workspace.store.write=async value=>{if(value.active)throw new Error('Synthetic protected write failed');return write(value);};
- const error=await f.startup.start(f.selected,await f.pub.options.authorize()).catch(error=>error);assert.ok(isDataStartupFailure(error));assert.equal(error.retryable,false);
+ const f=fixture(t),write=f.workspace.store.write;let refusedActiveWrites=0;f.workspace.store.write=async value=>{if(value.active){refusedActiveWrites++;throw new Error('Synthetic protected write failed');}return write(value);};
+ const error=await f.startup.start(f.selected,await f.pub.options.authorize()).catch(error=>error);assert.equal(refusedActiveWrites,1,'The intended second-channel protected activation write must be reached: '+error?.message);assert.ok(isDataStartupFailure(error));assert.equal(error.retryable,false);
  assert.ok(f.pub.journal.active);assert.equal(f.workspace.journal.active,null);assert.equal(f.pub.journal.highwater.catalogSequence,1);assert.equal(f.workspace.journal.highwater.catalogSequence,1);assert.equal(f.runtime.child,null);assert.equal(f.events.at(-1),'stop');
  f.workspace.store.write=write;await f.startup.start(f.selected,await f.pub.options.authorize());assert.ok(f.pub.journal.active);assert.ok(f.workspace.journal.active);
 });

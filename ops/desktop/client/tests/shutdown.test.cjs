@@ -6,7 +6,7 @@ const turn=()=>new Promise(resolve=>setImmediate(resolve));
 function fixture({stop=async()=>{},districtStop=null,activate=false,noticeThrows=false}={}){
  const calls=[],handlers=new Map(),child={fixture:true};
  const context={closing:false,closeApproved:true,background:true,portable:false,interval:1,presenceInterval:2,districtDataInterval:3,
-  downloads:{abort(){calls.push('abort');}},clearInterval(){},networkWatcher:{close(){calls.push('network-close');}},moduleDataStartup:{async shutdown(){calls.push('drain');}},
+  startupRetry:{cancel(){calls.push('startup-cancel');}},downloads:{abort(){calls.push('abort');}},clearInterval(){},networkWatcher:{close(){calls.push('network-close');}},moduleDataStartup:{async shutdown(){calls.push('drain');}},
   runtime:{child,async stop(){calls.push('stop');await stop();this.child=null;}},districtSwitch:districtStop?{async stopAll(){calls.push('stop-all');await districtStop();}}:null,
   updater:{async activateAfterClose(){calls.push('activate');return activate;},close(){calls.push('updater-close');}},
   updateStatus(){calls.push('notice');if(noticeThrows)throw new Error('notification unavailable');},updateGitHubStatus(){calls.push('update-notice');},
@@ -26,7 +26,7 @@ function fixture({stop=async()=>{},districtStop=null,activate=false,noticeThrows
 
 test('failed backend shutdown defers activation and quit, reports failure and preserves retryability',async()=>{
  let attempts=0;const f=fixture({stop:async()=>{if(++attempts===1)throw new Error('still alive');},noticeThrows:true});
- assert.equal(await f.close(),false);assert.equal(f.context.closing,false);assert.equal(f.context.closeApproved,false);
+ assert.equal(await f.close(),false);assert.equal(f.calls[0],'startup-cancel');assert.ok(f.calls.indexOf('startup-cancel')<f.calls.indexOf('drain'));assert.equal(f.context.closing,false);assert.equal(f.context.closeApproved,false);
  assert.equal(f.context.finishClose.deferred,true);assert.equal(f.context.finishClose.inProgress,false);assert.equal(f.context.runtime.child,f.child);
  assert.equal(f.calls.includes('activate'),false);assert.equal(f.calls.includes('quit'),false);assert.ok(f.calls.includes('dialog'));
  assert.equal(await f.close(),true);assert.equal(attempts,2);assert.equal(f.context.runtime.child,null);
