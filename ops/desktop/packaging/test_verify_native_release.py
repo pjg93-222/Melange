@@ -649,6 +649,154 @@ class SourceOverlayFixture(unittest.TestCase):
             n.source_provenance(**args)
 
 
+class MelangeCompositeFixture(unittest.TestCase):
+    """One real frozen reader blob plus otherwise identical retained fixture files."""
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.prefix = "resources/runtime/melange/"
+        self.name = "fec/surfaces/melange_public_data.py"
+        self.client = self.root / "frozen/ops/desktop/client"
+        self.client.mkdir(parents=True)
+        self.reader = self.root / "frozen" / self.name
+        self.reader.parent.mkdir(parents=True)
+        self.raw = b"reviewed exact frozen reader\n"
+        self.reader.write_bytes(self.raw)
+        self.commit = "a" * 40
+        sha = hashlib.sha256(self.raw).hexdigest()
+        blob = hashlib.sha1(b"blob " + str(len(self.raw)).encode() + b"\0" + self.raw).hexdigest()
+        old = b"retained approved reader"
+        old_provenance = b'{"retainedSourceCommit":"' + b"b" * 40 + b'"}'
+        self.original = {
+            self.prefix + "sources/" + self.name: {"size": len(old), "sha256": hashlib.sha256(old).hexdigest()},
+            self.prefix + "sources/untouched.py": {"size": 9, "sha256": "c" * 64},
+            self.prefix + "source-provenance.json": {"size": len(old_provenance), "sha256": hashlib.sha256(old_provenance).hexdigest()}}
+        self.program = copy.deepcopy(self.original)
+        self.program[self.prefix + "sources/" + self.name] = {"size": len(self.raw), "sha256": sha}
+        self.freeze_path = self.root / "frozen/source-freeze-evidence.json"
+        self.freeze = {"schemaVersion": 1, "status": "passed-committed-source-freeze", "sourceClientCommit": self.commit,
+            "readerGitBlob": {"path": self.name, "gitObject": blob, "bytes": len(self.raw), "sha256": sha},
+            "readerMatchesExactGitBlob": True, "protectedResidueWritten": False, "archiveContainsProtectedResidue": False,
+            "before": {"head": self.commit, "remoteBranchCommit": self.commit, "trackedStatus": ""},
+            "after": {"head": self.commit, "remoteBranchCommit": self.commit, "trackedStatus": ""}}
+        self.proof_path = self.root / "origin-proof.json"
+        self.proof = {"schemaVersion": 1, "appId": "melange", "status": "passed",
+            "provenanceKind": "composite-retained-export-plus-exact-git-override", "baseSourceCommit": "b" * 40,
+            "overrideSourceCommit": self.commit, "sharedBootstrapCommit": self.commit,
+            "sourceFileCount": 2, "gitOverrideFileCount": 1, "retainedExportFileCount": 1, "changedGitPaths": [self.name],
+            "baseReader": {"bytes": len(old), "sha256": hashlib.sha256(old).hexdigest()},
+            "override": {"path": str(self.reader), "bytes": len(self.raw), "sha256": sha, "gitBlob": blob},
+            "sourceFreezeEvidence": {"path": str(self.freeze_path), "sha256": ""}}
+        self.staged = self.root / "stage/sources"
+        self.staged.mkdir(parents=True)
+        self.provenance = {"schemaVersion": 1, "app": "melange", "version": "1.0.32", "sourceCommit": self.commit,
+            "commonClientCommit": self.commit, "bootstrapCommit": self.commit,
+            "previousRuntimeProvenanceSha256": hashlib.sha256(old_provenance).hexdigest(),
+            "sourceOrigin": {"kind": self.proof["provenanceKind"], "baseSourceCommit": "b" * 40,
+                "proofSha256": "", "sharedBootstrapSourceCommit": self.commit,
+                "sourceFileCount": 2, "gitOverrideFileCount": 1, "retainedExportFileCount": 1}}
+        self.save()
+
+    def save(self):
+        self.freeze_path.write_text(json.dumps(self.freeze))
+        self.proof["sourceFreezeEvidence"]["sha256"] = n.legacy.digest(self.freeze_path)
+        self.proof_path.write_text(json.dumps(self.proof))
+        self.provenance["sourceOrigin"]["proofSha256"] = n.legacy.digest(self.proof_path)
+        path = self.staged.parent / "source-provenance.json"
+        path.write_text(json.dumps(self.provenance))
+        self.program[self.prefix + "source-provenance.json"] = {"size": path.stat().st_size, "sha256": n.legacy.digest(path)}
+
+    def verify(self, **overrides):
+        args = dict(app="melange", version="1.0.32", client_commit=self.commit, source_commit=self.commit,
+            staged=self.staged, program_map=self.program, original_reference=self.original,
+            origin_proof=self.proof_path, client=self.client)
+        return n.source_provenance(**dict(args, **overrides))
+
+    def test_exact_git_reader_and_unchanged_retained_closure_pass(self):
+        self.assertEqual(self.verify()["originProofSha256"], n.legacy.digest(self.proof_path))
+        self.assertEqual(self.verify()["sourceFileCount"], 2)
+
+    def test_missing_proof_or_frozen_export_and_unrelated_source_changes_refuse(self):
+        for change in ({"origin_proof": None}, {"client": None}):
+            with self.subTest(change=change), self.assertRaisesRegex(n.Refused, "proof and frozen client are required"):
+                self.verify(**change)
+        self.program[self.prefix + "sources/untouched.py"]["sha256"] = "d" * 64
+        with self.assertRaisesRegex(n.Refused, "unapproved retained member"):
+            self.verify()
+        self.program[self.prefix + "sources/untouched.py"] = self.original[self.prefix + "sources/untouched.py"]
+        self.program[self.prefix + "sources/extra.py"] = {"size": 1, "sha256": "e" * 64}
+        with self.assertRaisesRegex(n.Refused, "changed the retained source closure"):
+            self.verify()
+
+    def test_origin_commit_count_base_and_blob_claims_cannot_grant_authority(self):
+        baseline = copy.deepcopy(self.proof)
+        for mutate, reason in (
+            (lambda v: v.update(overrideSourceCommit="d" * 40), "origin identity differs"),
+            (lambda v: v.update(changedGitPaths=["untouched.py"]), "origin identity differs"),
+            (lambda v: v.update(sourceFileCount=3), "origin counts differ"),
+            (lambda v: v.update(gitOverrideFileCount=True), "origin counts differ"),
+            (lambda v: v["baseReader"].update(sha256="d" * 64), "retained base"),
+            (lambda v: v["override"].update(gitBlob="d" * 40), "exact frozen Git blob"),
+            (lambda v: v.update(unreviewedSource="other.py"), "origin identity differs")):
+            self.proof = copy.deepcopy(baseline)
+            mutate(self.proof)
+            self.save()
+            with self.subTest(reason=reason), self.assertRaisesRegex(n.Refused, reason):
+                self.verify()
+
+    def test_independent_frozen_bytes_and_paths_must_match_proof(self):
+        self.reader.write_bytes(b"different frozen reader")
+        with self.assertRaisesRegex(n.Refused, "exact frozen Git blob"):
+            self.verify()
+        self.reader.write_bytes(self.raw)
+        outside = self.root / "outside.py"
+        outside.write_bytes(self.raw)
+        self.proof["override"]["path"] = str(outside)
+        self.save()
+        with self.assertRaisesRegex(n.Refused, "outside frozen source"):
+            self.verify()
+
+    def test_frozen_evidence_must_bind_commit_blob_clean_state_and_hash(self):
+        baseline = copy.deepcopy(self.freeze)
+        for mutate, reason in (
+            (lambda v: v.update(sourceClientCommit="d" * 40), "freeze evidence differs"),
+            (lambda v: v["readerGitBlob"].update(gitObject="d" * 40), "freeze evidence differs"),
+            (lambda v: v["after"].update(head="d" * 40), "not clean and committed"),
+            (lambda v: v["before"].update(trackedStatus=" M reader.py"), "not clean and committed"),
+            (lambda v: v.update(archiveContainsProtectedResidue=True), "freeze evidence differs")):
+            self.freeze = copy.deepcopy(baseline)
+            mutate(self.freeze)
+            self.save()
+            with self.subTest(reason=reason), self.assertRaisesRegex(n.Refused, reason):
+                self.verify()
+        self.freeze = baseline
+        self.save()
+        self.freeze_path.write_text(self.freeze_path.read_text() + "\n")
+        with self.assertRaisesRegex(n.Refused, "freeze evidence differs"):
+            self.verify()
+
+    def test_fixed_helper_addition_is_allowed_but_other_missing_base_members_refuse(self):
+        program, overlay = self.root / "base", self.root / "overlay/manifest.json"
+        NativeFixture.write_files(program, {"vendor.dll": pe(b"unchanged vendor")})
+        helper = self.prefix + "bootstrap/module_catalogue_cache.py"
+        NativeFixture.write_files(overlay.parent / "files", {helper: b"reviewed frozen cache helper"})
+        value = {"schemaVersion": 1, "appId": "melange", "version": "1.0.32", "clientCommit": self.commit,
+            "sourceCommit": self.commit, "files": [{"path": helper, "bytes": len(b"reviewed frozen cache helper"),
+                "sha256": hashlib.sha256(b"reviewed frozen cache helper").hexdigest()}]}
+        overlay.write_text(json.dumps(value))
+        files, pes, mapping, _inputs, _binding = n.source_overlays(*n.scan(program), "melange", "1.0.32",
+            overlay, self.commit, self.commit)
+        self.assertEqual(set(mapping), {"vendor.dll", helper})
+        self.assertEqual(pes, {"vendor.dll"})
+        self.assertEqual(mapping[helper]["sha256"], value["files"][0]["sha256"])
+        self.assertFalse((program / helper).exists())
+        value["files"][0]["path"] = self.prefix + "bootstrap/module_application_contracts.py"
+        overlay.write_text(json.dumps(value))
+        with self.assertRaisesRegex(n.Refused, "Invalid source overlay member"):
+            n.source_overlays(*n.scan(program), "melange", "1.0.32", overlay, self.commit, self.commit)
+
+
 class CompiledModuleBridgeFixture(unittest.TestCase):
     """Tiny literal authorities join an actual file map; no inventory is monkeypatched."""
     def setUp(self):

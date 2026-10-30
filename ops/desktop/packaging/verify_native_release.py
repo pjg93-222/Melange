@@ -171,12 +171,17 @@ def source_overlays(files, pes, mapping, app, version, manifest_file, client_com
             and all(isinstance(value, str) and re.fullmatch(r"[a-f0-9]{40}", value) for value in (client_commit, source_commit)),
             "Source overlay identity differs from frozen release")
     rows = manifest["files"]
-    require(isinstance(rows, list) and 1 <= len(rows) <= 5, "Invalid source overlay member count")
     prefix = "resources/runtime/" + app + "/"
     allowed = {prefix + name for name in ("bootstrap/terrier_standalone.py", "bootstrap/module_application_inventory.py",
+                                          "bootstrap/module_application_contracts.py", "bootstrap/module_public_input_installers.py",
+                                          "bootstrap/native_access_state.py", "bootstrap/module_catalogue_cache.py",
                                           "source-inventory.json", "source-provenance.json")}
+    additions = {prefix + "bootstrap/module_catalogue_cache.py"}
     if app == "terrier":
         allowed.add(prefix + "sources/server/research/street_views.py")
+    elif app == "melange":
+        allowed.add(prefix + "sources/fec/surfaces/melange_public_data.py")
+    require(isinstance(rows, list) and 1 <= len(rows) <= len(allowed), "Invalid source overlay member count")
     root = manifest_file.parent / "files"
     overlay_files, overlay_pes, overlay_map = scan(root)
     require(not overlay_pes, "Source overlays cannot contain native images")
@@ -185,7 +190,8 @@ def source_overlays(files, pes, mapping, app, version, manifest_file, client_com
     for row in rows:
         require(isinstance(row, dict) and set(row) == {"path", "bytes", "sha256"}, "Invalid source overlay member")
         name = row["path"]
-        require(isinstance(name, str) and name in allowed and name not in seen and name in files and name not in pes
+        require(isinstance(name, str) and name in allowed and name not in seen
+                and (name in files or name in additions) and name not in pes
                 and type(row["bytes"]) is int and 0 <= row["bytes"] <= 16 * 1024**2
                 and isinstance(row["sha256"], str) and re.fullmatch(r"[a-f0-9]{64}", row["sha256"]),
                 "Invalid source overlay member")
@@ -202,7 +208,8 @@ def source_overlays(files, pes, mapping, app, version, manifest_file, client_com
         "clientCommit": client_commit, "sourceCommit": source_commit, "files": rows}
 
 
-def source_provenance(*, app, version, client_commit, source_commit, staged, program_map, original_reference, origin_proof=None):
+def source_provenance(*, app, version, client_commit, source_commit, staged, program_map, original_reference,
+                      origin_proof=None, client=None):
     """Bind packaged provenance to the independent gated stage and source origins."""
     expected = staged.parent / "source-provenance.json"
     info = physical(expected)
@@ -224,7 +231,10 @@ def source_provenance(*, app, version, client_commit, source_commit, staged, pro
     retained = {name[len(prefix + "sources/"):]: row for name, row in original_reference.items() if name.startswith(prefix + "sources/")}
     require(set(sources) == set(retained), "Source overlay changed the retained source closure")
     proof_hash = None
-    if app != "terrier":
+    if app == "melange" and origin.get("kind") == "composite-retained-export-plus-exact-git-override":
+        proof_hash = melange_composite_origin(origin=origin, proof_file=origin_proof, client=client,
+            client_commit=client_commit, source_commit=source_commit, sources=sources, retained=retained)
+    elif app != "terrier":
         require(origin.get("kind") == "retained-verified-export" and origin.get("baseSourceCommit") == source_commit
                 and origin.get("sourceFileCount") == len(sources) and sources == retained,
                 "Retained source provenance differs from exact base sources")
@@ -260,6 +270,88 @@ def source_provenance(*, app, version, client_commit, source_commit, staged, pro
             require(origin.get(field) == proof.get(field) == count, "Composite source origin counts differ")
     return {"sha256": expected_hash, "kind": origin["kind"], "originProofSha256": proof_hash,
             "sourceFileCount": len(sources)}
+
+
+def melange_composite_origin(*, origin, proof_file, client, client_commit, source_commit, sources, retained):
+    """One exact frozen Git reader may replace an otherwise unchanged retained export."""
+    require(proof_file is not None and client is not None, "Melange composite source origin proof and frozen client are required")
+    def bounded_json(file, label):
+        file = Path(file).absolute()
+        require(physical(file).st_size <= 1024 ** 2, label + " is too large")
+        def unique(pairs):
+            value = {}
+            for key, item in pairs:
+                require(key not in value, "Duplicate " + label + " property")
+                value[key] = item
+            return value
+        return json.loads(file.read_text(encoding="utf-8"), object_pairs_hook=unique)
+    proof_path = Path(proof_file).absolute()
+    proof = bounded_json(proof_path, "Melange origin proof")
+    proof_hash = legacy.digest(proof_path)
+    fields = {"schemaVersion", "appId", "status", "provenanceKind", "baseSourceCommit", "overrideSourceCommit",
+              "sharedBootstrapCommit", "sourceFileCount", "gitOverrideFileCount", "retainedExportFileCount",
+              "changedGitPaths", "baseReader", "override", "sourceFreezeEvidence"}
+    origin_fields = {"kind", "baseSourceCommit", "proofSha256", "sharedBootstrapSourceCommit",
+                     "sourceFileCount", "gitOverrideFileCount", "retainedExportFileCount"}
+    name = "fec/surfaces/melange_public_data.py"
+    require(type(proof) is dict and set(proof) == fields and type(origin) is dict and set(origin) == origin_fields
+            and type(proof["schemaVersion"]) is int and proof["schemaVersion"] == 1
+            and proof["appId"] == "melange" and proof["status"] == "passed"
+            and origin["kind"] == proof["provenanceKind"] == "composite-retained-export-plus-exact-git-override"
+            and origin["proofSha256"] == proof_hash
+            and proof["overrideSourceCommit"] == proof["sharedBootstrapCommit"] == client_commit == source_commit
+            and origin["sharedBootstrapSourceCommit"] == client_commit
+            and origin["baseSourceCommit"] == proof["baseSourceCommit"]
+            and type(proof["baseSourceCommit"]) is str and re.fullmatch(r"[a-f0-9]{40}", proof["baseSourceCommit"])
+            and proof["changedGitPaths"] == [name], "Melange composite source origin identity differs")
+    require(set(sources) == set(retained) and name in sources
+            and {key for key in sources if sources[key] != retained[key]} == {name},
+            "Melange composite source changed an unapproved retained member")
+    for field, count in (("sourceFileCount", len(sources)), ("gitOverrideFileCount", 1),
+                         ("retainedExportFileCount", len(sources) - 1)):
+        require(type(proof[field]) is int and type(origin[field]) is int and proof[field] == origin[field] == count,
+                "Melange composite source origin counts differ")
+    base, override, evidence = proof["baseReader"], proof["override"], proof["sourceFreezeEvidence"]
+    require(type(base) is dict and set(base) == {"bytes", "sha256"} and type(base["bytes"]) is int
+            and retained[name] == {"size": base["bytes"], "sha256": base["sha256"]},
+            "Melange composite reader differs from retained base")
+    require(type(override) is dict and set(override) == {"path", "bytes", "sha256", "gitBlob"}
+            and type(override["path"]) is str
+            and type(override["bytes"]) is int and 0 < override["bytes"] <= 16 * 1024 ** 2
+            and type(override["sha256"]) is str and re.fullmatch(r"[a-f0-9]{64}", override["sha256"])
+            and type(override["gitBlob"]) is str and re.fullmatch(r"[a-f0-9]{40}", override["gitBlob"])
+            and sources[name] == {"size": override["bytes"], "sha256": override["sha256"]},
+            "Melange composite reader differs from packaged source")
+    client = Path(client).absolute()
+    frozen_root = client.parents[2]
+    frozen_reader = frozen_root / name
+    require(physical(frozen_reader).st_size == override["bytes"], "Melange reader override differs from exact frozen Git blob")
+    override_path = Path(override["path"]).absolute()
+    physical(override_path)
+    require(identity(override_path) == identity(frozen_reader), "Melange reader override is outside frozen source")
+    raw = frozen_reader.read_bytes()
+    git_blob = hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+    require(len(raw) == override["bytes"] and hashlib.sha256(raw).hexdigest() == override["sha256"]
+            and git_blob == override["gitBlob"], "Melange reader override differs from exact frozen Git blob")
+    require(type(evidence) is dict and set(evidence) == {"path", "sha256"}
+            and type(evidence["path"]) is str and type(evidence["sha256"]) is str
+            and re.fullmatch(r"[a-f0-9]{64}", evidence["sha256"])
+            and identity(evidence["path"]) == identity(frozen_root / "source-freeze-evidence.json"),
+            "Melange source freeze evidence is outside frozen source")
+    frozen = bounded_json(evidence["path"], "source freeze evidence")
+    require(legacy.digest(evidence["path"]) == evidence["sha256"] and type(frozen) is dict
+            and type(frozen.get("schemaVersion")) is int and frozen["schemaVersion"] == 1
+            and frozen.get("status") == "passed-committed-source-freeze"
+            and frozen.get("sourceClientCommit") == client_commit
+            and frozen.get("readerMatchesExactGitBlob") is True and frozen.get("protectedResidueWritten") is False
+            and frozen.get("archiveContainsProtectedResidue") is False
+            and frozen.get("readerGitBlob") == {"path": name, "gitObject": git_blob,
+                "bytes": len(raw), "sha256": override["sha256"]}, "Melange source freeze evidence differs")
+    for phase in ("before", "after"):
+        state = frozen.get(phase)
+        require(type(state) is dict and state.get("head") == state.get("remoteBranchCommit") == client_commit
+                and state.get("trackedStatus") == "", "Melange source freeze was not clean and committed")
+    return proof_hash
 
 
 def reader_capabilities(seven):
@@ -741,7 +833,7 @@ def verify(args):
             program_map=app_map, members=members, client=client, staged=staged, trust=trust, installer_format=installer_format)
         provenance_binding = source_provenance(app=args.app, version=args.version, client_commit=args.client_commit,
             source_commit=args.source_commit, staged=staged, program_map=app_map, original_reference=original_reference,
-            origin_proof=getattr(args, "source_origin_proof", None)) if source_overlay else None
+            origin_proof=getattr(args, "source_origin_proof", None), client=client) if source_overlay else None
         absence = contract.verify_without_uninstaller(installer=installer, package_json=package,
             nsis_files=nsis_files, app_files=app_files, asar_members=members, signing_receipt=receipt_path)
         receipt = json.loads(receipt_path.read_text(encoding="utf-8-sig"))
@@ -777,7 +869,7 @@ def verify(args):
         if source_overlay:
             require(source_provenance(app=args.app, version=args.version, client_commit=args.client_commit,
                 source_commit=args.source_commit, staged=staged, program_map=app_map, original_reference=original_reference,
-                origin_proof=getattr(args, "source_origin_proof", None)) == provenance_binding,
+                origin_proof=getattr(args, "source_origin_proof", None), client=client) == provenance_binding,
                 "Source provenance changed during verification")
         for file, before in inputs.items():
             require(snapshot(file) == before, "Verification input changed: " + file)
@@ -811,8 +903,8 @@ def main(argv=None):
     parser.add_argument("--source", help="Original frozen source export (provenance; transformed bytes use --staged-sources)")
     parser.add_argument("--app-executable", help="Explicit signed main-executable overlay used by the built-in installer")
     parser.add_argument("--app-asar", help="Explicit ASAR overlay used by the built-in installer")
-    parser.add_argument("--source-overlay", help="Closed, replacement-only source/bootstrap overlay manifest; vendor/native changes are forbidden")
-    parser.add_argument("--source-origin-proof", help="Independent composite origin proof required for a Terrier source overlay")
+    parser.add_argument("--source-overlay", help="Closed reviewed source/bootstrap overlay; only the fixed cache helper may be a new member")
+    parser.add_argument("--source-origin-proof", help="Independent composite origin proof required for a reviewed source override")
     parser.add_argument("--installer-format", choices=INSTALLER_FORMATS, default="legacy-nsis-v1",
                         help="explicit native payload layout; builtin layout forbids external installer plugins")
     parser.add_argument("--free-floor-gib", type=free_floor_gib, default=32,
