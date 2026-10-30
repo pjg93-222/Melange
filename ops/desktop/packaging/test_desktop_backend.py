@@ -20,6 +20,50 @@ spec.loader.exec_module(backend)
 
 
 class BackendBoundaryTests(unittest.TestCase):
+    def setUp(self):
+        # These CLI/HTTP boundary fixtures use placeholder source paths and
+        # never start/import an application. Real code-byte verification is
+        # exercised with the sealed Geo source in test_terrier_district.
+        check = patch('terrier_district.verify_district_program', return_value='synthetic-program-proof')
+        self.program_check = check.start()
+        self.addCleanup(check.stop)
+
+    def test_terrier_program_failure_precedes_application_run(self):
+        from module_application_contracts import ModuleInputError
+        args = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src',
+                '--data-root', 'data', '--state-root', 'state', '--standalone']
+        self.program_check.side_effect = ModuleInputError()
+        with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x' * 32}), patch.object(backend, 'run') as run, \
+                patch.object(backend, 'contain_windows_children'), patch('sys.argv', args):
+            with self.assertRaises(ModuleInputError):
+                backend.main()
+            run.assert_not_called()
+        self.program_check.assert_called_once_with(Path('src'))
+
+    def test_windows_session_cli_is_native_probe_or_explicit_standalone_terrier(self):
+        with patch('sys.argv', ['desktop_backend', '--desktop-windows-session']), patch('desktop_credentials.main', return_value=0) as probe:
+            self.assertEqual(backend.main(), 0)
+            probe.assert_called_once_with()
+        base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state']
+        with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):
+            for invalid in (base + ['--windows-session'], [*base[:2], 'mentat', *base[3:], '--standalone', '--windows-session']):
+                with patch('sys.argv', invalid), self.assertRaises(SystemExit):
+                    backend.main()
+            if backend.os.name == 'nt':
+                with patch('sys.argv', base + ['--standalone', '--windows-session']):
+                    backend.main()
+                self.assertTrue(run.call_args.args[0].windows_session)
+
+    def test_standalone_terrier_allows_separate_public_cache_without_a_legacy_owner(self):
+        base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state', '--standalone']
+        with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):
+            with patch('sys.argv', base + ['--github-district-data']):
+                backend.main()
+            self.assertTrue(run.call_args.args[0].standalone)
+            for invalid in (base + ['--github-district-data', '--state-root', 'data'], [*base[:2], 'mentat', *base[3:]]):
+                with patch('sys.argv', invalid), self.assertRaises(SystemExit):
+                    backend.main()
+
     def test_github_dataset_flag_requires_existing_terrier_owner_and_separate_roots(self):
         base = ['desktop_backend', '--app', 'terrier', '--port', '2000', '--source-root', 'src', '--data-root', 'data', '--state-root', 'state']
         with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'run') as run, patch.object(backend, 'contain_windows_children'):
@@ -114,6 +158,78 @@ class BackendBoundaryTests(unittest.TestCase):
         self.assertEqual(status, ['403 Forbidden'])
         self.assertEqual(calls, [])
         self.assertEqual(guarded({'HTTP_X_DESKTOP_TOKEN':'x'*32}, lambda *args: None), [b'existing django'])
+
+    def test_dual_cli_passes_both_verified_inputs_and_closes_both(self):
+        from module_workspace_handoff import PreparedWorkspace
+        public, workspace = object(), object()
+        dual = PreparedWorkspace(public, workspace)
+        args = ['desktop_backend', '--app', 'mentat', '--port', '2000', '--source-root', 'src',
+                '--data-root', 'data', '--state-root', 'state', '--profile-root', 'profile', '--desktop-workspace-input']
+        with patch.dict('os.environ', {'DESKTOP_LAUNCH_TOKEN': 'x'*32}), patch.object(backend, 'contain_windows_children'), \
+             patch('module_workspace_handoff.prepare_workspace_handoff', return_value=dual) as prepare, \
+             patch('module_workspace_handoff.close_workspace_handoff') as close, patch.object(backend, 'run') as run:
+            with patch('sys.argv', args): backend.main()
+            self.assertEqual(run.call_args.kwargs, {'module_inputs': public, 'workspace_inputs': workspace})
+            self.assertEqual(prepare.call_args.kwargs['app_id'], 'mentat')
+            close.assert_called_once_with(dual)
+            run.reset_mock()
+            for extra in ('--desktop-module-input', '--desktop-district-input'):
+                with patch('sys.argv', args + [extra]), contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                    backend.main()
+            run.assert_not_called()
+
+    def test_workspace_binding_precedes_public_capture_and_health(self):
+        public_latch, workspace_latch, server = object(), object(), object()
+        calls = []
+        with patch('module_data_handoff.server_installation', side_effect=[public_latch, workspace_latch]), \
+             patch('module_data_handoff.complete_server_installation', side_effect=lambda latch, actual: calls.append((latch, actual))):
+            first, second, ready = backend.module_installations(object(), object(), lambda _: {})
+            self.assertIs(first, public_latch)
+            self.assertIs(second, workspace_latch)
+            self.assertEqual(calls, [])
+            ready(server)
+        self.assertEqual(calls, [(workspace_latch, server), (public_latch, server)])
+
+    def test_dual_health_refuses_partial_installation_and_authenticates_before_bindings(self):
+        from module_application_contracts import ModuleInputError
+        public, workspace, prepared = object(), object(), object()
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *args): pass
+        guarded = backend.guarded_handler(Handler, 'x'*32, 'mentat', module_installation=public,
+                                          workspace_installation=workspace, workspace_inputs=prepared)
+        server = ThreadingHTTPServer(('127.0.0.1', 0), guarded)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        url = 'http://127.0.0.1:' + str(server.server_port) + backend.HEALTH_PATH
+        try:
+            def health(latch, actual):
+                self.assertIs(actual, server)
+                return {'channel': 'public' if latch is public else 'workspace'}
+            with patch('module_data_handoff.server_installed_health', side_effect=health) as check:
+                with self.assertRaises(HTTPError) as denied: urllib.request.urlopen(url)
+                self.assertEqual(denied.exception.code, 403)
+                check.assert_not_called()
+                with urllib.request.urlopen(urllib.request.Request(url, headers={backend.TOKEN_HEADER: 'x'*32})) as response:
+                    result = json.load(response)
+                self.assertEqual(result['moduleData'], {'channel': 'public'})
+                self.assertEqual(result['workspaceData'], {'channel': 'workspace'})
+            with patch('module_data_handoff.server_installed_health', side_effect=[{'channel': 'public'}, ModuleInputError()]):
+                with self.assertRaises(HTTPError) as failed:
+                    urllib.request.urlopen(urllib.request.Request(url, headers={backend.TOKEN_HEADER: 'x'*32}))
+                self.assertEqual(failed.exception.code, 503)
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join()
+
+    def test_workspace_cannot_run_without_verified_matching_public_context(self):
+        from module_application_contracts import ModuleInputError
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            options = SimpleNamespace(app='mentat', data_root=root/'not-created-data', state_root=root/'not-created-state')
+            with self.assertRaises(ModuleInputError): backend.run(options, 'x'*32, workspace_inputs=object())
+            self.assertFalse(options.data_root.exists())
+            self.assertFalse(options.state_root.exists())
 
 
 class DistrictBundleImportTests(unittest.TestCase):
@@ -238,6 +354,28 @@ class GitHubDistrictArchiveTests(unittest.TestCase):
 
     def extract(self, request=None, check=lambda *_: None):
         return backend.extract_github_district_archive(request or self.request(), check=check)
+
+    def test_extracts_signed_nested_snapshot_files_and_checks_their_hashes(self):
+        self.content['snapshots/co-cd005-111111111111/manifest.json'] = b'{"schema":"fixture"}'
+        self.content['snapshots/co-cd005-111111111111/derived/v3_meta.json.gz'] = b'signed fixture bytes'
+        self.pack([('co-05/sources/example.csv', b'excluded fixture source')])
+        result = self.extract()
+        self.assertTrue(result['sourceMetadataAccepted'])
+        for role, content in self.content.items():
+            self.assertEqual((self.output / role).read_bytes(), content)
+        self.assertFalse((self.output / 'sources').exists())
+
+    def test_snapshot_checksum_failure_preserves_preexisting_state(self):
+        self.content['snapshots/co-cd005-111111111111/rows.json'] = b'[]'
+        self.pack()
+        request = self.request()
+        request['files'][-1]['sha256'] = '0' * 64
+        accounts = self.root / 'accounts.sqlite3'
+        accounts.write_bytes(b'preserved local state')
+        with self.assertRaises(ValueError):
+            self.extract(request)
+        self.assertFalse(self.output.exists())
+        self.assertEqual(accounts.read_bytes(), b'preserved local state')
 
     def test_extracts_only_six_roles_then_validates_source_metadata(self):
         self.pack([('co-05/sources/example.csv', b'invented fixture')])

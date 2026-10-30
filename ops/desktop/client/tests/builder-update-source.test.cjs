@@ -9,15 +9,31 @@ const {spawnSync}=require('node:child_process');
 // Each app updates from its own public repository; the variable, when set, overrides it (2026-10-15 correction).
 const EXPECTED={melange:'pjg93-222/melange',mentat:'pjg93-222/mentat',terrier:'pjg93-222/geo'};
 
+test('workspace distribution is an explicit compiled M/M mode and cannot be selected for Terrier or from unknown values',()=>{
+ const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-workspace-build-'));
+ try{
+  for(const appId of Object.keys(EXPECTED)){
+   fs.mkdirSync(path.join(fixture,appId,'bootstrap'),{recursive:true});fs.mkdirSync(path.join(fixture,appId,'python','bin'),{recursive:true});
+   fs.writeFileSync(path.join(fixture,appId,'bootstrap','desktop_backend.py'),'');fs.writeFileSync(path.join(fixture,appId,'python','python.exe'),'');fs.writeFileSync(path.join(fixture,appId,'python','bin','python3'),'');
+   for(const mode of ['disabled','workspace-v1','renderer-path']){
+    const child=spawnSync(process.execPath,['-e',"const config=require('./builder.cjs');process.stdout.write(JSON.stringify(config.extraMetadata.desktopAppConfig.desktopWorkspaceData))"],{cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env:{...process.env,DESKTOP_APP_ID:appId,DESKTOP_RUNTIME_ROOT:fixture,DESKTOP_ACCESS_TRUST:'',DESKTOP_WORKSPACE_DATA_MODE:mode}});
+    if(mode==='renderer-path'){assert.notEqual(child.status,0);assert.match(child.stderr,/workspace/);}
+    else{assert.equal(child.status,0,child.stderr);assert.deepEqual(JSON.parse(child.stdout),mode==='workspace-v1'&&appId!=='terrier'?{[appId]:'workspace-v1'}:{});}
+   }
+  }
+ }finally{assert.equal(path.dirname(fixture),path.resolve(os.tmpdir()));assert.ok(path.basename(fixture).startsWith('desktop-workspace-build-'));fs.rmSync(fixture,{recursive:true,force:true});}
+});
+
 function updateSource(fixture,appId,repository){
   const env={...process.env,DESKTOP_APP_ID:appId,DESKTOP_RUNTIME_ROOT:fixture,DESKTOP_ACCESS_TRUST:''};
   delete env.DESKTOP_GITHUB_REPOSITORY;delete env.DESKTOP_UPDATE_PROVIDER;
   if(repository!==undefined)env.DESKTOP_GITHUB_REPOSITORY=repository;
   const child=spawnSync(process.execPath,['-e',
-    "const c=require('./builder.cjs');process.stdout.write(JSON.stringify({source:c.extraMetadata.desktopAppConfig.desktopUpdateSource,uninstaller:c.extraMetadata.desktopAppConfig.desktopUninstaller,nsis:c.nsis,target:c.win.target}))"],
+    "const c=require('./builder.cjs');process.stdout.write(JSON.stringify({source:c.extraMetadata.desktopAppConfig.desktopUpdateSource,accessMode:c.extraMetadata.desktopAppConfig.desktopAccessMode,uninstaller:c.extraMetadata.desktopAppConfig.desktopUninstaller,nsis:c.nsis,target:c.win.target}))"],
     {cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env});
   assert.equal(child.status,0,child.stderr);
   const result=JSON.parse(child.stdout);
+  assert.equal(result.accessMode,'standalone','new builds use local access without remote administrator approval');
   assert.equal(result.uninstaller,false,appId+' native metadata disables the uninstaller');
   assert.equal(result.nsis,undefined,'the normal build must not restore legacy installer plug-ins');
   assert.deepEqual(result.target,['dir'],'the signed directory is completed by build-native.cjs');

@@ -10,6 +10,7 @@ network, activation, persistent configuration, or filesystem writes occur here.
 """
 import base64
 import copy
+from functools import wraps
 import hashlib
 import json
 import os
@@ -21,6 +22,7 @@ import uuid
 
 from collections.abc import Mapping
 from module_data_snapshot import KINDS, KIND_TOTAL_LIMITS, Snapshot, exact, parse, regular, require, safe_root
+from module_application_contracts import DataIntakeBlocked
 
 MiB, GiB = 1024 ** 2, 1024 ** 3
 MAX_TOTAL, MAX_SEGMENTS, MAX_MANIFEST = 32 * GiB, 256, 2 * MiB
@@ -76,6 +78,30 @@ def opened_identity(info):
     return (info.st_dev,info.st_ino,info.st_mode,info.st_nlink,info.st_size,info.st_mtime_ns)
 
 
+def _data_intake(function):
+    @wraps(function)
+    def checked(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except DataIntakeBlocked:
+            raise
+        except OSError:
+            raise DataIntakeBlocked('storage') from None
+        except (ValueError, UnicodeError, OverflowError):
+            raise DataIntakeBlocked('integrity') from None
+    return checked
+
+
+@_data_intake
+def _input_json(raw):
+    return parse(raw)
+
+
+@_data_intake
+def _input_snapshot(request):
+    return Snapshot(request)
+
+
 def _native_cache_root(base, requested):
     # Walk the fixed requested spelling before resolving Windows native storage
     # redirection. Never resolve away a descendant junction/reparse point.
@@ -111,6 +137,7 @@ class ReadView:
         self.base,self.root=base,root
         self.directories,self.files={},{}
 
+    @_data_intake
     def directory(self, path):
         require(contains(self.base,path))
         current=self.base
@@ -124,6 +151,7 @@ class ReadView:
                         else (before.st_dev,before.st_ino,before.st_mode)==(info.st_dev,info.st_ino,info.st_mode))
             self.directories[current]=info
 
+    @_data_intake
     def read(self, path, limit, *, expected_bytes=None, expected_sha=None, retain=False):
         require(contains(self.root,path) and path!=self.root)
         self.directory(path.parent)
@@ -147,6 +175,7 @@ class ReadView:
         prior=self.files.get(path);require(prior is None or stamp(prior)==stamp(current));self.files[path]=current
         return b''.join(parts) if retain else h.hexdigest()
 
+    @_data_intake
     def unchanged(self):
         for path,before in self.directories.items():
             after=regular(path,True);require(contains(self.base,path.resolve(strict=True)))
@@ -155,6 +184,7 @@ class ReadView:
         for path,before in self.files.items():
             after=regular(path);require(after.st_nlink==1 and stamp(before)==stamp(after))
 
+    @_data_intake
     def closure(self, root, files, directories):
         files,directories=set(files),set(directories)
         def walk(folder):
@@ -176,7 +206,16 @@ def decode(value, size=None):
     return raw
 
 
-def pointer_metadata(app_id, envelope, source, verify_signature):
+def _channel(app_id, workspace):
+    require(type(workspace) is bool and app_id in APPS)
+    if workspace:
+        from workspace_data_contract import WORKSPACE_PURPOSES
+        return APPS[app_id][0], WORKSPACE_PURPOSES[app_id]
+    return APPS[app_id]
+
+
+@_data_intake
+def pointer_metadata(app_id, envelope, source, verify_signature, *, workspace=False):
     exact(envelope,('schemaVersion','keyId','payload','signature'))
     require(type(envelope['schemaVersion']) is int and envelope['schemaVersion']==1 and isinstance(envelope['keyId'],str)
             and 0<len(envelope['keyId'])<=256 and isinstance(envelope['payload'],str) and len(envelope['payload'])<16384)
@@ -186,7 +225,7 @@ def pointer_metadata(app_id, envelope, source, verify_signature):
         require(callable(verify_signature) and verify_signature(envelope['keyId'],raw,signature) is True)
     value=parse(raw)
     exact(value,('schemaVersion','purpose','appId','repository','catalogSequence','releaseTag','releaseCommit','manifest'))
-    repository,purpose=APPS[app_id]
+    repository,purpose=_channel(app_id,workspace)
     require(canonical(value)==raw and type(value['schemaVersion']) is int and value['schemaVersion']==1 and value['purpose']==purpose
             and value['appId']==app_id and value['repository']==repository
             and integer(value['catalogSequence']) and value['catalogSequence']>0
@@ -200,9 +239,10 @@ def pointer_metadata(app_id, envelope, source, verify_signature):
     return value
 
 
-def manifest_metadata(app_id, value, pointer, required_kinds):
+@_data_intake
+def manifest_metadata(app_id, value, pointer, required_kinds, *, workspace=False):
     exact(value,('schemaVersion','purpose','appId','repository','releaseTag','datasets'))
-    repository,purpose=APPS[app_id]
+    repository,purpose=_channel(app_id,workspace)
     require(type(value['schemaVersion']) is int and value['schemaVersion']==1 and value['purpose']==purpose+'sets' and value['appId']==app_id
             and value['repository']==repository and value['releaseTag']==pointer['releaseTag']
             and isinstance(value['datasets'],list) and 0<len(value['datasets'])<=32)
@@ -236,7 +276,7 @@ def manifest_metadata(app_id, value, pointer, required_kinds):
 
 def prepare_module_readers(*, app_id, profile, source_root, original_data_root, state_root, source,
                            native_verified=False, verify_signature=None, required_kinds=None,
-                           reader_registry=None, protected_roots=(), is_cancelled=lambda:False):
+                           reader_registry=None, protected_roots=(), is_cancelled=lambda:False, workspace=False):
     """Return scoped readers; caller installs them before server imports.
 
     Neither downloaded JSON nor a standalone CLI can establish native_verified.
@@ -253,7 +293,7 @@ def prepare_module_readers(*, app_id, profile, source_root, original_data_root, 
             and all(callable(value) for value in reader_registry.values()))
     required=tuple(required_kinds)
     original_source=copy.deepcopy(source);exact(original_source,SOURCE_FIELDS)
-    repository,_purpose=APPS[app_id]
+    repository,_purpose=_channel(app_id,workspace)
     require(type(source['schemaVersion']) is int and source['schemaVersion']==1 and source['appId']==app_id
             and source['repository']==repository and integer(source['catalogSequence']) and source['catalogSequence']>0
             and digest(source['pointerDigest']) and digest(source['manifestSha256']))
@@ -262,12 +302,16 @@ def prepare_module_readers(*, app_id, profile, source_root, original_data_root, 
     data=Path(planned_original_root(original_data_root,original_data_root).canonical)
     state=Path(planned_original_root(state_root,state_root).canonical)
     require(isinstance(source['cacheRoot'],str) and Path(source['cacheRoot']).is_absolute())
-    choices=[(profile_root,profile_root/'packs/github-module-data')]
+    namespace = 'github-module-data'
+    if workspace:
+        from workspace_data_contract import WORKSPACE_CACHE
+        namespace = WORKSPACE_CACHE
+    choices=[(profile_root,profile_root/'packs'/namespace)]
     if os.environ.get('LOCALAPPDATA'):
         local=Path(os.environ['LOCALAPPDATA'])
         require(local.is_absolute())
         local=local.resolve(strict=True);safe_root(str(local))
-        choices.append((local,local/'MelangeData'/app_id/'github-module-data'))
+        choices.append((local,local/'MelangeData'/app_id/namespace))
     chosen = None
     for base, requested in choices:
         try:
@@ -284,11 +328,11 @@ def prepare_module_readers(*, app_id, profile, source_root, original_data_root, 
         require(protected.is_absolute() and not overlap(cache,protected),'Module cache overlaps original or protected state')
     require(sum(KIND_TOTAL_LIMITS.get(kind,sum(limit for _path,limit in KINDS[kind][1].values())) for kind in required)<=MAX_TOTAL)
     view=ReadView(base,cache);view.directory(cache)
-    envelope=parse(view.read(cache/'pointers'/(source['pointerDigest']+'.json'),32768,retain=True))
-    pointer=pointer_metadata(app_id,envelope,source,verify_signature)
+    envelope=_input_json(view.read(cache/'pointers'/(source['pointerDigest']+'.json'),32768,retain=True))
+    pointer=pointer_metadata(app_id,envelope,source,verify_signature,workspace=workspace)
     raw=view.read(cache/'manifests'/(source['manifestSha256']+'.json'),MAX_MANIFEST,
                   expected_bytes=pointer['manifest']['bytes'],expected_sha=source['manifestSha256'],retain=True)
-    datasets=manifest_metadata(app_id,parse(raw),pointer,required)
+    datasets=manifest_metadata(app_id,_input_json(raw),pointer,required,workspace=workspace)
     snapshot_root=cache/'snapshots'/source['manifestSha256'];view.directory(snapshot_root)
     requests=[];entries=[];expected_files=set();expected_directories=set()
     for dataset in datasets:
@@ -300,7 +344,7 @@ def prepare_module_readers(*, app_id, profile, source_root, original_data_root, 
             parent=Path(relative).parent
             while parent!=Path('.'):expected_directories.add(parent.as_posix());parent=parent.parent
         request={'appId':app_id,'kind':dataset['kind'],'sourceRoot':str(code),'snapshotRoot':str(root),'files':files,'objects':copy.deepcopy(dataset['objects'])}
-        requests.append(Snapshot(request))
+        requests.append(_input_snapshot(request))
         entries.append({'kind':dataset['kind'],'datasetId':dataset['datasetId'],'revisionId':dataset['revisionId'],'root':str(root),'files':files,'objects':copy.deepcopy(dataset['objects'])})
     view.closure(snapshot_root,expected_files,expected_directories)
     readers={}

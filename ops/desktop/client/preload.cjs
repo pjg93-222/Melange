@@ -12,6 +12,8 @@ if(savedState&&savedState.enabled){
 }
 contextBridge.exposeInMainWorld('desktop',Object.freeze({
   info:()=>ipcRenderer.invoke('desktop:info'),
+  getUpdateInfo:()=>ipcRenderer.invoke('desktop:update-info'),
+  onUpdateStatus:callback=>{if(typeof callback!=='function')throw new Error('Update status callback required');const listener=(_event,value)=>callback(value);ipcRenderer.on('desktop:update-status',listener);return()=>ipcRenderer.removeListener('desktop:update-status',listener);},
   districts:()=>ipcRenderer.invoke('desktop:districts'),
   switchDistrict:value=>ipcRenderer.invoke('desktop:switch-district',value),
   districtData:()=>ipcRenderer.invoke('desktop:district-data'),
@@ -23,5 +25,6 @@ contextBridge.exposeInMainWorld('desktop',Object.freeze({
   rendererReady:()=>ipcRenderer.invoke('desktop:renderer-ready'),
   pair:value=>ipcRenderer.invoke('desktop:pair',value),
   launch:()=>ipcRenderer.invoke('desktop:launch'),
+  openWorkspaceSettings:()=>ipcRenderer.invoke('desktop:open-workspace-settings'),
   onStatus:callback=>{const listener=(_event,value)=>callback(String(value));ipcRenderer.on('desktop:status',listener);return()=>ipcRenderer.removeListener('desktop:status',listener);}
 }));

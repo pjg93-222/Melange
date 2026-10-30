@@ -31,16 +31,29 @@ function runtimeRoots(appId,userData,configuration){
   if(appId!=='terrier')return {data,state};
   const district=configuration.district||'co-05';
   if(!DISTRICTS.includes(district))throw new Error('Unsupported Terrier district.');
+  if(configuration.standaloneGitHubData!==undefined){
+    const {standaloneGitHubData:selected,...original}=configuration;
+    if(!selected||Object.keys(selected).sort().join('|')!=='cacheRoot|catalogueSha256|district|schemaVersion'||![1,2].includes(selected.schemaVersion)||selected.district!==district||typeof selected.cacheRoot!=='string'||!path.isAbsolute(selected.cacheRoot)||typeof selected.catalogueSha256!=='string'||!/^[a-f0-9]{64}$/.test(selected.catalogueSha256)||original.ownerGitHubData!==undefined)throw new Error('Invalid standalone GitHub district cache.');
+    const roots=runtimeRoots(appId,userData,original),allowed=[path.join(userData,'packs'),...(process.env.LOCALAPPDATA?[path.join(process.env.LOCALAPPDATA,'MelangeData','terrier')]:[])];
+    if(!allowed.some(root=>physicalPath(root)===physicalPath(selected.cacheRoot)))throw new Error('Unapproved standalone GitHub cache root.');
+    let cached=path.resolve(selected.cacheRoot);
+    for(const part of ['','github-districts',selected.schemaVersion===2?'datasets-v2':'datasets',selected.catalogueSha256,district]){
+      if(part)cached=path.join(cached,part);
+      if(!fs.existsSync(cached)||fs.lstatSync(cached).isSymbolicLink()||!fs.lstatSync(cached).isDirectory())throw new Error('Standalone GitHub district cache is unavailable or unsafe.');
+    }
+    if(contains(physicalPath(roots.state),physicalPath(cached))||contains(physicalPath(cached),physicalPath(roots.state)))throw new Error('GitHub district data must be separate from local account state.');
+    return {...roots,data:cached,githubDistrictData:true,standaloneDistrictData:true};
+  }
   if(configuration.terrierLegacy!==undefined){
     const legacy=configuration.terrierLegacy;
     if(!legacy||legacy.schemaVersion!==1||legacy.district!==district||legacy.firstPasswordOwner!=='admin'||typeof legacy.dataDirectory!=='string'||physicalPath(legacy.dataDirectory)!==physicalPath(data)||Object.keys(legacy).some(key=>!['schemaVersion','district','firstPasswordOwner','dataDirectory'].includes(key)))throw new Error('Invalid approved Terrier legacy connection.');
     if(configuration.ownerGitHubData!==undefined){
       const selected=configuration.ownerGitHubData;
-      if(!selected||Object.keys(selected).sort().join('|')!=='cacheRoot|catalogueSha256|district|schemaVersion'||selected.schemaVersion!==1||selected.district!==district||typeof selected.cacheRoot!=='string'||!path.isAbsolute(selected.cacheRoot)||typeof selected.catalogueSha256!=='string'||!/^[a-f0-9]{64}$/.test(selected.catalogueSha256))throw new Error('Invalid owner GitHub district cache.');
+      if(!selected||Object.keys(selected).sort().join('|')!=='cacheRoot|catalogueSha256|district|schemaVersion'||![1,2].includes(selected.schemaVersion)||selected.district!==district||typeof selected.cacheRoot!=='string'||!path.isAbsolute(selected.cacheRoot)||typeof selected.catalogueSha256!=='string'||!/^[a-f0-9]{64}$/.test(selected.catalogueSha256))throw new Error('Invalid owner GitHub district cache.');
       const allowed=[path.join(userData,'packs'),...(process.env.LOCALAPPDATA?[path.join(process.env.LOCALAPPDATA,'MelangeData','terrier')]:[])];
       if(!allowed.some(root=>physicalPath(root)===physicalPath(selected.cacheRoot)))throw new Error('Unapproved owner GitHub cache root.');
       let cached=path.resolve(selected.cacheRoot);
-      for(const part of ['','github-districts','datasets',selected.catalogueSha256,district]){
+      for(const part of ['','github-districts',selected.schemaVersion===2?'datasets-v2':'datasets',selected.catalogueSha256,district]){
         if(part)cached=path.join(cached,part);
         if(!fs.existsSync(cached)||fs.lstatSync(cached).isSymbolicLink()||!fs.lstatSync(cached).isDirectory())throw new Error('Owner GitHub district cache is unavailable or unsafe.');
       }

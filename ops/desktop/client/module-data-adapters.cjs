@@ -26,8 +26,8 @@ const FEC=Object.freeze(Object.fromEntries([...['2022','2024','2026'].flatMap(cy
 const PUBLIC_ROLES=Object.freeze({'melange.official-payroll-observations.v1':Object.freeze({observations:role('public-data/observations.ndjson',8*GiB),receipt:role('public-data/receipt.json',MiB)}),'mentat.public-fec-tables.v1':FEC});
 const ROLE_MAPS=Object.freeze({'melange.staffer-graph-core.v1':GRAPH,'melange.payroll-identity-core.v1':PAYROLL,'mentat.aggregate-forecast-core.v1':FORECAST});
 function exact(value,keys){return value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join('|')===[...keys].sort().join('|');}
-function registryFor({appId,sourceRoot,probe},kinds,maps){
- if(!Object.hasOwn(kinds,appId)||typeof sourceRoot!=='string'||!path.isAbsolute(sourceRoot)||typeof probe!=='function')throw new Error('Compiled module validator is unavailable');
+function registryFor({appId,sourceRoot,probe,prepareProbe},kinds,maps){
+ if(!Object.hasOwn(kinds,appId)||typeof sourceRoot!=='string'||!path.isAbsolute(sourceRoot)||typeof probe!=='function'||prepareProbe!==undefined&&typeof prepareProbe!=='function')throw new Error('Compiled module validator is unavailable');
  const registry={};
  for(const kind of kinds[appId]){
   const roles=maps[kind],maxTotalBytes=kind==='mentat.public-fec-tables.v1'?512*MiB:Object.values(roles).reduce((n,r)=>n+r.maxBytes,0);
@@ -37,20 +37,48 @@ function registryFor({appId,sourceRoot,probe},kinds,maps){
    for(const object of dataset.objects){if(!object||!Object.hasOwn(roles,object.role)||seen.has(object.role)||!Number.isSafeInteger(object.bytes)||object.bytes<=0||object.bytes>roles[object.role].maxBytes||typeof object.sha256!=='string'||!/^[a-f0-9]{64}$/.test(object.sha256))return false;seen.add(object.role);total+=object.bytes;}
    return total<=maxTotalBytes;
   }
-  registry[kind]=Object.freeze({appId,version:1,roles,maxTotalBytes,validateMetadata,
-   async validateSnapshot({dataset,root,files,signal}){
+  async function validateSnapshot({dataset,root,files,signal},read){
     if(signal?.aborted)throw new Error('Module data verification canceled');
     if(!validateMetadata(dataset)||typeof root!=='string'||!path.isAbsolute(root)||!exact(files,Object.keys(roles)))throw new Error('Module data snapshot is incomplete');
     for(const [name,spec] of Object.entries(roles))if(typeof files[name]!=='string'||path.resolve(files[name])!==path.resolve(root,...spec.path.split('/')))throw new Error('Module data role escaped its compiled location');
-    const result=await probe({appId,kind,sourceRoot,snapshotRoot:root,files,objects:dataset.objects},{signal});
+    const result=await read({appId,kind,sourceRoot,snapshotRoot:root,files,objects:dataset.objects},{signal});
     if(signal?.aborted)throw new Error('Module data verification canceled');
     if(!exact(result,['schemaVersion','validated','appId','kind','coverage'])||result.schemaVersion!==1||result.validated!==true||result.appId!==appId||result.kind!==kind||!exact(result.coverage,['completeKind','fullApplication'])||result.coverage.completeKind!==true||result.coverage.fullApplication!==false)throw new Error('Compiled module reader rejected this snapshot');
     return true;
-   }});
+  }
+  const adapter={appId,version:1,roles,maxTotalBytes,validateMetadata,validateSnapshot:input=>validateSnapshot(input,probe)};
+  if(prepareProbe)adapter.prepareSnapshot=async({signal}={})=>{
+   if(signal?.aborted)throw new Error('Module data verification canceled');
+   // Only the native command/options reach prewarm. Dataset paths and bytes are
+   // passed to run after the caller's ordinary role hashes have all succeeded.
+   const runner=await prepareProbe({signal});
+   if(!runner||typeof runner.run!=='function'||typeof runner.cancel!=='function'){
+    if(typeof runner?.cancel==='function')await runner.cancel();throw new Error('Compiled module validator is unavailable');
+   }
+   let used=false,closed=false,drain;
+   return Object.freeze({
+    validateSnapshot(input){
+     if(used||closed||input.signal!==signal)throw new Error('Module data verification session is unavailable');used=true;
+     return validateSnapshot(input,request=>runner.run(request));
+    },
+    cancel(){closed=true;return drain??=Promise.resolve().then(()=>runner.cancel());}
+   });
+  };
+  registry[kind]=Object.freeze(adapter);
  }
  return Object.freeze(registry);
 }
 function createModuleDataRegistry(options){return registryFor(options,CORE_KINDS,ROLE_MAPS);}
 function createPublicModuleDataRegistry(options){return registryFor(options,PUBLIC_KINDS,PUBLIC_ROLES);}
 function createPagedModuleDataRegistry(options){return registryFor(options,PAGED_KINDS,PAGED_ROLES);}
-module.exports={CORE_KINDS,ROLE_MAPS,PUBLIC_KINDS,PUBLIC_ROLES,PAGED_KINDS,PAGED_ROLES,createModuleDataRegistry,createPublicModuleDataRegistry,createPagedModuleDataRegistry};
+function createWorkspaceModuleDataRegistry(options){const workspace=require('./workspace-data-contract.cjs');return registryFor(options,workspace.WORKSPACE_KINDS,workspace.roleMaps());}
+async function withSnapshotValidation(adapter,options,work){
+ if(adapter.prepareSnapshot!==undefined&&typeof adapter.prepareSnapshot!=='function')throw new Error('Compiled module validator is unavailable');
+ const session=adapter.prepareSnapshot?await adapter.prepareSnapshot(options):null;
+ try{
+  if(session&&(!exact(session,['validateSnapshot','cancel'])||typeof session.validateSnapshot!=='function'||typeof session.cancel!=='function'))throw new Error('Compiled module validator is unavailable');
+  if(adapter.prepareSnapshot&&!session)throw new Error('Compiled module validator is unavailable');
+  return await work((session||adapter).validateSnapshot.bind(session||adapter));
+ }finally{if(session&&typeof session.cancel==='function')await session.cancel();}
+}
+module.exports={CORE_KINDS,ROLE_MAPS,PUBLIC_KINDS,PUBLIC_ROLES,PAGED_KINDS,PAGED_ROLES,createModuleDataRegistry,createPublicModuleDataRegistry,createPagedModuleDataRegistry,createWorkspaceModuleDataRegistry,withSnapshotValidation};

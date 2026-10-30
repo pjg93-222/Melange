@@ -12,6 +12,9 @@ import stat
 import sys
 import types
 import uuid
+from workspace_data_contract import (DASHBOARD_KIND, DISPLAY_GRAPH_KIND, INDUSTRY_PAGES_KIND,
+    STAFFER_ANALYSIS_KIND, REPORT_ANALYSIS_KIND, DASHBOARD_ROLES, INDUSTRY_PAGES_ROLES,
+    STAFFER_ANALYSIS_ROLES, REPORT_ANALYSIS_ROLES)
 
 MiB, GiB = 1024 ** 2, 1024 ** 3
 GRAPH = {'graph-receipt': ('graph/receipt.json', MiB), 'graph-verification': ('graph/verification.json', MiB),
@@ -35,6 +38,10 @@ KINDS = {'melange.staffer-graph-core.v1':('melange',GRAPH), 'melange.payroll-ide
          'melange.official-payroll-observations.v1':('melange',PUBLIC_PAYROLL),
          'melange.official-payroll-pages.v1':('melange',PUBLIC_PAYROLL_PAGES),
          'mentat.public-fec-tables.v1':('mentat',PUBLIC_FEC)}
+KINDS.update({DASHBOARD_KIND: ('melange', DASHBOARD_ROLES), DISPLAY_GRAPH_KIND: ('melange', GRAPH),
+              INDUSTRY_PAGES_KIND: ('melange', INDUSTRY_PAGES_ROLES),
+              STAFFER_ANALYSIS_KIND: ('melange', STAFFER_ANALYSIS_ROLES),
+              REPORT_ANALYSIS_KIND: ('mentat', REPORT_ANALYSIS_ROLES)})
 KIND_TOTAL_LIMITS = {'mentat.public-fec-tables.v1': 512*MiB}
 
 def require(value, message='Module data snapshot was rejected'):
@@ -195,6 +202,11 @@ def validate_snapshot(request):
     if snapshot.kind in ('melange.official-payroll-observations.v1', 'melange.official-payroll-pages.v1', 'mentat.public-fec-tables.v1'):
         from module_public_input_installers import validate_public_snapshot
         validate_public_snapshot(snapshot)
+    elif snapshot.kind in ('melange.dashboard-pages.v1', 'melange.staffer-display-graph.v1',
+                           'melange.industry-pages.v1', 'melange.staffer-analysis.v1',
+                           'mentat.report-analysis.v1'):
+        from module_workspace_inputs import validate_snapshot as validate_workspace
+        validate_workspace(snapshot)
     elif snapshot.app=='melange':
         from melange_module_data import validate
         validate(snapshot)

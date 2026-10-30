@@ -47,6 +47,20 @@ function compiler(){
   return candidates.find(file=>fs.existsSync(file));
 }
 
+test('exact payload include compiles and extracts root and nested filenames with spaces and dollars',t=>{
+  const makensis=compiler();if(process.platform!=='win32'||!makensis){t.skip('pinned NSIS compiler unavailable');return;}
+  const directory=workspace(t),target=path.join(directory,'program'),output=path.join(directory,'fixture.exe');
+  const files=new Map(),expected=new Map([['root $ file.txt','root fixture'],['nested $ folder/name with spaces $.txt','nested fixture']]);
+  let index=0;for(const [relative,contents]of expected){const source=path.join(directory,'source $ '+index++ + '.txt');fs.writeFileSync(source,contents);files.set(relative,source);}
+  const include=require('../build-plugin-free.cjs').payloadInclude(files),script=path.join(directory,'fixture.nsi');
+  fs.writeFileSync(script,['Unicode true','Name "Payload fixture"','OutFile "'+output+'"','RequestExecutionLevel user','SilentInstall silent',
+    'Section','StrCpy $INSTDIR "'+target+'"',include,'Goto extraction_done','extraction_failed:','SetErrorLevel 2','Quit','extraction_done:','SectionEnd'].join('\n'));
+  const build=spawnSync(makensis,['/WX','/V2',script],{encoding:'utf8',windowsHide:true,timeout:60000});assert.equal(build.status,0,build.stdout+build.stderr);
+  const run=spawnSync(output,['/S'],{windowsHide:true,timeout:30000});assert.equal(run.status,0,String(run.error));
+  for(const [relative,contents]of expected)assert.equal(fs.readFileSync(path.join(target,...relative.split('/')),'utf8'),contents);
+  assert.equal(fs.readdirSync(target).some(name=>/^uninstall/i.test(name)),false);
+});
+
 test('complete generated assisted installer compiles with warnings as errors; original unused closure fails',async t=>{
   const makensis=compiler(),cache=path.join(process.env.LOCALAPPDATA||'','electron-builder','Cache','nsis-resources-3.4.1');
   const resource=fs.existsSync(cache)&&fs.readdirSync(cache).map(name=>path.join(cache,name,'plugins','x86-unicode')).find(file=>fs.existsSync(file));

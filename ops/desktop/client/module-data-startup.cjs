@@ -8,41 +8,59 @@ const {authorized,checkedRegistry}=require('./github-module-protocol.cjs');
 const {GitHubModuleController,sanitizeModuleStatus}=require('./github-module-controller.cjs');
 const {ModuleDataTransition}=require('./module-data-transition.cjs');
 const {refuseModuleDataSettings}=require('./runtime.cjs');
-const {programTable,programFingerprint,verifyProgram}=require('./module-data-runtime-boundary.cjs');
-const {APPLICATION_SPECS}=require('./module-application-inventory.cjs');
-const {createPublicModuleDataRegistry,createPagedModuleDataRegistry,PUBLIC_KINDS,PAGED_KINDS}=require('./module-data-adapters.cjs');
+const {programTable,programFingerprint,verifyProgram,withVerifiedProgramConstruction}=require('./module-data-runtime-boundary.cjs');
+const {APPLICATION_SPECS,WORKSPACE_APPLICATION_SPECS}=require('./module-application-inventory.cjs');
+const {createPublicModuleDataRegistry,createPagedModuleDataRegistry,createWorkspaceModuleDataRegistry,PUBLIC_KINDS,PAGED_KINDS}=require('./module-data-adapters.cjs');
+const {WORKSPACE_KINDS}=require('./workspace-data-contract.cjs');
 const {backendCommand}=require('./backend-command.cjs');
-const {desktopProbe}=require('./desktop-probe.cjs');
-function compiledApplicationContract(appId,context){
+const {desktopProbe,prepareDesktopProbe}=require('./desktop-probe.cjs');
+const {dataStartupFailure,programFailure}=require('./startup-failure.cjs');
+function applicationContract(appId,context){
  if(!['melange','mentat'].includes(appId)||!context?.runtime||typeof context.resources!=='string'||!path.isAbsolute(context.resources))return null;
  try{
-  const paged=appId==='melange'&&context.publicDataMode==='paged-v1';
-  const base=APPLICATION_SPECS[appId],spec=paged?{...base,contractId:'melange.public-data.pages.v1',requiredKinds:PAGED_KINDS.melange}:base;
-  if(!spec||spec.contractId!==(paged?'melange.public-data.pages.v1':appId+'.public-data.v1')||spec.requiredKinds.join('|')!==(paged?PAGED_KINDS[appId]:PUBLIC_KINDS[appId]).join('|')||
+  const workspace=context.workspaceContract===true,paged=!workspace&&appId==='melange'&&context.publicDataMode==='paged-v1';
+  const base=workspace?WORKSPACE_APPLICATION_SPECS?.[appId]:APPLICATION_SPECS[appId],spec=paged?{...base,contractId:'melange.public-data.pages.v1',requiredKinds:PAGED_KINDS.melange}:base;
+  if(!spec||spec.contractId!==(workspace?appId+'.workspace.v1':paged?'melange.public-data.pages.v1':appId+'.public-data.v1')||spec.requiredKinds.join('|')!==(workspace?WORKSPACE_KINDS[appId]:paged?PAGED_KINDS[appId]:PUBLIC_KINDS[appId]).join('|')||
      spec.startupTimeoutMs!==(appId==='melange'?600000:300000))return null;
   const command=backendCommand(context.resources,appId),sourceRoot=path.join(command.runtime,'sources'),bootstrapRoot=path.join(command.runtime,'bootstrap');
-  const current=()=>{const roots=verifyProgram(context.runtime,spec);if(roots.source!==sourceRoot||roots.bootstrap!==bootstrapRoot)throw failure();};
-  current();
-  const registry=(paged?createPagedModuleDataRegistry:createPublicModuleDataRegistry)({appId,sourceRoot,probe:async(request,{signal}={})=>{
+  const current=()=>{try{const roots=verifyProgram(context.runtime,spec);if(roots.source!==sourceRoot||roots.bootstrap!==bootstrapRoot)throw failure();}catch{throw programFailure();}};
+  const probeMode=workspace?'--desktop-github-workspace-check':'--desktop-github-module-check';
+  const registry=(workspace?createWorkspaceModuleDataRegistry:paged?createPagedModuleDataRegistry:createPublicModuleDataRegistry)({appId,sourceRoot,prepareProbe:({signal}={})=>{
+   if(signal?.aborted)throw failure();
+   const reader=prepareDesktopProbe(command,probeMode,{signal,timeout:spec.startupTimeoutMs,onDiagnostic:context.onProbeDiagnostic,beforeSpawn:current});
+   return {async run(request){if(signal?.aborted)throw failure();current();let result;try{result=await reader.run(request);}catch(error){
+    if(!signal?.aborted&&reader.diagnostics().some(value=>value.phase==='prewarm'&&['spawn-failed','process-error','early-exit','input-error'].includes(value.reason)))throw programFailure();
+    throw error;
+   }if(signal?.aborted)throw failure();current();return result;},cancel:()=>reader.cancel()};
+  },probe:async(request,{signal}={})=>{
    if(signal?.aborted)throw failure();current();
-   const result=await desktopProbe(command,'--desktop-github-module-check',request,{signal,timeout:spec.startupTimeoutMs});
+   const result=await desktopProbe(command,probeMode,request,{signal,timeout:spec.startupTimeoutMs});
    if(signal?.aborted)throw failure();current();return result;
   }});
-  return checkedContract(appId,{...spec,registry});
+  return {contract:checkedContract(appId,{...spec,registry},workspace?'workspace-v1':'public-v1'),roots:Object.freeze({source:sourceRoot,bootstrap:bootstrapRoot})};
  }catch{return null;}
 }
+function withCompiledApplicationContract(appId,context,construct){
+ if(typeof construct!=='function'||require('node:util').types.isAsyncFunction(construct))throw failure();
+ const application=applicationContract(appId,context);
+ if(!application)return construct(null);
+ const {contract,roots}=application;
+ return withVerifiedProgramConstruction(context.runtime,contract,proof=>construct(proof?contract:null,proof||undefined),roots);
+}
+function compiledApplicationContract(appId,context){return withCompiledApplicationContract(appId,context,contract=>contract);}
+function withCompiledWorkspaceApplicationContract(appId,context,construct){return withCompiledApplicationContract(appId,{...context,workspaceContract:true},construct);}
 function failure(){const error=new Error('Module data activation is unavailable.');error.code=error.reason='transition';return error;}
 function fingerprint(value){try{return crypto.createHash('sha256').update(canonical(value)).digest('hex');}catch{throw failure();}}
 function freeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}
 function names(value){return Array.isArray(value)&&value.length>0&&value.every(name=>typeof name==='string'&&/^[a-z0-9][a-z0-9._-]{0,127}$/.test(name))&&new Set(value).size===value.length;}
-function checkedContract(appId,contract){
+function checkedContract(appId,contract,channel='public-v1'){
  if(contract===null)return null;
  if(!contract||Object.keys(contract).sort().join('|')!=='appId|contractId|privateBoundaries|programFiles|programFingerprint|publicReaders|registry|requiredKinds|schemaVersion|startupTimeoutMs'||
     contract.schemaVersion!==1||contract.appId!==appId||typeof contract.contractId!=='string'||!/^[a-z0-9][a-z0-9._-]{0,127}$/.test(contract.contractId)||
     typeof contract.programFingerprint!=='string'||!/^[a-f0-9]{64}$/.test(contract.programFingerprint)||
     !names(contract.requiredKinds)||!names(contract.publicReaders)||!names(contract.privateBoundaries)||
     !Number.isSafeInteger(contract.startupTimeoutMs)||contract.startupTimeoutMs<1000||contract.startupTimeoutMs>600000)throw failure();
- try{programTable(contract.programFiles);if(programFingerprint(contract.programFiles)!==contract.programFingerprint)throw failure();checkedRegistry(appId,contract.registry,contract.requiredKinds);}catch{throw failure();}
+ try{programTable(contract.programFiles);if(programFingerprint(contract.programFiles)!==contract.programFingerprint)throw failure();checkedRegistry(appId,contract.registry,contract.requiredKinds,channel);}catch{throw failure();}
  return freeze(contract);
 }
 function moduleHealthBinding(candidate,contract){
@@ -53,11 +71,12 @@ function moduleHealthBinding(candidate,contract){
 }
 
 class ModuleDataStartup{
- constructor({appId,getSelected,getGeneration,getRuntime,authorize,createProvider,canStage=()=>false,keepAwake,onStatus=()=>{},
+ constructor({appId,getSelected,getGeneration,getRuntime,authorize,createProvider,canStage=()=>false,keepAwake,onStatus=()=>{},requireInstalledContract=false,
               contract=compiledApplicationContract(appId),boundary=null,...controllerOptions}){
   if([getSelected,getGeneration,getRuntime,authorize,createProvider,canStage,onStatus].some(value=>typeof value!=='function'))throw failure();
   this.appId=appId;this.getRuntime=getRuntime;this.getSelected=getSelected;this.onStatus=onStatus;this.stageEligible=canStage;this.contract=checkedContract(appId,contract);
-  this.closed=false;this.liveLease=null;
+  if(typeof requireInstalledContract!=='boolean')throw failure();
+  this.closed=false;this.liveLease=null;this.requireInstalledContract=requireInstalledContract;
   // The native boundary must independently support the exact compiled source
   // closure. A contract flag or ordinary HTTP health cannot grant activation.
   this.supported=Boolean(this.contract&&boundary&&boundary.programFingerprint===this.contract.programFingerprint&&
@@ -78,14 +97,24 @@ class ModuleDataStartup{
   refuseModuleDataSettings(configuration);
   const runtime=this.getRuntime();
   if(this.closed||this.transition.busy)throw failure();
+  if(this.requireInstalledContract&&!this.supported)throw programFailure();
   if(runtime.child||!this.supported||!authorized(this.appId,configuration,approval))return runtime.start(configuration);
   if(this.boundary.supportsContract(this.contract)!==true)throw failure();
   return this.transition.run(async lease=>{
    let ownedChild=null;this.liveLease=lease;
    try{
     if(fingerprint(configuration)!==fingerprint(lease.originalSelected))throw failure();
-    const candidate=await this.controller.prepare({signal:lease.signal});lease.assertCurrent();
-    if(!candidate)throw failure();lease.bindCandidate(candidate);
+    let candidate;
+    try{candidate=await this.controller.prepare({signal:lease.signal});}
+    catch(error){
+     lease.assertCurrent();
+     // External data cannot establish a broken binary. Recheck installed code
+     // before preserving a blocked/deferred outcome; health is still ungranted.
+     if(this.boundary.supportsContract(this.contract)!==true)throw programFailure();
+     throw dataStartupFailure(error)||error;
+    }
+    lease.assertCurrent();
+    if(!candidate){const error=new Error('Existing-owner access is no longer available.');error.code=error.reason='authorization';throw error;}lease.bindCandidate(candidate);
     const expected=moduleHealthBinding(candidate,this.contract);
     const binding=await this.boundary.start({runtime,configuration,candidate,lease,contract:this.contract,
      claimChild:child=>{if(ownedChild||!child||runtime.child!==child)throw failure();ownedChild=child;lease.assertCurrent();}});
@@ -117,4 +146,4 @@ class ModuleDataStartup{
   return Promise.all([startup,staging]).then(()=>Object.freeze({drained:true}));
  }
 }
-module.exports={ModuleDataStartup,compiledApplicationContract,moduleHealthBinding};
+module.exports={ModuleDataStartup,compiledApplicationContract,withCompiledApplicationContract,withCompiledWorkspaceApplicationContract,moduleHealthBinding,checkedContract};

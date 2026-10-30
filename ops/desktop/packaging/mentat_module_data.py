@@ -1,10 +1,15 @@
 """Read-only aggregate forecast schemas and explicitly bound report workbooks.
 
-Never calls forecast calculation/catalog functions, builds anchors, updates a
-pointer, opens a database, or reads the user's original reports or console.
+Legacy component validation does not calculate forecasts. The optional full
+workspace binding also verifies genuine party splits against actual PAC
+calculations. It never builds anchors, updates a pointer, opens a database,
+or reads the user's original reports or console.
 """
 from contextlib import contextmanager
 from functools import lru_cache
+import builtins
+import hashlib
+import json
 import os
 from pathlib import PurePosixPath
 import re
@@ -36,7 +41,7 @@ def program_reader(snapshot,name):
         sys.modules.pop('runtime_paths',None)
         if old_module is not None:sys.modules['runtime_paths']=old_module
 
-def bind_readers(snapshot,contract,gp,pp):
+def bind_readers(snapshot,contract,gp,pp,*,panel_cohort_splits=None):
     """Return isolated actual readers; never patch global runtime/state modules."""
     aliases=ReadAliases({'models/giving-models-current.json':snapshot.files['giving-pointer'],
         'models/'+gp['active']:snapshot.files['giving-model'],
@@ -81,7 +86,88 @@ def bind_readers(snapshot,contract,gp,pp):
     pac=program_reader(snapshot,'pac_giving_forecast')
     pac.Path=aliases.path;pac.app_data_root=lambda:aliases.path('models')
     pac.os=types.SimpleNamespace(environ={})
+    if panel_cohort_splits is not None:
+        bind_panel_inputs(giving,pac,panel_cohort_splits)
     return {'giving':giving,'pac':pac,'workbook_path':workbook_path}
+
+
+def canonical_panel(value):
+    return json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode('utf-8')
+
+
+def panel_documents(value):
+    """Two authenticated factual inputs; no arbitrary paths or split defaults."""
+    exact(value,('schemaVersion','documents'))
+    require(type(value['schemaVersion']) is int and value['schemaVersion']==1)
+    exact(value['documents'],('credit_unions','telecom'))
+    documents={}
+    for sector,row in value['documents'].items():
+        exact(row,('sourceSha256','documentSha256','projectionProofSha256','document'))
+        for field in ('sourceSha256','documentSha256','projectionProofSha256'):
+            require(type(row[field]) is str and re.fullmatch('[0-9a-f]{64}',row[field]))
+        document=row['document'];raw=canonical_panel(document)
+        require(len(raw)<=32*1024 and hashlib.sha256(raw).hexdigest()==row['documentSha256'])
+        fields={'schema','sector','target','count','cohort_ids_sha256','basis','cycles','observed','sources','note'}
+        if sector=='telecom':fields.add('silent_committees')
+        exact(document,fields)
+        require(document['schema']=='panel-cohort-party-split-v1' and document['sector']==sector
+                and type(document['target']) is int and 2000<=document['target']<=2100 and document['target']%2==0
+                and type(document['count']) is int and 0<document['count']<=10000
+                and type(document['cohort_ids_sha256']) is str and re.fullmatch('[0-9a-f]{64}',document['cohort_ids_sha256'])
+                and type(document['basis']) is str and 0<len(document['basis'])<=2048
+                and type(document['note']) is str and len(document['note'])<=4096)
+        exact(document['sources'],('current_ledger_sha256','history_ledger_sha256','ids_sha256'))
+        require(all(type(item) is str and re.fullmatch('[0-9a-f]{64}',item) for item in document['sources'].values())
+                and document['sources']['ids_sha256']==document['cohort_ids_sha256'])
+        exact(document['cycles'],(str(document['target']-2),))
+        for block,observed in [(item,False) for item in document['cycles'].values()]+[(document['observed'],True)]:
+            exact(block,('House','Senate','sum_cents','unresolved_office_pool',*(('through',) if observed else ())))
+            values=[]
+            for chamber in ('House','Senate'):
+                exact(block[chamber],('D','R','Other','Unknown'))
+                values.extend(block[chamber].values())
+            values.extend((block['sum_cents'],block['unresolved_office_pool']))
+            require(all(type(item) is int and abs(item)<=10**18 for item in values)
+                    and sum(sum(block[chamber].values()) for chamber in ('House','Senate'))+block['unresolved_office_pool']==block['sum_cents'])
+            if observed:
+                require(type(block['through']) is str and re.fullmatch(r'\d{4}-\d{2}-\d{2}',block['through']))
+                date.fromisoformat(block['through'])
+        if sector=='telecom':
+            silent=document['silent_committees']
+            require(type(silent) is list and len(silent)<=document['count']
+                    and all(type(item) is str and re.fullmatch(r'C\d{8}',item) for item in silent)
+                    and len(set(silent))==len(silent))
+        # A canonical text copy makes the signed documents immutable to the
+        # consumer without granting any filesystem authority.
+        documents[sector]=raw.decode('utf-8')
+    return documents
+
+
+def bind_panel_inputs(giving,pac,documents):
+    require(type(documents) is dict and set(documents)=={'credit_unions','telecom'})
+    class FixedText:
+        def __init__(self,raw):self._raw=raw
+        def read_text(self,encoding='utf-8'):
+            require(encoding=='utf-8');return self._raw
+    def clone(function,**overrides):
+        copied=types.FunctionType(function.__code__,{**function.__globals__,**overrides},function.__name__,function.__defaults__,function.__closure__)
+        copied.__kwdefaults__=function.__kwdefaults__;return copied
+    split=clone(giving._cohort_split,SPLIT_FILE=FixedText(documents['credit_unions']),
+                SPLIT_FILES={'telecom':FixedText(documents['telecom'])})
+    def fixed_import(name,globals=None,locals=None,fromlist=(),level=0):
+        require(name=='pac_giving_forecast' and level==0)
+        return pac
+    giving._cohort_split=split
+    giving._panel_block=clone(giving._panel_block,_cohort_split=split,__builtins__={**vars(builtins),'__import__':fixed_import})
+    published=pac.catalog()
+    for sector,text in documents.items():
+        document=json.loads(text)
+        item=next((item for item in published['sectors'] if item['sector']==sector),None)
+        require(item is not None and item['cohort']['count']==document['count']
+                and item['cohort']['ids_sha256']==document['cohort_ids_sha256'])
+        current=item['current'];require(current is not None and current['target']==document['target'])
+        actual,why=split(item,current,document['target']-2)
+        require(actual is not None and why is None,'The authenticated panel party split differs from its actual PAC cohort and cent totals')
 
 def frame_metadata(reader,frame,sector,cohort):
     """The installed frame input contract, without its statistical calculation."""
@@ -151,7 +237,7 @@ def workbook_metadata(path):
             relation=ids.get(sheet.get('{'+office+'}id'))
             require(relation is not None and relation.get('Type')==office+'/worksheet')
 
-def validate(snapshot):
+def validate(snapshot,*,full_workspace=False):
     require(snapshot.kind=='mentat.aggregate-forecast-core.v1')
     selection=snapshot.json('selection');exact(selection,('schemaVersion','purpose','giving','pac'))
     exact(selection['giving'],('sha256','modelVersion','modelSchemaVersion'));exact(selection['pac'],('sha256','modelId'))
@@ -179,7 +265,9 @@ def validate(snapshot):
         snapshot.matches(role,selected[0])
         # Receipt paths are provenance only; input I/O uses only compiled role paths.
         workbook_metadata(snapshot.files[role])
-    readers=bind_readers(snapshot,contract,gp,pp)
+    require(type(full_workspace) is bool)
+    documents=panel_documents(receipt.get('panelCohortSplits')) if full_workspace else None
+    readers=bind_readers(snapshot,contract,gp,pp,panel_cohort_splits=documents)
     actual=readers['giving'].models();require(actual.get('sha256')==snapshot.objects['giving-model']['sha256'])
     require(readers['giving'].anchors()==anchors)
     # Use installed loaders only, never catalog()/calculate()/forecast methods.

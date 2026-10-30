@@ -21,8 +21,9 @@ def canonical_root(path):
     return os.path.normcase(str(Path(path).resolve()))
 
 
-def workspace_path(data, state):
-    identity = hashlib.sha256(canonical_root(data).encode('utf-8')).hexdigest()[:24]
+def workspace_path(code, data, state):
+    roots = json.dumps([canonical_root(code), canonical_root(data)], ensure_ascii=False, separators=(',', ':'))
+    identity = hashlib.sha256(roots.encode('utf-8')).hexdigest()[:24]
     return Path(state).resolve().parent / 'runtime-workspaces' / identity
 
 
@@ -112,9 +113,9 @@ def prepare_workspace(code, data, state):
     code, data, state = Path(code).resolve(), Path(data).resolve(), Path(state).resolve()
     if code == data or code.is_relative_to(data) or data.is_relative_to(code):
         raise ValueError('Mentat code and writable data must be separate trees')
-    # Selecting another data directory must not rewrite a live session's links.
-    # Legacy runtime-workspace directories are preserved, never repointed.
-    workspace = workspace_path(data, state)
+    # A new installation or data selection must not rewrite a live session's links.
+    # Legacy data-only workspace keys are preserved, never repointed or reused.
+    workspace = workspace_path(code, data, state)
     workspace.mkdir(parents=True, exist_ok=True)
     pairs = []
     for name in CODE_DIRS:

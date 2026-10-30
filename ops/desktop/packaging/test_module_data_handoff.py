@@ -12,11 +12,11 @@ import threading
 import time
 import unittest
 
-from module_application_contracts import (ApplicationContract, ProgramFile, ModuleInputError,
+from module_application_contracts import (ApplicationContract, ProgramFile, ModuleInputError, DataIntakeBlocked,
     application_contract, canonical, program_fingerprint, verify_program)
 from module_data_handoff import (InstalledInputs, MAX_FRAME, installed_health,
     install_handoff, prepare_handoff, read_frame, planned_original_root, recheck_original_roots,
-    server_installation, complete_server_installation, server_installed_health)
+    server_installation, complete_server_installation, server_installed_health, emit_data_blocked)
 
 
 def frame(value):
@@ -80,6 +80,39 @@ class HandoffTests(unittest.TestCase):
 
     def prepare(self, message=None, **options):
         return prepare_handoff(io.BytesIO(frame(self.message if message is None else message)), **{**self.options, **options})
+
+    def test_only_typed_verified_data_failure_emits_bound_diagnostic_without_exception_text(self):
+        def blocked(**_options):
+            raise DataIntakeBlocked('integrity')
+        self.contract = replace(self.contract, prepare_readers=blocked)
+        with self.assertRaises(DataIntakeBlocked) as raised:
+            self.prepare()
+        output = io.StringIO()
+        self.assertTrue(emit_data_blocked(raised.exception, output))
+        line = output.getvalue()
+        self.assertTrue(line.startswith('DESKTOP_DATA_BLOCKED '))
+        value = json.loads(line.removeprefix('DESKTOP_DATA_BLOCKED '))
+        self.assertEqual(value, {'schemaVersion': 1, 'appId': 'mentat', 'launchNonce': self.message['launchNonce'],
+            'programFingerprint': self.contract.program_fingerprint, 'sourceDigests': {'public': 'b' * 64}, 'reason': 'integrity'})
+        self.assertNotIn(str(self.root), line)
+        self.assertFalse(emit_data_blocked(DataIntakeBlocked(), io.StringIO()))
+        def unknown(**_options):
+            raise ImportError('private source path must not enter diagnostic')
+        self.contract = replace(self.contract, prepare_readers=unknown)
+        with self.assertRaises(ModuleInputError) as unknown_error:
+            self.prepare()
+        self.assertIs(type(unknown_error.exception), ModuleInputError)
+        self.assertFalse(emit_data_blocked(unknown_error.exception, io.StringIO()))
+
+    def test_program_mutation_cannot_be_classified_as_data_blocked(self):
+        def tampered(**_options):
+            (self.roots['source'] / 'consumer.py').write_bytes(b'# mutated during data factory\n')
+            raise DataIntakeBlocked('integrity')
+        self.contract = replace(self.contract, prepare_readers=tampered)
+        with self.assertRaises(ModuleInputError) as raised:
+            self.prepare()
+        self.assertIs(type(raised.exception), ModuleInputError)
+        self.assertFalse(emit_data_blocked(raised.exception, io.StringIO()))
 
     def rejected(self, message):
         before = len(self.events)

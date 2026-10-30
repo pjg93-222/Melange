@@ -53,8 +53,12 @@ def valid_token(value, token):
     return isinstance(value, str) and hmac.compare_digest(value, token)
 
 
-def guarded_handler(handler, token, app_id, *, module_installation=None):
+def guarded_handler(handler, token, app_id, *, module_installation=None, workspace=None,
+                    workspace_installation=None, workspace_inputs=None, module_inputs=None):
     """Authenticate before the existing handler routes any HTTP verb or returns app data."""
+    if (workspace_installation is None) != (workspace_inputs is None) or (workspace_installation is not None and module_installation is None):
+        from module_application_contracts import ModuleInputError
+        raise ModuleInputError()
     class DesktopHandler(handler):
         def parse_request(self):
             if not super().parse_request():
@@ -63,13 +67,52 @@ def guarded_handler(handler, token, app_id, *, module_installation=None):
                 self.send_error(403, 'Desktop authorization required')
                 self.close_connection = True
                 return False
+            if workspace_installation is not None and self.path not in {HEALTH_PATH, ACTIVITY_PATH}:
+                from module_data_handoff import server_installed_health, ModuleInputError
+                from module_workspace_installers import handle_workspace_request
+                try:
+                    server_installed_health(workspace_installation, self.server)
+                    if handle_workspace_request(self, workspace_inputs):
+                        return False
+                except ModuleInputError as error:
+                    from module_application_contracts import DataIntakeBlocked
+                    if type(error) is DataIntakeBlocked:
+                        from module_workspace_handoff import abort_workspace_data_blocked
+                        abort_workspace_data_blocked(error, module_inputs, workspace_inputs)
+                    self.send_error(503, 'Native workspace input is unavailable')
+                    return False
+            if workspace is not None:
+                from urllib.parse import urlsplit
+                from desktop_workspace import WORKSPACE_PATH
+                path = urlsplit(self.path).path
+                if path == WORKSPACE_PATH or (path == '/' and workspace.replaces_empty_root()):
+                    if self.command != 'GET':
+                        self.send_error(405, 'Workspace page requires GET')
+                        return False
+                    body, policy = workspace.page(self.server)
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'text/html; charset=utf-8')
+                    self.send_header('Content-Security-Policy', policy)
+                    self.send_header('Cache-Control', 'no-store')
+                    self.send_header('Referrer-Policy', 'no-referrer')
+                    self.send_header('X-Content-Type-Options', 'nosniff')
+                    self.send_header('Content-Length', str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                    return False
             if self.path in {HEALTH_PATH, ACTIVITY_PATH} and self.command == 'GET':
                 payload = {'appId': app_id, 'pid': os.getpid()}
                 if self.path == HEALTH_PATH and module_installation is not None:
                     from module_data_handoff import server_installed_health, ModuleInputError
                     try:
                         payload['moduleData'] = server_installed_health(module_installation, self.server)
-                    except ModuleInputError:
+                        if workspace_installation is not None:
+                            payload['workspaceData'] = server_installed_health(workspace_installation, self.server)
+                    except ModuleInputError as error:
+                        from module_application_contracts import DataIntakeBlocked
+                        if type(error) is DataIntakeBlocked and workspace_inputs is not None:
+                            from module_workspace_handoff import abort_workspace_data_blocked
+                            abort_workspace_data_blocked(error, module_inputs, workspace_inputs)
                         self.send_error(503, 'Native module input is unavailable')
                         return False
                 if self.path == ACTIVITY_PATH:
@@ -88,11 +131,12 @@ def guarded_handler(handler, token, app_id, *, module_installation=None):
 
 
 class GuardedWSGI:
-    def __init__(self, application, token, app_id, audit=None, launch_path=None, desktop_boundary=None):
+    def __init__(self, application, token, app_id, audit=None, launch_path=None, desktop_boundary=None, district_installation=None):
         self.application, self.token, self.app_id = application, token, app_id
         self.audit = audit
         self.launch_path = launch_path
         self.desktop_boundary = desktop_boundary
+        self.district_installation = district_installation
 
     def __call__(self, environment, start_response):
         original_start = start_response
@@ -106,10 +150,30 @@ class GuardedWSGI:
         if self.desktop_boundary is not None and not self.desktop_boundary.authorize_environment(environment):
             start_response('403 Forbidden', [('Content-Type', 'text/plain'), ('Cache-Control', 'no-store')])
             return [b'Desktop request boundary refused']
+        if self.district_installation is not None and environment.get('PATH_INFO') == '/__desktop/district-commit':
+            from ipaddress import ip_address
+            from terrier_runtime_handoff import DistrictActivationBlocked, abort_blocked_district
+            if (environment.get('REQUEST_METHOD') != 'POST' or environment.get('CONTENT_LENGTH') != '0'
+                    or environment.get('QUERY_STRING') or environment.get('HTTP_TRANSFER_ENCODING')
+                    or not ip_address(environment.get('REMOTE_ADDR', '')).is_loopback):
+                start_response('403 Forbidden', [('Content-Length', '0')])
+                return [b'']
+            try:
+                accepted = self.district_installation.commit(environment.get('HTTP_X_DESKTOP_DISTRICT_COMMIT'))
+            except DistrictActivationBlocked as error:
+                abort_blocked_district(error)
+            start_response('204 No Content' if accepted else '403 Forbidden', [('Content-Length', '0'), ('Cache-Control', 'no-store')])
+            return [b'']
         if environment.get('PATH_INFO') in {HEALTH_PATH, ACTIVITY_PATH} and environment.get('REQUEST_METHOD') == 'GET':
             payload = {'appId': self.app_id, 'pid': os.getpid()} if environment.get('PATH_INFO') == HEALTH_PATH else {'appId': self.app_id, 'busy': None}
             if environment.get('PATH_INFO') == HEALTH_PATH and self.launch_path:
                 payload['launchPath'] = self.launch_path
+            if environment.get('PATH_INFO') == HEALTH_PATH and self.district_installation is not None:
+                from terrier_runtime_handoff import DistrictActivationBlocked, abort_blocked_district
+                try:
+                    payload['districtData'] = self.district_installation.health()
+                except DistrictActivationBlocked as error:
+                    abort_blocked_district(error)
             body = json.dumps(payload).encode()
             start_response('200 OK', [('Content-Type', 'application/json'), ('Cache-Control', 'no-store'), ('Content-Length', str(len(body)))])
             return [body]
@@ -262,9 +326,33 @@ def require_runtime(root, name, relative):
     return file
 
 
-def run(options, token, *, module_inputs=None):
+def module_installations(public, workspace, capture_public):
+    """Bind workspace first, then capture/install the preserved public server."""
+    from module_data_handoff import server_installation, complete_server_installation
+    public_latch = server_installation(public, capture_public)
+    workspace_latch = None
+    if workspace is not None:
+        from module_workspace_installers import capture_workspace_originals
+        workspace_latch = server_installation(workspace, lambda server: capture_workspace_originals(workspace, server))
+    def ready(server):
+        if workspace_latch is not None:
+            complete_server_installation(workspace_latch, server)
+        complete_server_installation(public_latch, server)
+    return public_latch, workspace_latch, ready
+
+
+def run(options, token, *, module_inputs=None, district_input=None, workspace_inputs=None):
     public_data = None
     on_server_ready = None
+    if workspace_inputs is not None:
+        from module_data_handoff import PreparedHandoff, recheck_original_roots, require
+        require(type(module_inputs) is PreparedHandoff and type(workspace_inputs) is PreparedHandoff
+                and workspace_inputs.contract.app_id == options.app
+                and workspace_inputs.contract.contract_id == options.app + '.workspace.v1'
+                and workspace_inputs.roots == module_inputs.roots
+                and workspace_inputs.launch_nonce == module_inputs.launch_nonce
+                and workspace_inputs.contract.program_fingerprint == module_inputs.contract.program_fingerprint)
+        recheck_original_roots(workspace_inputs)
     if module_inputs is not None:
         from module_data_handoff import PreparedHandoff, recheck_original_roots, require
         from module_public_input_installers import public_reader
@@ -278,10 +366,16 @@ def run(options, token, *, module_inputs=None):
     source = options.source_root.resolve()
     data = options.data_root.resolve()
     state = options.state_root.resolve()
+    standalone = bool(getattr(options, 'standalone', False))
+    if standalone and options.app != 'terrier':
+        raise ValueError('Standalone backend mode is only available for Terrier')
+    windows_session = bool(getattr(options, 'windows_session', False))
+    if windows_session and (not standalone or options.app != 'terrier' or os.name != 'nt'):
+        raise ValueError('Windows desktop sign-in requires standalone Terrier on Windows')
     github_data = bool(getattr(options, 'github_district_data', False))
-    if github_data and (options.app != 'terrier' or not getattr(options, 'legacy_owner', None)
+    if github_data and (options.app != 'terrier' or not (standalone or getattr(options, 'legacy_owner', None))
                         or data == state or data.is_relative_to(state) or state.is_relative_to(data)):
-        raise ValueError('GitHub district data requires an existing owner and separate data/state roots')
+        raise ValueError('GitHub district data requires explicit local access and separate data/state roots')
     principal = None
     if options.app == 'terrier':
         sys.path.insert(0, str(source))
@@ -289,12 +383,18 @@ def run(options, token, *, module_inputs=None):
         raw_principal = os.environ.pop('DESKTOP_ACCESS_PRINCIPAL', '')
         if len(raw_principal) > 4096:
             raise ValueError('Approved desktop principal is required')
-        principal = parse_principal(json.loads(raw_principal), options.district)
-        if (principal.mode == 'existing-owner') != bool(getattr(options, 'legacy_owner', None)):
-            raise ValueError('Explicit owner mapping does not match the approved principal')
+        if standalone:
+            if raw_principal:
+                raise ValueError('Standalone access cannot impersonate an approved principal')
+        else:
+            principal = parse_principal(json.loads(raw_principal), options.district)
+            if (principal.mode == 'existing-owner') != bool(getattr(options, 'legacy_owner', None)):
+                raise ValueError('Explicit owner mapping does not match the approved principal')
     for directory in (data, state):
         if module_inputs is not None:
             recheck_original_roots(module_inputs)
+        if workspace_inputs is not None:
+            recheck_original_roots(workspace_inputs)
         directory.mkdir(parents=True, exist_ok=True)
     # A caller must not make a desktop install act as a network-hosted server.
     if os.environ.get('ACCESS_ENFORCE') == '1' or os.environ.get('CU_DEPLOYMENT') == 'hosted':
@@ -307,6 +407,7 @@ def run(options, token, *, module_inputs=None):
     os.environ.pop('PYTHONHOME', None)
     if options.app == 'melange':
         from melange_bootstrap import initialize_workspace
+        from desktop_workspace import DesktopWorkspace
         initialize_workspace(data)
         start_data_release('melange', data, state)
         sys.path.insert(0, str(source))
@@ -322,12 +423,14 @@ def run(options, token, *, module_inputs=None):
         module = importlib.import_module('fec.surfaces.staffer_live_server')
         dashboard_file = configure_melange_dashboard(module, data, state)
         installation = None
+        workspace_installation = None
         if module_inputs is not None:
-            from module_data_handoff import server_installation, complete_server_installation
             from module_public_input_installers import capture_originals
-            installation = server_installation(module_inputs, lambda server: capture_originals(module_inputs, server))
-            on_server_ready = lambda server: complete_server_installation(installation, server)
-        module.Handler = guarded_handler(module.Handler, token, options.app, module_installation=installation)
+            installation, workspace_installation, on_server_ready = module_installations(module_inputs, workspace_inputs,
+                lambda server: capture_originals(module_inputs, server))
+        module.Handler = guarded_handler(module.Handler, token, options.app, module_installation=installation,
+            workspace=DesktopWorkspace(options.app, data), workspace_installation=workspace_installation,
+            workspace_inputs=workspace_inputs, module_inputs=module_inputs)
         sys.argv = ['staffer_live_server', '--source-root', str(data), '--port', str(options.port), '--dashboard-file', dashboard_file]
         if module_inputs is None:
             module.main()
@@ -335,6 +438,7 @@ def run(options, token, *, module_inputs=None):
             module.main(public_data=public_data, on_server_ready=on_server_ready)
     elif options.app == 'mentat':
         code = source / 'mentat'
+        from desktop_workspace import DesktopWorkspace
         from mentat_layout import prepare_workspace, load_connections, bind_analytics_paths
         protected_root = source.parent
         if source.parent.parent.name == 'runtime' and source.parent.parent.parent.name == 'resources':
@@ -366,14 +470,16 @@ def run(options, token, *, module_inputs=None):
         relocate_mentat_modules(code, data, workspace, connections['app_data'])
         bind_analytics_paths(importlib.import_module('contribution_data'), code, workspace, data)
         installation = None
+        workspace_installation = None
         if module_inputs is not None:
-            from module_data_handoff import server_installation, complete_server_installation
             from module_public_input_installers import capture_originals, private_program_guard
             guard = private_program_guard(source)
-            installation = server_installation(module_inputs, lambda server: capture_originals(module_inputs, server,
-                console_root=connections['console'], reports_root=connections['reports'], program_guard=guard))
-            on_server_ready = lambda server: complete_server_installation(installation, server)
-        module.Handler = guarded_handler(module.Handler, token, options.app, module_installation=installation)
+            installation, workspace_installation, on_server_ready = module_installations(module_inputs, workspace_inputs,
+                lambda server: capture_originals(module_inputs, server, console_root=connections['console'],
+                    reports_root=connections['reports'], program_guard=guard))
+        module.Handler = guarded_handler(module.Handler, token, options.app, module_installation=installation,
+            workspace=DesktopWorkspace(options.app, data, connections=connections), workspace_installation=workspace_installation,
+            workspace_inputs=workspace_inputs, module_inputs=module_inputs)
         rscript = source.parent / 'native' / 'R' / 'bin' / ('Rscript.exe' if os.name == 'nt' else 'Rscript')
         sys.argv = ['mentat', '--port', str(options.port), '--data-root', str(connections['console'])]
         if rscript.is_file():
@@ -398,7 +504,12 @@ def run(options, token, *, module_inputs=None):
                           TERRIER_WORK_PY=sys.executable, TERRIER_PY312=sys.executable, TERRIER_COMPUTE='windows')
         legacy_owner = getattr(options, 'legacy_owner', None)
         from terrier_district import validate_district
-        validate_district(source, data, options.district, legacy=bool(legacy_owner), state_root=state, github_data=github_data)
+        validate = lambda: validate_district(source, data, options.district, legacy=bool(legacy_owner), state_root=state,
+                                             github_data=github_data, standalone=standalone)
+        if district_input is not None:
+            district_input.data_call(validate)
+        else:
+            validate()
         if legacy_owner:
             from terrier_owner import legacy_secret_path
             key = legacy_secret_path(data, state, legacy_owner, separate_data=github_data)
@@ -408,14 +519,17 @@ def run(options, token, *, module_inputs=None):
             key.write_text(secrets.token_urlsafe(64), encoding='utf-8')
             if os.name != 'nt':
                 key.chmod(0o600)
-        os.environ.update(DJANGO_SETTINGS_MODULE='server.settings', CU_DEPLOYMENT='desktop', CU_BIND='127.0.0.1',
+        os.environ.update(DJANGO_SETTINGS_MODULE='server.settings', CU_DEPLOYMENT='desktop-standalone' if standalone else 'desktop', CU_BIND='127.0.0.1',
                           CU_ALLOWED_HOSTS='127.0.0.1,localhost', CU_DATA_DIR=str(data), CU_STATE_DIR=str(state),
                           CU_SECRET_KEY=key.read_text(encoding='utf-8'), CU_DISTRICT=options.district,
                           CU_COOKIE_PREFIX='desktop_' + options.district.replace('-', '') + '_')
         # The existing owner's one password and one sign-in for every district (Geo server/research/desktop_owner.py):
         # a desktop-level directory outside every district and a per-app-session key, which settings removes from the environment.
         session_key = os.environ.pop('DESKTOP_OWNER_SESSION_KEY', '')
-        if legacy_owner:
+        if standalone:
+            os.environ.pop('CU_DESKTOP_OWNER_ROOT', None)
+            os.environ.pop('CU_DESKTOP_OWNER_SESSION', None)
+        if legacy_owner and not standalone:
             owner_root = getattr(options, 'owner_root', None)
             owner_root = owner_root.resolve() if owner_root else None
             if owner_root is None or len(session_key) < 32 or any(owner_root == root or owner_root.is_relative_to(root) or root.is_relative_to(owner_root)
@@ -425,13 +539,31 @@ def run(options, token, *, module_inputs=None):
             os.environ.update(CU_DESKTOP_OWNER_ROOT=str(owner_root), CU_DESKTOP_OWNER_SESSION=session_key)
         import django
         django.setup()
+        if standalone:
+            from terrier_standalone import configure_settings
+            configure_settings(windows_session=windows_session)
         from django.core.management import call_command
         # The explicit selected state store is backed up and verified before any migration.
         from desktop_migrations import migrate_django
         migrate_django(state)
-        from server.research.desktop_principal import prepare_principal
-        launch_path = prepare_principal(principal, state)
-        import_district_bundle(data, state)
+        if standalone:
+            from terrier_standalone import prepare_accounts, prepare_windows_account, StandaloneBoundary
+            windows_account = prepare_windows_account(state) if windows_session else None
+            launch_path = None if windows_session else prepare_accounts(state, legacy_owner=legacy_owner)
+            boundary = StandaloneBoundary(options.district, options.port, windows_account=windows_account)
+        else:
+            from server.research.desktop_principal import prepare_principal
+            from server.research.desktop_access import DesktopBoundary
+            launch_path = prepare_principal(principal, state)
+            boundary = DesktopBoundary(options.district, options.port, principal)
+        if github_data:
+            if district_input is not None:
+                district_input.prepare_snapshot()
+            else:
+                from terrier_github_snapshot import activate_snapshot
+                activate_snapshot(source, data, state, options.district)
+        else:
+            import_district_bundle(data, state)
         command = importlib.import_module('server.research.management.commands.serve')
         def desktop_fault_log(port):
             import faulthandler
@@ -441,24 +573,24 @@ def run(options, token, *, module_inputs=None):
             faulthandler.enable(file=command._fault_log, all_threads=True)
         command.enable_fault_log = desktop_fault_log
         from desktop_audit import DesktopAudit
-        from server.research.desktop_access import DesktopBoundary
         audit = DesktopAudit(state / 'audit', options.app, options.district)
         command.application = GuardedWSGI(command.application, token, options.app, audit, launch_path=launch_path,
-                                          desktop_boundary=DesktopBoundary(options.district, options.port, principal))
+                                          desktop_boundary=boundary, district_installation=district_input)
         call_command('serve', port=options.port)
 
 
 def extract_github_district_archive(request, *, check=None):
-    """Extract only six signed runtime roles into a new, disposable directory."""
+    """Extract signed runtime stores and approved summary snapshot files into a new directory."""
     import re
     import shutil
     import stat
     import zipfile
+    from terrier_github_snapshot import snapshot_role
     required = {'contacts.sqlite3', 'roads.sqlite3', 'scores.sqlite3', 'street.sqlite3', 'walk.sqlite3', 'density.json'}
     if not isinstance(request, dict) or set(request) != {'archive', 'destination', 'district', 'files', 'sourceRoot'}:
         raise ValueError('Invalid district archive request')
     district = request['district']
-    if district not in {'co-05', 'or-05', 'ct-01'} or not isinstance(request['files'], list) or len(request['files']) != 6:
+    if district not in {'co-05', 'or-05', 'ct-01'} or not isinstance(request['files'], list) or not 6 <= len(request['files']) <= 10000:
         raise ValueError('Invalid district runtime roles')
     for key in ('archive', 'destination', 'sourceRoot'):
         if not isinstance(request[key], str) or not Path(request[key]).is_absolute():
@@ -476,12 +608,12 @@ def extract_github_district_archive(request, *, check=None):
         if not isinstance(item, dict) or set(item) != {'role', 'path', 'bytes', 'sha256'}:
             raise ValueError('Invalid runtime file specification')
         role = item['role']
-        if role not in required or role in specs or item['path'] != district + '/data/' + role:
+        if not (role in required or snapshot_role(role)) or role in specs or item['path'] != district + '/data/' + role:
             raise ValueError('Invalid or duplicate runtime path')
         if type(item['bytes']) is not int or not 0 < item['bytes'] <= 3 * 1024**3 or not isinstance(item['sha256'], str) or not re.fullmatch('[0-9a-f]{64}', item['sha256']):
             raise ValueError('Invalid runtime file size or checksum')
         specs[role] = item
-    if set(specs) != required or sum(item['bytes'] for item in specs.values()) > 12 * 1024**3:
+    if not required.issubset(specs) or sum(item['bytes'] for item in specs.values()) > 12 * 1024**3:
         raise ValueError('Incomplete or oversized district')
     created = None
     try:
@@ -504,18 +636,19 @@ def extract_github_district_archive(request, *, check=None):
                     raise ValueError('Unsafe or ambiguous ZIP entry')
                 names.add(name.casefold().rstrip('/'))
                 role = name.removeprefix(district + '/data/')
-                if role in required and name == specs[role]['path']:
+                if role in specs and name == specs[role]['path']:
                     if item.is_dir() or item.file_size != specs[role]['bytes']:
                         raise ValueError('Runtime ZIP entry size mismatch')
                     selected[role] = item
-            if set(selected) != required:
+            if set(selected) != set(specs):
                 raise ValueError('District archive lacks a required runtime file')
             output.mkdir(mode=0o700)
             created = output.stat()
             verified = []
-            for role in sorted(required):
+            for role in sorted(specs):
                 item, expected = selected[role], specs[role]
                 digest, count = hashlib.sha256(), 0
+                (output / role).parent.mkdir(parents=True, exist_ok=True)
                 with zipped.open(item) as incoming, (output / role).open('xb') as target:
                     while block := incoming.read(1024 * 1024):
                         count += len(block)
@@ -565,7 +698,10 @@ def github_district_extract_main():
 
 
 def main():
-    if '--desktop-module-input' in sys.argv[1:]:
+    if sys.argv[1:] == ['--desktop-windows-session']:
+        from desktop_credentials import main as windows_session_main
+        return windows_session_main()
+    if any(flag in sys.argv[1:] for flag in ('--desktop-module-input', '--desktop-district-input', '--desktop-workspace-input')):
         # -E ignores the environment bytecode setting. Suppress writes before
         # importing the parent-frame/parser/contract or any domain module.
         sys.dont_write_bytecode = True
@@ -604,7 +740,11 @@ def main():
     parser.add_argument('--legacy-owner', choices=['admin'])
     parser.add_argument('--owner-root', type=Path)
     parser.add_argument('--github-district-data', action='store_true')
+    parser.add_argument('--standalone', action='store_true')
+    parser.add_argument('--windows-session', action='store_true')
     parser.add_argument('--desktop-module-input', action='store_true')
+    parser.add_argument('--desktop-workspace-input', action='store_true')
+    parser.add_argument('--desktop-district-input', action='store_true')
     parser.add_argument('--profile-root', type=Path)
     options = parser.parse_args()
     token = os.environ.get('DESKTOP_LAUNCH_TOKEN', '')
@@ -614,31 +754,72 @@ def main():
         parser.error('Installed code and writable data must be separate')
     if options.legacy_owner and options.app != 'terrier':
         parser.error('Legacy owner setup is only available for Terrier')
+    if options.standalone and options.app != 'terrier':
+        parser.error('Standalone backend mode is only available for Terrier')
+    if options.windows_session and (not options.standalone or options.app != 'terrier' or os.name != 'nt'):
+        parser.error('Windows desktop sign-in requires standalone Terrier on Windows')
     if bool(options.owner_root) != bool(options.legacy_owner):
         parser.error('The desktop owner directory is used with, and only with, the existing Terrier owner')
-    if options.github_district_data and (options.app != 'terrier' or not options.legacy_owner
+    if options.github_district_data and (options.app != 'terrier' or not (options.standalone or options.legacy_owner)
             or options.data_root.resolve() == options.state_root.resolve()
             or options.data_root.resolve().is_relative_to(options.state_root.resolve())
             or options.state_root.resolve().is_relative_to(options.data_root.resolve())):
-        parser.error('GitHub district cache requires an explicit existing Terrier owner and separate data/state roots')
-    if bool(options.profile_root) != bool(options.desktop_module_input) or (options.desktop_module_input and
+        parser.error('GitHub district cache requires explicit local access and separate data/state roots')
+    if bool(options.profile_root) != bool(options.desktop_module_input or options.desktop_district_input or options.desktop_workspace_input) or ((options.desktop_module_input or options.desktop_workspace_input) and
             (options.app not in ('melange', 'mentat') or options.github_district_data or options.legacy_owner)):
         parser.error('Native module input requires an explicit profile and a supported original application')
+    if options.desktop_workspace_input and (options.desktop_module_input or options.desktop_district_input):
+        parser.error('Native workspace input includes its own public input and cannot be combined with another frame')
+    if options.desktop_district_input and (options.desktop_module_input or options.desktop_workspace_input or options.app != 'terrier' or not options.github_district_data):
+        parser.error('Native district input requires the selected public district')
+    if options.app == 'terrier':
+        from terrier_district import verify_district_program
+        verify_district_program(options.source_root)
     prepared = None
+    dual = None
+    district_input = None
     try:
+        if options.desktop_workspace_input:
+            from module_workspace_handoff import prepare_workspace_handoff
+            dual = prepare_workspace_handoff(sys.stdin.buffer, app_id=options.app, profile_root=options.profile_root,
+                source_root=options.source_root, original_data_root=options.data_root, state_root=options.state_root,
+                bootstrap_root=Path(__file__).resolve().parent)
+            prepared = dual.public
         if options.desktop_module_input:
             from module_data_handoff import prepare_handoff
             prepared = prepare_handoff(sys.stdin.buffer, app_id=options.app, profile_root=options.profile_root,
                 source_root=options.source_root, original_data_root=options.data_root, state_root=options.state_root,
                 bootstrap_root=Path(__file__).resolve().parent)
-        run(options, token, module_inputs=prepared)
+        if options.desktop_district_input:
+            from terrier_runtime_handoff import prepare_district_handoff
+            district_input = prepare_district_handoff(sys.stdin.buffer, options)
+        inputs = {'module_inputs': prepared}
+        if district_input is not None:
+            inputs['district_input'] = district_input
+        if dual is not None:
+            inputs['workspace_inputs'] = dual.workspace
+        run(options, token, **inputs)
     except Exception as error:
-        if options.desktop_module_input:
+        if options.desktop_district_input:
+            from terrier_runtime_handoff import emit_district_blocked
+            if emit_district_blocked(error, sys.stdout):
+                return 1
+            raise
+        if options.desktop_module_input or options.desktop_workspace_input:
+            from module_data_handoff import emit_data_blocked
+            if dual is not None:
+                from module_workspace_handoff import emit_workspace_data_blocked
+                emit_workspace_data_blocked(error, dual, sys.stdout)
+            else:
+                emit_data_blocked(error, sys.stdout)
             print('Native module input is unavailable.', file=sys.stderr, flush=True)
             return 1
         raise
     finally:
-        if prepared is not None:
+        if dual is not None:
+            from module_workspace_handoff import close_workspace_handoff
+            close_workspace_handoff(dual)
+        elif prepared is not None:
             from module_data_handoff import close_handoff
             close_handoff(prepared)
 

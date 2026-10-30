@@ -47,7 +47,7 @@ class LaunchTests(unittest.TestCase):
                        'releaseTag':'module-data-2026-10-21-fixture','datasets':[]}
         self.contents={}
         for index,(kind,(app,roles)) in enumerate(KINDS.items()):
-            if app!=app_id or kind in ('melange.official-payroll-observations.v1','melange.official-payroll-pages.v1','mentat.public-fec-tables.v1'):continue
+            if app!=app_id or kind not in ('melange.staffer-graph-core.v1','melange.payroll-identity-core.v1','mentat.aggregate-forecast-core.v1'):continue
             objects=[]
             for role,(_relative,_limit) in roles.items():
                 raw=(role_bytes or {}).get((kind,role),('synthetic '+role).encode())
@@ -116,6 +116,31 @@ class LaunchTests(unittest.TestCase):
             self.assertEqual(set(result['readers']),set(self.options['required_kinds']))
             self.assertEqual(result['source'],source);self.assertEqual(self.inventory(),before)
             self.assertEqual(self.account.read_bytes(),b'original account state');self.assertEqual(self.output.read_bytes(),b'original output')
+
+    def test_workspace_namespace_requires_its_own_purpose_and_never_reuses_public_cache(self):
+        from workspace_data_contract import WORKSPACE_PURPOSES
+        with self.assertRaises(ValueError):
+            prepare_module_readers(**self.options, workspace=True)
+        old_cache = self.cache
+        self.cache = self.profile / 'packs/github-workspace-data'
+        old_cache.rename(self.cache)
+        self.snapshot = self.cache / self.snapshot.relative_to(old_cache)
+        self.pointer['purpose'] = WORKSPACE_PURPOSES[self.app]
+        self.manifest['purpose'] = WORKSPACE_PURPOSES[self.app] + 'sets'
+        self.rebind()
+        self.options['source'] = self.source
+        with self.assertRaises(ValueError):
+            prepare_module_readers(**self.options)
+        result = prepare_module_readers(**self.options, workspace=True)
+        self.assertEqual(result['source']['cacheRoot'], str(self.cache))
+        self.assertFalse(result['coverage']['fullApplication'])
+        self.pointer['purpose'] = APPS[self.app][1]
+        self.rebind()
+        self.options['source'] = self.source
+        with self.assertRaises(ValueError):
+            prepare_module_readers(**self.options, workspace=True)
+        self.assertEqual(self.account.read_bytes(), b'original account state')
+        self.assertEqual(self.output.read_bytes(), b'original output')
 
     def test_native_verification_cannot_come_from_downloaded_json_or_truthy_values(self):
         for value in (False,None,1,'true'):

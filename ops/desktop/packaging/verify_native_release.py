@@ -1,8 +1,9 @@
-"""Independently inspect a native Windows release; never execute its payload.
+"""Independently inspect a native Windows release; never launch its native payload.
 
 The build controller supplies frozen client/source exports and its gated staging
 tree. This verifier compares actual archive bytes to those inputs, independently
-enumerates every PE header, and obtains fresh Windows signature verdicts.
+enumerates every PE header, and obtains fresh Windows signature verdicts. The
+source-bound Node contract-construction check creates no backend, UI or profile.
 """
 from __future__ import annotations
 
@@ -19,6 +20,8 @@ import os
 from pathlib import Path
 import re
 import shutil
+import struct
+import subprocess
 import sys
 
 HERE = Path(__file__).resolve().parent
@@ -144,6 +147,435 @@ def reference_overlays(files, pes, mapping, app, *, executable=None, asar=None):
     return files, pes, mapping
 
 
+BOOTSTRAP_OVERLAY33 = frozenset((
+    "data_release_fetch.py",
+    "desktop_audit.py",
+    "desktop_backend.py",
+    "desktop_credentials.py",
+    "desktop_figure_renderer.py",
+    "desktop_migrations.py",
+    "desktop_workspace.py",
+    "melange_bootstrap.py",
+    "melange_data_paths.py",
+    "melange_module_data.py",
+    "melange_public_payroll_normalize.py",
+    "melange_public_payroll_projection.py",
+    "melange_public_provenance.py",
+    "mentat_layout.py",
+    "mentat_module_data.py",
+    "module_application_contracts.py",
+    "module_application_inventory.py",
+    "module_catalogue_cache.py",
+    "module_data_handoff.py",
+    "module_data_launch.py",
+    "module_data_snapshot.py",
+    "module_public_input_installers.py",
+    "module_workspace_combined_ui.py",
+    "module_workspace_handoff.py",
+    "module_workspace_industry_ui.py",
+    "module_workspace_inputs.py",
+    "module_workspace_installers.py",
+    "module_workspace_render.py",
+    "module_workspace_ui_templates.py",
+    "native_access_state.py",
+    "native_credentials.py",
+    "terrier_district.py",
+    "terrier_github_snapshot.py",
+    "terrier_owner.py",
+    "terrier_runtime_handoff.py",
+    "terrier_standalone.py",
+    "workspace_archive.py",
+    "workspace_cache.py",
+    "workspace_data_contract.py",
+    "workspace_graph.py",
+    "workspace_melange.py",
+    "workspace_mentat.py",
+    "workspace_sqlite.py",
+))
+BOOTSTRAP_ADDITIONS33 = frozenset((
+    "desktop_workspace.py",
+    "module_workspace_combined_ui.py",
+    "module_workspace_handoff.py",
+    "module_workspace_industry_ui.py",
+    "module_workspace_inputs.py",
+    "module_workspace_installers.py",
+    "module_workspace_render.py",
+    "module_workspace_ui_templates.py",
+    "terrier_runtime_handoff.py",
+    "workspace_archive.py",
+    "workspace_cache.py",
+    "workspace_data_contract.py",
+    "workspace_graph.py",
+    "workspace_melange.py",
+    "workspace_mentat.py",
+    "workspace_sqlite.py",
+))
+
+
+def source_overlays(files, pes, mapping, app, version, manifest_file, client_commit, source_commit):
+    """Independently bind the narrowly reviewed non-native source replacements.
+
+    The original base stays untouched. Actual extracted sources and bootstrap
+    still have to equal the separately gated source tree and frozen tooling.
+    """
+    if manifest_file is None:
+        return files, pes, mapping, {}, None
+    manifest_file = Path(manifest_file).absolute()
+    require(physical(manifest_file).st_size <= 65536, "Source overlay manifest is too large")
+    def unique_object(pairs):
+        value = {}
+        for key, item in pairs:
+            require(key not in value, "Duplicate source overlay property")
+            value[key] = item
+        return value
+    manifest = json.loads(manifest_file.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
+    require(isinstance(manifest, dict) and set(manifest) == {"schemaVersion", "appId", "version", "clientCommit", "sourceCommit", "files"}
+            and type(manifest["schemaVersion"]) is int and manifest["schemaVersion"] == 1
+            and manifest["appId"] == app and manifest["version"] == version
+            and manifest["clientCommit"] == client_commit and manifest["sourceCommit"] == source_commit
+            and all(isinstance(value, str) and re.fullmatch(r"[a-f0-9]{40}", value) for value in (client_commit, source_commit)),
+            "Source overlay identity differs from frozen release")
+    rows = manifest["files"]
+    prefix = "resources/runtime/" + app + "/"
+    allowed = {prefix + name for name in ("bootstrap/terrier_standalone.py", "bootstrap/module_application_inventory.py",
+                                          "bootstrap/module_application_contracts.py", "bootstrap/module_public_input_installers.py",
+                                          "bootstrap/native_access_state.py", "bootstrap/module_catalogue_cache.py",
+                                          "source-inventory.json", "source-provenance.json")}
+    additions = {prefix + "bootstrap/module_catalogue_cache.py"}
+    if app == "terrier":
+        allowed.add(prefix + "sources/server/research/street_views.py")
+    elif app == "melange":
+        allowed.add(prefix + "sources/fec/surfaces/melange_public_data.py")
+    if version == "1.0.33":
+        allowed = {prefix + "bootstrap/" + name for name in BOOTSTRAP_OVERLAY33}
+        allowed.update((prefix + "source-inventory.json", prefix + "source-provenance.json"))
+        additions = {prefix + "bootstrap/" + name for name in BOOTSTRAP_ADDITIONS33}
+        if app == "melange":
+            allowed.update(prefix + "sources/" + name for name in MELANGE33_GIT_SOURCES)
+    require(isinstance(rows, list) and 1 <= len(rows) <= len(allowed), "Invalid source overlay member count")
+    root = manifest_file.parent / "files"
+    overlay_files, overlay_pes, overlay_map = scan(root)
+    require(not overlay_pes, "Source overlays cannot contain native images")
+    files, pes, mapping = dict(files), set(pes), dict(mapping)
+    seen, inputs = set(), {}
+    for row in rows:
+        require(isinstance(row, dict) and set(row) == {"path", "bytes", "sha256"}, "Invalid source overlay member")
+        name = row["path"]
+        require(isinstance(name, str) and name in allowed and name not in seen
+                and (name in files or name in additions) and name not in pes
+                and type(row["bytes"]) is int and 0 <= row["bytes"] <= 16 * 1024**2
+                and isinstance(row["sha256"], str) and re.fullmatch(r"[a-f0-9]{64}", row["sha256"]),
+                "Invalid source overlay member")
+        seen.add(name)
+        require(overlay_map.get(name) == {"sha256": row["sha256"], "size": row["bytes"]}, "Source overlay bytes differ")
+        source = overlay_files[name]
+        with source.open("rb") as stream:
+            require(stream.read(2) != b"MZ", "Source overlays cannot contain native images")
+        files[name], mapping[name] = source, overlay_map[name]
+        inputs[str(source)] = snapshot(source)
+    require(set(overlay_files) == seen, "Source overlay file inventory is not closed")
+    inputs[str(manifest_file)] = snapshot(manifest_file)
+    return files, pes, mapping, inputs, {"path": str(manifest_file), "sha256": inputs[str(manifest_file)][-1],
+        "clientCommit": client_commit, "sourceCommit": source_commit, "files": rows}
+
+
+def source_provenance(*, app, version, client_commit, source_commit, staged, program_map, original_reference,
+                      origin_proof=None, client=None):
+    """Bind packaged provenance to the independent gated stage and source origins."""
+    expected = staged.parent / "source-provenance.json"
+    info = physical(expected)
+    prefix = "resources/runtime/" + app + "/"
+    expected_hash = legacy.digest(expected)
+    require(program_map.get(prefix + "source-provenance.json") == {"sha256": expected_hash, "size": info.st_size},
+            "Packaged source provenance differs from gated provenance")
+    value = json.loads(expected.read_text(encoding="utf-8"))
+    require(isinstance(value, dict) and value.get("schemaVersion") == 1 and value.get("app") == app
+            and value.get("version") == version and value.get("sourceCommit") == source_commit
+            and value.get("commonClientCommit") == value.get("bootstrapCommit") == client_commit,
+            "Source provenance differs from frozen identities")
+    previous = original_reference.get(prefix + "source-provenance.json")
+    require(previous is not None and value.get("previousRuntimeProvenanceSha256") == previous["sha256"],
+            "Source provenance does not bind retained provenance")
+    origin = value.get("sourceOrigin")
+    require(isinstance(origin, dict), "Explicit retained/composite source origin required")
+    sources = {name[len(prefix + "sources/"):]: row for name, row in program_map.items() if name.startswith(prefix + "sources/")}
+    retained = {name[len(prefix + "sources/"):]: row for name, row in original_reference.items() if name.startswith(prefix + "sources/")}
+    require(set(sources) == set(retained), "Source overlay changed the retained source closure")
+    proof_hash = None
+    if version == "1.0.33" and origin.get("kind") == "sealed-native32-with-exact-git-overrides":
+        proof_hash = sealed32_source_origin(app=app, origin=origin, proof_file=origin_proof, client=client,
+            client_commit=client_commit, source_commit=source_commit, sources=sources, retained=retained,
+            original_reference=original_reference)
+    elif app == "melange" and origin.get("kind") == "composite-retained-export-plus-exact-git-override":
+        proof_hash = melange_composite_origin(origin=origin, proof_file=origin_proof, client=client,
+            client_commit=client_commit, source_commit=source_commit, sources=sources, retained=retained)
+    elif app != "terrier":
+        require(origin.get("kind") == "retained-verified-export" and origin.get("baseSourceCommit") == source_commit
+                and origin.get("sourceFileCount") == len(sources) and sources == retained,
+                "Retained source provenance differs from exact base sources")
+    else:
+        require(origin_proof is not None, "Terrier composite source origin proof is required")
+        proof_path = Path(origin_proof).absolute()
+        physical(proof_path)
+        proof_hash = legacy.digest(proof_path)
+        proof = json.loads(proof_path.read_text(encoding="utf-8"))
+        require(origin.get("kind") == proof.get("provenanceKind") == "composite-retained-export-plus-exact-git-override"
+                and proof.get("status") == "passed" and origin.get("proofSha256") == proof_hash
+                and proof.get("overrideSourceCommit") == source_commit
+                and origin.get("baseSourceCommit") == proof.get("baseSourceCommit")
+                and origin.get("sharedBootstrapSourceCommit") == proof.get("sharedBootstrapCommit")
+                and proof.get("changedGitPaths") == ["server/research/street_views.py"],
+                "Terrier composite source origin identity differs")
+        rows = proof.get("files")
+        require(isinstance(rows, list) and len(rows) == len(sources), "Incomplete composite source origins")
+        seen, counts = set(), {"git-blob": 0, "retained-approved-export-not-tracked-in-git": 0}
+        for row in rows:
+            name = row.get("path")
+            require(name in sources and name not in seen and row.get("origin") in counts
+                    and row.get("matchesPublished30Native") is True
+                    and retained[name] == {"sha256": row.get("baseSha256"), "size": row.get("bytes")},
+                    "Composite source origin differs from retained base")
+            seen.add(name)
+            counts[row["origin"]] += 1
+            size = proof["override"]["bytes"] if name == "server/research/street_views.py" else row["bytes"]
+            require(sources[name] == {"sha256": row.get("effectiveSha256"), "size": size},
+                    "Composite source origin differs from packaged source")
+        for field, count in (("sourceFileCount", len(sources)), ("gitBackedFileCount", counts["git-blob"]),
+                             ("retainedExportFileCount", counts["retained-approved-export-not-tracked-in-git"])):
+            require(origin.get(field) == proof.get(field) == count, "Composite source origin counts differ")
+    return {"sha256": expected_hash, "kind": origin["kind"], "originProofSha256": proof_hash,
+            "sourceFileCount": len(sources)}
+
+
+SEALED_NATIVE32 = {
+    "melange": {"report": "ab8221132f18b2ebffa1cb304ea93ee799e9e281bb5604e3105d2797cc01d8d6",
+        "installer": "e0ad5cb0eb101673843d4e8b6eb0fa23e1836d25e2552f42af0e58a6f510574e",
+        "source": "541e7272b724925aa68b090813e5362ed8ea839c"},
+    "mentat": {"report": "94c9be3bcfb4506561f564e2331b029930c8105c8bed65f1b25cf0d5162234c0",
+        "installer": "9e14073a6ca85146df174e5ec48c1d8216fd64ac77a7858fb4ebddb03c421258",
+        "source": "2b623be182881039e974940b652fab7d39a87ce6"},
+    "terrier": {"report": "6355a74740d2115d1867f9111ed518e8518bc20a419cfda3a181d387fe1aeda7",
+        "installer": "65e994f7184993975c717d0b22d52d492e207798c3e7746ed568f1830060abb1",
+        "source": "74877566f1f8c73c52e5edffc24562d4b9c1eef9"},
+}
+SEALED32_CLIENT = "541e7272b724925aa68b090813e5362ed8ea839c"
+GRAPH33_SOURCE = "fec/surfaces/staffer_graph_snapshot.py"
+SERVICE33_SOURCE = "fec/surfaces/staffer_live_service.py"
+MELANGE33_GIT_SOURCES = (GRAPH33_SOURCE, SERVICE33_SOURCE)
+READER32_SOURCE = "fec/surfaces/melange_public_data.py"
+READER32_PROOF = "144e3d6dd4753e20d6e122b5c577192df1c69fb9450fc72136b69cb6c6318048"
+
+
+def bounded_origin_json(path, limit=1024 ** 2):
+    path = Path(path).absolute()
+    require(physical(path).st_size <= limit, "Source origin evidence exceeds its bound")
+    def unique(pairs):
+        value = {}
+        for key, item in pairs:
+            require(key not in value, "Duplicate source origin property")
+            value[key] = item
+        return value
+    return json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique)
+
+
+def origin_reference(value):
+    require(type(value) is dict and set(value) == {"path", "sha256"}
+            and type(value["path"]) is str and type(value["sha256"]) is str
+            and re.fullmatch(r"[a-f0-9]{64}", value["sha256"]), "Invalid source origin evidence reference")
+    path = Path(value["path"]).absolute()
+    require(physical(path).st_size <= 32 * 1024 ** 2, "Source origin evidence exceeds its bound")
+    require(legacy.digest(path) == value["sha256"], "Source origin evidence hash differs")
+    return path
+
+
+def sealed32_source_origin(*, app, origin, proof_file, client, client_commit, source_commit,
+                           sources, retained, original_reference):
+    """Release33 only: exact sealed32 lineage and two enumerated Git application patches.
+
+    This is not a fresh claim about the disappeared n7 materialization or an
+    exemption for arbitrary sources. The independently pinned32 native report
+    authenticates the complete baseline; every other source byte stays exact.
+    """
+    require(app in SEALED_NATIVE32 and proof_file is not None and client is not None,
+            "Sealed32 provenance requires its exact evidence and frozen client")
+    proof = bounded_origin_json(proof_file)
+    proof_hash = legacy.digest(proof_file)
+    fields = {"schemaVersion", "appId", "status", "provenanceKind", "baseVersion", "baseSourceCommit",
+        "clientCommit", "sourceCommit", "baseNativeReport", "baseSourceProvenanceSha256",
+        "baseSourceMapSha256", "sourceFileCount", "overrides", "sourceFreezeEvidence", "inheritedReaderProof"}
+    origin_fields = {"kind", "baseVersion", "baseSourceCommit", "baseNativeReportSha256", "proofSha256",
+        "sharedBootstrapSourceCommit", "sourceFileCount", "gitOverrideFileCount", "retainedExportFileCount"}
+    pinned = SEALED_NATIVE32[app]
+    require(type(proof) is dict and set(proof) == fields and type(origin) is dict and set(origin) == origin_fields
+        and type(proof["schemaVersion"]) is int and proof["schemaVersion"] == 1
+        and proof["appId"] == app and proof["status"] == "passed"
+        and origin["kind"] == proof["provenanceKind"] == "sealed-native32-with-exact-git-overrides"
+        and origin["baseVersion"] == proof["baseVersion"] == "1.0.32"
+        and origin["baseSourceCommit"] == proof["baseSourceCommit"] == pinned["source"]
+        and origin["proofSha256"] == proof_hash and origin["sharedBootstrapSourceCommit"] == proof["clientCommit"] == client_commit
+        and proof["sourceCommit"] == source_commit
+        and source_commit == (client_commit if app == "melange" else pinned["source"]),
+        "Sealed32 source origin identity differs")
+    report_path = origin_reference(proof["baseNativeReport"])
+    require(origin["baseNativeReportSha256"] == proof["baseNativeReport"]["sha256"] == pinned["report"],
+            "Sealed32 native report is not the reviewed baseline")
+    report = bounded_origin_json(report_path, 32 * 1024 ** 2)
+    require(report.get("status") == "passed" and report.get("appId") == app and report.get("version") == "1.0.32"
+        and report.get("clientCommit") == SEALED32_CLIENT and report.get("sourceCommit") == pinned["source"]
+        and report.get("installerSha256") == pinned["installer"], "Sealed32 native report identity differs")
+    prefix = "resources/runtime/" + app + "/"
+    baseline = report.get("applicationFiles")
+    require(type(baseline) is dict, "Sealed32 native file census is missing")
+    baseline_sources = {name[len(prefix + "sources/"):]: row for name, row in baseline.items()
+                        if name.startswith(prefix + "sources/")}
+    provenance = baseline.get(prefix + "source-provenance.json")
+    require(baseline_sources == retained and set(sources) == set(retained)
+        and provenance == original_reference.get(prefix + "source-provenance.json")
+        and type(provenance) is dict and proof["baseSourceProvenanceSha256"] == provenance["sha256"],
+        "Sealed32 source/provenance census differs from the actual retained base")
+    canonical = json.dumps(baseline_sources, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    require(proof["baseSourceMapSha256"] == hashlib.sha256(canonical).hexdigest(), "Sealed32 whole-source map hash differs")
+    overrides = proof["overrides"]
+    changed = {name for name in sources if sources[name] != retained[name]}
+    expected = set(MELANGE33_GIT_SOURCES) if app == "melange" else set()
+    require(type(overrides) is list and len(overrides) == len(expected) and changed == expected,
+            "Release33 changed an unapproved retained application source")
+    for field, count in (("sourceFileCount", len(sources)), ("gitOverrideFileCount", len(expected)),
+                         ("retainedExportFileCount", len(sources) - len(expected))):
+        require(type(origin[field]) is int and origin[field] == count, "Release33 source origin counts differ")
+    require(type(proof["sourceFileCount"]) is int and proof["sourceFileCount"] == len(sources), "Incomplete release33 source origins")
+    frozen_root = Path(client).absolute().parents[2]
+    evidence_path = origin_reference(proof["sourceFreezeEvidence"])
+    require(identity(evidence_path) == identity(frozen_root / "source-freeze-evidence.json"), "Source freeze is outside the capsule")
+    frozen = bounded_origin_json(evidence_path)
+    require(frozen.get("status") == "passed-committed-source-freeze" and frozen.get("sourceClientCommit") == client_commit
+        and frozen.get("protectedResidueWritten") is False and frozen.get("archiveContainsProtectedResidue") is False
+        and frozen.get("allNamedGitBlobsMatch") is True, "Release33 source freeze differs")
+    for phase in ("before", "after"):
+        state = frozen.get(phase)
+        require(type(state) is dict and state.get("head") == state.get("remoteBranchCommit") == client_commit
+            and state.get("trackedStatus") == "", "Release33 source was not clean, committed and pushed")
+    capsule = bounded_origin_json(frozen_root / "capsule-provenance.json")
+    require(capsule.get("commit") == client_commit and capsule.get("version") == "1.0.33"
+        and capsule.get("sourceFreezeEvidenceSha256") == proof["sourceFreezeEvidence"]["sha256"]
+        and capsule.get("archiveSha256") == frozen.get("archiveSha256") == legacy.digest(frozen_root / "committed-source.zip"),
+        "Release33 capsule does not bind the actual freeze record and Git archive")
+    seen = set()
+    for row in overrides:
+        require(type(row) is dict and set(row) == {"gitPath", "path", "bytes", "sha256", "gitBlob"}
+            and row["gitPath"] in expected and row["gitPath"] not in seen and type(row["bytes"]) is int and 0 < row["bytes"] <= 16 * 1024 ** 2
+            and type(row["sha256"]) is str and re.fullmatch(r"[a-f0-9]{64}", row["sha256"])
+            and type(row["gitBlob"]) is str and re.fullmatch(r"[a-f0-9]{40}", row["gitBlob"])
+            and sources[row["gitPath"]] == {"size": row["bytes"], "sha256": row["sha256"]}, "Invalid frozen graph source override")
+        name = row["gitPath"]
+        seen.add(name)
+        path = frozen_root / name
+        physical(path)
+        require(type(row["path"]) is str and identity(row["path"]) == identity(path), "Graph override leaves the frozen capsule")
+        raw = path.read_bytes()
+        blob = hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+        require(len(raw) == row["bytes"] and hashlib.sha256(raw).hexdigest() == row["sha256"] and blob == row["gitBlob"]
+            and frozen.get("sourceGitBlobs", {}).get(name) == {"gitObject": blob, "bytes": len(raw), "sha256": row["sha256"]},
+            "Graph override differs from the exact frozen Git blob")
+    require(seen == expected, "Release33 exact Git override roster differs")
+    if app == "melange":
+        inherited = origin_reference(proof["inheritedReaderProof"])
+        require(proof["inheritedReaderProof"]["sha256"] == READER32_PROOF
+            and report.get("sourceProvenance", {}).get("originProofSha256") == READER32_PROOF,
+            "Inherited32 reader lineage differs")
+        history = bounded_origin_json(inherited)
+        require(history.get("status") == "passed" and history.get("appId") == "melange"
+            and history.get("overrideSourceCommit") == SEALED32_CLIENT
+            and retained.get(READER32_SOURCE) == sources.get(READER32_SOURCE) == {
+                "size": history.get("override", {}).get("bytes"), "sha256": history.get("override", {}).get("sha256")},
+            "Inherited32 reader bytes changed")
+    else:
+        require(proof["inheritedReaderProof"] is None, "Unexpected inherited Melange reader proof")
+    return proof_hash
+
+
+def melange_composite_origin(*, origin, proof_file, client, client_commit, source_commit, sources, retained):
+    """One exact frozen Git reader may replace an otherwise unchanged retained export."""
+    require(proof_file is not None and client is not None, "Melange composite source origin proof and frozen client are required")
+    def bounded_json(file, label):
+        file = Path(file).absolute()
+        require(physical(file).st_size <= 1024 ** 2, label + " is too large")
+        def unique(pairs):
+            value = {}
+            for key, item in pairs:
+                require(key not in value, "Duplicate " + label + " property")
+                value[key] = item
+            return value
+        return json.loads(file.read_text(encoding="utf-8"), object_pairs_hook=unique)
+    proof_path = Path(proof_file).absolute()
+    proof = bounded_json(proof_path, "Melange origin proof")
+    proof_hash = legacy.digest(proof_path)
+    fields = {"schemaVersion", "appId", "status", "provenanceKind", "baseSourceCommit", "overrideSourceCommit",
+              "sharedBootstrapCommit", "sourceFileCount", "gitOverrideFileCount", "retainedExportFileCount",
+              "changedGitPaths", "baseReader", "override", "sourceFreezeEvidence"}
+    origin_fields = {"kind", "baseSourceCommit", "proofSha256", "sharedBootstrapSourceCommit",
+                     "sourceFileCount", "gitOverrideFileCount", "retainedExportFileCount"}
+    name = "fec/surfaces/melange_public_data.py"
+    require(type(proof) is dict and set(proof) == fields and type(origin) is dict and set(origin) == origin_fields
+            and type(proof["schemaVersion"]) is int and proof["schemaVersion"] == 1
+            and proof["appId"] == "melange" and proof["status"] == "passed"
+            and origin["kind"] == proof["provenanceKind"] == "composite-retained-export-plus-exact-git-override"
+            and origin["proofSha256"] == proof_hash
+            and proof["overrideSourceCommit"] == proof["sharedBootstrapCommit"] == client_commit == source_commit
+            and origin["sharedBootstrapSourceCommit"] == client_commit
+            and origin["baseSourceCommit"] == proof["baseSourceCommit"]
+            and type(proof["baseSourceCommit"]) is str and re.fullmatch(r"[a-f0-9]{40}", proof["baseSourceCommit"])
+            and proof["changedGitPaths"] == [name], "Melange composite source origin identity differs")
+    require(set(sources) == set(retained) and name in sources
+            and {key for key in sources if sources[key] != retained[key]} == {name},
+            "Melange composite source changed an unapproved retained member")
+    for field, count in (("sourceFileCount", len(sources)), ("gitOverrideFileCount", 1),
+                         ("retainedExportFileCount", len(sources) - 1)):
+        require(type(proof[field]) is int and type(origin[field]) is int and proof[field] == origin[field] == count,
+                "Melange composite source origin counts differ")
+    base, override, evidence = proof["baseReader"], proof["override"], proof["sourceFreezeEvidence"]
+    require(type(base) is dict and set(base) == {"bytes", "sha256"} and type(base["bytes"]) is int
+            and retained[name] == {"size": base["bytes"], "sha256": base["sha256"]},
+            "Melange composite reader differs from retained base")
+    require(type(override) is dict and set(override) == {"path", "bytes", "sha256", "gitBlob"}
+            and type(override["path"]) is str
+            and type(override["bytes"]) is int and 0 < override["bytes"] <= 16 * 1024 ** 2
+            and type(override["sha256"]) is str and re.fullmatch(r"[a-f0-9]{64}", override["sha256"])
+            and type(override["gitBlob"]) is str and re.fullmatch(r"[a-f0-9]{40}", override["gitBlob"])
+            and sources[name] == {"size": override["bytes"], "sha256": override["sha256"]},
+            "Melange composite reader differs from packaged source")
+    client = Path(client).absolute()
+    frozen_root = client.parents[2]
+    frozen_reader = frozen_root / name
+    require(physical(frozen_reader).st_size == override["bytes"], "Melange reader override differs from exact frozen Git blob")
+    override_path = Path(override["path"]).absolute()
+    physical(override_path)
+    require(identity(override_path) == identity(frozen_reader), "Melange reader override is outside frozen source")
+    raw = frozen_reader.read_bytes()
+    git_blob = hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+    require(len(raw) == override["bytes"] and hashlib.sha256(raw).hexdigest() == override["sha256"]
+            and git_blob == override["gitBlob"], "Melange reader override differs from exact frozen Git blob")
+    require(type(evidence) is dict and set(evidence) == {"path", "sha256"}
+            and type(evidence["path"]) is str and type(evidence["sha256"]) is str
+            and re.fullmatch(r"[a-f0-9]{64}", evidence["sha256"])
+            and identity(evidence["path"]) == identity(frozen_root / "source-freeze-evidence.json"),
+            "Melange source freeze evidence is outside frozen source")
+    frozen = bounded_json(evidence["path"], "source freeze evidence")
+    require(legacy.digest(evidence["path"]) == evidence["sha256"] and type(frozen) is dict
+            and type(frozen.get("schemaVersion")) is int and frozen["schemaVersion"] == 1
+            and frozen.get("status") == "passed-committed-source-freeze"
+            and frozen.get("sourceClientCommit") == client_commit
+            and frozen.get("readerMatchesExactGitBlob") is True and frozen.get("protectedResidueWritten") is False
+            and frozen.get("archiveContainsProtectedResidue") is False
+            and frozen.get("readerGitBlob") == {"path": name, "gitObject": git_blob,
+                "bytes": len(raw), "sha256": override["sha256"]}, "Melange source freeze evidence differs")
+    for phase in ("before", "after"):
+        state = frozen.get(phase)
+        require(type(state) is dict and state.get("head") == state.get("remoteBranchCommit") == client_commit
+                and state.get("trackedStatus") == "", "Melange source freeze was not clean and committed")
+    return proof_hash
+
+
 def reader_capabilities(seven):
     info = legacy.run([seven, "i"]).decode("utf-8", "strict")
     require(re.search(r"\bNsis\s+nsis\b", info, re.IGNORECASE), "A full NSIS-capable 7-Zip reader is required")
@@ -247,6 +679,150 @@ def client_manifest(client):
     return files
 
 
+def asar_member_bytes(archive, name):
+    """Read one already-censused member without executing or extracting client code."""
+    name = legacy.safe_name(name)
+    with Path(archive).open("rb") as stream:
+        lead = stream.read(16)
+        require(len(lead) == 16, "Truncated contract ASAR header")
+        first, header_size, _, json_size = struct.unpack("<IIII", lead)
+        require(first == 4 and 0 < json_size <= 16 * 1024**2 and header_size >= json_size + 8,
+                "Unsupported contract ASAR header")
+        node = json.loads(stream.read(json_size))
+        for part in name.split("/"):
+            node = node.get("files", {}).get(part)
+            require(isinstance(node, dict) and not node.get("link") and not node.get("unpacked"),
+                    "Missing or redirected compiled ASAR inventory")
+        require("files" not in node and type(node.get("size")) is int and 0 < node["size"] <= 2 * 1024**2,
+                "Invalid compiled ASAR inventory size")
+        offset = int(node.get("offset", -1))
+        require(offset >= 0 and 8 + header_size + offset + node["size"] <= Path(archive).stat().st_size,
+                "Compiled ASAR inventory lies outside archive")
+        stream.seek(8 + header_size + offset)
+        raw = stream.read(node["size"])
+        require(len(raw) == node["size"], "Truncated compiled ASAR inventory")
+        return raw
+
+
+def compiled_module_tables(*, app, javascript, python, program_map, config):
+    """Join both compiled authorities to the actual packaged program, not its source inventory."""
+    text = javascript.decode("utf-8-sig")
+    matches = list(re.finditer(r"\bconst\s+APPLICATION_SPECS\s*=\s*freeze\(\s*", text))
+    require(len(matches) == 1, "Compiled JavaScript module table is missing or ambiguous")
+    js, end = json.JSONDecoder().raw_decode(text, matches[0].end())
+    require(re.fullmatch(r"\s*\);\s*module\.exports\s*=\s*Object\.freeze\(\{APPLICATION_SPECS\}\);\s*",
+                         text[end:]), "Compiled JavaScript module table is not a closed literal")
+    def literal(node):
+        if isinstance(node, ast.Call):
+            require(isinstance(node.func, ast.Name) and node.func.id == "MappingProxyType"
+                    and len(node.args) == 1 and not node.keywords,
+                    "Compiled Python module table contains executable selectors")
+            return literal(node.args[0])
+        if isinstance(node, ast.Dict):
+            keys = [literal(key) for key in node.keys]
+            require(all(type(key) is str for key in keys) and len(set(keys)) == len(keys),
+                    "Compiled Python module table has duplicate or invalid keys")
+            return dict(zip(keys, (literal(value) for value in node.values)))
+        if isinstance(node, (ast.Tuple, ast.List)):
+            return [literal(value) for value in node.elts]
+        if isinstance(node, ast.Constant) and type(node.value) in (str, int, bool, type(None)):
+            return node.value
+        raise Refused("Compiled Python module table is not a closed literal")
+    assignments = [node.value for node in ast.parse(python.decode("utf-8-sig")).body
+                   if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)
+                       and target.id == "APPLICATION_SPECS" for target in node.targets)]
+    require(len(assignments) == 1, "Compiled Python module table is missing or ambiguous")
+    py = literal(assignments[0])
+    require(js == py and isinstance(js, dict) and set(js) == {"melange", "mentat"},
+            "Packaged JavaScript/Python compiled module tables disagree")
+    spec = js[app]
+    fields = {"schemaVersion", "appId", "contractId", "programFingerprint", "programFiles",
+              "requiredKinds", "publicReaders", "privateBoundaries", "startupTimeoutMs"}
+    require(isinstance(spec, dict) and set(spec) == fields and type(spec["schemaVersion"]) is int
+            and spec["schemaVersion"] == 1 and spec["appId"] == app
+            and spec["contractId"] == app + ".public-data.v1", "Invalid compiled application identity")
+    files = spec["programFiles"]
+    require(isinstance(files, list) and 0 < len(files) <= 512, "Invalid compiled program table")
+    seen, total = set(), 0
+    for row in files:
+        require(isinstance(row, dict) and set(row) == {"root", "path", "bytes", "sha256"}
+                and row["root"] in ("source", "bootstrap") and isinstance(row["path"], str)
+                and 0 < len(row["path"]) <= 400
+                and all(re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9._-]{0,127}", part)
+                        and not part.endswith(".") for part in row["path"].split("/"))
+                and type(row["bytes"]) is int and 0 <= row["bytes"] <= 16 * 1024**2
+                and isinstance(row["sha256"], str) and re.fullmatch(r"[a-f0-9]{64}", row["sha256"]),
+                "Invalid compiled program descriptor")
+        key = row["root"] + "/" + row["path"].lower()
+        require(key not in seen and not row["path"].endswith(("module_application_inventory.py", "module-application-inventory.cjs")),
+                "Duplicate or recursive compiled program descriptor")
+        seen.add(key)
+        total += row["bytes"]
+        prefix = "resources/runtime/" + app + ("/sources/" if row["root"] == "source" else "/bootstrap/")
+        require(program_map.get(prefix + row["path"]) == {"size": row["bytes"], "sha256": row["sha256"]},
+                "Compiled program descriptor differs from actual packaged bytes: " + key)
+    require(total <= 64 * 1024**2, "Compiled program table exceeds native budget")
+    ordered = sorted(files, key=lambda row: (row["root"], row["path"]))
+    fingerprint = hashlib.sha256(json.dumps(ordered, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    require(fingerprint == spec["programFingerprint"], "Compiled program fingerprint differs from its literal table")
+    modes = config.get("desktopPublicData", {})
+    require(isinstance(modes, dict), "Packaged public data mode is invalid")
+    mode = modes.get(app)
+    require(mode in (None, "paged-v1") and (mode != "paged-v1" or app == "melange"),
+            "Unsupported packaged public data mode")
+    paged = app == "melange" and mode == "paged-v1"
+    access_mode = config.get("desktopAccessMode", "managed")
+    authentication = config.get("desktopAuthentication", "password")
+    require(access_mode in ("standalone", "managed") and authentication in ("windows", "password")
+            and (authentication != "windows" or access_mode == "standalone"),
+            "Invalid packaged module authentication mode")
+    return {"status": "passed", "appId": app, "programFingerprint": fingerprint,
+            "programFileCount": len(files), "programBytes": total,
+            "javascriptSha256": hashlib.sha256(javascript).hexdigest(),
+            "pythonSha256": hashlib.sha256(python).hexdigest(),
+            "publicDataMode": mode, "accessMode": access_mode, "authentication": authentication,
+            "contractId": "melange.public-data.pages.v1" if paged else spec["contractId"],
+            "requiredKinds": ["melange.official-payroll-pages.v1"] if paged else spec["requiredKinds"],
+            "literalTablesEqual": True, "matchesActualPackagedProgram": True}
+
+
+def compiled_module_runtime(*, app, client, extracted, expected):
+    """Construct the real, byte-bound client contract without launching an application or backend."""
+    script = r'''
+const fs=require('node:fs'),path=require('node:path');
+const request=JSON.parse(fs.readFileSync(0,'utf8'));
+const {Runtime}=require(path.join(request.client,'runtime.cjs'));
+const {withCompiledApplicationContract}=require(path.join(request.client,'module-data-startup.cjs'));
+const {createRuntimeModuleBoundary}=require(path.join(request.client,'module-data-runtime-boundary.cjs'));
+const runtime=new Runtime(request.app,request.profile,request.resources,{allowStandalone:request.accessMode==='standalone',authentication:request.authentication});
+const result=withCompiledApplicationContract(request.app,{runtime,resources:request.resources,publicDataMode:request.mode},(contract,proof)=>{
+ if(!contract)throw new Error('Packaged application contract is unsupported');
+ const boundary=createRuntimeModuleBoundary({appId:request.app,profile:request.profile,contract,constructionProof:proof,
+   getRuntime:()=>runtime,getSelected:()=>({}),authorize:async()=>{throw new Error('Acceptance never authorizes a launch');}});
+ if(!boundary||boundary.supportsContract(contract)!==true||boundary.supportsContract(contract)!==true)throw new Error('Packaged native boundary rejects its contract');
+ return {status:'passed',contractId:contract.contractId,programFingerprint:contract.programFingerprint,
+   programFileCount:contract.programFiles.length,requiredKinds:contract.requiredKinds,boundarySupported:true};
+});
+process.stdout.write(JSON.stringify(result));
+'''
+    node = shutil.which("node")
+    require(node is not None, "Node is required for the packaged application-contract acceptance")
+    request = {"app": app, "client": str(client), "resources": str(extracted / "resources"),
+               "profile": str(extracted.parent / "unused-module-acceptance-profile"),
+               "mode": expected["publicDataMode"], "accessMode": expected["accessMode"],
+               "authentication": expected["authentication"]}
+    result = subprocess.run([node, "-e", script], input=json.dumps(request).encode(), capture_output=True,
+                            timeout=120, creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+    require(result.returncode == 0, "Actual packaged application contract/native boundary is unsupported")
+    value = json.loads(result.stdout)
+    require(value.get("status") == "passed" and value.get("boundarySupported") is True
+            and all(value.get(key) == expected[key] for key in ("contractId", "programFingerprint", "programFileCount", "requiredKinds")),
+            "Actual packaged application contract differs from compiled-table acceptance")
+    return {**value, "scope": "Real byte-bound packaged client contract and Runtime roots; no backend/UI/profile writes",
+            "clientSource": "Frozen client bytes already matched to actual ASAR by verify_sources",
+            "programRoots": "Actual extracted native program"}
+
+
 def verify_sources(*, app, version, program_files, program_map, members, client, staged, trust, installer_format="legacy-nsis-v1"):
     require(installer_format in INSTALLER_FORMATS, "Unsupported native installer format")
     names = client_manifest(client)
@@ -299,8 +875,23 @@ def verify_sources(*, app, version, program_files, program_map, members, client,
         expected_boot[name] = {"sha256": legacy.digest(packaging / name), "size": info.st_size}
     actual_boot = {name[len(prefix + "bootstrap/"):]: value for name, value in program_map.items() if name.startswith(prefix + "bootstrap/")}
     same_tree(actual_boot, expected_boot, "Frozen runtime bootstrap")
+    module_table = {"status": "not-applicable", "reason": "district-application-or-legacy-client"}
+    if app in ("melange", "mentat"):
+        name = "module-application-inventory.cjs"
+        python_name = prefix + "bootstrap/module_application_inventory.py"
+        declares_modules = name in members or python_name in program_files
+        needs_modules = config.get("desktopAccessMode") == "standalone" and config.get("desktopAuthentication") == "windows"
+        if declares_modules or needs_modules:
+            require(name in members and python_name in program_files,
+                    "Packaged application is missing its compiled module declarations")
+            javascript = asar_member_bytes(program_files["resources/app.asar"], name)
+            require(hashlib.sha256(javascript).hexdigest() == members[name]["sha256"],
+                    "Compiled ASAR module declaration changed during inspection")
+            module_table = compiled_module_tables(app=app, javascript=javascript,
+                python=program_files[python_name].read_bytes(), program_map=program_map, config=config)
     return {"clientFiles": expected_client, "runtimeSources": staged_map, "runtimeBootstrap": expected_boot,
             "nativeBuildInputs": build_inputs, "publicReleaseCertificate": program_map["resources/" + certificate],
+            "compiledModuleTable": module_table,
             "sourceManifests": {"releaseFiles": legacy.digest(client / "release-files.cjs"),
                                 "buildRuntime": legacy.digest(packaging / "build_runtime.py"),
                                 "stagedSources": legacy.digest(staged_inventory_path)}}, package
@@ -389,7 +980,12 @@ def verify(args):
     output, installer = Path(args.output).absolute(), Path(args.installer).absolute()
     program, client, staged = (Path(value).absolute() for value in (args.program_directory, args.client, args.staged_sources))
     overlays = {"executable": getattr(args, "app_executable", None), "asar": getattr(args, "app_asar", None)}
-    require(installer_format == "builtin-nsis-v1" or not any(overlays.values()), "Reference overlays require the built-in installer format")
+    source_overlay = getattr(args, "source_overlay", None)
+    require(installer_format == "builtin-nsis-v1" or not (any(overlays.values()) or source_overlay), "Reference overlays require the built-in installer format")
+    if source_overlay:
+        overlay_root = Path(source_overlay).absolute().parent
+        require(not overlay_root.is_relative_to(program) and not program.is_relative_to(overlay_root),
+                "Source overlay must be outside the retained base")
     seven = Path(args.seven_zip).resolve(strict=True)  # known tool cache may have a legitimate parent redirect
     tool_inputs = [seven]
     if seven.with_suffix(".dll").exists():
@@ -408,10 +1004,17 @@ def verify(args):
     output.mkdir()
     paths = [installer, receipt_path, trust, *tool_inputs, Path(__file__), HERE / "verify_signed_release.py", HERE / "no_uninstaller_contract.py",
              *(Path(value).absolute() for value in overlays.values() if value)]
+    if source_overlay:
+        paths.append(staged.parent / "source-provenance.json")
+        if getattr(args, "source_origin_proof", None):
+            paths.append(Path(args.source_origin_proof).absolute())
     inputs = {str(file): snapshot(file) for file in paths}
     reference_files, reference_pes, reference = scan(program)
     original_reference = dict(reference)
     reference_files, reference_pes, reference = reference_overlays(reference_files, reference_pes, reference, args.app, **overlays)
+    reference_files, reference_pes, reference, source_inputs, source_binding = source_overlays(
+        reference_files, reference_pes, reference, args.app, args.version, source_overlay, args.client_commit, args.source_commit)
+    inputs.update(source_inputs)
     report = {"schemaVersion": 1, "status": "failed", "appId": args.app, "version": args.version,
               "clientCommit": args.client_commit, "sourceCommit": args.source_commit,
               "originalSourceExport": args.source,
@@ -420,6 +1023,7 @@ def verify(args):
               "freeFloorGiB": args.free_floor_gib,
               "archiveReader": reader, "installerFormat": installer_format,
               "referenceOverlays": {name: str(Path(value).absolute()) for name, value in overlays.items() if value},
+              "sourceOverlay": source_binding,
               "runtimeExecution": "not performed", "recipientPolicyAcceptance": "not tested"}
     with locked_input(installer), contextlib.ExitStack() as locks:
         for file in tool_inputs:
@@ -449,6 +1053,9 @@ def verify(args):
         verify_asar_integrity(app_files[PRODUCTS[args.app] + ".exe"], asar_header_hash)
         source_evidence, package = verify_sources(app=args.app, version=args.version, program_files=app_files,
             program_map=app_map, members=members, client=client, staged=staged, trust=trust, installer_format=installer_format)
+        provenance_binding = source_provenance(app=args.app, version=args.version, client_commit=args.client_commit,
+            source_commit=args.source_commit, staged=staged, program_map=app_map, original_reference=original_reference,
+            origin_proof=getattr(args, "source_origin_proof", None), client=client) if source_overlay else None
         absence = contract.verify_without_uninstaller(installer=installer, package_json=package,
             nsis_files=nsis_files, app_files=app_files, asar_members=members, signing_receipt=receipt_path)
         receipt = json.loads(receipt_path.read_text(encoding="utf-8-sig"))
@@ -460,15 +1067,32 @@ def verify(args):
         print(json.dumps({"phase": "complete-native-signature-census", "appId": args.app, "files": len(items)}), flush=True)
         rows = legacy.signatures(items, native, preserve_execution_policy=True)
         check_verdicts(rows, items, expected, app_map, nsis_map, args.app, args.version)
+        module_acceptance = None
+        compiled = source_evidence["compiledModuleTable"]
+        if compiled["status"] == "passed":
+            print(json.dumps({"phase": "actual-compiled-module-contract", "appId": args.app,
+                              "publicDataMode": compiled["publicDataMode"]}), flush=True)
+            module_acceptance = compiled_module_runtime(app=args.app, client=client,
+                extracted=extracted, expected=compiled)
         require(rows["installer"]["sha256"] == report["installerSha256"], "Outer installer changed during signature verification")
         same_tree(scan(extracted)[2], app_map, "Final extracted application")
         if outer != extracted:
             same_tree(scan(outer)[2], nsis_map, "Final NSIS container")
         same_tree(scan(program)[2], original_reference, "Final signed program input")
+        if source_overlay:
+            _, _, final_reference, final_source_inputs, final_binding = source_overlays(
+                reference_files, reference_pes, reference, args.app, args.version, source_overlay, args.client_commit, args.source_commit)
+            require(final_reference == reference and final_source_inputs == source_inputs and final_binding == source_binding,
+                    "Source overlay changed during verification")
         final_sources, _ = verify_sources(app=args.app, version=args.version, program_files=app_files,
             program_map=app_map, members=legacy.asar(app_files["resources/app.asar"])[1], client=client, staged=staged, trust=trust,
             installer_format=installer_format)
         require(final_sources == source_evidence, "Frozen source inputs changed during verification")
+        if source_overlay:
+            require(source_provenance(app=args.app, version=args.version, client_commit=args.client_commit,
+                source_commit=args.source_commit, staged=staged, program_map=app_map, original_reference=original_reference,
+                origin_proof=getattr(args, "source_origin_proof", None), client=client) == provenance_binding,
+                "Source provenance changed during verification")
         for file, before in inputs.items():
             require(snapshot(file) == before, "Verification input changed: " + file)
         plugins = [] if installer_format == "builtin-nsis-v1" else sorted(NATIVE_PLUGINS)
@@ -478,6 +1102,8 @@ def verify(args):
             embeddedAsarIntegrityVerified=True, asarHeaderSha256=asar_header_hash,
             completeNativeCensus=True, desktopUninstaller=False,
             noUninstaller=absence, sourceEvidence=source_evidence, applicationFiles=app_map, nsisFiles=nsis_map,
+            compiledModuleAcceptance=module_acceptance,
+            sourceProvenance=provenance_binding,
             nativeSignatureRows=rows, inputFilesUnchanged=True)
     return report
 
@@ -499,6 +1125,8 @@ def main(argv=None):
     parser.add_argument("--source", help="Original frozen source export (provenance; transformed bytes use --staged-sources)")
     parser.add_argument("--app-executable", help="Explicit signed main-executable overlay used by the built-in installer")
     parser.add_argument("--app-asar", help="Explicit ASAR overlay used by the built-in installer")
+    parser.add_argument("--source-overlay", help="Closed reviewed source/bootstrap overlay; only the fixed cache helper may be a new member")
+    parser.add_argument("--source-origin-proof", help="Independent composite origin proof required for a reviewed source override")
     parser.add_argument("--installer-format", choices=INSTALLER_FORMATS, default="legacy-nsis-v1",
                         help="explicit native payload layout; builtin layout forbids external installer plugins")
     parser.add_argument("--free-floor-gib", type=free_floor_gib, default=32,

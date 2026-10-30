@@ -81,6 +81,16 @@ test('background staging returns only public status and cannot activate a snapsh
  assert.equal(f.calls.some(item=>Array.isArray(item)&&item[0]==='commit'),false);f.controller.shutdown();
 });
 
+test('default background checks are fifteen minutes while manual/start checks reuse the provider immediately',async t=>{
+ const f=fixture();t.after(()=>f.controller.shutdown());
+ assert.deepEqual(f.calls.find(value=>Array.isArray(value)&&value[0]==='interval'),['interval',15*60*1000]);
+ await f.controller.prepare();await f.controller.stage();await f.controller.stage();
+ f.timer();await f.controller.drain();await f.controller.invalidate();await f.controller.stage();
+ assert.equal(f.calls.filter(value=>value==='create').length,1,'Provider and its server cooldown survive normal checks and invalidation');
+ assert.equal(f.calls.filter(value=>Array.isArray(value)&&value[0]==='prepare').length,1);
+ assert.equal(f.calls.filter(value=>Array.isArray(value)&&value[0]==='stage').length,4,'Manual checks do not wait for the background interval');
+});
+
 test('chunk progress limits synchronous settings reads and status sends while phase changes and completion remain immediate',async t=>{
  let now=1000,reads=0,f;t.mock.method(Date,'now',()=>now);
  f=fixture({controller:{getSelected:()=>{reads++;return f.selected;}}});
@@ -248,8 +258,8 @@ test('shutdown cancels current and queued work, clears its timer and stops statu
  await assert.rejects(f.controller.prepare(),{code:'cancelled'});assert.equal(f.active,'previous-active');
 });
 
-test('the five-minute timer can stage only, honors the native busy guard and never commits',async()=>{
- const f=fixture();assert.deepEqual(f.calls[0],['interval',300000]);assert.ok(f.calls.includes('timer-unref'));
+test('the fifteen-minute timer can stage only, honors the native busy guard and never commits',async()=>{
+ const f=fixture();assert.deepEqual(f.calls[0],['interval',900000]);assert.ok(f.calls.includes('timer-unref'));
  f.timer();await f.controller.tail;assert.equal(f.active,'previous-active');assert.equal(f.calls.filter(value=>Array.isArray(value)&&value[0]==='stage').length,1);
  f.canStage=false;f.timer();await f.controller.tail;assert.equal(f.calls.filter(value=>Array.isArray(value)&&value[0]==='stage').length,1);
  assert.equal(f.calls.some(value=>Array.isArray(value)&&value[0]==='commit'),false);f.controller.shutdown();

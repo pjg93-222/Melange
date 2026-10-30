@@ -9,7 +9,85 @@ const {districtConfiguration,verifyDistrictAsync}=require('../district-switch.cj
 const {REPOSITORY,POINTER_PATH,IDS,ROLES,assetURL}=protocol;
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value));
-function fixture(t){
+function controlledHashStreams(t,directory,{holdAbort=-1,autoAfter=Infinity}={}){
+ const {Readable}=require('node:stream'),original=fs.createReadStream,entries=[],waiters=[];let active=0,peak=0;
+ fs.createReadStream=function(file,options){
+  if(path.dirname(file)!==directory)return original.call(this,file,options);
+  const index=entries.length;let destroyStarted,closed;const entry={file,startedDestroy:new Promise(resolve=>{destroyStarted=resolve;}),closed:new Promise(resolve=>{closed=resolve;})};
+  const stream=new Readable({signal:options.signal,read(){},destroy(error,done){let finished=false;entry.finishDestroy=()=>{if(!finished){finished=true;done(error);}};destroyStarted(error);if(!(error&&index===holdAbort))entry.finishDestroy();}});
+  entry.release=bytes=>{if(!stream.destroyed){stream.push(bytes||fs.readFileSync(file));stream.push(null);}};
+  entry.destroy=()=>stream.destroy();stream.once('close',()=>{active--;closed();});active++;peak=Math.max(peak,active);entries.push(entry);
+  for(const ready of waiters.splice(0))ready();if(index>=autoAfter)queueMicrotask(()=>entry.release());return stream;
+ };
+ t.after(()=>{fs.createReadStream=original;for(const entry of entries){entry.finishDestroy?.();entry.destroy();}});
+ return {entries,get active(){return active;},get peak(){return peak;},async count(number){while(entries.length<number)await new Promise(resolve=>waiters.push(resolve));}};
+}
+function fixtureFiles(f){return protocol.manifest(f.world.manifest,protocol.pointer(f.world.envelope,f.publicKeys)).dataFiles['co-05'];}
+
+test('district native warmup starts before hashes but receives no input until all hashes pass',{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const streams=controlledHashStreams(t,f.legacy,{autoAfter:2}),files=fixtureFiles(f);let prepared=0,sent=0,drained=0;
+ const p=f.create({checkExisting:()=>assert.fail('Unexpected second probe'),prepareCheckExisting:(directory,district)=>{
+  assert.equal(directory,f.legacy);assert.equal(district,'co-05');assert.equal(streams.entries.length,0);prepared++;
+  return {run:async()=>{assert.equal(streams.active,0);assert.equal(streams.entries.length,files.length);sent++;return true;},cancel:async()=>{drained++;}};
+ }});
+ const running=p.verifyDirectory(f.legacy,'co-05',files);await streams.count(2);assert.equal(prepared,1);assert.equal(sent,0);
+ streams.entries[1].release();streams.entries[0].release();assert.equal(await running,true);assert.equal(sent,1);assert.equal(drained,1);
+});
+
+test('district final mutation checks run after native warmup drainage',async t=>{
+ const f=fixture(t);f.writeLegacy();const file=path.join(f.legacy,'density.json');
+ const p=f.create({prepareCheckExisting:()=>({run:async()=>true,cancel:async()=>{const bytes=fs.readFileSync(file);bytes[0]^=1;fs.writeFileSync(file,bytes);}})});
+ assert.equal(await p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)),false);
+});
+
+for(const reason of ['hash failure','abort'])test(`district ${reason} drains hashes and unsent native warmup before returning`,{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const streams=controlledHashStreams(t,f.legacy,{holdAbort:0}),controller=new AbortController();let cancelled,finishCancel,sent=0,settled=false;
+ const cancelStarted=new Promise(resolve=>{cancelled=resolve;}),cancelDone=new Promise(resolve=>{finishCancel=resolve;});
+ const p=f.create({signal:controller.signal,prepareCheckExisting:()=>({run:async()=>{sent++;return true;},cancel:async()=>{assert.equal(streams.active,0);cancelled();await cancelDone;}})});
+ const running=p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)).then(value=>{settled=true;return {value};},error=>{settled=true;return {error};});
+ await streams.count(2);if(reason==='abort')controller.abort();else{const bad=fs.readFileSync(streams.entries[1].file);bad[0]^=1;streams.entries[1].release(bad);}
+ await streams.entries[0].startedDestroy;streams.entries[0].finishDestroy();await cancelStarted;
+ assert.equal(settled,false);assert.equal(sent,0);assert.equal(streams.entries.length,2);finishCancel();const result=await running;
+ if(reason==='abort')assert.ok(result.error);else assert.equal(result.value,false);assert.equal(f.checks.length,0);
+});
+
+test('two district hash readers overlap with bounded concurrency and preserve out-of-order results',{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const files=fixtureFiles(f),streams=controlledHashStreams(t,f.legacy,{autoAfter:2});let native=0;
+ const p=f.create({checkExisting:async()=>{native++;assert.equal(streams.active,0);return true;}}),running=p.verifyDirectory(f.legacy,'co-05',files);
+ await streams.count(2);assert.equal(streams.entries.length,2);assert.equal(streams.active,2);
+ streams.entries[1].release();await streams.count(3);assert.equal(streams.active<=2,true);streams.entries[0].release();
+ assert.equal(await running,true);assert.equal(streams.peak,2);assert.equal(streams.active,0);assert.equal(native,1);
+ assert.deepEqual(streams.entries.map(item=>path.basename(item.file)).sort(),files.map(item=>item.role).sort());
+});
+
+test('failed district hash cancels and drains its sibling before failure and schedules no more files',{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const streams=controlledHashStreams(t,f.legacy,{holdAbort:0}),p=f.create();let settled=false;
+ const running=p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)).then(value=>{settled=true;return value;});
+ await streams.count(2);const wrong=fs.readFileSync(streams.entries[1].file);wrong[0]^=1;streams.entries[1].release(wrong);
+ await streams.entries[0].startedDestroy;assert.equal(settled,false);assert.equal(streams.entries.length,2);assert.equal(f.checks.length,0);
+ streams.entries[0].finishDestroy();assert.equal(await running,false);assert.equal(streams.active,0);assert.equal(f.checks.length,0);
+});
+
+test('aborted district hash drains both readers and preserves abort outward semantics',{timeout:10000},async t=>{
+ const f=fixture(t);f.writeLegacy();const streams=controlledHashStreams(t,f.legacy,{holdAbort:0}),controller=new AbortController(),p=f.create({signal:controller.signal});let settled=false;
+ const running=p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)).then(value=>{settled=true;return {value};},error=>{settled=true;return {error};});
+ await streams.count(2);controller.abort();await streams.entries[0].startedDestroy;assert.equal(settled,false);assert.equal(streams.entries.length,2);assert.equal(f.checks.length,0);
+ streams.entries[0].finishDestroy();const result=await running;assert.ok(result.error);assert.equal(streams.active,0);assert.equal(f.checks.length,0);
+});
+
+for(const mutation of ['bytes','sidecar'])test(`parallel district verification still refuses ${mutation} changed during native reader`,async t=>{
+ const f=fixture(t);f.writeLegacy();const file=path.join(f.legacy,mutation==='bytes'?'density.json':'contacts.sqlite3');
+ const p=f.create({checkExisting:async()=>{if(mutation==='bytes'){const old=fs.statSync(file),bytes=fs.readFileSync(file);bytes[0]^=1;fs.writeFileSync(file,bytes);fs.utimesSync(file,old.atime,old.mtime);}else fs.writeFileSync(file+'-wal','fixture');return true;}});
+ assert.equal(await p.verifyDirectory(f.legacy,'co-05',fixtureFiles(f)),false);
+});
+
+test('parallel district hash failure leaves accepted active and high-water state unchanged',async t=>{
+ const f=fixture(t),p=f.create();const effective=await p.ensure(f.config,f.authorization),before=structuredClone(f.state);
+ const directory=runtimeRoots('terrier',f.profile,effective).data,file=path.join(directory,'density.json'),raw=fs.readFileSync(file);raw[0]^=1;fs.writeFileSync(file,raw);
+ await assert.rejects(p.ensure(effective,f.authorization),/cache failed verification/);assert.deepEqual(f.state,before);
+});
+
+function fixture(t,{snapshots=false}={}){
  const temporary=fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(),'github-district-fixture-')));t.after(()=>fs.rmSync(temporary,{recursive:true,force:true,maxRetries:5}));
  const profile=path.join(temporary,'profile'),root=path.join(profile,'packs'),legacy=path.join(temporary,'legacy');fs.mkdirSync(root,{recursive:true});fs.mkdirSync(legacy);
  const keys=crypto.generateKeyPairSync('ed25519'),raw=keys.publicKey.export({format:'der',type:'spki'}).subarray(-32).toString('base64'),publicKeys={fixture:raw};
@@ -22,18 +100,19 @@ function fixture(t){
   const tag='district-testsets-2026-10-21'+(sequence>1?'-r'+sequence:''),files=[],runtime_roles={},dataset_assets=[],data=new Map(),archives=new Map();
   for(const id of IDS){runtime_roles[id]={};const name='terrier-testsets-'+id+'-'+tag.slice('district-testsets-'.length)+'.zip',archive=Buffer.from('fixture archive '+id+' revision '+sequence);archives.set(id,archive);
    for(const role of ROLES){const bytes=role.endsWith('.sqlite3')?Buffer.concat([Buffer.from('SQLite format 3\0'),Buffer.from([0,0,1,1]),Buffer.from(id+role+sequence)]):Buffer.from(JSON.stringify({district:id,revision:sequence}));data.set(id+'/'+role,bytes);const item={path:id+'/data/'+role,district:id,bytes:bytes.length,roles:['runtime_dataset'],sha256:sha(bytes),asset:name};files.push(item);runtime_roles[id][role]={path:item.path,bytes:item.bytes,sha256:item.sha256,asset:name};}
-   dataset_assets.push({name,bytes:archive.length,sha256:sha(archive),members:6,raw_bytes:files.filter(item=>item.district===id).reduce((n,item)=>n+item.bytes,0),member_sha256_verified:true,zip_crc_verified:true,download_url:assetURL(tag,name)});
+   if(snapshots){const key={'co-05':'co-cd005','or-05':'or-cd005','ct-01':'ct-cd001'}[id]+'-111111111111';for(const filename of ['manifest.json','rows.json','geometry.json','streets.geojson','district.geojson','area_indices.json','adjacency.json','derived/v3_meta.json','derived/v3_meta.json.gz']){const role='snapshots/'+key+'/'+filename,bytes=json({district:id,filename,revision:sequence});data.set(id+'/'+role,bytes);files.push({path:id+'/data/'+role,district:id,bytes:bytes.length,roles:['snapshot_or_cache'],sha256:sha(bytes),asset:name});}}
+   dataset_assets.push({name,bytes:archive.length,sha256:sha(archive),members:files.filter(item=>item.district===id).length,raw_bytes:files.filter(item=>item.district===id).reduce((n,item)=>n+item.bytes,0),member_sha256_verified:true,zip_crc_verified:true,download_url:assetURL(tag,name)});
   }
-  const manifest=json({schema:'terrier-district-testsets-v1',repository:REPOSITORY,release_tag:tag,districts:[...IDS],unique_dataset_files:18,dataset_input_bytes:files.reduce((n,item)=>n+item.bytes,0),distribution:{kind:'data_prerelease',make_latest:false,desktop_update_tag:false},files,runtime_roles,dataset_assets});
+  const manifest=json({schema:'terrier-district-testsets-v1',repository:REPOSITORY,release_tag:tag,districts:[...IDS],unique_dataset_files:files.length,dataset_input_bytes:files.reduce((n,item)=>n+item.bytes,0),distribution:{kind:'data_prerelease',make_latest:false,desktop_update_tag:false},files,runtime_roles,dataset_assets});
   const body={schemaVersion:1,purpose:'terrier-public-district-data',appId:'terrier',repository:REPOSITORY,catalogSequence:sequence,releaseTag:tag,releaseCommit:String(sequence).repeat(40),manifest:{asset:'manifest.json',bytes:manifest.length,sha256:sha(manifest)}};
   const result={body,envelope:sign(body),manifest,data,archives};worlds.set(tag,result);return result;
  }
  world=build();const requests=[],downloads=[],checks=[],statuses=[];let saved=null,networkDown=false,corruptDownload=false,extractFails=false,extractCount=0,tagRef=null;const tagObjects=new Map();
  const store={read:async()=>structuredClone(saved),write:async value=>{saved=structuredClone(value);}};
- const transport={read:async(url,options)=>{requests.push({url,options});if(networkDown)throw Object.assign(new Error('fixture network unavailable bearer=SENTINEL'),{code:'ENETUNREACH'});if(url.endsWith('/commits/main'))return json({sha:'a'.repeat(40)});if(url.includes('/contents/')){const bytes=json(world.envelope);return json({type:'file',encoding:'base64',path:POINTER_PATH,size:bytes.length,content:bytes.toString('base64')});}if(url.includes('/git/ref/tags/'))return json(tagRef?tagRef(world):{ref:'refs/tags/'+world.body.releaseTag,object:{type:'commit',sha:world.body.releaseCommit}});if(url.includes('/git/tags/')){const entry=tagObjects.get(url.slice(url.indexOf('/git/tags/')+'/git/tags/'.length));assert.ok(entry,url);return json(typeof entry==='function'?entry(world):entry);}const target=[...worlds.values()].find(item=>url===assetURL(item.body.releaseTag,'manifest.json'));assert.ok(target,url);return target.manifest;},download:async(url,target,options)=>{downloads.push({url,options});const item=[...worlds.values()].find(item=>url.includes('/'+item.body.releaseTag+'/')),id=IDS.find(id=>url.includes('-'+id+'-'));assert.ok(item&&id);const bytes=corruptDownload?Buffer.alloc(item.archives.get(id).length):item.archives.get(id);await fsp.writeFile(target,bytes,{flag:'wx'});options.onProgress(bytes.length);}};
+ const transport={read:async(url,options)=>{requests.push({url,options});if(networkDown)throw Object.assign(new Error('fixture network unavailable bearer=SENTINEL'),{code:'ENETUNREACH'});if(url==='https://raw.githubusercontent.com/'+REPOSITORY+'/main/'+POINTER_PATH)return json(world.envelope);if(url.includes('/releases/tags/'))return json({tag_name:world.body.releaseTag,draft:false,prerelease:true});if(url.endsWith('/commits/main'))return json({sha:'a'.repeat(40)});if(url.includes('/contents/')){const bytes=json(world.envelope);return json({type:'file',encoding:'base64',path:POINTER_PATH,size:bytes.length,content:bytes.toString('base64')});}if(url.includes('/git/ref/tags/'))return json(tagRef?tagRef(world):{ref:'refs/tags/'+world.body.releaseTag,object:{type:'commit',sha:world.body.releaseCommit}});if(url.includes('/git/tags/')){const entry=tagObjects.get(url.slice(url.indexOf('/git/tags/')+'/git/tags/'.length));assert.ok(entry,url);return json(typeof entry==='function'?entry(world):entry);}const target=[...worlds.values()].find(item=>url===assetURL(item.body.releaseTag,'manifest.json'));assert.ok(target,url);return target.manifest;},download:async(url,target,options)=>{downloads.push({url,options});const item=[...worlds.values()].find(item=>url.includes('/'+item.body.releaseTag+'/')),id=IDS.find(id=>url.includes('-'+id+'-'));assert.ok(item&&id);const bytes=corruptDownload?Buffer.alloc(item.archives.get(id).length):item.archives.get(id);await fsp.writeFile(target,bytes,{flag:'wx'});options.onProgress(bytes.length);}};
  const checkExisting=async(directory,district)=>{checks.push({directory,district});return true;};
- const extract=async({archive,destination,district,files})=>{extractCount++;assert.ok(archive.endsWith('.zip'));await fsp.mkdir(destination);if(extractFails){await fsp.writeFile(path.join(destination,'partial'),'fixture');throw new Error('fixture extraction failure');}const item=[...worlds.values()].find(item=>files[0].sha256===sha(item.data.get(district+'/'+files[0].role)));assert.ok(item);for(const file of files)await fsp.writeFile(path.join(destination,file.role),item.data.get(district+'/'+file.role),{flag:'wx'});return {ok:true,district,files:files.map(({role,bytes,sha256})=>({role,bytes,sha256})),sourceMetadataAccepted:true};};
- const create=(overrides={})=>new GitHubDistricts({profile,root,publicKeys,store,transport,checkExisting,extract,onStatus:status=>statuses.push(status),statfs:async()=>({bavail:100000000000,bsize:1}),...overrides});
+ const extract=async({archive,destination,district,files})=>{extractCount++;assert.ok(archive.endsWith('.zip'));await fsp.mkdir(destination);if(extractFails){await fsp.writeFile(path.join(destination,'partial'),'fixture');throw new Error('fixture extraction failure');}const item=[...worlds.values()].find(item=>files[0].sha256===sha(item.data.get(district+'/'+files[0].role)));assert.ok(item);for(const file of files){await fsp.mkdir(path.dirname(path.join(destination,file.role)),{recursive:true});await fsp.writeFile(path.join(destination,file.role),item.data.get(district+'/'+file.role),{flag:'wx'});}return {ok:true,district,files:files.map(({role,bytes,sha256})=>({role,bytes,sha256})),sourceMetadataAccepted:true};};
+ const create=(overrides={})=>{const {fixtureProvider=GitHubDistricts,...options}=overrides;return new fixtureProvider({profile,root,publicKeys,store,transport,checkExisting,extract,onStatus:status=>statuses.push(status),statfs:async()=>({bavail:100000000000,bsize:1}),...options});};
  function writeLegacy(item=world){for(const id of IDS){const directory=id==='co-05'?legacy:path.join(legacy,id);fs.mkdirSync(directory,{recursive:true});for(const role of ROLES)fs.writeFileSync(path.join(directory,role),item.data.get(id+'/'+role));fs.writeFileSync(path.join(directory,'accounts.sqlite3'),'fixture account remains local');fs.writeFileSync(path.join(directory,'.secret'),'fixture secret remains local');}}
  return {temporary,profile,root,legacy,config,authorization,publicKeys,sign,build,create,writeLegacy,requests,downloads,checks,statuses,transport,get world(){return world;},set world(value){world=value;},get state(){return saved;},set state(value){saved=value;},set networkDown(value){networkDown=value;},set corruptDownload(value){corruptDownload=value;},set extractFails(value){extractFails=value;},set tagRef(value){tagRef=value;},tagObjects,get extractCount(){return extractCount;}};
 }
@@ -57,12 +136,109 @@ test('recipient, revoked or forged owner contexts never make GitHub requests',as
  for(const authorization of [null,{...f.authorization,owner:null},{...f.authorization,accepted:{...f.authorization.accepted,revoked:true}},{...f.authorization,principal:{...f.authorization.principal,mode:'recipient'}},{...f.authorization,principal:{...f.authorization.principal,deviceId:'other'}}]){assert.equal(await p.ensure(f.config,authorization),f.config);assert.equal(await p.discover(f.config,authorization),null);}
  assert.equal(f.requests.length,0);assert.equal(f.state,null);assert.equal(p.info(f.config),null);
 });
+
+function standaloneAuthorization(district='co-05'){
+ return {mode:'standalone',identity:{schemaVersion:1,appId:'terrier',deviceId:crypto.randomUUID(),accountId:crypto.randomUUID(),accountIdentity:'local_owner'},session:null,principal:{mode:'standalone',districtId:district}};
+}
+
+test('new native-bound district preparation stages verified data and retains the previous active until runtime acceptance',async t=>{
+ const f=fixture(t,{snapshots:true}),configuration={dataDirectory:f.legacy,district:'co-05'},authorization=standaloneAuthorization(),provider=f.create({deferActivation:true});
+ const result=await provider.ensure(configuration,authorization);
+ assert.equal(f.state.active['co-05'],undefined);assert.ok(f.state.staged['co-05']);assert.equal(provider.verifiedDirectories.size,0,'Handles transferred to exact returned object');
+ assert.equal(await require('../district-runtime-input.cjs').discardDistrictConfiguration(structuredClone(result)),false);
+ assert.equal(await require('../district-runtime-input.cjs').discardDistrictConfiguration(result),true);
+ assert.equal(f.state.active['co-05'],undefined);assert.ok(f.state.staged['co-05']);
+});
+
+test('waiting native candidate cannot roll protected active state back after a different process activates newer data',async t=>{
+ const {createRequire}=require('node:module'),vm=require('node:vm'),file=path.resolve(__dirname,'../github-districts.cjs'),real=createRequire(file),module={exports:{}};let binding;
+ vm.runInNewContext(fs.readFileSync(file,'utf8'),{module,require:name=>name==='./district-runtime-input.cjs'?{bindDistrictConfiguration:(configuration,options)=>{binding=options;return configuration;}}:real(name),Buffer,URL,process,structuredClone,AbortController,setTimeout,clearTimeout},{filename:file});
+ const f=fixture(t,{snapshots:true}),configuration={dataDirectory:f.legacy,district:'co-05'},authorization=standaloneAuthorization();
+ const old=f.create({deferActivation:true,fixtureProvider:module.exports.GitHubDistricts});await old.ensure(configuration,authorization);
+ try{
+  f.world=f.build(2);await f.create().ensure(configuration,authorization);const before=structuredClone(f.state);
+  assert.equal(f.state.active['co-05'].catalogSequence,2);assert.equal(f.state.staged['co-05'],undefined);
+  await assert.rejects(binding.verify(),{code:'context'});await assert.rejects(binding.commit(),{code:'context'});assert.deepEqual(f.state,before);
+ }finally{await binding.close();}
+});
+test('fresh standalone uses signed public data with separate local accounts and no server grant',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),configuration={dataDirectory:f.legacy,district:'co-05'},provider=f.create();
+ const result=await provider.ensure(configuration,authorization);
+ assert.ok(result.standaloneGitHubData);assert.equal(result.terrierLegacy,undefined);assert.equal(result.ownerGitHubData,undefined);
+ assert.equal(f.state.identity.mode,'standalone');assert.equal(f.state.identity.accountId,authorization.identity.accountId);assert.equal(f.state.identity.serverId,undefined);
+ assert.equal(f.downloads.length,1);assert.equal(f.extractCount,1);
+ const roots=prepareRuntimeRoots('terrier',f.profile,result);assert.equal(roots.standaloneDistrictData,true);assert.equal(roots.legacyOwner,undefined);assert.notEqual(roots.data,roots.state);
+ const accounts=path.join(roots.state,'accounts.sqlite3');fs.writeFileSync(accounts,'existing local account fixture');
+ f.networkDown=true;const offline=await provider.ensure(configuration,authorization);assert.deepEqual(offline,result);assert.equal(fs.readFileSync(accounts,'utf8'),'existing local account fixture');
+ assert.equal(f.statuses.at(-1).phase,'offline');assert.equal(f.downloads.length,1);
+ const switched=districtConfiguration(result,'or-05',IDS);assert.equal(switched.standaloneGitHubData,undefined);assert.equal(switched.district,'or-05');
+});
+test('standalone public data refuses wrong district, account binding, and fake grants before network access',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),configuration={dataDirectory:f.legacy,district:'co-05'},provider=f.create();
+ for(const denied of [{...authorization,principal:{mode:'standalone',districtId:'or-05'}},{...authorization,identity:{...authorization.identity,appId:'melange'}},{...authorization,identity:{...authorization.identity,accountId:'invalid'}},{...authorization,accepted:{grant:{}}}])assert.equal(await provider.ensure(configuration,denied),configuration);
+ assert.equal(f.requests.length,0);assert.equal(f.state,null);
+ await provider.ensure(configuration,authorization);
+ await assert.rejects(provider.ensure(configuration,{...authorization,identity:{...authorization.identity,accountId:crypto.randomUUID()}}),/another owner/);
+});
+test('standalone journal migration retains signed high-water and leaves managed state unchanged',async t=>{
+ const f=fixture(t);f.world=f.build(2);await f.create().ensure(f.config,f.authorization);const previous=structuredClone(f.state),original=JSON.stringify(previous);let local=null;
+ const provider=f.create({store:{read:async()=>structuredClone(local),write:async value=>{local=structuredClone(value);}},previousStore:{read:async()=>structuredClone(previous)}});
+ f.world=f.build(1);const configuration={dataDirectory:f.legacy,district:'co-05'},authorization=standaloneAuthorization();
+ await assert.rejects(provider.ensure(configuration,authorization),/rollback/);
+ assert.equal(local.latest,previous.latest);assert.deepEqual(local.active,{});assert.deepEqual(local.staged,{});assert.equal(local.identity.mode,'standalone');
+ assert.equal(JSON.stringify(previous),original);assert.deepEqual(f.state,previous);
+ f.world=f.build(2);const downloads=f.downloads.length;await provider.ensure(configuration,authorization);assert.equal(f.downloads.length,downloads);
+});
+test('standalone district switching matches the local account independently of selected district',()=>{
+ const {approvalIdentity}=require('../district-transition.cjs'),first=standaloneAuthorization();
+ assert.equal(approvalIdentity(first),approvalIdentity({...first,principal:{mode:'standalone',districtId:'or-05'}}));
+ assert.notEqual(approvalIdentity(first),approvalIdentity({...first,identity:{...first.identity,accountId:crypto.randomUUID()}}));
+ assert.throws(()=>approvalIdentity({...first,accepted:{grant:{}}}),/local account/);
+});
+test('district steady checks use only the signed CDN pointer and reuse protected old-format verified bindings',async t=>{
+ const f=fixture(t),p=f.create();await p.ensure(f.config,f.authorization);
+ assert.equal(f.requests.filter(row=>row.url.startsWith('https://api.github.com/')).length,2);
+ // Older protected journals stored the reviewed main commit here rather than
+ // the release commit; the signed pointer/manifest still hold exact bindings.
+ const old=structuredClone(f.state);old.catalogues[old.latest].commit='a'.repeat(40);f.state=old;
+ f.requests.length=0;await f.create().ensure(f.config,f.authorization);assert.deepEqual(f.requests.map(row=>row.url),['https://raw.githubusercontent.com/'+REPOSITORY+'/main/'+POINTER_PATH]);
+ f.world=f.build(2);f.requests.length=0;await p.discover(f.config,f.authorization,{stageOnly:true});assert.equal(f.requests.filter(row=>row.url.startsWith('https://api.github.com/')).length,2,'A new signed pointer must check public release and tag again');
+});
+test('district pointer fallback uses only the same fixed API raw document after typed network loss',async t=>{
+ const f=fixture(t),p=f.create(),original=f.transport.read,api='https://api.github.com/repos/'+REPOSITORY+'/contents/'+POINTER_PATH+'?ref=main',raw='https://raw.githubusercontent.com/'+REPOSITORY+'/main/'+POINTER_PATH,calls=[];
+ f.transport.read=async(url,options)=>{calls.push({url,options});if(url===raw)throw require('../network-transport.cjs').networkFailure('unreachable','fixture raw host unavailable');if(url===api){assert.equal(options.apiRaw,true);assert.equal(options.maxBytes,16384);return json(f.world.envelope);}return original(url,options);};
+ const checked=await p.discoverCatalogue(await p.readState(f.authorization));assert.equal(checked.pointer.value.catalogSequence,1);assert.deepEqual(calls.slice(0,2).map(row=>row.url),[raw,api]);assert.equal(f.state.latest,checked.pointer.digest);
+ const accepted=structuredClone(f.state);f.world={...f.world,envelope:{...f.world.envelope,signature:Buffer.alloc(64).toString('base64')}};await assert.rejects(p.discoverCatalogue(await p.readState(f.authorization)),/signature/);assert.deepEqual(f.state,accepted);
+});
+
+test('district TLS, schema, signature, HTTP refusal and unbranded timeout never trigger API pointer fallback',async t=>{
+ for(const failure of [new Error('net::ERR_CERT_AUTHORITY_INVALID'),new Error('GitHub release unavailable (404)'),Object.assign(new Error('unbranded'),{reason:'timeout'}),'schema','signature']){
+  const f=fixture(t),p=f.create(),original=f.transport.read;let apiCalls=0;
+  f.transport.read=async(url,options)=>{if(url.includes('/contents/'))apiCalls++;if(url.startsWith('https://raw.githubusercontent.com/')){if(failure==='schema')return json({wrong:true});if(failure==='signature')return json({...f.world.envelope,signature:Buffer.alloc(64).toString('base64')});throw failure;}return original(url,options);};
+  await assert.rejects(p.discoverCatalogue(await p.readState(f.authorization)));assert.equal(apiCalls,0);assert.equal(f.state,null);
+ }
+});
+
+test('API pointer quota does not block a recovered raw host and never fabricates accepted data',async t=>{
+ const f=fixture(t),p=f.create({now:()=>1700000000000,random:()=>0}),original=f.transport.read;let rawDown=true,apiCalls=0;
+ f.transport.read=async(url,options)=>{if(url.startsWith('https://raw.githubusercontent.com/')&&rawDown)throw require('../network-transport.cjs').networkFailure('timeout','fixture raw timeout');if(url.includes('/contents/')){apiCalls++;throw Object.assign(new Error('fixture API quota'),{githubRateLimit:true,retryAfter:'3600'});}return original(url,options);};
+ await assert.rejects(p.discoverCatalogue(await p.readState(f.authorization)));assert.equal(f.state,null);await assert.rejects(p.discoverCatalogue(await p.readState(f.authorization)));assert.equal(apiCalls,1);
+ rawDown=false;const accepted=await p.readState(f.authorization);const pointer=protocol.pointer(f.world.envelope,f.publicKeys);accepted.latest=pointer.digest;accepted.catalogues[pointer.digest]={envelope:f.world.envelope,manifestBase64:f.world.manifest.toString('base64'),commit:f.world.body.releaseCommit};f.state=accepted;
+ assert.equal((await p.discoverCatalogue(await p.readState(f.authorization))).pointer.digest,pointer.digest);assert.equal(apiCalls,1);
+});
+
+test('new district pointers refuse draft, non-data-prerelease and wrong release identities before committing',async t=>{
+ for(const change of [{draft:true},{prerelease:false},{tag_name:'district-testsets-1999-01-01'}]){
+  const f=fixture(t),read=f.transport.read;f.transport.read=async(url,options)=>url.includes('/releases/tags/')?Buffer.from(JSON.stringify({tag_name:f.world.body.releaseTag,draft:false,prerelease:true,...change})):read(url,options);
+  await assert.rejects(f.create().ensure(f.config,f.authorization),/public data prerelease/);assert.equal(f.state,null);assert.equal(f.downloads.length,0);
+ }
+});
 test('identical legacy runtime bytes are reused with zero archive downloads and native owner roots unchanged',async t=>{
  const f=fixture(t);f.writeLegacy();const before=ownerBindingFingerprint('terrier',f.profile,f.config,f.authorization.accepted.grant),p=f.create(),result=await p.ensure(f.config,f.authorization);
  assert.deepEqual(result,f.config);assert.equal(f.downloads.length,0);assert.equal(f.extractCount,0);assert.equal(f.checks.length,1);assert.equal(p.info(f.config).phase,'ready');assert.equal(f.state.active['co-05'].source,'legacy');assert.equal(ownerBindingFingerprint('terrier',f.profile,result,f.authorization.accepted.grant),before);
  const text=JSON.stringify(p.info(f.config));for(const secret of [f.legacy,f.profile,'fixture-owner','grantId','SENTINEL'])assert.ok(!text.includes(secret));
  for(const request of [...f.requests,...f.downloads])for(const key of ['token','authorization','headers','grant','deviceId','owner'])assert.equal(Object.hasOwn(request.options,key),false);
- assert.ok(f.requests.some(request=>request.url.endsWith('?ref='+'a'.repeat(40))));
+ assert.ok(f.requests.some(request=>request.url==='https://raw.githubusercontent.com/'+REPOSITORY+'/main/'+POINTER_PATH));assert.equal(f.requests.some(request=>request.url.includes('/commits/main')||request.url.includes('/contents/')),false);
 });
 test('a changed byte with preserved size and mtime forces selected-only verified download, preserving owner state',async t=>{
  const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);
@@ -108,10 +284,31 @@ test('offline reuse revalidates exact bytes; signature/rollback failures never m
  f.networkDown=false;const accepted=structuredClone(f.state);f.world={...f.world,envelope:{...f.world.envelope,signature:Buffer.alloc(64).toString('base64')}};await assert.rejects(()=>p.ensure(f.config,f.authorization),/signature/);assert.equal(p.info(f.config).phase,'error');assert.deepEqual(f.state,accepted);
  f.networkDown=true;fs.writeFileSync(path.join(f.legacy,'density.json'),'invalid');await assert.rejects(()=>p.ensure(f.config,f.authorization));assert.equal(p.info(f.config).phase,'error');
 });
+
+test('district server cooldown spans manual/background checks and revalidates cached bytes before offline use',async t=>{
+ const f=fixture(t);f.writeLegacy();let now=1700000000000,requests=0,limited=true;
+ const p=f.create({now:()=>now,random:()=>0});await p.ensure(f.config,f.authorization);const original=f.transport.read;
+ f.transport.read=async(...args)=>{requests++;if(limited)throw Object.assign(new Error('fixture quota'),{githubRateLimit:true,retryAfter:'120'});return original(...args);};
+ assert.equal((await p.discover(f.config,f.authorization)).phase,'offline');assert.equal(requests,1);const checks=f.checks.length;
+ assert.deepEqual(await p.ensure(f.config,f.authorization),f.config);assert.equal(requests,1);assert.ok(f.checks.length>checks,'Cooldown does not skip native/cache revalidation');
+ const raw=fs.readFileSync(path.join(f.legacy,'density.json'));fs.writeFileSync(path.join(f.legacy,'density.json'),'invalid');await assert.rejects(p.ensure(f.config,f.authorization));assert.equal(p.info(f.config).phase,'error');assert.equal(requests,1);fs.writeFileSync(path.join(f.legacy,'density.json'),raw);
+ now+=120000;limited=false;assert.equal((await p.discover(f.config,f.authorization)).phase,'ready');assert.equal(requests,2,'The fixed signed pointer resumes at the advertised deadline without REST polling');
+});
+
+test('district quota cannot authorize an unaccepted cache and download limits preserve the previous active revision',async t=>{
+ const f=fixture(t);f.writeLegacy();let now=1700000000000;
+ const p=f.create({now:()=>now,random:()=>0}),original=f.transport.read;
+ f.transport.read=async()=>{throw Object.assign(new Error('fixture quota'),{githubRateLimit:true,resetAt:'1700000120'});};
+ await assert.rejects(p.ensure(f.config,f.authorization));assert.equal(f.state,null,'No accepted state is synthesized');
+ now+=120000;f.transport.read=original;await p.ensure(f.config,f.authorization);const active=structuredClone(f.state.active);f.world=f.build(2);
+ f.transport.download=async()=>{throw Object.assign(new Error('fixture download quota'),{githubRateLimit:true,retryAfter:'300'});};
+ assert.deepEqual(await p.ensure(f.config,f.authorization),f.config);assert.deepEqual(f.state.active,active);assert.equal(p.info(f.config).phase,'offline');
+ const requests=f.requests.length;await p.discover(f.config,f.authorization);assert.equal(f.requests.length,requests+1,'Asset-origin quota permits a recovered raw pointer check while retaining the download cooldown');assert.deepEqual(f.state.active,active);
+});
 test('cached catalogue/protected owner identity tamper and cache junctions are refused',async t=>{
  const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const accepted=structuredClone(f.state);
  f.state={...f.state,identity:{...f.state.identity,deviceId:'wrong'}};await assert.rejects(()=>p.ensure(f.config,f.authorization),/another owner/);f.state=accepted;
- const root=path.join(f.root,'github-districts','datasets'),outside=path.join(f.temporary,'outside');fs.mkdirSync(outside);fs.rmSync(root,{recursive:true});fs.symlinkSync(outside,root,process.platform==='win32'?'junction':'dir');await assert.rejects(()=>p.ensure(f.config,f.authorization),/Unsafe/);assert.deepEqual(fs.readdirSync(outside),[]);
+ const root=path.join(f.root,'github-districts','datasets-v2'),outside=path.join(f.temporary,'outside');fs.mkdirSync(outside);fs.rmSync(root,{recursive:true});fs.symlinkSync(outside,root,process.platform==='win32'?'junction':'dir');await assert.rejects(()=>p.ensure(f.config,f.authorization),/Unsafe/);assert.deepEqual(fs.readdirSync(outside),[]);
 });
 test('a network interruption preparing a newer revision reuses only the prior verified active data',async t=>{
  const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const active=structuredClone(f.state.active);f.world=f.build(2);f.transport.download=async()=>{throw Object.assign(new Error('fixture disconnected'),{code:'ECONNRESET'});};
@@ -143,7 +340,7 @@ test('real public transport sends public GET headers only, bounds bytes and refu
   assert.equal((await publicTransport.read('https://api.github.com/repos/'+REPOSITORY+'/commits/main',{maxBytes:4})).toString(),'safe');
   for(const request of requests){assert.equal(request.options.method,'GET');assert.equal(request.options.rejectUnauthorized,true);assert.equal(Object.keys(request.options.headers).some(key=>['authorization','cookie','x-desktop-token','x-device-id'].includes(key.toLowerCase())),false);assert.ok(!JSON.stringify(request).includes('fixture-owner'));}
   oversize=true;await assert.rejects(()=>publicTransport.read('https://api.github.com/repos/'+REPOSITORY+'/commits/main',{maxBytes:4}),/limit/);
-  oversize=false;redirect=true;await assert.rejects(()=>publicTransport.read(assetURL('district-testsets-2026-10-21','manifest.json'),{maxBytes:10,asset:true}),/URL refused/);
+  oversize=false;redirect=true;await assert.rejects(()=>publicTransport.read(assetURL('district-testsets-2026-10-21','manifest.json'),{maxBytes:10,asset:true}),error=>require('../github-source.cjs').isResponseIntegrity(error)&&error.message==='GitHub redirect destination refused'&&/URL refused/.test(error.cause?.message));
  }finally{https.request=original;}
 });
 // Release tags may be lightweight (ref -> commit) or annotated (ref -> tag object(s) -> commit); peeling is bounded.
@@ -180,4 +377,137 @@ test('a tag object whose sha differs from the requested sha, or a mismatched ref
  const f=fixture(t);f.writeLegacy();const p=f.create();await p.ensure(f.config,f.authorization);const accepted=structuredClone(f.state);f.world=f.build(2);
  annotate(f,2,{mismatch:1});await assert.rejects(()=>p.ensure(f.config,f.authorization),/GitHub district release commit changed/);assert.deepEqual(f.state,accepted);assert.equal(f.downloads.length,0);
  f.tagRef=world=>({ref:'refs/tags/other-'+world.body.releaseTag,object:{type:'commit',sha:world.body.releaseCommit}});await assert.rejects(()=>p.ensure(f.config,f.authorization),/GitHub district release commit changed/);assert.deepEqual(f.state,accepted);assert.equal(f.downloads.length,0);
+});
+
+
+test('signed snapshot files are preserved in the schema2 cache without replacing old six-file caches',async t=>{
+ const f=fixture(t,{snapshots:true}),old=path.join(f.root,'github-districts','datasets','a'.repeat(64),'co-05');fs.mkdirSync(old,{recursive:true});fs.writeFileSync(path.join(old,'contacts.sqlite3'),'existing six-file cache');
+ const p=f.create(),authorization=standaloneAuthorization(),result=await p.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ assert.equal(result.standaloneGitHubData.schemaVersion,2);
+ const roots=prepareRuntimeRoots('terrier',f.profile,result);assert.ok(roots.data.includes('datasets-v2'));
+ assert.ok(fs.existsSync(path.join(roots.data,'snapshots','co-cd005-111111111111','rows.json')));
+ assert.ok(fs.existsSync(path.join(roots.data,'snapshots','co-cd005-111111111111','derived','v3_meta.json.gz')));
+ assert.equal(fs.readFileSync(path.join(old,'contacts.sqlite3'),'utf8'),'existing six-file cache');
+ const count=f.downloads.length;await p.ensure(result,authorization);assert.equal(f.downloads.length,count);
+});
+
+test('a changed signed snapshot byte fails verification without touching user state',async t=>{
+ const f=fixture(t,{snapshots:true}),authorization=standaloneAuthorization(),p=f.create(),result=await p.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ const roots=prepareRuntimeRoots('terrier',f.profile,result),file=path.join(roots.data,'snapshots','co-cd005-111111111111','rows.json');
+ fs.writeFileSync(file,Buffer.alloc(fs.statSync(file).size));const saved=JSON.stringify(f.state);
+ await assert.rejects(p.ensure(result,authorization),/failed verification/);
+ assert.equal(JSON.stringify(f.state),saved);assert.equal(f.downloads.length,1);
+});
+
+
+test('managed snapshot caches reject unsigned extra derived files',async t=>{
+ const f=fixture(t,{snapshots:true}),authorization=standaloneAuthorization(),p=f.create(),result=await p.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ const roots=prepareRuntimeRoots('terrier',f.profile,result),file=path.join(roots.data,'snapshots','co-cd005-111111111111','derived','v3_unlisted.json');
+ fs.writeFileSync(file,'{"unlisted":true}');
+ await assert.rejects(p.ensure(result,authorization),/failed verification/);
+ assert.equal(fs.readFileSync(file,'utf8'),'{"unlisted":true}');
+});
+
+test('same-district upgrades retain signed inventories for the remaining compressed archive after unpacked caches retire',async t=>{
+ const f=fixture(t,{snapshots:true}),authorization=standaloneAuthorization(),configuration={dataDirectory:f.legacy,district:'co-05'},first=f.world;
+ const initial=await f.create().ensure(configuration,authorization),previous=structuredClone(f.state),oldKey=previous.latest,oldHash=initial.standaloneGitHubData.catalogueSha256;
+ const oldV2=path.join(f.root,'github-districts','datasets-v2',oldHash,'co-05'),oldV1=path.join(f.root,'github-districts','datasets',oldHash,'co-05');
+ fs.mkdirSync(oldV1,{recursive:true});for(const role of ROLES)fs.writeFileSync(path.join(oldV1,role),first.data.get('co-05/'+role));
+ f.world=f.build(2);const upgraded=await f.create().ensure(initial,authorization),current=structuredClone(f.state);
+ assert.ok(current.catalogues[oldKey]);assert.notEqual(current.latest,oldKey);assert.ok(fs.existsSync(oldV1)&&fs.existsSync(oldV2));
+ const restarted=f.create();await restarted.initialize();assert.ok((await restarted.readState(authorization)).catalogues[oldKey]);
+ const result=await restarted.retireInactive(upgraded,authorization);
+ assert.ok(result.retired.includes(oldV1)&&result.retired.includes(oldV2));assert.ok(f.state.catalogues[oldKey]);
+ assert.equal(f.state.latest,current.latest);assert.deepEqual(f.state.active,current.active);assert.deepEqual(f.state.staged,current.staged);
+ assert.ok(fs.existsSync(path.join(f.root,'github-districts','datasets-v2',upgraded.standaloneGitHubData.catalogueSha256,'co-05')));
+ f.world=first;await assert.rejects(f.create().ensure(upgraded,authorization),/rollback/);
+});
+
+test('retiring an older live district preserves staged newer data for a fresh zero-download start, then retires the old generation',async t=>{
+ const f=fixture(t,{snapshots:true}),authorization=standaloneAuthorization(),provider=f.create(),first=f.world;
+ const initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),oldDirectory=provider.directory(initial.standaloneGitHubData.catalogueSha256,'co-05'),oldArchive=path.join(f.root,'github-districts/downloads',sha(first.archives.get('co-05'))+'.zip');
+ f.world=f.build(2);await provider.discover(initial,authorization);const staged=structuredClone(f.state),newDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05'),newArchive=path.join(f.root,'github-districts/downloads',sha(f.world.archives.get('co-05'))+'.zip'),downloads=f.downloads.length;
+ assert.equal(downloads,2);await provider.retireInactive(initial,authorization);assert.deepEqual(f.state,staged);
+ for(const target of [oldDirectory,newDirectory,oldArchive,newArchive])assert.ok(fs.existsSync(target),target);
+ const restarted=f.create(),upgraded=await restarted.ensure(initial,authorization);assert.equal(f.downloads.length,downloads);assert.equal(f.state.active['co-05'].catalogSequence,2);assert.equal(f.state.staged['co-05'],undefined);
+ const retired=await restarted.retireInactive(upgraded,authorization);assert.ok(retired.retired.includes(oldDirectory));for(const target of [oldArchive,newDirectory,newArchive])assert.ok(fs.existsSync(target),target);
+ const stream=fs.createReadStream;t.mock.method(fs,'createReadStream',function(file,...args){assert.ok(!file.endsWith('.zip'),'Journal authority preservation must not rehash full archives');return stream.call(this,file,...args);});await restarted.commit(structuredClone(f.state));assert.ok(Object.values(f.state.catalogues).some(item=>item.envelope.payload===first.envelope.payload));
+ f.world=first;await assert.rejects(restarted.ensure(upgraded,authorization),/rollback/);assert.equal(f.downloads.length,downloads);
+});
+
+test('retirement retains only the live and latest staged generations after repeated newer staging',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),activeDirectory=provider.directory(f.state.active['co-05'].manifestSha256,'co-05');
+ f.world=f.build(2);await provider.discover(initial,authorization);const supersededKey=f.state.latest,supersededDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05'),supersededArchive=path.join(f.root,'github-districts/downloads',sha(f.world.archives.get('co-05'))+'.zip');
+ f.world=f.build(3);await provider.discover(initial,authorization);const stagedDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05');
+ const result=await provider.retireInactive(initial,authorization);for(const target of [supersededDirectory,supersededArchive])assert.ok(result.retired.includes(target),target);for(const target of [activeDirectory,stagedDirectory])assert.ok(fs.existsSync(target),target);
+ assert.equal(f.state.catalogues[supersededKey],undefined);assert.equal(Object.keys(f.state.catalogues).length,2);assert.equal(f.state.active['co-05'].catalogSequence,1);assert.equal(f.state.staged['co-05'].catalogSequence,3);
+});
+
+test('switching to another public district retires both unpacked generations and keeps its recent compressed download',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),oldDirectory=provider.directory(f.state.active['co-05'].manifestSha256,'co-05');
+ f.world=f.build(2);await provider.discover(initial,authorization);const stagedDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05'),stagedArchive=path.join(f.root,'github-districts/downloads',sha(f.world.archives.get('co-05'))+'.zip');
+ const nextAuthorization={...authorization,principal:{mode:'standalone',districtId:'or-05'}},switched=await provider.ensure(districtConfiguration(initial,'or-05',IDS),nextAuthorization);
+ const result=await provider.retireInactive(switched,nextAuthorization);for(const target of [oldDirectory,stagedDirectory])assert.ok(result.retired.includes(target),target);assert.ok(fs.existsSync(stagedArchive));assert.ok(fs.existsSync(provider.directory(switched.standaloneGitHubData.catalogueSha256,'or-05')));
+});
+
+for(const mutation of ['owner','root','active descriptor','staged manifest'])test(`retirement refuses ${mutation} mismatch before removing active or staged data`,async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ f.world=f.build(2);await provider.discover(initial,authorization);const activeDirectory=provider.directory(f.state.active['co-05'].manifestSha256,'co-05'),stagedDirectory=provider.directory(f.state.staged['co-05'].manifestSha256,'co-05');
+ const selected=structuredClone(initial),approval=structuredClone(authorization);
+ if(mutation==='owner')approval.identity.accountId=crypto.randomUUID();
+ if(mutation==='root')selected.standaloneGitHubData.cacheRoot=path.join(f.root,'other');
+ if(mutation==='active descriptor')selected.standaloneGitHubData.catalogueSha256=f.state.staged['co-05'].manifestSha256;
+ if(mutation==='staged manifest')f.state={...f.state,staged:{...f.state.staged,'co-05':{...f.state.staged['co-05'],manifestSha256:'c'.repeat(64)}}};
+ const before=structuredClone(f.state);await assert.rejects(provider.retireInactive(selected,approval));assert.deepEqual(f.state,before);assert.ok(fs.existsSync(activeDirectory));assert.ok(fs.existsSync(stagedDirectory));assert.equal(f.downloads.length,2);
+});
+
+test('retention never turns changed staged bytes into accepted startup data',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ f.world=f.build(2);await provider.discover(initial,authorization);const file=path.join(provider.directory(f.state.staged['co-05'].manifestSha256,'co-05'),'scores.sqlite3'),bytes=fs.readFileSync(file);bytes[bytes.length-1]^=1;fs.writeFileSync(file,bytes);const before=structuredClone(f.state);
+ await provider.retireInactive(initial,authorization);await assert.rejects(f.create().ensure(initial,authorization),/failed verification/);assert.deepEqual(f.state,before);assert.deepEqual(fs.readFileSync(file),bytes);assert.equal(f.downloads.length,2);
+});
+
+test('recent compressed district downloads survive repeated switches while unpacked caches retire and reused archives are rehashed',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create();let current=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),archiveReads=0;
+ const stream=fs.createReadStream;t.mock.method(fs,'createReadStream',function(file,...args){if(file.endsWith('.zip'))archiveReads++;return stream.call(this,file,...args);});
+ for(const [index,district]of ['or-05','co-05','or-05','co-05'].entries()){
+  const previous=provider.directory(current.standaloneGitHubData.catalogueSha256,current.district),approval={...authorization,principal:{mode:'standalone',districtId:district}},reads=archiveReads;
+  current=await provider.ensure(districtConfiguration(current,district,IDS),approval);if(index>0)assert.ok(archiveReads>reads,'Reused compressed archive must be hashed before extraction');await provider.retireInactive(current,approval);
+  assert.equal(fs.existsSync(previous),false);assert.equal(f.downloads.length,2);assert.equal(fs.readdirSync(path.join(f.root,'github-districts/downloads')).length,2);
+ }
+ assert.equal(f.extractCount,5);
+});
+
+test('a third recent district archive evicts the eligible oldest download and keeps only current unpacked data',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create();let current=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization);
+ const archive=district=>path.join(f.root,'github-districts/downloads',sha(f.world.archives.get(district))+'.zip');
+ for(const district of ['or-05','ct-01']){const approval={...authorization,principal:{mode:'standalone',districtId:district}};current=await provider.ensure(districtConfiguration(current,district,IDS),approval);if(district==='or-05'){fs.utimesSync(archive('co-05'),1,1);fs.utimesSync(archive('or-05'),2,2);}await provider.retireInactive(current,approval);}
+ assert.equal(f.downloads.length,3);assert.equal(fs.existsSync(archive('co-05')),false);assert.ok(fs.existsSync(archive('or-05'))&&fs.existsSync(archive('ct-01')));assert.equal(fs.readdirSync(path.dirname(archive('ct-01'))).length,2);
+ for(const district of ['co-05','or-05'])assert.equal(fs.existsSync(provider.directory(current.standaloneGitHubData.catalogueSha256,district)),false);
+});
+
+test('a retained compressed archive with changed bytes fails closed on reuse and is never replaced',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create(),initial=await provider.ensure({dataDirectory:f.legacy,district:'co-05'},authorization),approval={...authorization,principal:{mode:'standalone',districtId:'or-05'}};
+ const other=await provider.ensure(districtConfiguration(initial,'or-05',IDS),approval);await provider.retireInactive(other,approval);const archive=path.join(f.root,'github-districts/downloads',sha(f.world.archives.get('co-05'))+'.zip'),bytes=fs.readFileSync(archive);bytes[bytes.length-1]^=1;fs.writeFileSync(archive,bytes);const before=structuredClone(f.state);
+ await assert.rejects(provider.ensure(districtConfiguration(other,'co-05',IDS),authorization),/archive.*verification/i);assert.deepEqual(fs.readFileSync(archive),bytes);assert.equal(f.downloads.length,2);assert.deepEqual(f.state,before);
+});
+
+test('unsafe cached catalogue paths retain inventory without following their junction',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),configuration={dataDirectory:f.legacy,district:'co-05'};
+ const initial=await f.create().ensure(configuration,authorization),oldKey=f.state.latest,oldHash=initial.standaloneGitHubData.catalogueSha256;
+ const oldPath=path.join(f.root,'github-districts','datasets-v2',oldHash),outside=path.join(f.temporary,'outside');fs.mkdirSync(outside);fs.writeFileSync(path.join(outside,'keep'),'unrelated');
+ fs.rmSync(oldPath,{recursive:true});fs.symlinkSync(outside,oldPath,'junction');
+ f.world=f.build(2);const upgraded=await f.create().ensure(initial,authorization);assert.ok(f.state.catalogues[oldKey]);
+ await f.create().retireInactive(upgraded,authorization);assert.ok(f.state.catalogues[oldKey]);assert.equal(fs.readFileSync(path.join(outside,'keep'),'utf8'),'unrelated');
+});
+
+test('retained cached catalogues stay within the existing sixteen-catalogue journal limit',async t=>{
+ const f=fixture(t),authorization=standaloneAuthorization(),provider=f.create();await provider.initialize();const state=await provider.readState(authorization);
+ for(let sequence=1;sequence<=17;sequence++){
+  const world=f.build(sequence);world.body.releaseCommit=world.body.releaseCommit.slice(0,40);world.envelope=f.sign(world.body);
+  const pointer=protocol.pointer(world.envelope,f.publicKeys);state.catalogues[pointer.digest]={envelope:world.envelope,manifestBase64:world.manifest.toString('base64'),commit:'a'.repeat(40)};state.latest=pointer.digest;
+  fs.mkdirSync(path.join(f.root,'github-districts','datasets-v2',world.body.manifest.sha256,'co-05'),{recursive:true});
+  if(sequence===16)await provider.commit(state);
+ }
+ const saved=structuredClone(f.state);assert.equal(Object.keys(saved.catalogues).length,16);await assert.rejects(provider.commit(state));assert.deepEqual(f.state,saved);
 });

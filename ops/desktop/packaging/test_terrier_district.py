@@ -1,4 +1,5 @@
 import json
+import base64
 from contextlib import closing
 import os
 from pathlib import Path
@@ -7,9 +8,10 @@ import sys
 import tempfile
 import unittest
 import io
+from types import SimpleNamespace
 from unittest.mock import patch
 
-from terrier_district import validate_district, validate_github_runtime, main as district_main
+from terrier_district import validate_district, validate_github_runtime, DistrictDataBlocked, main as district_main
 
 
 class DistrictValidationTests(unittest.TestCase):
@@ -37,6 +39,40 @@ class DistrictValidationTests(unittest.TestCase):
         self.assertEqual(validate_district(self.source, self.data, 'co-05', legacy=True), {'district': 'co-05', 'validated': True})
         self.assertEqual(before, {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.data.iterdir()})
 
+    def test_probe_marks_only_known_data_failures_and_never_import_or_context_failures(self):
+        request = {'sourceRoot': str(self.source), 'dataRoot': str(self.data / 'missing'), 'district': 'co-05'}
+        def run():
+            output = io.StringIO()
+            with patch('sys.stdin', SimpleNamespace(buffer=io.BytesIO(json.dumps(request).encode()))), patch('sys.stdout', output):
+                self.assertEqual(district_main(github_runtime=True), 1)
+            self.assertNotIn(str(self.data), output.getvalue())
+            return json.loads(output.getvalue())
+        self.assertEqual(run(), {'error': 'The selected district data could not be verified.'})
+        from module_application_inventory import DISTRICT_PROGRAM_SPECS
+        context = {'launchNonce': base64.urlsafe_b64encode(b'n' * 32).rstrip(b'=').decode(),
+                   'programFingerprint': DISTRICT_PROGRAM_SPECS['terrier']['programFingerprint'], 'sourceDigest': 'd' * 64}
+        request['nativeDiagnostic'] = context
+        self.assertEqual(run(), {'error': 'The selected district data could not be verified.',
+                                 'dataBlocked': True, 'errorKind': 'integrity', 'district': 'co-05',
+                                 'nativeDiagnostic': context})
+        with patch.object(self.definitions, 'get', side_effect=ValueError('invalid compiled district context')):
+            self.assertNotIn('dataBlocked', run())
+        original_import = __import__
+        def unavailable(name, *args, **kwargs):
+            if name == 'tools':
+                raise ImportError('synthetic program import failure')
+            return original_import(name, *args, **kwargs)
+        with patch('builtins.__import__', side_effect=unavailable):
+            self.assertNotIn('dataBlocked', run())
+        with patch('terrier_district._validate_github_files', side_effect=AttributeError('unknown program failure')):
+            self.assertNotIn('dataBlocked', run())
+        with patch('terrier_district._validate_github_files', side_effect=OSError('private filesystem detail')):
+            self.assertEqual(run()['errorKind'], 'storage')
+        request['nativeDiagnostic'] = {**context, 'programFingerprint': '0' * 64}
+        self.assertNotIn('dataBlocked', run())
+        request['nativeDiagnostic'] = {**context, 'sourceDigest': 'not-a-hash'}
+        self.assertNotIn('dataBlocked', run())
+
     def test_wrong_district_and_missing_secret_refused_without_writes(self):
         secret = (self.data / '.secret').read_bytes()
         with self.assertRaises(ValueError):
@@ -54,8 +90,9 @@ class DistrictValidationTests(unittest.TestCase):
 
     def test_corrupt_accounts_refused(self):
         (self.data / 'accounts.sqlite3').write_bytes(b'invalid sqlite fixture')
-        with self.assertRaises(sqlite3.DatabaseError):
+        with self.assertRaises(DistrictDataBlocked) as raised:
             validate_district(self.source, self.data, 'co-05', legacy=True)
+        self.assertEqual(raised.exception.reason, 'integrity')
 
     def github_cache(self):
         # Deliberately outside the original owner directory.
@@ -71,6 +108,16 @@ class DistrictValidationTests(unittest.TestCase):
                 connection.execute('INSERT INTO ' + table + ' VALUES (?,?)', (key, source_sha if role == 'walk.sqlite3' else json.dumps(source_sha)))
                 connection.commit()
         (cache / 'density.json').write_text('{}')
+        with closing(sqlite3.connect(cache / 'scores.sqlite3')) as connection:
+            connection.execute('INSERT INTO metadata VALUES (?, ?)', ('area_table_sha256', json.dumps('a' * 64)))
+            connection.commit()
+        snapshot = cache / 'snapshots' / 'co-cd005-111111111111'
+        snapshot.mkdir(parents=True)
+        from terrier_github_snapshot import BASE_FILES
+        for filename in BASE_FILES:
+            (snapshot / filename).write_text('{}')
+        (snapshot / 'manifest.json').write_text(json.dumps({'schema': 'cu-summary-v4', 'snapshot': snapshot.name,
+            'source_sha256': source_sha, 'row_framework': {'area_table_sha256': 'a' * 64}}))
         return cache
 
     def test_github_cache_uses_original_owner_state_without_requiring_or_copying_accounts_into_data(self):
@@ -88,6 +135,17 @@ class DistrictValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_district(self.source, self.data, 'co-05', legacy=True, state_root=self.data, github_data=True)
 
+    def test_standalone_public_cache_needs_no_legacy_account_but_keeps_separate_state(self):
+        cache = self.github_cache()
+        state = self.data / 'new-local-state'
+        self.assertEqual(validate_district(self.source, cache, 'co-05', state_root=state,
+                                         github_data=True, standalone=True), {'district': 'co-05', 'validated': True})
+        self.assertFalse(state.exists())
+        self.assertFalse((cache / 'accounts.sqlite3').exists())
+        self.assertFalse((cache / '.secret').exists())
+        with self.assertRaises(ValueError):
+            validate_district(self.source, cache, 'co-05', state_root=cache, github_data=True, standalone=True)
+
     def test_github_cache_checks_all_source_bindings_and_original_accounts_integrity(self):
         cache = self.github_cache()
         for role, key in (('contacts.sqlite3', 'source_sha256'), ('walk.sqlite3', 'source_sha256'),
@@ -102,8 +160,9 @@ class DistrictValidationTests(unittest.TestCase):
                     validate_github_runtime(self.source, cache, 'co-05')
                 (cache / role).write_bytes(original)
         (self.data / 'accounts.sqlite3').write_bytes(b'corrupt original owner account fixture')
-        with self.assertRaises(sqlite3.DatabaseError):
+        with self.assertRaises(DistrictDataBlocked) as raised:
             validate_district(self.source, cache, 'co-05', legacy=True, state_root=self.data, github_data=True)
+        self.assertEqual(raised.exception.reason, 'integrity')
 
     def test_github_metadata_probe_reads_no_account_or_application_rows(self):
         cache = self.github_cache()
@@ -120,6 +179,20 @@ class DistrictValidationTests(unittest.TestCase):
         self.assertTrue(all('accounts.sqlite3' not in file for file in opened))
         self.assertTrue(all('mode=ro' in file for file in opened))
         self.assertFalse((cache / 'accounts.sqlite3').exists())
+
+    def test_standalone_native_probe_validates_public_files_without_owner_identity(self):
+        cache = self.github_cache()
+        request = {'sourceRoot': str(self.source), 'dataRoot': str(cache), 'district': 'co-05', 'legacy': False,
+                   'stateRoot': str(self.data / 'new-local-state'), 'githubDistrictData': True, 'standalone': True}
+        incoming, output = type('Input', (), {'buffer': io.BytesIO(json.dumps(request).encode())})(), io.StringIO()
+        with patch('sys.stdin', incoming), patch('sys.stdout', output):
+            self.assertEqual(district_main(), 0)
+        self.assertEqual(json.loads(output.getvalue()), {'district': 'co-05', 'validated': True})
+        self.assertFalse((self.data / 'new-local-state').exists())
+        for changed in ({'standalone': 'true'}, {'standalone': False}):
+            incoming = type('Input', (), {'buffer': io.BytesIO(json.dumps({**request, **changed}).encode())})()
+            with patch('sys.stdin', incoming), patch('sys.stdout', io.StringIO()):
+                self.assertEqual(district_main(), 1)
 
     def test_github_probe_cannot_be_used_as_owner_mapping_or_accept_extra_paths(self):
         cache = self.github_cache()
@@ -159,7 +232,7 @@ class DistrictValidationTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
         archive = root / 'district.zip'
-        roles = ('contacts.sqlite3', 'density.json', 'roads.sqlite3', 'scores.sqlite3', 'street.sqlite3', 'walk.sqlite3')
+        roles = tuple(sorted(p.relative_to(cache).as_posix() for p in cache.rglob('*') if p.is_file()))
         def request(output):
             with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as zipped:
                 for role in roles:
@@ -169,7 +242,7 @@ class DistrictValidationTests(unittest.TestCase):
                                'sha256': hashlib.sha256((cache / role).read_bytes()).hexdigest()} for role in roles]}
         result = extract_github_district_archive(request(root / 'accepted'))
         self.assertEqual(result['sourceMetadataAccepted'], True)
-        self.assertEqual({p.name for p in (root / 'accepted').iterdir()}, set(roles))
+        self.assertEqual({p.relative_to(root / 'accepted').as_posix() for p in (root / 'accepted').rglob('*') if p.is_file()}, set(roles))
         with closing(sqlite3.connect(cache / 'contacts.sqlite3')) as connection:
             connection.execute('UPDATE metadata SET value=?', (json.dumps('wrong source with valid archive hashes'),))
             connection.commit()

@@ -11,6 +11,14 @@ const applicationConfig=app.isPackaged?require('./package.json').desktopAppConfi
 if(!applicationConfig||(app.isPackaged&&!applicationConfig.appId))throw new Error('Packaged application identity is missing.');
 const definition=appDefinition(applicationConfig.appId||(process.env.DESKTOP_APP_ID||'melange'));
 const githubConfig=applicationConfig.desktopUpdateSource?.provider==='github'?require('./github-source.cjs').configuration(applicationConfig.desktopUpdateSource):null;
+const accessMode=applicationConfig.desktopAccessMode||(app.isPackaged?'managed':process.env.DESKTOP_ACCESS_MODE||'standalone');
+if(!['managed','standalone'].includes(accessMode))throw new Error('Unsupported desktop access mode');
+const standaloneMode=accessMode==='standalone';
+const authentication=applicationConfig.desktopAuthentication||(app.isPackaged?'password':process.env.DESKTOP_AUTHENTICATION||(standaloneMode?'windows':'password'));
+if(!['windows','password'].includes(authentication)||(authentication==='windows'&&!standaloneMode))throw new Error('Unsupported desktop authentication mode');
+const windowsAuthentication=standaloneMode&&authentication==='windows';
+let osSessionLocked=false,windowsSuspension=Promise.resolve();
+const updatePresentation=require('./update-status.cjs').createUpdateStatus({appId:definition.id,appName:definition.name,installedVersion:app.getVersion(),provider:githubConfig?'github':'publisher',accessMode});
 app.setName(definition.name);
 // Without the explicit isolated switch this resolves exactly the production profile, AppUserModelId, discovery cache and login registration.
 let profile,isolationRefused=null;
@@ -27,7 +35,7 @@ if(profile.isolated){
  // Electron applies constructor options after this event fires, so mark again on the next turn.
  app.on('browser-window-created',(_event,created)=>{const mark=()=>{if(!created.isDestroyed())created.setTitle(marked(created.getTitle()));};mark();setImmediate(mark);created.on('page-title-updated',(event,title)=>{event.preventDefault();created.setTitle(marked(title));});});
 }
-let window,settingsWindow,accessWindow,accessGate,accessInitializing,accessLifecycle,authenticationWindow,authenticationTicket,runtimePartition,presenceInterval,runtime,updater,districtSwitch,districtDataController,districtDataInterval,moduleDataStartup,uiStateStore,activityOutbox,activityDraining=false,status='Open the application to start.',interval,networkWatcher,closing=false,closeApproved=false,askingClose=false,openingAccess=false,checkingUpdates=false;
+let window,settingsWindow,accessWindow,accessGate,accessInitializing,accessLifecycle,authenticationWindow,authenticationTicket,runtimePartition,presenceInterval,runtime,updater,githubSource,districtSwitch,districtDataController,districtDataInterval,moduleDataStartup,uiStateStore,activityOutbox,activityDraining=false,status='Open the application to start.',interval,networkWatcher,closing=false,closeApproved=false,askingClose=false,openingAccess=false,checkingUpdates=false;
 let background=!profile.isolated&&app.isPackaged&&(process.argv.includes('--desktop-updater')||(process.platform==='darwin'&&app.getLoginItemSettings().wasOpenedAtLogin));
 const userData=app.getPath('userData'),setupURL=pathToFileURL(path.join(__dirname,'setup.html')).href;
 // Terrier testers' district data is downloaded privately into <packRoot>\stores (their dataDirectory) and its state kept in <packRoot>\state, outside the synced Documents profile.
@@ -59,6 +67,23 @@ function saveEnrollment(value){if(!safeStorage.isEncryptionAvailable())throw new
 // Settings written after startup always pass isolated-profile confinement.
 const saveSettings=value=>write('settings.json',profile.isolated?confineIsolatedSettings(profile.boundary,value):value);
 function updateStatus(message){status=message;if(settingsWindow&&!settingsWindow.isDestroyed())settingsWindow.webContents.send('desktop:status',message);}
+function updateSnapshot(){return {...updatePresentation.current(),accessMode};}
+function showUpdateTitle(){
+ if(!window||window.isDestroyed())return;
+ const title=definition.name+' '+app.getVersion()+' — '+updateSnapshot().message+(profile.isolated?ISOLATED_TITLE_SUFFIX:'');
+ window.setTitle(title);
+}
+function updateGitHubStatus(message){
+ updatePresentation.record(message);const value=updateSnapshot();
+ for(const owned of [window,settingsWindow,accessWindow,authenticationWindow])if(owned&&!owned.isDestroyed())owned.webContents.send('desktop:update-status',value);
+ showUpdateTitle();
+}
+function updateInfoOnly(event){
+ const owned=[window,settingsWindow,accessWindow,authenticationWindow].find(item=>item&&!item.isDestroyed()&&item.webContents===event.sender);
+ if(!owned||event.senderFrame!==owned.webContents.mainFrame)throw new Error('Untrusted update-status request');
+ const url=event.senderFrame.url;
+ if(![setupURL,accessURL,loadingURL].includes(url)&&!(runtime?.origin&&new URL(url).origin===runtime.origin))throw new Error('Untrusted update-status page');
+}
 function setupOnly(event){if(!settingsWindow||settingsWindow.isDestroyed()||event.sender!==settingsWindow.webContents||event.senderFrame!==settingsWindow.webContents.mainFrame||event.senderFrame.url!==setupURL)throw new Error('Untrusted desktop request');}
 function runtimeOnly(event){if(runtime.requestsAllowed===false||accessLifecycle?.suspended||event.sender!==window.webContents||event.senderFrame!==window.webContents.mainFrame||!runtime.origin||new URL(event.senderFrame.url).origin!==runtime.origin)throw new Error('Untrusted application request');}
 async function showSetup(){
@@ -71,14 +96,17 @@ async function showSetup(){
 async function ensureAccess(){
  if(accessTransition.mutating)throw new Error('Administrator trust is being verified');
  if(accessGate)return accessGate;if(accessInitializing)return accessInitializing;
- const finish=accessTransition.begin();accessInitializing=(async()=>{const gate=await require('./access-bootstrap.cjs').bootstrapAccess({resources,appId:definition.id,profile:userData,configuration:()=>read('settings.json'),packaged:app.isPackaged,bundledTrust:applicationConfig.desktopAccessTrust});accessGate=gate;
-  activityOutbox=new(require('./activity-outbox.cjs').ActivityOutbox)({store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'activity'})});
+ const finish=accessTransition.begin();accessInitializing=(async()=>{const bootstrap=standaloneMode?require('./standalone-bootstrap.cjs').bootstrapStandalone:require('./access-bootstrap.cjs').bootstrapAccess;
+  const gate=await bootstrap({resources,appId:definition.id,profile:userData,configuration:()=>read('settings.json'),packaged:app.isPackaged,bundledTrust:applicationConfig.desktopAccessTrust,safeStorage,authentication});accessGate=gate;
+  if(!standaloneMode)activityOutbox=new(require('./activity-outbox.cjs').ActivityOutbox)({store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'activity'})});
   const {AccessLifecycle,terrierSession}=require('./access-lifecycle.cjs');
   accessLifecycle=new AccessLifecycle({runtime,gate:accessGate,hide:()=>window.hide(),showBoundary:showAccess,
    terrierAuthenticated:()=>terrierSession(runtime,runtimePartition),terrierLogout:()=>terrierSession(runtime,runtimePartition,{logout:true}),
    terrierPasswordLockDisabled:()=>terrierSession(runtime,runtimePartition,{passwordLockDisabled:true}),
    onSuspend:()=>Promise.all([districtSwitch?.suspend(),moduleDataStartup?.invalidate('authorization')]),
-   presence:(state,sessionId)=>accessGate.client.presence({sessionId,state,version:app.getVersion(),districtId:definition.id==='terrier'&&state==='active'?read('settings.json').district:null})});
+   presence:standaloneMode?async()=>{}:(state,sessionId)=>accessGate.client.presence({sessionId,state,version:app.getVersion(),districtId:definition.id==='terrier'&&state==='active'?read('settings.json').district:null})});
+ accessLifecycle.osLocked=osSessionLocked;
+ if(osSessionLocked){windowsSuspension=accessLifecycle.suspend('locked').catch(()=>{});await windowsSuspension;}
  return gate;})();
  try{return await accessInitializing;}catch(error){try{fs.mkdirSync(path.join(userData,'logs'),{recursive:true,mode:0o700});fs.appendFileSync(path.join(userData,'logs','access.log'),new Date().toISOString()+' access bootstrap failed (reason='+(error?.reason||'none')+'): '+String(error?.message).slice(0,200)+'\n',{mode:0o600});}catch{}throw error;}finally{accessInitializing=null;finish();}
 }
@@ -113,27 +141,50 @@ const launch=require('./single-launch.cjs').singleLaunch(async function launchOn
  let finish;try{finish=accessTransition.begin();}catch{updateStatus('Wait for administrator trust verification before opening the app.');return;}
  try{return await launchAuthorized(fromAccess);}finally{finish();}
 });
+const startupRetry=new(require('./startup-failure.cjs').StartupRetry)({retry:()=>launch(),
+ getContext:()=>({runtime,key:String(accessLifecycle?.generation||0)+':'+crypto.createHash('sha256').update(JSON.stringify(read('settings.json'))).digest('hex')}),
+ canRetry:()=>Boolean(!closing&&!askingClose&&!background&&!osSessionLocked&&accessLifecycle&&!accessLifecycle.suspended&&runtime&&!runtime.child&&window&&!window.isDestroyed())});
 async function launchAuthorized(fromAccess){
  background=false;
+ startupRetry.begin();
  let generation=accessLifecycle?.generation;
- const failStartup=async error=>{if(accessLifecycle?.suspended)return;try{if(!portable)await updater.markApplicationFailed();}catch{}updateStatus('Application startup failed. Check local logs.');await showSetup();throw error;};
+ const failStartup=async error=>{
+  if(closing||accessLifecycle?.suspended||(generation!==undefined&&generation!==accessLifecycle?.generation)){startupRetry.cancel();return;}
+  if(!runtime?.child&&['cancelled','authorization','context'].includes(error?.code)){
+   startupRetry.cancel();const message='Startup paused because access or the selected workspace changed. Choose Open app to retry.';updateStatus(message);await loadingStatus(message);return;
+  }
+  if(require('./startup-failure.cjs').isDataStartupFailure(error)){
+   try{if(!portable)updater.markApplicationDeferred(error);}catch{}
+   updateStatus(error.message);await loadingStatus(error.message);
+   if(closing||accessLifecycle?.suspended){startupRetry.cancel();return;}
+   if(error.retryable)startupRetry.defer(error);else{startupRetry.cancel();await showSetup();}
+   return;
+  }
+  startupRetry.cancel();const message='Application startup failed. Check local logs.';updateStatus(message);await loadingStatus(message);try{if(!portable)await updater.markApplicationFailed();}catch{}await showSetup();throw error;
+ };
  try{refuseModuleDataSettings(runtime.configuration||read('settings.json'));}catch(error){await failStartup(error);return;}
  try{const gate=await ensureAccess();if(generation===undefined)generation=accessLifecycle.generation;await settleDistrict(gate);await require('./access-gate.cjs').authorizeAvailable(gate,async state=>{if(state.phase==='revoked')await onRevoked();});}catch{if(runtime.child&&!accessLifecycle?.suspended)await accessLifecycle?.suspend('locked');if(accessGate?.accepted?.revoked)await dropDistrictData();if(fromAccess)throw new Error('Access is not ready');window.hide();await showAccess();return;}
  if(closing||generation!==accessLifecycle.generation)return;
  if(runtime.child&&accessLifecycle.suspended&&definition.id==='terrier'){
-  const passwordlessOwner=await accessLifecycle.refreshPasswordlessOwner({expectedGeneration:generation});
+  const passwordlessOwner=!windowsAuthentication&&await accessLifecycle.refreshPasswordlessOwner({expectedGeneration:generation});
   const signedIn=passwordlessOwner||(!accessLifecycle.requiresFreshPassword&&await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition));
   if(closing||generation!==accessLifecycle.generation||accessLifecycle.osLocked)return;
-  if(!signedIn){await showTerrierSignIn();return;}
+  if(!signedIn){if(windowsAuthentication){updateStatus('Terrier could not open the Windows account. Close and reopen Terrier to retry.');await showSetup();}else await showTerrierSignIn();return;}
  }
- openingAccess=true;
- try{let configuration=runtime.configuration||read('settings.json');refuseModuleDataSettings(configuration);if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});
+ openingAccess=true;let configuration;
+ try{configuration=runtime.configuration||read('settings.json');refuseModuleDataSettings(configuration);if(packs&&!runtime.child){configuration=await prepareDistrictData();if(!configuration)return;}if(closing||generation!==accessLifecycle.generation)return;const approved=await accessGate.authorize(configuration);await accessLifecycle.resume(approved,{expectedGeneration:generation});
    if(closing||generation!==accessLifecycle.generation)return;
    if(moduleDataStartup?.supported&&!runtime.child){
     await loadingStatus('Preparing reviewed public data. Larger sources can take several minutes.');
     if(closing||generation!==accessLifecycle.generation)return;
    }
-   const origin=moduleDataStartup?await moduleDataStartup.start(configuration,approved):await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();}
+   const origin=moduleDataStartup?await moduleDataStartup.start(configuration,approved):await runtime.start(configuration);bundleNotice();districtSwitch?.remember(configuration,runtime);if(closing||!await accessLifecycle.canReveal(generation,approved))return;let currentOrigin;try{currentOrigin=new URL(window.webContents.getURL()).origin;}catch{}if(currentOrigin!==origin)await window.loadURL(origin+runtime.launchPath);runtime.launchPath='/';if(closing||!await accessLifecycle.canReveal(generation,approved))return;window.show();accessWindow?.close();startupRetry.cancel();if(!portable)updater.markApplicationReady();await accessLifecycle.heartbeat();
+   if(configuration.standaloneGitHubData){
+    const openedRuntime=runtime;
+    ownerDistrictController()?.retire(configuration,{canRetire:()=>!closing&&!districtSwitch?.busy&&!accessLifecycle.suspended&&runtime===openedRuntime&&runtime.child&&runtime.configuration?.district===configuration.district&&runtime.configuration?.standaloneGitHubData?.schemaVersion===configuration.standaloneGitHubData.schemaVersion&&runtime.configuration?.standaloneGitHubData?.catalogueSha256===configuration.standaloneGitHubData.catalogueSha256})
+     .catch(()=>districtLog('Previous public district cache retirement was deferred.'));
+   }
+  }
  catch(error){await failStartup(error);}
  finally{openingAccess=false;}
 }
@@ -153,6 +204,7 @@ const journalStore=()=>require('./access-state.cjs').accessStateStore({resources
 // A non-legacy Terrier tester's district-data log and backend.log (runtime.cjs logRoot) live in the private store; the owner's legacy install and the other apps keep the profile's logs folder.
 const districtLogs=()=>{try{if(packs&&read('settings.json').terrierLegacy===undefined)return packs.logDirectory(packRoot);}catch{}return path.join(userData,'logs');};
 function districtLog(message){try{const logs=districtLogs();fs.mkdirSync(logs,{recursive:true,mode:0o700});fs.appendFileSync(path.join(logs,'district-data.log'),new Date().toISOString()+' '+String(message).slice(0,300)+'\n',{mode:0o600});}catch{}}
+function readerDiagnostic(value){try{const logs=districtLogs();fs.mkdirSync(logs,{recursive:true,mode:0o700});fs.appendFile(path.join(logs,'startup.jsonl'),JSON.stringify({time:new Date().toISOString(),appId:definition.id,version:app.getVersion(),phase:value.phase,reason:value.reason,elapsedMs:value.elapsedMs})+'\n',{mode:0o600},()=>{});}catch{}}
 // The backend serves a district even when its downloaded bundle could not be imported (it leaves a marker and retries at its next start): say so.
 function bundleNotice(){const message=packs?.bundleImportNotice(runtime?.roots);if(message)updateStatus(message);}
 function districtDataStatus(state){
@@ -171,9 +223,12 @@ function ownerDistrictController(){
    canDiscover:configuration=>Boolean(!closing&&runtime?.child&&runtime.requestsAllowed!==false&&!accessLifecycle?.suspended&&!districtSwitch?.busy&&configuration.district===read('settings.json').district),
    keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);},
    createProvider:onStatus=>new(require('./github-districts.cjs').GitHubDistricts)({resources,profile:userData,root:packRoot,
+    deferActivation:standaloneMode&&app.isPackaged===true,
     publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.terrier,
-    store:require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:'github-district-state'}),signal:downloads.signal,onStatus,
-    checkExisting:async(dataRoot,district)=>{const result=await probe(command,'--desktop-github-district-check',{sourceRoot,dataRoot,district},{signal:downloads.signal});return result.validated===true&&result.district===district;},
+    store:require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:standaloneMode?'github-district-local-state':'github-district-state'}),
+    previousStore:standaloneMode?require('./access-state.cjs').accessStateStore({resources,appId:'terrier',profile:userData,kind:'github-district-state'}):null,signal:downloads.signal,onStatus,
+    checkExisting:async(dataRoot,district,{files})=>{const reader=require('./district-data-probe.cjs').prepareDistrictProbe({runtime,command,sourceRoot,dataRoot,district,files,signal:downloads.signal,onDiagnostic:readerDiagnostic});try{return await reader.run();}finally{await reader.cancel();}},
+    prepareCheckExisting:(dataRoot,district,{signal,files})=>require('./district-data-probe.cjs').prepareDistrictProbe({runtime,command,sourceRoot,dataRoot,district,files,signal,onDiagnostic:readerDiagnostic}),
     extract:request=>probe(command,'--desktop-github-district-extract',{...request,sourceRoot},{timeout:10*60*1000,signal:downloads.signal})
    })
   });
@@ -181,13 +236,13 @@ function ownerDistrictController(){
  return districtDataController;
 }
 async function prepareOwnerDistrict(configuration){
- if(!configuration.terrierLegacy)return configuration;
+ if(!standaloneMode&&!configuration.terrierLegacy)return configuration;
  const controller=ownerDistrictController();return controller?await controller.ensure(configuration):configuration;
 }
 async function discoverDistrictData({skipIfBusy=false}={}){
  if(closing||!runtime?.child||accessLifecycle?.suspended||districtSwitch?.busy)return null;
  const configuration=runtime.configuration||read('settings.json');
- if(!configuration.terrierLegacy)return null;
+ if(!standaloneMode&&!configuration.terrierLegacy)return null;
  const controller=ownerDistrictController();
  try{await controller?.discover(configuration,{skipIfBusy});}catch{/* The provider emits fixed error/offline state; the open runtime stays intact. */}
  return controller?.info(configuration,runtime.authorization)||null;
@@ -196,14 +251,20 @@ async function discoverDistrictData({skipIfBusy=false}={}){
 async function prepareDistrictData(){
  const settings=read('settings.json');
  try{
-  if(settings.terrierLegacy!==undefined)return await prepareOwnerDistrict(settings);
+  if(standaloneMode||settings.terrierLegacy!==undefined)return await prepareOwnerDistrict(settings);
   await packs.ensureDistrictData(accessGate,{root:packRoot,settings,journal:journalStore(),check:packs.districtCheck({resources,protectedPaths:[app.getAppPath(),path.dirname(process.execPath)]}),
    confine:profile.isolated?item=>confineIsolatedPath(profile.boundary,item,'The district data store'):null,onStatus:loadingStatus,signal:downloads.signal,
    keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);}});
   return settings;
  }catch(error){
   if(closing||downloads.signal.aborted)return false;
-  if(settings.terrierLegacy!==undefined){districtLog('GitHub district preparation could not complete.');loadingStatus('GitHub district data could not be verified. Existing files were preserved. Reopen Terrier to try again.');return false;}
+  const failure=require('./startup-failure.cjs');require('./district-data-probe.cjs').verifyDistrictProgram(runtime);
+  if(failure.isDataStartupFailure(error))throw error;
+  if(failure.networkFailure(error))throw failure.dataStartupFailure(error);
+  if(require('./github-district-protocol.cjs').isDistrictDataError(error)||require('./github-source.cjs').isResponseIntegrity(error))throw failure.dataStartupFailure({reason:'integrity'});
+  if(['CERT_HAS_EXPIRED','CERT_NOT_YET_VALID','DEPTH_ZERO_SELF_SIGNED_CERT','SELF_SIGNED_CERT_IN_CHAIN','UNABLE_TO_VERIFY_LEAF_SIGNATURE','UNABLE_TO_GET_ISSUER_CERT_LOCALLY','ERR_TLS_CERT_ALTNAME_INVALID','ERR_CERT_AUTHORITY_INVALID','ERR_CERT_COMMON_NAME_INVALID','ERR_CERT_DATE_INVALID','ERR_CERT_INVALID','ERR_SSL_PROTOCOL_ERROR'].includes(error?.code))throw failure.dataStartupFailure({reason:'integrity'});
+  if(['EACCES','EPERM','ENOENT','ENOSPC','EDQUOT','EIO','EROFS','EMFILE','ENFILE','EBUSY'].includes(error?.code))throw failure.dataStartupFailure({reason:'storage'});
+  if(standaloneMode||settings.terrierLegacy!==undefined)throw error;
   districtLog(error?.cause?.message||error?.message);
   if(error instanceof packs.DistrictDataStop){loadingStatus(error.message+' Reopen Terrier to try again.');return false;}
   throw error;
@@ -231,22 +292,24 @@ async function showTerrierSignIn(){
 }
 async function resumeTerrierSession(){
  const owned=authenticationWindow,ticket=authenticationTicket;if(!owned||owned.isDestroyed()||!accessLifecycle.authenticationCurrent(ticket)||!await require('./access-lifecycle.cjs').terrierSession(runtime,runtimePartition))return;
- try{const approved=await accessGate.authorize();if(authenticationWindow!==owned||!accessLifecycle.authenticationCurrent(ticket))return;await accessLifecycle.resume(approved,{freshPassword:true,expectedGeneration:ticket.generation});if(closing||!await accessLifecycle.canReveal(ticket.generation,approved))return;openingAccess=true;owned.close();accessWindow?.close();window.show();await accessLifecycle.heartbeat();}catch{}finally{openingAccess=false;}
+ try{const approved=await accessGate.authorize();if(authenticationWindow!==owned||!accessLifecycle.authenticationCurrent(ticket))return;await accessLifecycle.resume(approved,{freshPassword:true,expectedGeneration:ticket.generation});if(closing||!await accessLifecycle.canReveal(ticket.generation,approved))return;openingAccess=true;owned.close();accessWindow?.close();window.show();await accessLifecycle.heartbeat();}catch{}finally{openingAccess=false;if(definition.id==='terrier')await require('./district-runtime-input.cjs').discardDistrictConfiguration(configuration);}
 }
-async function checkUpdates(){
+async function checkUpdates({manual=false}={}){
  if(portable){updateStatus('Portable copy: replace this extracted application folder to update. Your local data remains separate.');if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked')await onRevoked();}catch{}await drainActivity();return;}
 
  if(checkingUpdates||closing||updater.osShutdown)return;checkingUpdates=true;
+ updateGitHubStatus('Checking for updates…');
  try{
   let enrollmentDeferred=false;
   try{if(githubConfig)await require('./github-source.cjs').enrollGitHub({appId:definition.id,publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp[definition.id],config:githubConfig,load:loadEnrollment,save:saveEnrollment});else await accessOperation(async()=>{const gate=await ensureAccess();await enrollApproved({client:gate.client,version:app.getVersion(),load:loadEnrollment,save:saveEnrollment});});}
   catch{enrollmentDeferred=true;}
+  if(manual&&githubSource){await githubSource.refreshDiscovery();if(updater.checkPromise)await updater.checkPromise;}
   await updater.check();
-  if(enrollmentDeferred&&!fs.existsSync(file(enrollmentFile)))updateStatus(githubConfig?'GitHub update initialization is pending. The receiver retries when packaged verification keys and protected local storage are available.':'Automatic update enrollment is pending. The receiver retries when the approved server and protected credentials are available.');
+  if(enrollmentDeferred&&!fs.existsSync(file(enrollmentFile))){updateStatus(githubConfig?'GitHub update initialization is pending. The receiver retries when packaged verification keys and protected local storage are available.':'Automatic update enrollment is pending. The receiver retries when the approved server and protected credentials are available.');updateGitHubStatus('Update deferred: update setup is unavailable. Retrying automatically.');}
   if(accessGate)try{const state=await accessGate.refresh();if(state.phase==='revoked')await onRevoked();if(accessWindow&&!accessWindow.isDestroyed())accessWindow.webContents.send('desktop-access:status',state);}catch{}
   await drainActivity();
   if(background&&!runtime.child&&!window.isVisible()&&!updater.osShutdown){const activating=await updater.activateAfterClose();if(activating)closing=true;}
- }catch{updateStatus('Update check deferred. The receiver will retry; local work remains available.');}
+ }catch{const detail=manual&&githubSource?' '+githubSource.discoverySummary():'';updateStatus('Update check deferred. The receiver will retry; local work remains available.'+detail);updateGitHubStatus('Update deferred: unable to check. Retrying automatically.'+detail);}
  finally{checkingUpdates=false;}
 }
 async function recoverPrevious(){if(portable){updateStatus('Portable copy: replace the extracted application folder to change versions.');return;}try{const target=updater.recoveryCandidate();const result=await dialog.showMessageBox(window,{type:'warning',buttons:['Cancel','Prepare recovery'],defaultId:0,cancelId:0,title:'Restore previous '+definition.name+' version?',message:'Restore previously authorized version '+target.version+'?',detail:'Program files will be restored only after you close the app. Local data is retained. This recovery cannot reverse data changes made by a newer version.'});if(result.response===1)await updater.beginRecovery();}catch(error){updateStatus('Recovery unavailable: '+error.message);}}
@@ -258,22 +321,44 @@ async function confirmClose(){
     if(response===1){if(await runtime.activity()===true){updateStatus('Close deferred: a calculation is running.');return;}closeApproved=true;window.close();}
   }finally{askingClose=false;}
 }
-async function finishClose(){if(closing)return;closing=true;downloads.abort();clearInterval(interval);clearInterval(presenceInterval);clearInterval(districtDataInterval);networkWatcher?.close();await moduleDataStartup?.shutdown();if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();const activating=portable?false:await updater?.activateAfterClose();if(!activating){updater?.close();app.quit();}}
+async function finishClose(){
+ if(closing||finishClose.inProgress)return false;
+ closing=true;finishClose.inProgress=true;finishClose.deferred=false;finishClose.stopped=false;
+ startupRetry.cancel();
+ try{
+  downloads.abort();clearInterval(interval);clearInterval(presenceInterval);clearInterval(districtDataInterval);networkWatcher?.close();
+  await moduleDataStartup?.shutdown();
+  if(districtSwitch)await districtSwitch.stopAll();else await runtime?.stop();
+  finishClose.stopped=true;
+  const activating=portable?false:await updater?.activateAfterClose();
+  if(!activating){updater?.close();app.quit();}
+  return true;
+ }catch{
+  closing=false;closeApproved=false;finishClose.deferred=true;
+  try{updateStatus('Closing is delayed. Open the app again or choose Quit to retry stopping its local processes.');updateGitHubStatus('Update deferred: waiting for the local app to finish closing.');}catch{}
+  if(!updater?.osShutdown)try{dialog.showErrorBox(definition.name+' could not finish closing','Automatic installation is paused. Open the app again or choose Quit to retry closing it. Your local data has been retained.');}catch{}
+  return false;
+ }finally{finishClose.inProgress=false;}
+}
 function createModuleDataStartup(){
  if(!['melange','mentat'].includes(definition.id))return null;
- const {ModuleDataStartup,compiledApplicationContract}=require('./module-data-startup.cjs');
+ if(applicationConfig.desktopWorkspaceData?.[definition.id]==='workspace-v1')return createWorkspaceDataStartup();
+ const {ModuleDataStartup,withCompiledApplicationContract}=require('./module-data-startup.cjs');
  // Reject untrusted source markers before installed-program or provider I/O.
  // The existing fresh launch preflight reports this through startup failure UI.
- let contract=null;
- try{refuseModuleDataSettings(read('settings.json'));contract=compiledApplicationContract(definition.id,{runtime,resources,publicDataMode:applicationConfig.desktopPublicData?.[definition.id]});}catch{}
+ const construct=(contract,constructionProof)=>{
  const boundary=contract?require('./module-data-runtime-boundary.cjs').createRuntimeModuleBoundary({appId:definition.id,profile:userData,contract,
+  constructionProof,
   publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],getRuntime:()=>runtime,getSelected:()=>read('settings.json'),
   onPreparing:()=>updateStatus('Preparing reviewed public data. Larger sources can take several minutes.'),
   authorize:async configuration=>(await ensureAccess()).authorize(configuration),protectedRoots:[resources,app.getAppPath(),path.dirname(process.execPath)]}):null;
  return new ModuleDataStartup({appId:definition.id,getSelected:()=>read('settings.json'),getRuntime:()=>runtime,getGeneration:()=>accessLifecycle?.generation||0,
+  requireInstalledContract:Boolean(app.isPackaged&&applicationConfig.desktopPublicData?.[definition.id]),
   authorize:async configuration=>(await ensureAccess()).authorize(configuration),
   canStage:()=>Boolean(!askingClose&&!closing&&runtime?.child&&runtime.requestsAllowed!==false&&!accessLifecycle?.suspended),
-  onStatus:state=>{if(!closing&&runtime?.child&&runtime.requestsAllowed!==false&&!accessLifecycle?.suspended&&window&&!window.isDestroyed())window.webContents.send('desktop:module-data-status',state);},
+  onStatus:state=>{if(closing||accessLifecycle?.suspended||!window||window.isDestroyed())return;
+   if(runtime?.child&&runtime.requestsAllowed!==false)window.webContents.send('desktop:module-data-status',state);
+   else{const progress=Number.isSafeInteger(state.totalBytes)&&state.totalBytes>0&&Number.isSafeInteger(state.receivedBytes)?' '+(state.receivedBytes/1048576).toFixed(1)+' of '+(state.totalBytes/1048576).toFixed(1)+' MB.':'';Promise.resolve(loadingStatus(state.message+progress)).catch(()=>{});}},
   keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);},
   // Only an exact installed program table grants the native boundary. A staged
   // component probe alone cannot establish installed reader health.
@@ -283,9 +368,43 @@ function createModuleDataStartup(){
    transport:contract.contractId==='melange.public-data.pages.v1'?new(require('./github-module-transport.cjs').GitHubModuleTransport)(definition.id,{paged:true}):undefined,
    publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],registry:contract.registry,requiredKinds:contract.requiredKinds,
    protectedRoots:[resources,app.getAppPath(),path.dirname(process.execPath)],
-   store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}),
+   store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:standaloneMode?'github-module-local-state':'github-module-state'}),
+   previousStore:standaloneMode?require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}):null,
    authorize:async configuration=>(await ensureAccess()).authorize(configuration),
    effectiveConfiguration:({originalSelected,source})=>({...originalSelected,ownerGitHubModuleData:source})})});
+ };
+ try{
+  refuseModuleDataSettings(read('settings.json'));
+  return withCompiledApplicationContract(definition.id,{runtime,resources,publicDataMode:applicationConfig.desktopPublicData?.[definition.id],onProbeDiagnostic:readerDiagnostic},construct);
+ }catch{return construct(null);}
+}
+function createWorkspaceDataStartup(){
+ const {WorkspaceDataStartup}=require('./workspace-data-startup.cjs'),{withCompiledApplicationContract,withCompiledWorkspaceApplicationContract}=require('./module-data-startup.cjs');
+ const {CHANNEL}=require('./workspace-data-contract.cjs'),{GitHubModules}=require('./github-modules.cjs'),{GitHubModuleTransport}=require('./github-module-transport.cjs');
+ const protectedRoots=[resources,app.getAppPath(),path.dirname(process.execPath)],context={runtime,resources,publicDataMode:applicationConfig.desktopPublicData?.[definition.id],onProbeDiagnostic:readerDiagnostic};
+ const provider=(contract,workspace)=>new GitHubModules({appId:definition.id,profile:userData,channel:workspace?CHANNEL.id:'public-v1',
+  transport:new GitHubModuleTransport(definition.id,{channel:workspace?CHANNEL.id:'public-v1',paged:!workspace&&contract.contractId==='melange.public-data.pages.v1'}),
+  publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],registry:contract.registry,requiredKinds:contract.requiredKinds,protectedRoots,
+  store:require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:workspace?(standaloneMode?CHANNEL.localStateKind:CHANNEL.managedStateKind):(standaloneMode?'github-module-local-state':'github-module-state')}),
+  previousStore:!workspace&&standaloneMode?require('./access-state.cjs').accessStateStore({resources,appId:definition.id,profile:userData,kind:'github-module-state'}):null,
+  authorize:async configuration=>(await ensureAccess()).authorize(configuration),effectiveConfiguration:({originalSelected,source})=>({...originalSelected,[workspace?CHANNEL.sourceField:'ownerGitHubModuleData']:source})});
+ const construct=(publicContract,publicConstructionProof,workspaceContract,workspaceConstructionProof)=>{
+  const boundary=publicContract&&workspaceContract?require('./module-data-runtime-boundary.cjs').createRuntimeWorkspaceBoundary({appId:definition.id,profile:userData,
+   publicKeys:applicationConfig.desktopAccessTrust?.updatePublicKeysByApp?.[definition.id],publicContract,workspaceContract,publicConstructionProof,workspaceConstructionProof,
+   getRuntime:()=>runtime,getSelected:()=>read('settings.json'),authorize:async configuration=>(await ensureAccess()).authorize(configuration),protectedRoots,
+   onPreparing:()=>{const message='Opening your workspace from verified GitHub data.';updateStatus(message);Promise.resolve(loadingStatus(message)).catch(()=>{});}}):null;
+  return new WorkspaceDataStartup({appId:definition.id,getSelected:()=>read('settings.json'),getRuntime:()=>runtime,getGeneration:()=>accessLifecycle?.generation||0,
+   publicContract,workspaceContract,boundary,requireInstalledContract:true,authorize:async configuration=>(await ensureAccess()).authorize(configuration),
+   createPublicProvider:contract=>provider(contract,false),createWorkspaceProvider:contract=>provider(contract,true),
+   canStage:()=>Boolean(!askingClose&&!closing&&runtime?.child&&runtime.requestsAllowed!==false&&!accessLifecycle?.suspended),
+   onStatus:state=>{if(closing||accessLifecycle?.suspended||!window||window.isDestroyed())return;
+    if(runtime?.child&&runtime.requestsAllowed!==false)window.webContents.send('desktop:module-data-status',state);
+    else{const progress=Number.isSafeInteger(state.totalBytes)&&state.totalBytes>0&&Number.isSafeInteger(state.receivedBytes)?' '+(state.receivedBytes/1048576).toFixed(1)+' of '+(state.totalBytes/1048576).toFixed(1)+' MB.':'';Promise.resolve(loadingStatus(state.message+progress)).catch(()=>{});}},
+   keepAwake:()=>{const id=powerSaveBlocker.start('prevent-app-suspension');return()=>powerSaveBlocker.stop(id);}});
+ };
+ try{refuseModuleDataSettings(read('settings.json'));return withCompiledApplicationContract(definition.id,context,(publicContract,publicProof)=>
+  withCompiledWorkspaceApplicationContract(definition.id,context,(workspaceContract,workspaceProof)=>construct(publicContract,publicProof,workspaceContract,workspaceProof)));
+ }catch{return construct(null,undefined,null,undefined);}
 }
 async function openPublicData(){
  const target=definition.id==='melange'?'/public-data/':definition.id==='mentat'?'/#public-data':null;if(!target||closing)return;
@@ -294,13 +413,21 @@ async function openPublicData(){
  if(runtime!==current||current.origin!==origin||accessLifecycle.generation!==generation||closing)return;
  await window.loadURL(origin+target);
 }
-app.on('second-instance',()=>{background=false;if(launchInstall.defer()){launchInstall.showWindow();return;}if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
+async function openDataWorkspace(){
+ if(!['melange','mentat'].includes(definition.id)||closing)return;
+ await launch();const current=runtime,generation=accessLifecycle?.generation,approval=current?.authorization,origin=current?.origin;
+ if(closing||!current?.child||current.requestsAllowed===false||!origin||!accessLifecycle||!await accessLifecycle.canReveal(generation,approval))return;
+ if(runtime!==current||current.origin!==origin||accessLifecycle.generation!==generation||closing)return;
+ await window.loadURL(origin+'/__desktop/workspace');
+}
+app.on('second-instance',()=>{background=false;if(launchInstall.defer()){launchInstall.showWindow();return;}if(finishClose.deferred){finishClose().catch(()=>{});return;}if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
 app.whenReady().then(async()=>{
+  require('./network-transport.cjs').configureElectronTransport(net);
   if(profile.migrationRequired){dialog.showErrorBox(definition.name+' profile migration required','Existing application settings, credentials or data were found in the earlier profile location. They have been preserved. Migrate that profile explicitly before using this installation.');app.quit();return;}
   fs.mkdirSync(userData,{recursive:true,mode:0o700});
   // Terrier: new installs use the private store; a tester still on the old default <profile>\data is moved to it (explicit directories are never changed).
   if(!fs.existsSync(file('settings.json'))){const dataDirectory=packs?path.join(packRoot,'stores'):path.join(userData,'data');fs.mkdirSync(dataDirectory,{recursive:true,mode:0o700});write('settings.json',{dataDirectory,...(definition.id==='terrier'?{district:'co-05'}:{})});}
-  else if(packs){
+  else if(packs&&!standaloneMode){
    const previous=read('settings.json'),migrated=packs.migrateSettings(previous,{userData,root:packRoot});
    if(migrated){
     // The old default data and state trees (voter data, accounts, secrets) must not stay in Documents. They go first: if that fails the settings stay and the next start retries.
@@ -309,11 +436,11 @@ app.whenReady().then(async()=>{
    }
   }
   if(profile.isolated)try{confineIsolatedSettings(profile.boundary,read('settings.json'));}catch(error){dialog.showErrorBox(definition.name+' isolated test profile refused',error.message+' The backend was not started. Correct or remove settings.json in '+userData+'.');app.quit();return;}
-  const createRuntime=()=>new Runtime(definition.id,userData,resources,{protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,
+  const createRuntime=()=>new Runtime(definition.id,userData,resources,{allowStandalone:standaloneMode,authentication,protectedPaths:[app.getAppPath(),path.dirname(process.execPath)],rendererFactory:definition.id==='mentat'?()=>require('./render-service.cjs').startRenderService({BrowserWindow,session}):null,
    // Packaged only with DESKTOP_SHARED_SCRAPE=1 (builder.cjs). The backend gets a loopback capability; the protected access
    // bearer stays in this process and provider API keys stay on the publisher (ops/desktop/server/SCRAPE-BROKER.md).
-   scrapeFactory:applicationConfig.desktopScrapeBroker===true&&['melange','mentat'].includes(definition.id)?async configuration=>require('./scrape-service.cjs').startScrapeService({authorize:async()=>{if(closing||accessLifecycle?.suspended)throw new Error('Collection is suspended');return (await ensureAccess()).authorize(configuration);},query:async(value,options)=>(await ensureAccess()).client.scrape(value,options)}):null,
-   authorize:async configuration=>(await ensureAccess()).authorize(configuration),confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null,logRoot:packs?packs.logDirectory(packRoot):null});
+   scrapeFactory:!standaloneMode&&applicationConfig.desktopScrapeBroker===true&&['melange','mentat'].includes(definition.id)?async configuration=>require('./scrape-service.cjs').startScrapeService({authorize:async()=>{if(closing||accessLifecycle?.suspended)throw new Error('Collection is suspended');return (await ensureAccess()).authorize(configuration);},query:async(value,options)=>(await ensureAccess()).client.scrape(value,options)}):null,
+   authorize:async configuration=>(await ensureAccess()).authorize(configuration),districtInputRequired:definition.id==='terrier'&&standaloneMode&&app.isPackaged===true,confine:profile.isolated?paths=>{for(const item of paths)confineIsolatedPath(profile.boundary,item,'The application data location');}:null,logRoot:packs?packs.logDirectory(packRoot):null});
   runtime=createRuntime();
   moduleDataStartup=createModuleDataStartup();
   if(definition.id==='terrier'){
@@ -324,6 +451,8 @@ app.whenReady().then(async()=>{
      verify:async configuration=>{const selected=profile.isolated?confineIsolatedSettings(profile.boundary,configuration):configuration,effective=await prepareOwnerDistrict(selected);await verifyDistrictAsync(resources,userData,effective,[app.getAppPath(),path.dirname(process.execPath)]);return effective;},createRuntime,current:()=>runtime,
      activate:next=>{runtime=next;runtime.contentsId=window.webContents.id;if(accessLifecycle)accessLifecycle.runtime=next;bundleNotice();},
      location:()=>window.webContents.getURL(),navigate:url=>window.loadURL(url),
+     retainInactive:configuration=>!configuration.standaloneGitHubData,
+     retire:configuration=>ownerDistrictController()?.retire(configuration),
      canReveal:approved=>!closing&&accessLifecycle.canReveal(accessLifecycle.generation,approved),onUnavailable:showAccess,
      log:value=>{try{const logs=path.join(userData,'logs');fs.mkdirSync(logs,{recursive:true});fs.appendFileSync(path.join(logs,'district-switch.jsonl'),JSON.stringify({...value,time:new Date().toISOString()})+'\n');}catch{}}
     });
@@ -355,6 +484,8 @@ app.whenReady().then(async()=>{
   // Visibility is granted only by the post-await authorization checks in launch.
   // A late ready-to-show event must never reveal preserved locked content.
   window.on('closed',()=>{authenticationWindow?.close();accessWindow?.close();settingsWindow?.close();});
+  window.on('page-title-updated',event=>{event.preventDefault();showUpdateTitle();});
+  showUpdateTitle();
   const permitted=url=>url===loadingURL||Boolean(runtime.origin&&new URL(url).origin===runtime.origin);
   window.webContents.on('did-finish-load',()=>{if(loadingText&&window.webContents.getURL()===loadingURL)window.webContents.send('desktop:status',loadingText);});
   window.webContents.on('will-navigate',(event,url)=>{if(!permitted(url))event.preventDefault();});
@@ -367,15 +498,16 @@ app.whenReady().then(async()=>{
   // again once, and an update already installed from it is confirmed by its running version.
   const localRoot=process.platform==='win32'&&app.isPackaged&&!profile.isolated?path.join(process.env.LOCALAPPDATA||path.join(app.getPath('home'),'AppData','Local'),definition.applicationId):null;
   const updaterRoot=localRoot?path.join(localRoot,'updater'):githubConfig?path.join(userData,'github-updates'):userData;
-  const githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:profile.discoveryCache}):null;
+  githubSource=githubConfig?new(require('./github-source.cjs').GitHubSource)({repository:githubConfig.repository,appId:definition.id,cacheDirectory:profile.discoveryCache}):null;
   const githubOptions=githubSource?{request:githubSource.request.bind(githubSource),download:githubSource.download.bind(githubSource)}:{};
+  if(process.platform==='win32'&&app.isPackaged&&!profile.isolated)githubOptions.activationTarget=version=>dlLayout.appDirectory(app.getPath('downloads'),definition.name,version);
   // Downloads layout (DL-spec 2.4): only an app that runs from <Downloads>/MelangeApplications; Documents/Programs installs behave exactly as before.
   const downloadsFolder=process.platform==='win32'&&app.isPackaged&&!profile.isolated?app.getPath('downloads'):null;
   const layoutMode=Boolean(downloadsFolder&&dlLayout.downloadsMode({execPath:process.execPath,downloads:downloadsFolder}));
   const installLayout=layoutMode?{cacheDirectory:dlLayout.updaterCacheDirectory(downloadsFolder,definition.id),
     sweep:state=>dlLayout.sweepLayout({downloads:downloadsFolder,documents:app.getPath('documents'),home:app.getPath('home'),localAppData:process.env.LOCALAPPDATA||path.join(app.getPath('home'),'AppData','Local'),product:definition.name,app:definition.id,applicationId:definition.applicationId,current:app.getVersion(),execPath:process.execPath,userData,state,log:updateStatus})}:null;
   if(layoutMode)dlLayout.layoutWarnings({downloads:downloadsFolder,home:app.getPath('home'),env:process.env,execFile:require('node:util').promisify(require('node:child_process').execFile)}).then(warnings=>{if(warnings.length)updateStatus(warnings.join(' '));}).catch(()=>{});
-  updater=new DesktopUpdater({installLayout,...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>updateStatus(githubSource?message+' '+githubSource.discoverySummary():message),autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null,legacyUserData:localRoot&&githubConfig?path.join(userData,'github-updates'):null});
+  updater=new DesktopUpdater({installLayout,...githubOptions,appId:definition.id,version:app.getVersion(),userData:updaterRoot,loadEnrollment,saveEnrollment,readState:()=>read(githubConfig?'github-update-state.json':'update-state.json'),writeState:value=>write(githubConfig?'github-update-state.json':'update-state.json',value),onStatus:message=>{const detail=githubSource?message+' '+githubSource.discoverySummary():message;updateGitHubStatus(detail);updateStatus(detail);},autoUpdater:require('electron-updater').autoUpdater,packaged:app.isPackaged,nativeInstallation:profile.nativeInstallation,publisherName:applicationConfig.windowsPublisherName,baselineRoot:localRoot?path.join(localRoot,'baseline'):null,legacyUserData:localRoot&&githubConfig?path.join(userData,'github-updates'):null});
   // Updates do not depend on the release certificate being in the user's Trusted Root store: the Ed25519-signed manifest and sha256/sha512 checks (trust.cjs, github-source.cjs) still gate every install.
   // builder.cjs keeps verifyUpdateCodeSignature:true so publisherName stays configured for updater.cjs nativeTrust; only the Authenticode chain checks are skipped.
   // electron-updater's own check would require the release root in the user's Trusted Root store (Status Valid) and match a
@@ -398,7 +530,8 @@ app.whenReady().then(async()=>{
    if(installed){closing=true;launchInstall.closeWindow();await runtime.stop().catch(()=>{});return;}
    launchInstall.closeWindow();if(requested)background=false;
   }
-  ipcMain.handle('desktop:info',event=>{setupOnly(event);return {name:definition.name,appId:definition.id,version:app.getVersion(),updateProvider:githubConfig?'github':'publisher',status,settings:read('settings.json'),paired:fs.existsSync(file(enrollmentFile))};});
+  ipcMain.handle('desktop:update-info',event=>{updateInfoOnly(event);return updateSnapshot();});
+  ipcMain.handle('desktop:info',async event=>{setupOnly(event);const access=windowsAuthentication?await(await ensureAccess()).info():null;return {name:definition.name,appId:definition.id,version:app.getVersion(),accessMode,authentication,windowsAccountDisplayName:access?.windowsAccountDisplayName||null,updateProvider:githubConfig?'github':'publisher',status,settings:read('settings.json'),paired:fs.existsSync(file(enrollmentFile))};});
   async function selectDistrict(event,district){
     runtimeOnly(event);
     if(definition.id!=='terrier'||askingClose||closing||accessLifecycle?.suspended)throw new Error('District switching is unavailable.');
@@ -415,7 +548,8 @@ app.whenReady().then(async()=>{
   ipcMain.handle('desktop:districts',event=>{runtimeOnly(event);if(definition.id!=='terrier')throw new Error('Districts are only available in Terrier.');const {LABELS}=require('./district-switch.cjs'),configuration=read('settings.json');return {schema:'desktop-districts-1',current:configuration.district,districts:districtSwitch.scope(configuration).map(id=>({id,label:LABELS[id],ready:true,port:0}))};});
   ipcMain.handle('desktop:pair',async(event,bundle)=>{setupOnly(event);if(githubConfig)throw new Error('GitHub updates use the verification keys bundled with this installer. Manual publisher pairing is not required.');if(!safeStorage.isEncryptionAvailable())throw new Error('Operating-system credential protection unavailable');const result=await enrollFresh({bundle:pairing(bundle,definition.id),appId:definition.id,version:app.getVersion(),platform:process.platform,arch:process.arch,request:jsonRequest,readPrevious:()=>fs.existsSync(file(enrollmentFile))?JSON.parse(safeStorage.decryptString(fs.readFileSync(file(enrollmentFile)))):null,save:saveEnrollment,deleteCredential:(appId,deviceId)=>credentialCommand(resources,appId,deviceId,'delete')});updateStatus('Paired with a new device identity. Administrator recipient approval is required.'+(result.priorCredentialRemoved?'':' Previous credential cleanup remains pending.'));return true;});
   ipcMain.handle('desktop:launch',async event=>{setupOnly(event);await launch();});
-  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},...(['melange','mentat'].includes(definition.id)?[{label:'Public data',click:()=>openPublicData().catch(()=>{})}]:[]),{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}},{label:'Settings',click:showSetup},{label:'Import or refresh administrator server trust',click:importAccessTrust},{label:'Check for approved updates',click:checkUpdates},{label:'Restore previous authorized version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(districtLogs())},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
+  ipcMain.handle('desktop:open-workspace-settings',async(event,...args)=>{runtimeOnly(event);if(args.length||!['melange','mentat'].includes(definition.id))throw new Error('Unsupported workspace settings request.');await showSetup();return true;});
+  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:definition.name,submenu:[{label:'Open app',click:()=>launch().catch(()=>{})},...(['melange','mentat'].includes(definition.id)?[{label:'Public data',click:()=>openPublicData().catch(()=>{})},{label:'Data workspace',click:()=>openDataWorkspace().catch(()=>{})}]:[]),...(windowsAuthentication?[{label:'Use Windows + L to lock this workspace',enabled:false}]:[{label:'Lock workspace',click:()=>{if(runtime.child)accessLifecycle?.suspend('locked').catch(()=>{});}}]),{label:'Settings',click:showSetup},...(!standaloneMode?[{label:'Import or refresh administrator server trust',click:importAccessTrust}]:[]),{label:'Check for updates',click:()=>checkUpdates({manual:true})},{label:'Restore previous version',click:recoverPrevious},{label:'Open logs',click:()=>shell.openPath(districtLogs())},{type:'separator'},{role:'quit'}]},{role:'editMenu'},{role:'viewMenu'}]));
   window.on('close',event=>{
     if(updater.osShutdown||closeApproved||!runtime.child)return;
     event.preventDefault();if(askingClose)return;askingClose=true;
@@ -423,20 +557,32 @@ app.whenReady().then(async()=>{
   });
   // Never override a renderer beforeunload veto; unsaved-work protections remain active.
   require('./district-switch.cjs').preserveUnloadVeto(window.webContents,()=>{closeApproved=false;districtSwitch?.cancel();});
-  if(!background&&definition.id==='terrier'){await window.loadURL(loadingURL);window.show();}else await window.loadURL('about:blank');
+  // Register before launch: public data preparation may outlive a Windows lock.
+  const suspendWindowsAccess=()=>{if(accessLifecycle)windowsSuspension=Promise.all([windowsSuspension,accessLifecycle.suspend('locked')]).then(()=>{},()=>{});};
+  const resumeWindowsAccess=async()=>{
+   if(!windowsAuthentication||!accessLifecycle||background||closing||osSessionLocked)return;
+   const generation=accessLifecycle.generation;
+   await windowsSuspension;await launch.whenIdle().catch(()=>{});
+   if(closing||osSessionLocked||generation!==accessLifecycle.generation)return;
+   await accessLifecycle.resumeWindows({expectedGeneration:generation});
+   if(!closing&&!osSessionLocked&&generation===accessLifecycle.generation)await launch();
+  };
+  powerMonitor.on('lock-screen',()=>{startupRetry.cancel();osSessionLocked=true;if(accessLifecycle)accessLifecycle.osLocked=true;suspendWindowsAccess();});
+  powerMonitor.on('unlock-screen',()=>{osSessionLocked=false;if(accessLifecycle)accessLifecycle.osLocked=false;if(windowsAuthentication)resumeWindowsAccess().catch(()=>{});else accessLifecycle?.heartbeat().catch(()=>{});});
+  powerMonitor.on('suspend',()=>{startupRetry.cancel();suspendWindowsAccess();});
+  powerMonitor.on('resume',()=>{checkUpdates();resumeWindowsAccess().catch(()=>{});});
+  powerMonitor.on('unlock-screen',checkUpdates);
+  if(!background){await window.loadURL(loadingURL);window.show();}else await window.loadURL('about:blank');
+  // GitHub status and discovery start independently of sign-in/data preparation.
+  checkUpdates();
   if(!background){if(read('settings.json').dataDirectory)await launch().catch(()=>{});else{updateStatus('Application startup failed: no local data location is configured. Check local logs.');await showSetup();}}
   if(!portable)if(profile.registerLoginItem)app.setLoginItemSettings({openAtLogin:true,...(process.platform==='win32'?{name:definition.applicationId,path:process.execPath,args:['--desktop-updater']}:{})});
-  checkUpdates();interval=setInterval(checkUpdates,15*60*1000);interval.unref();
-  districtDataInterval=setInterval(()=>discoverDistrictData({skipIfBusy:true}).catch(()=>{}),5*60*1000);districtDataInterval.unref();
-  networkWatcher=watchNetwork({isOnline:()=>net.isOnline(),onReconnect:()=>{checkUpdates();moduleDataStartup?.stage({skipIfBusy:true}).catch(()=>{});}});
+  interval=setInterval(checkUpdates,15*60*1000);interval.unref();
+  districtDataInterval=setInterval(()=>discoverDistrictData({skipIfBusy:true}).catch(()=>{}),15*60*1000);districtDataInterval.unref();
+  networkWatcher=watchNetwork({isOnline:()=>net.isOnline(),onReconnect:()=>{checkUpdates();startupRetry.retryNow().catch(()=>{});moduleDataStartup?.stage({skipIfBusy:true}).catch(()=>{});}});
   presenceInterval=setInterval(()=>{accessLifecycle?.heartbeat().catch(()=>{});drainActivity();},60000);presenceInterval.unref();
-  powerMonitor.on('lock-screen',()=>{if(accessLifecycle){accessLifecycle.osLocked=true;accessLifecycle.suspend('locked').catch(()=>{});}});
-  powerMonitor.on('unlock-screen',()=>{if(accessLifecycle){accessLifecycle.osLocked=false;accessLifecycle.heartbeat().catch(()=>{});}});
-  powerMonitor.on('suspend',()=>{if(accessLifecycle)accessLifecycle.suspend('locked').catch(()=>{});});
-  powerMonitor.on('resume',checkUpdates);
-  powerMonitor.on('unlock-screen',checkUpdates);
 });
 app.on('window-all-closed',finishClose);
-app.on('before-quit',event=>{launchInstall.closeWindow();if(!closing&&!launchInstall.installing&&window&&!window.isDestroyed()){event.preventDefault();window.close();}else{clearInterval(interval);networkWatcher?.close();}});
+app.on('before-quit',event=>{if(finishClose.deferred||(finishClose.inProgress&&!finishClose.stopped)){event.preventDefault();if(finishClose.deferred)finishClose().catch(()=>{});return;}launchInstall.closeWindow();if(!closing&&!launchInstall.installing&&window&&!window.isDestroyed()){event.preventDefault();window.close();}else{clearInterval(interval);networkWatcher?.close();}});
 }
 }
