@@ -1,7 +1,8 @@
 'use strict';
-// Public, read-only downloads use Chromium's Windows proxy/PAC and TLS stack.
-// Node HTTPS is retained for headless library tests; an Electron process must
-// explicitly configure the native transport after app.ready, never fall back.
+// Production downloads explicitly use the previously deployed Node HTTPS path.
+// TLS validation, anonymous requests and signed artifact checks remain required.
+// The native adapter remains available for explicit transport tests; no request
+// silently changes transport after a failure.
 const https=require('node:https'),{EventEmitter}=require('node:events'),{PassThrough}=require('node:stream');
 let configured=null;
 const RETRYABLE=new Set(['timeout','unreachable','proxy','rate_limited']);
@@ -78,5 +79,6 @@ function createElectronRequest(net){
  };
 }
 function configureElectronTransport(net){if(configured)throw new Error('The native network stack is already configured');configured=createElectronRequest(net);}
+function configureNodeTransport(){if(configured)throw new Error('The network stack is already configured');configured=https.request.bind(https);}
 function request(url,options,callback){if(configured)return configured(url,options,callback);if(process.versions.electron)throw new Error('Native network transport was not configured');return https.request(url,options,callback);}
-module.exports={request,configureElectronTransport,createElectronRequest,classifyNetworkError,networkFailure,RETRYABLE};
+module.exports={request,configureNodeTransport,configureElectronTransport,createElectronRequest,classifyNetworkError,networkFailure,RETRYABLE};

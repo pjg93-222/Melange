@@ -51,3 +51,14 @@ test('only headless Node has a fallback; unconfigured Electron fails closed',()=
  const previous=Object.getOwnPropertyDescriptor(process.versions,'electron');Object.defineProperty(process.versions,'electron',{value:'44.7.2',configurable:true});
  try{assert.throws(()=>request('https://github.com',{},()=>{}),/not configured/);configureElectronTransport({request:()=>new EventEmitter()});assert.throws(()=>configureElectronTransport({request(){}}),/already configured/);}finally{if(previous)Object.defineProperty(process.versions,'electron',previous);else delete process.versions.electron;}
 });
+
+test('production can explicitly restore Node HTTPS inside Electron without a silent transport fallback',()=>{
+ const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');let calls=0;
+ const fakeHTTPS={request(...args){calls++;return {args,transport:'node-https'};}};
+ const context={module:{exports:{}},require:name=>name==='node:https'?fakeHTTPS:require(name),process:{versions:{electron:'44.7.2'}},URL,setTimeout,clearTimeout,queueMicrotask};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../network-transport.cjs'),'utf8'),context);
+ const transport=context.module.exports;assert.throws(()=>transport.request('https://github.com',{},()=>{}),/not configured/);
+ transport.configureNodeTransport();const result=transport.request('https://github.com',{rejectUnauthorized:true},()=>{});
+ assert.equal(result.transport,'node-https');assert.equal(result.args[1].rejectUnauthorized,true);assert.equal(calls,1);
+ assert.throws(()=>transport.configureElectronTransport({request(){throw Error('must not switch');}}),/already configured/);
+});
