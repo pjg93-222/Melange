@@ -24,7 +24,8 @@ function applicationContract(appId,context){
      spec.startupTimeoutMs!==(appId==='melange'?600000:300000))return null;
   const command=backendCommand(context.resources,appId),sourceRoot=path.join(command.runtime,'sources'),bootstrapRoot=path.join(command.runtime,'bootstrap');
   const current=()=>{try{const roots=verifyProgram(context.runtime,spec);if(roots.source!==sourceRoot||roots.bootstrap!==bootstrapRoot)throw failure();}catch{throw programFailure();}};
-  const probeMode=workspace?'--desktop-github-workspace-check':'--desktop-github-module-check';
+  // Native read-only validation dispatches by dataset kind for both channels.
+  const probeMode='--desktop-github-module-check';
   const registry=(workspace?createWorkspaceModuleDataRegistry:paged?createPagedModuleDataRegistry:createPublicModuleDataRegistry)({appId,sourceRoot,prepareProbe:({signal}={})=>{
    if(signal?.aborted)throw failure();
    const reader=prepareDesktopProbe(command,probeMode,{signal,timeout:spec.startupTimeoutMs,onDiagnostic:context.onProbeDiagnostic,beforeSpawn:current});
