@@ -91,13 +91,27 @@ function pointerRelease(envelope,repo,appId){
 class GitHubSource{
  constructor({repository:repo,appId,platform='win32',arch='x64',readJSON=json,open=response,cacheDirectory,cacheOptions={}}){if(!['melange','mentat','terrier'].includes(appId)||platform!=='win32'||arch!=='x64')throw new Error('Unsupported GitHub desktop target');this.repository=repository(repo);this.appId=appId;this.platform=platform;this.arch=arch;this.open=open;
   this.clock=cacheOptions.now||Date.now;
-  this.cache=cacheDirectory?new DiscoveryCache({...cacheOptions,cooldownScope:'cdn',directory:cacheDirectory,repository:this.repository,validate:values=>discoveryMetadata(values,this.repository),onStatus:value=>{this.discoveryInfo=value;}}):null;
+  this.cache=cacheDirectory?new DiscoveryCache({...cacheOptions,cooldownScope:'api',directory:cacheDirectory,repository:this.repository,validate:values=>discoveryMetadata(values,this.repository),onStatus:value=>{this.discoveryInfo=value;}}):null;
   this.readJSON=(url,options)=>this.cache&&new URL(url).hostname==='api.github.com'?this.cache.request(()=>readJSON(url,options)):readJSON(url,options);
  }
  discoverySummary(){const info=this.discoveryInfo;if(!info)return '';if(info.backoffUntil)return 'GitHub API retry after '+new Date(info.backoffUntil).toISOString()+'.';if(!info.checkedAt)return '';return (info.cached?'Using cached release list checked ':'Release list checked ')+new Date(info.checkedAt).toISOString()+'. '+(info.refreshDeferred?'Refresh deferred.':'Next discovery after '+new Date(info.nextCheckAt).toISOString()+'.');}
  identity(enrollment){if(enrollment?.source!=='github'||enrollment.repository!==this.repository||enrollment.appId!==this.appId||enrollment.deviceToken)throw new Error('GitHub update source identity mismatch');}
  api(suffix){return 'https://api.github.com/repos/'+this.repository+'/releases'+suffix;}
- async discover({forceRefresh=false}={}){const minute=Math.floor(this.clock()/60000);const envelope=await this.readJSON(latestManifestURL(this.repository,this.appId,forceRefresh?minute:undefined),{asset:true,maxBytes:1024*1024});return discoveryMetadata([pointerRelease(envelope,this.repository,this.appId)],this.repository);}
+ async discover(){
+  const candidates=[];
+  for(let page=1;page<=5;page++){
+   const values=await this.readJSON(this.api('?per_page=100&page='+page));
+   if(!Array.isArray(values)||values.length>100)throw responseIntegrity('Invalid GitHub releases');
+   for(const value of values){
+    if(value?.draft!==false||value?.prerelease!==false||typeof value.tag_name!=='string'||!value.tag_name.startsWith('desktop-v'))continue;
+    const item=release(value);
+    item.assets=item.assets.filter(asset=>asset&&['melange','mentat','terrier'].some(app=>[app+'-win32-x64.manifest.json',app+'-trust.json',app+'-'+item.version+'-win32-x64.exe'].includes(asset.name))).map(({name,size,browser_download_url})=>({name,size,browser_download_url}));
+    candidates.push(...discoveryMetadata([item],this.repository));
+   }
+   if(values.length<100)break;
+  }
+  return candidates;
+ }
  async latest({forceRefresh=false}={}){const values=this.cache?await this.cache.get(()=>this.discover({forceRefresh}),{forceRefresh}):await this.discover({forceRefresh});const candidates=values.filter(item=>{if(item.kind==='signed-manifest-pointer')return item.appId===this.appId;try{assetURL(this.repository,item,this.appId+'-'+this.platform+'-'+this.arch+'.manifest.json');return true;}catch{return false;}});return candidates.sort((a,b)=>semver.rcompare(a.version,b.version))[0]||null;}
  async refreshDiscovery(){
   this.manualDiscovery=null;
@@ -118,7 +132,7 @@ class GitHubSource{
   const parsed=new URL(relative,'https://local.invalid');
   if(parsed.pathname!==base+'/updates'&&parsed.pathname!==base+'/recovery')throw new Error('Unsupported GitHub update operation');
   const query=parsed.searchParams;if(query.get('platform')!==this.platform||query.get('arch')!==this.arch)throw new Error('GitHub release target mismatch');
-  if(parsed.pathname.endsWith('/recovery')){const version=query.get('version');tag(version);const envelope=await this.readJSON(fixedAssetURL(this.repository,version,this.appId+'-'+this.platform+'-'+this.arch+'.manifest.json'),{asset:true,maxBytes:1024*1024});const item=pointerRelease(envelope,this.repository,this.appId);if(item.version!==version)throw new Error('Recovery release tag mismatch');return envelope;}
+  if(parsed.pathname.endsWith('/recovery')){const expected=tag(query.get('version')),item=release(await this.readJSON(this.api('/tags/'+expected)));if(tag(item.version)!==expected)throw new Error('Recovery release tag mismatch');return this.manifest(item);}
   const item=this.discoveryLoaded?this.current:await this.latest();
   if(this.discoveryInfo?.refreshDeferred||this.discoveryInfo?.backoffUntil)throw network.networkFailure(this.discoveryInfo.backoffUntil?'rate_limited':'unreachable','Current GitHub update status is unavailable; the last release information could not be refreshed.',{retryAfterMs:this.discoveryInfo.backoffUntil?this.discoveryInfo.backoffUntil-this.clock():5000});
   if(!item||semver.lte(item.version,query.get('version')))return null;return this.manifest(item);

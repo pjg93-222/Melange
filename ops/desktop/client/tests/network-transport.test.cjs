@@ -46,8 +46,10 @@ test('native response backpressure bounds buffering while preserving every deliv
  let remaining=1024*1024;const f=fixture(native=>{const source=new Readable({highWaterMark:16384,read(){while(remaining){const n=Math.min(remaining,16384);remaining-=n;if(!this.push(Buffer.alloc(n,7)))return;}this.push(null);}});source.statusCode=200;source.headers={};native.emit('response',source);});
  const stream=await open(f.send).response;await new Promise(resolve=>setImmediate(resolve));assert(stream.readableLength<=128*1024);const bytes=await body(stream);assert.equal(bytes.length,1024*1024);assert(bytes.every(value=>value===7));
 });
-test('only headless Node has a fallback; unconfigured Electron fails closed',()=>{
- const https=require('node:https'),original=https.request;https.request=()=>({headless:true});try{assert.equal(request('https://github.com',{},()=>{}).headless,true);}finally{https.request=original;}
+test('public downloads use Node HTTPS in headless and packaged Electron even when a native adapter was configured',()=>{
+ const https=require('node:https'),original=https.request,calls=[];https.request=(url,options)=>{calls.push({url,options});return {nodeHttps:true};};
  const previous=Object.getOwnPropertyDescriptor(process.versions,'electron');Object.defineProperty(process.versions,'electron',{value:'44.7.2',configurable:true});
- try{assert.throws(()=>request('https://github.com',{},()=>{}),/not configured/);configureElectronTransport({request:()=>new EventEmitter()});assert.throws(()=>configureElectronTransport({request(){}}),/already configured/);}finally{if(previous)Object.defineProperty(process.versions,'electron',previous);else delete process.versions.electron;}
+ try{assert.equal(request('https://github.com',{},()=>{}).nodeHttps,true);configureElectronTransport({request:()=>{throw new Error('Unexpected Electron networking');}});assert.equal(request('https://github.com',{},()=>{}).nodeHttps,true);delete process.versions.electron;assert.equal(request('https://github.com',{},()=>{}).nodeHttps,true);assert(calls.every(call=>call.options.rejectUnauthorized===true));}finally{https.request=original;if(previous)Object.defineProperty(process.versions,'electron',previous);else delete process.versions.electron;}
+ for(const options of [{rejectUnauthorized:false},{method:'POST'},{headers:{Cookie:'private'}},{headers:{Authorization:'secret'}},{headers:{'Proxy-Authorization':'secret'}}])assert.throws(()=>request('https://github.com/x',options,()=>{}));
+ for(const url of ['http://github.com/x','https://user:secret@github.com/x','file:///secret','https://github.com:8443/x'])assert.throws(()=>request(url,{},()=>{}));
 });

@@ -422,7 +422,6 @@ async function openDataWorkspace(){
 }
 app.on('second-instance',()=>{background=false;if(launchInstall.defer()){launchInstall.showWindow();return;}if(finishClose.deferred){finishClose().catch(()=>{});return;}if(!runtime||closing)return;if(accessLifecycle?.suspended)showAccess().catch(()=>{});else launch().catch(()=>{});});
 app.whenReady().then(async()=>{
-  require('./network-transport.cjs').configureElectronTransport(net);
   if(profile.migrationRequired){dialog.showErrorBox(definition.name+' profile migration required','Existing application settings, credentials or data were found in the earlier profile location. They have been preserved. Migrate that profile explicitly before using this installation.');app.quit();return;}
   fs.mkdirSync(userData,{recursive:true,mode:0o700});
   // Terrier: new installs use the private store; a tester still on the old default <profile>\data is moved to it (explicit directories are never changed).

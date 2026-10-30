@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),crypto=require('node:crypto'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {Readable}=require('node:stream');const {EventEmitter}=require('node:events');
-const {GitHubSource,configuration,checkedURL,githubPolicy,enrollGitHub,response,json,discoveryMetadata,isResponseIntegrity}=require('../github-source.cjs');
+const {GitHubSource,configuration,checkedURL,githubPolicy,enrollGitHub,response,json,discoveryMetadata,pointerRelease,isResponseIntegrity}=require('../github-source.cjs');
 const {verifyEnvelope}=require('../trust.cjs');const {DesktopUpdater}=require('../updater.cjs');
 const repo='owner/desktop-updates';
 function fixture({cacheDirectory,cacheOptions}={}){
@@ -17,7 +17,7 @@ function fixture({cacheDirectory,cacheOptions}={}){
   releases.set(version,{draft:false,prerelease:false,tag_name:'desktop-v'+version,assets:[asset(name,bytes.length),asset('melange-win32-x64.manifest.json',JSON.stringify(envelope).length),asset('melange-trust.json',18)]});return manifest;
  }
  const seed=add('1.0.0',1),next=add('1.0.1',2),calls=[];let corrupt=false;
- const source=new GitHubSource({repository:repo,appId:'melange',cacheDirectory,cacheOptions,readJSON:async url=>{calls.push(url);if(url.split('?')[0]==='https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json'){const published=[...releases.values()].filter(r=>r.draft===false&&r.prerelease===false).at(-1);return manifests.get(published.tag_name.slice(9));}if(url.endsWith('/melange-trust.json'))return {transitions:[]};return manifests.get(url.split('/desktop-v')[1].split('/')[0]);},open:async url=>Readable.from(corrupt?Buffer.from('bad fixture'):packages.get(url.split('/').at(-1)))});
+ const source=new GitHubSource({repository:repo,appId:'melange',cacheDirectory,cacheOptions,readJSON:async url=>{calls.push(url);if(url.startsWith('https://api.github.com/repos/'+repo+'/releases?'))return [...releases.values()];if(url.startsWith('https://api.github.com/repos/'+repo+'/releases/tags/desktop-v'))return releases.get(url.split('/desktop-v')[1]);if(url.endsWith('/melange-trust.json'))return {transitions:[]};return manifests.get(url.split('/desktop-v')[1].split('/')[0]);},open:async url=>Readable.from(corrupt?Buffer.from('bad fixture'):packages.get(url.split('/').at(-1)))});
  return {source,enrollment,seed,next,manifests,releases,packages,calls,set corrupt(value){corrupt=value;}};
 }
 test('GitHub source selects stable app assets, exact current recovery and rejects repository/audience/signature/replay changes',async()=>{
@@ -44,31 +44,32 @@ test('explicit discovery refresh feeds the existing signed update sequence witho
  assert.equal(f.source.discoveryInfo.cached,false);assert.doesNotMatch(f.source.discoverySummary(),/Using cached/);
  const envelope=await f.source.request(f.enrollment,updates);
  assert.equal(verifyEnvelope(envelope,f.enrollment,{appId:'melange',version:'1.0.0',platform:'win32',arch:'x64'}).manifest.version,'1.0.1');
- assert.equal(f.calls.filter(url=>url.includes('/releases/latest/download/melange-win32-x64.manifest.json')).length,2);assert.equal(f.calls.some(url=>url.startsWith('https://api.github.com/')),false);
+ assert.equal(f.calls.filter(url=>url.includes('/releases?per_page=100&page=1')).length,2);assert.equal(f.calls.some(url=>url.includes('/releases/latest/download/')),false);
  await f.source.request(f.enrollment,trust);assert.equal(f.source.discoveryInfo.cached,true);
 });
 
-test('manual discovery consumes the signed pointer once and expires a refresh not consumed promptly',async()=>{
- const f=fixture(),count=()=>f.calls.filter(url=>url.includes('/releases/latest/download/melange-win32-x64.manifest.json')).length;
+test('manual discovery consumes the REST release list once and expires a refresh not consumed promptly',async()=>{
+ const f=fixture(),count=()=>f.calls.filter(url=>url.includes('/releases?per_page=100&page=1')).length;
  await f.source.refreshDiscovery();await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(count(),1);
  await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(count(),2);
  await f.source.refreshDiscovery();f.source.manualDiscovery.expiresAt=Date.now()-1;
  await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(count(),4);
 });
-test('legacy REST cooldown cannot block CDN migration, while the old release cache remains useful',async t=>{
+test('restored REST discovery preserves API cooldown and cached release metadata',async t=>{
  const {DiscoveryCache,rateLimit}=require('../github-discovery.cjs'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'github-cdn-migration-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));let now=Date.now();
  const f=fixture({cacheDirectory:directory,cacheOptions:{now:()=>now,random:()=>0}}),legacy={version:'1.0.0',assets:f.releases.get('1.0.0').assets},old=new DiscoveryCache({directory,repository:repo,validate:value=>discoveryMetadata(value,repo),now:()=>now,random:()=>0});await old.get(async()=>[legacy]);await old.note(rateLimit(429,{'retry-after':'3600'}));
- assert(old.cooldown()>now);assert.notEqual(old.cooldownFile,f.source.cache.cooldownFile);assert.equal((await f.source.latest()).version,'1.0.0');assert.equal(f.calls.length,0,'Useful cached release metadata survives the migration');
- now+=60000;assert.equal((await f.source.refreshDiscovery()).version,'1.0.1');assert(old.cooldown()>now,'The old REST backoff was preserved, not reset');assert.equal(f.source.cache.cooldown(),0);
+ assert(old.cooldown()>now);assert.equal(old.cooldownFile,f.source.cache.cooldownFile);assert.equal((await f.source.latest()).version,'1.0.0');assert.equal(f.calls.length,0,'Useful cached release metadata survives the migration');
+ now+=60000;await assert.rejects(f.source.refreshDiscovery(),/deferred/);assert(old.cooldown()>now,'The REST backoff was preserved, not reset');assert.equal(f.calls.length,0);
+ now+=3600000;assert.equal((await f.source.refreshDiscovery()).version,'1.0.1');assert.equal(f.source.cache.cooldown(),0);
 });
 test('an automatic check with expired cached release metadata cannot claim up to date after a failed refresh',async t=>{
  const {TTL}=require('../github-discovery.cjs'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'github-stale-auto-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));let now=Date.now();const f=fixture({cacheDirectory:directory,cacheOptions:{now:()=>now,random:()=>0}});f.releases.delete('1.0.1');await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(await f.source.request(f.enrollment,'/v1/apps/melange/updates?platform=win32&arch=x64&version=1.0.0'),null);
- now+=TTL+1;const read=f.source.readJSON;f.source.readJSON=async(url,options)=>{if(url.includes('/releases/latest/download/'))throw require('../network-transport.cjs').networkFailure('unreachable','fixture latest host unavailable');return read(url,options);};await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(f.source.current.version,'1.0.0');assert.equal(f.source.discoveryInfo.refreshDeferred,true);
+ now+=TTL+1;const read=f.source.readJSON;f.source.readJSON=async(url,options)=>{if(url.includes('/releases?'))throw require('../network-transport.cjs').networkFailure('unreachable','fixture release API unavailable');return read(url,options);};await f.source.request(f.enrollment,'/v1/apps/melange/trust');assert.equal(f.source.current.version,'1.0.0');assert.equal(f.source.discoveryInfo.refreshDeferred,true);
  await assert.rejects(f.source.request(f.enrollment,'/v1/apps/melange/updates?platform=win32&arch=x64&version=1.0.0'),error=>error.reason==='unreachable'&&error.retryableNetwork===true);assert.equal((await f.source.request(f.enrollment,'/v1/apps/melange/recovery?platform=win32&arch=x64&version=1.0.0')).schemaVersion,1);
 });
 
-test('explicit refresh uses one allowlisted minute-bucket cache buster, while periodic discovery keeps its fixed URL',async()=>{
- const f=fixture();await f.source.latest();await f.source.refreshDiscovery();assert.equal(f.calls[0],'https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json');assert.match(f.calls[1],/\/releases\/latest\/download\/melange-win32-x64\.manifest\.json\?refresh=[0-9]{1,12}$/);assert.equal(f.calls.some(url=>url.startsWith('https://api.github.com')),false);
+test('explicit and periodic discovery use the same public REST route without a signed latest pointer',async()=>{
+ const f=fixture();await f.source.latest();await f.source.refreshDiscovery();assert.deepEqual(f.calls,Array(2).fill('https://api.github.com/repos/'+repo+'/releases?per_page=100&page=1'));
  assert.doesNotThrow(()=>checkedURL('https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json?refresh=123',true));for(const query of ['?refresh=1&refresh=2','?refresh=01','?refresh=%31','?token=secret','?refresh=1234567890123'])assert.throws(()=>checkedURL('https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json'+query,true));
 });
 
@@ -82,16 +83,25 @@ test('repository capitalization is normalized only for GitHub owner/repo and sig
  assert.equal(configuration({provider:'github',repository:'Owner/Desktop-Updates'}).repository,repo);
 });
 
-test('desktop discovery uses the canonical latest signed asset and never falls back to REST or treats malformed metadata as no update',async()=>{
- const f=fixture();assert.equal((await f.source.latest()).version,'1.0.1');assert.deepEqual(f.calls,['https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json']);
- for(const value of [[],{},f.releases.get('1.0.1'),{...f.manifests.get('1.0.1'),extra:'not an envelope'}]){f.source.readJSON=async()=>value;await assert.rejects(f.source.latest(),/pointer/);}
- const envelope=f.manifests.get('1.0.1');f.source.readJSON=async()=>({...envelope,signature:Buffer.alloc(64).toString('base64')});const item=await f.source.latest();const offered=await f.source.manifest(item);assert.throws(()=>verifyEnvelope(offered,f.enrollment,{appId:'melange',version:'1.0.0',platform:'win32',arch:'x64'}),/signature/);
+test('desktop REST discovery filters nonstable releases and rejects malformed metadata and bad manifest signatures',async()=>{
+ const f=fixture();assert.equal((await f.source.latest()).version,'1.0.1');assert.deepEqual(f.calls,['https://api.github.com/repos/'+repo+'/releases?per_page=100&page=1']);
+ const read=f.source.readJSON,stable=f.releases.get('1.0.1');f.source.readJSON=async()=>[{...stable,draft:true},{...stable,prerelease:true},{...stable,tag_name:'module-data-v1'},stable];assert.equal((await f.source.latest()).version,'1.0.1');
+ for(const value of [{},stable,Array(101).fill(stable),[{...stable,assets:null}],[{...stable,assets:stable.assets.map(a=>({...a,browser_download_url:'https://evil.invalid/asset'}))}]]){f.source.readJSON=async()=>value;await assert.rejects(f.source.latest());}
+ f.source.readJSON=async()=>[];assert.equal(await f.source.latest(),null);
+ const envelope=f.manifests.get('1.0.1');f.source.readJSON=async(url,options)=>url.endsWith('.manifest.json')?{...envelope,signature:Buffer.alloc(64).toString('base64')}:read(url,options);const item=await f.source.latest();const offered=await f.source.manifest(item);assert.throws(()=>verifyEnvelope(offered,f.enrollment,{appId:'melange',version:'1.0.0',platform:'win32',arch:'x64'}),/signature/);
  for(const url of ['https://raw.githubusercontent.com/'+repo+'/main/current.json','https://raw.githubusercontent.com/'+repo+'/desktop-updates/other.json','https://github.com/'+repo+'/releases/latest/download/melange-win32-x64.manifest.json?token=x'])assert.throws(()=>checkedURL(url,false,true));
 });
-test('signed pointer descriptors do not invent API asset existence or sidecar sizes, and legacy cached API rows remain readable',async()=>{
- const f=fixture(),item=await f.source.latest();assert.equal(item.kind,'signed-manifest-pointer');assert.equal(item.assets,undefined);assert.deepEqual(item.package,{name:f.next.package.name,size:f.next.package.size});
+test('cached signed pointer descriptors remain readable after restoring API discovery',async()=>{
+ const f=fixture(),item=pointerRelease(f.manifests.get('1.0.1'),repo,'melange');assert.equal(item.kind,'signed-manifest-pointer');assert.equal(item.assets,undefined);assert.deepEqual(item.package,{name:f.next.package.name,size:f.next.package.size});
  const legacy={version:'1.0.0',assets:f.releases.get('1.0.0').assets};assert.deepEqual(discoveryMetadata([legacy,item],repo),[legacy,item]);
  const source=new GitHubSource({repository:repo,appId:'melange',readJSON:async url=>url.endsWith('/melange-trust.json')?{transitions:[]}:f.manifests.get('1.0.0')});source.cache={get:async()=>[legacy]};assert.equal((await source.latest()).version,'1.0.0');
+});
+
+test('REST discovery reaches later pages and exact-tag recovery rejects a different release',async()=>{
+ const f=fixture(),calls=[],read=f.source.readJSON;
+ f.source.readJSON=async(url,options)=>{calls.push(url);if(url.includes('/releases?'))return url.endsWith('page=1')?Array.from({length:100},()=>({draft:false,prerelease:false,tag_name:'module-data-fixture'})):[f.releases.get('1.0.1')];return read(url,options);};
+ assert.equal((await f.source.latest()).version,'1.0.1');assert.deepEqual(calls,[1,2].map(page=>'https://api.github.com/repos/'+repo+'/releases?per_page=100&page='+page));
+ f.source.readJSON=async()=>f.releases.get('1.0.1');await assert.rejects(f.source.request(f.enrollment,'/v1/apps/melange/recovery?platform=win32&arch=x64&version=1.0.0'),/tag mismatch/);
 });
 test('public receiver does not require app access or send device tokens and preserves verified key transitions',async()=>{
  const publicKeys={root:crypto.randomBytes(32).toString('base64')};let saved=null;
