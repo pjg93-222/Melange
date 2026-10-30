@@ -131,6 +131,8 @@ def application_contract(app_id, contract_id):
     files = tuple(ProgramFile(**row) for row in rows)
     paths = {(item.root, item.path) for item in files}
     require(all(('bootstrap', path) in paths for path in _SHARED)
+            and (app_id != 'melange' or all(('bootstrap', path) in paths
+                 for path in ('module_catalogue_cache.py', 'native_access_state.py')))
             and all(('source', path) in paths for path in _APPLICATION[app_id])
             and not any(item.path.endswith(('module_application_inventory.py', 'module-application-inventory.cjs'))
                         for item in files))
