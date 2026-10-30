@@ -4760,15 +4760,9 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/AreaStreetMap-CYJefTEO.js",
+        "path": "frontend/dist/assets/AreaStreetMap-DtUZ0Csp.js",
         "bytes": 3848,
-        "sha256": "5ac144e44b3e7d4e29bd4913be6cca380574f810b8dee4318f9a37d4ff8f8736"
-      },
-      {
-        "root": "source",
-        "path": "frontend/dist/assets/ContactsScreen-CQeKozQr.js",
-        "bytes": 10301,
-        "sha256": "758fabd3f23054ffcda86b3e488c254fcf6b995a237d471141a3dd0771100fec"
+        "sha256": "02403ebfde6c0f5e9ea46a29a000c69603a918561b16b2ed65e5f432967ff922"
       },
       {
         "root": "source",
@@ -4778,57 +4772,63 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/MapParts-DbiNuQNZ.js",
+        "path": "frontend/dist/assets/ContactsScreen-EujfOrsV.js",
+        "bytes": 10301,
+        "sha256": "6a7565b9bbf75971fcc29288bea8be7121e7bb3bc51a29c2914773ffb352127c"
+      },
+      {
+        "root": "source",
+        "path": "frontend/dist/assets/MapParts-DSds5DiB.js",
         "bytes": 9582,
-        "sha256": "0c270197aefbead853c769e8d4fa7ce6a965334bbc46e7efd5e19ef12824db21"
+        "sha256": "fc8c5e87a7071f4cefe65d7b4e35a68fb7a9b2162fc407d844efe5b54d6f72f7"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/MapScreen-BlyD2Cip.js",
+        "path": "frontend/dist/assets/MapScreen-B33Idyfo.js",
         "bytes": 33315,
-        "sha256": "e3981c24289e4cc0c17463f857826eafa21a6a69c418c0b0c809ccdb20204d58"
+        "sha256": "997d67ceac989fb7fb9d9c9affc364adf0d64437355ebd270281f12c29051fd0"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/MethodScreen-C0GhMP6t.js",
+        "path": "frontend/dist/assets/MethodScreen-B1d5zaXu.js",
         "bytes": 4496,
-        "sha256": "681cd35a620f330b86cf4f97dd07a864ac040af1ce56e53703a7cecac6e021d8"
+        "sha256": "1ca9586cd055cb686488dc3fa98432f04d8e70e5b382517f5e25d5ea1d7c1509"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/PeopleScreen-Cc7sLenE.js",
+        "path": "frontend/dist/assets/PeopleScreen-BkmGjlzY.js",
         "bytes": 10185,
-        "sha256": "baabdcb03fe75bb23523a29d83a7eaf6b607bd5f04598d94804cc8b5e24fb21f"
+        "sha256": "699c120fee750a48e681694dfa1cec237cb0681ad890a613cfc198d0d6d09fe1"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/ProfileScreen-yTbkkBcw.js",
+        "path": "frontend/dist/assets/ProfileScreen-DZcAWrTu.js",
         "bytes": 10692,
-        "sha256": "e6564f4dd65c839973a0e1d45292ba86e42a82d315b5ee7b8fb88a10c510f657"
+        "sha256": "25658bccf9542f7426f0ff108daaf257434bbea1d0d28c0d1264a520b4c41182"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/WalkMap-DEeT221P.js",
+        "path": "frontend/dist/assets/WalkMap-BH_vJtdG.js",
         "bytes": 12967,
-        "sha256": "c1a8753e19d1c2ae931f96655ce7f9e0ace07621f77a4db632faa8ee9ebf20cc"
+        "sha256": "ef6a69259d48d8f54a4d66c978e926ea0e3b9cf3e046e20947a65c20657ff65e"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/WalkScreen-CsxlDi0r.css",
-        "bytes": 30557,
-        "sha256": "854fb74834999946908b478c192952ad32f7bcc921be71bcff6d5a5c4ff252dd"
+        "path": "frontend/dist/assets/WalkScreen-BjupOr1m.css",
+        "bytes": 33729,
+        "sha256": "2ef446e32ad02bc9cec425be7ea2d20f8bdd94eeb2e35d031c7c31a2a8bbd62a"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/WalkScreen-D6ICZwod.js",
-        "bytes": 226878,
-        "sha256": "6a6f1df5ec596c847a964631a4122066d23053900d3e87c8ab0275cf929d33c7"
+        "path": "frontend/dist/assets/WalkScreen-DiWpHXfn.js",
+        "bytes": 232606,
+        "sha256": "dd9a73910c17268b24fd717392cdacc1469d1849bf7a40deca3072ae72991a4d"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/WorkspaceScreen-BWiOe2dX.js",
+        "path": "frontend/dist/assets/WorkspaceScreen-uo16zBT1.js",
         "bytes": 16347,
-        "sha256": "cd43819a3c5e12a17972dd83b4417aa63bf6ccb1ce4fab1016937fd2c9616514"
+        "sha256": "0a453433660fc86a4ef271026a30b7fe49b1374ffe0f99b8d9ba4e428c1a088a"
       },
       {
         "root": "source",
@@ -4838,15 +4838,15 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/chevron-left-YiPs3APq.js",
+        "path": "frontend/dist/assets/chevron-left-DwsEpq3T.js",
         "bytes": 299,
-        "sha256": "8e333129e54c8dbf56a7684733e9c6c59af151858c10f70cb57a4a6ef3a292ef"
+        "sha256": "300a695dfa5cd20d2e49930d037b9e76d5a544d98d918e6e7dda2585dd38b7bf"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/chevron-right-D54LG9HA.js",
+        "path": "frontend/dist/assets/chevron-right-CONhyEIx.js",
         "bytes": 299,
-        "sha256": "f7128d3d0bbb04a2f552c1602af9e9cf021bb8743da80e6bb14c553bbcf680aa"
+        "sha256": "ea3af0af7e4a7453a905459e804dc5dc3fb52c1558f71eda3aa766ac65369f0b"
       },
       {
         "root": "source",
@@ -4856,9 +4856,9 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/download-Bjp4w8AT.js",
+        "path": "frontend/dist/assets/download-Bw48pdsn.js",
         "bytes": 717,
-        "sha256": "2c34f8592319c90d01e192b8a00d7b95c0c79d2de9c20e2cb8ed4dd91b935eed"
+        "sha256": "9f7e8baf6aa68bf5ef6e01fc02a1dfb827872a0b54f47f19d46f4de9a4041497"
       },
       {
         "root": "source",
@@ -4898,27 +4898,27 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/index-BgB4cvfx.js",
-        "bytes": 39353,
-        "sha256": "3af2abc9e726d8f83a667374e40851e628e70108bfaa3c81d49e8bbf942b5557"
-      },
-      {
-        "root": "source",
-        "path": "frontend/dist/assets/index-tXuxh47v.js",
+        "path": "frontend/dist/assets/index-CFkFkUJ-.js",
         "bytes": 54936,
-        "sha256": "a2995b7783dc267d98dc616165818d88616b70f8557433dbbcb1af7dd477bf2f"
+        "sha256": "a79ca05cbb41d09f8f0b6cd2390d38575df581b1eb01da1b273f8e510afcc8fe"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/index.es-BLD68h3p.js",
+        "path": "frontend/dist/assets/index-lnE_b1Lm.js",
+        "bytes": 39353,
+        "sha256": "e5076bb18095bd3d0377a7c2a0e4e3c9c3646842d031ad1a456dda14e6c51710"
+      },
+      {
+        "root": "source",
+        "path": "frontend/dist/assets/index.es-BQ9XIl04.js",
         "bytes": 159951,
-        "sha256": "74a4d2813dd6eda1efb5abca05b6f49c3106bc06c16c91394d33b6abaae5fe50"
+        "sha256": "a304e078d1690fe35f1d2bb7abbfc805b26ec6f3ff75ef6c2cf141bccc8ff56e"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/jspdf.es.min-BmlQcMZo.js",
+        "path": "frontend/dist/assets/jspdf.es.min-DscfasP2.js",
         "bytes": 384445,
-        "sha256": "976fa7fca38559adf056fc6d68243a11a30f907fbe7be4ba4aa59cb12706004f"
+        "sha256": "30733d346da50f5d4ba90ad27bb23f4c5171b2da292edf66443c66c252e3dabc"
       },
       {
         "root": "source",
@@ -4952,9 +4952,9 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/purify.es-CAi2OJFm.js",
-        "bytes": 30469,
-        "sha256": "8e143ee7bcdf076d62676183aacc62568c9adb8042c57d4fef7d62e1ca7c345a"
+        "path": "frontend/dist/assets/purify.es-DBIK8olT.js",
+        "bytes": 29400,
+        "sha256": "a9d2d63b75e213057d367d80b94a17cdaa0b9fb272b8b6b32e7f7aa9df27f836"
       },
       {
         "root": "source",
@@ -4970,9 +4970,9 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/walk-CBL-0-Cd.js",
+        "path": "frontend/dist/assets/walk-BMqSHMMv.js",
         "bytes": 33551,
-        "sha256": "af851d612a8de70e9019403383859b95974dd502ba28327fe5cd94e5c48af86b"
+        "sha256": "35f83db8e059f0fc32452c928c17e8cb7bb3f93936e3e7f4c6b576eae2300a28"
       },
       {
         "root": "source",
@@ -4982,33 +4982,33 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/walkRouteExport-B_xkToR2.js",
+        "path": "frontend/dist/assets/walkRouteExport-Cdgdg8sT.js",
         "bytes": 2653,
-        "sha256": "7858f05a4152b48019c003a9a13e56821877f5a48dcf107c51682dde0e1c35cd"
+        "sha256": "c28b14ebfbd01d8fdb7660e62147d1cf972273fa68f05ed1b7865c9fd51c4d36"
       },
       {
         "root": "source",
-        "path": "frontend/dist/assets/x-BRMeRhrv.js",
+        "path": "frontend/dist/assets/x-DMOu2Qkv.js",
         "bytes": 324,
-        "sha256": "fffba1f041379cc7ed015040b857e7e8e19b9bed1c9f8f3cc16fc8352b5163f2"
+        "sha256": "9a858ee9963ef1b83a2002f06932e16eb77207c685312485df1c7aa556965852"
       },
       {
         "root": "source",
         "path": "frontend/dist/brand/preview.css",
-        "bytes": 58,
-        "sha256": "e35c13401f1156462ec8fe82a8897c7d5524b1bc9ce2d5ff2890784517d8aa25"
+        "bytes": 59,
+        "sha256": "10278999233a871bf5720ad0b2ba2560773bb78aa408977aed0d316cc2a2112d"
       },
       {
         "root": "source",
         "path": "frontend/dist/brand/preview.html",
-        "bytes": 695,
-        "sha256": "ddde74efb2b42adae6fe8f5318bf35741467644d42ca01acb1bc8b9c61b02920"
+        "bytes": 698,
+        "sha256": "5547138d906cc7bbfe01ccb2d27a5a0b1433102bdd17a6a1a06e51c0553aae69"
       },
       {
         "root": "source",
         "path": "frontend/dist/brand/preview.js",
-        "bytes": 103,
-        "sha256": "8ff64bdc32ee0158cfe933f0d315864a936d34564ee7b4f538d94c584f57777c"
+        "bytes": 105,
+        "sha256": "2eca7e11921e30be87205da806f361512962f0bee61a09a621b917cb9607d1e5"
       },
       {
         "root": "source",
@@ -5043,20 +5043,20 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "source",
         "path": "frontend/dist/brand/terrier.css",
-        "bytes": 1654,
-        "sha256": "ffaf280a417eaee46f2539a0e327538add07d5e91632221fdeb07f0c22a245c4"
+        "bytes": 1672,
+        "sha256": "8ed2e335606d5feddd2c67b87058ea8643ceb44a37ae52cb66f8cdc57d5a6cde"
       },
       {
         "root": "source",
         "path": "frontend/dist/index.html",
-        "bytes": 1174,
-        "sha256": "2b3193b6110bb889c24933353b9c96a2cbce65167fb5e60c3aada6fdd9f75ce6"
+        "bytes": 1175,
+        "sha256": "0f87b4439580ba25c6c7f89691ea8ee20cc8c49e3033c2774ec1394c4ea8bc8c"
       },
       {
         "root": "source",
         "path": "frontend/dist/ocr/tesseract-6.0.1/LICENSE-tessdata.txt",
-        "bytes": 11357,
-        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        "bytes": 11558,
+        "sha256": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6"
       },
       {
         "root": "source",
@@ -5080,7 +5080,7 @@ const DISTRICT_PROGRAM_SPECS=freeze({
         "root": "source",
         "path": "frontend/dist/ocr/tesseract-6.0.1/asset-manifest.json",
         "bytes": 1357,
-        "sha256": "6067012eb0369efb4e6215ab265fa42491f7747e2793c96e906eddb2a516ea74"
+        "sha256": "07e062e149dbac6c3ec6e6b5c07f7a9614032ddc309a56b03a35e9e8c8485e18"
       },
       {
         "root": "source",
@@ -5330,6 +5330,12 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       },
       {
         "root": "source",
+        "path": "server/research/route_affiliation.py",
+        "bytes": 1344,
+        "sha256": "fa69cd21e2b47e703fab7e4b357329cfa6c3e83395566bde1924e54e8a26f248"
+      },
+      {
+        "root": "source",
         "path": "server/research/scoresdb.py",
         "bytes": 17135,
         "sha256": "2525f25c966edf36bf18c1cfcbf0be7637cd98a928935147695abcee30a213f4"
@@ -5481,8 +5487,8 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "source",
         "path": "server/research/walk_store.py",
-        "bytes": 27621,
-        "sha256": "72c7e36a3fab1d2133bdfb2d6f4995332447055792cd57e57b9a7050b6adab67"
+        "bytes": 27937,
+        "sha256": "ff694722108c237459102c911e3a6d79d36c293d24554e0361c4c7593991a33c"
       },
       {
         "root": "source",
@@ -5499,8 +5505,8 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "source",
         "path": "server/research/walk_views.py",
-        "bytes": 59992,
-        "sha256": "69627e0c5e2a6ee625a25ed7066ce1ec76e46a017853bac2fedfa2866f977a37"
+        "bytes": 60859,
+        "sha256": "7ea49e2676bc3da2c25ea1ec8b4f69776841d6a1184cbb0ae803a69b4be3a7a7"
       },
       {
         "root": "source",
@@ -5917,7 +5923,7 @@ const DISTRICT_PROGRAM_SPECS=freeze({
         "sha256": "2bf4e7a744568b9f18fdac2ff080f36e293d3cce044d869744cc0f701b05e64a"
       }
     ],
-    "programFingerprint": "fe17af29e8e7d785102c504cb84f43abe5f7f06eb7294225a1b32e60b6bd49ee"
+    "programFingerprint": "ec661836ae0fd6626cedec4cdbc6cf9b5915552bccc512d1edcec1e2296db7d0"
   }
 });
 module.exports=Object.freeze({APPLICATION_SPECS,WORKSPACE_APPLICATION_SPECS,DISTRICT_PROGRAM_SPECS});

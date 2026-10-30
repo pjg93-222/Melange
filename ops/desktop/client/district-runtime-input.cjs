@@ -10,7 +10,9 @@ const hash=value=>crypto.createHash('sha256').update(canonical(value)).digest('h
 function changed(){const error=new Error('The selected district changed before startup.');error.code=error.reason='context';return error;}
 function bindDistrictConfiguration(configuration,{profile,directory,district,files,verify,commit,close}){
  if(!configuration||INPUTS.has(configuration)||[verify,commit,close].some(value=>typeof value!=='function'))throw programFailure();
- const sourceDigest=districtSourceDigest(district,files),record={configuration:canonical(configuration),profile,directory,district,files:structuredClone(files),sourceDigest,verify,commit,close,closed:false,consumed:false};
+ // The digest and native frame must use the same canonical roster order. A
+ // signed provider roster may interleave snapshot files with the base roles.
+ const sourceDigest=districtSourceDigest(district,files),orderedFiles=structuredClone(files).sort((a,b)=>a.role<b.role?-1:1),record={configuration:canonical(configuration),profile,directory,district,files:orderedFiles,sourceDigest,verify,commit,close,closed:false,consumed:false};
  const release=async()=>{if(record.closed)return;record.closed=true;clearTimeout(record.timer);await close();};record.release=release;
  // A canceled caller that never reaches Runtime cannot hold verified handles.
  record.timer=setTimeout(()=>{release().catch(()=>{});},120000);record.timer.unref?.();

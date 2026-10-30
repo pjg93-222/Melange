@@ -36,6 +36,14 @@ test('changed exact configuration or installed programme refuses startup and rel
  const programme=fixture(t);fs.appendFileSync(path.join(programme.source,'app.py'),'# modified');assert.throws(()=>programme.consume(),{code:'program'});
  await new Promise(resolve=>setImmediate(resolve));assert.ok(changed.calls.includes('close'));assert.ok(programme.calls.includes('close'));
 });
+test('native frame uses the canonical roster order used by its source digest',async t=>{
+ const f=fixture(t),input=f.consume(),frame=JSON.parse(input.frame(f.roots,f.source).subarray(4));
+ // The fixture appends snapshots after walk.sqlite3, like the signed provider;
+ // Python requires the same lexicographic order that districtSourceDigest uses.
+ assert.deepEqual(frame.files.map(row=>row.role),frame.files.map(row=>row.role).sort());
+ const expected=crypto.createHash('sha256').update(require('../access-client.cjs').canonical({district:frame.district,files:frame.files})).digest('hex');
+ assert.equal(frame.sourceDigest,expected);
+});
 test('canceling an issued configuration closes it without activation; a clone cannot cancel its owner',async t=>{
  const f=fixture(t);assert.equal(await f.api.discardDistrictConfiguration(structuredClone(f.configuration)),false);assert.equal(await f.api.discardDistrictConfiguration(f.configuration),true);
  assert.equal(f.api.consumeDistrictConfiguration(f.runtime,f.configuration),null);assert.deepEqual(f.calls,['close']);
