@@ -646,6 +646,104 @@ def extract(seven, archive, destination, budget, *, reserve=RESERVE, archive_for
     return used
 
 
+def bounded_verifier_json(path, label):
+    path = Path(path).absolute()
+    with locked_input(path):
+        require(physical(path).st_size <= 1024**2, label+' exceeds its closed evidence bound')
+        return bounded_origin_json(path,limit=1024**2)
+
+
+def reused_builtin_extraction(*, args, installer, client, reference, seven):
+    """Resume only the exact33 literal-parser failure; all byte/signature gates still run."""
+    require(args.version == '1.0.33' and args.installer_format == 'builtin-nsis-v1',
+        'Extraction reuse is only supported for the closed33 builtin layout')
+    proof_path = Path(args.reuse_extraction).absolute()
+    proof = bounded_verifier_json(proof_path, 'extraction reuse proof')
+    fields = {'schemaVersion','purpose','appId','version','clientCommit','sourceCommit','installer',
+        'previousFailedReport','previousInvocation','previousVerifier','extractedApp','expectedReferenceSha256'}
+    require(type(proof) is dict and set(proof) == fields and type(proof['schemaVersion']) is int and proof['schemaVersion'] == 1
+        and proof['purpose'] == 'release33-builtin-extraction-reuse' and proof['appId'] == args.app
+        and proof['version'] == args.version and proof['clientCommit'] == args.client_commit
+        and proof['sourceCommit'] == args.source_commit, 'Extraction reuse identity differs')
+    def bound(row):
+        require(type(row) is dict and set(row) == {'path','bytes','sha256'} and type(row['path']) is str
+            and type(row['bytes']) is int and row['bytes'] > 0 and type(row['sha256']) is str
+            and re.fullmatch('[a-f0-9]{64}', row['sha256']), 'Invalid extraction reuse evidence reference')
+        path = Path(row['path']).absolute()
+        info = physical(path)
+        require(info.st_size == row['bytes'] and snapshot(path)[-1] == row['sha256'], 'Extraction reuse evidence changed')
+        return path
+    actual_installer = bound(proof['installer'])
+    require(identity(actual_installer) == identity(installer), 'Extraction reuse installer path differs')
+    prior_report_path, prior_invocation_path, prior_verifier = (bound(proof[name]) for name in
+        ('previousFailedReport','previousInvocation','previousVerifier'))
+    prior, invocation = bounded_verifier_json(prior_report_path, 'prior failed report'), bounded_verifier_json(prior_invocation_path, 'prior invocation')
+    require(prior.get('status') == 'failed' and prior.get('appId') == args.app and prior.get('version') == args.version
+        and prior.get('error') == 'Refused: Compiled JavaScript module table is not a closed literal',
+        'Extraction reuse requires the exact known literal-parser failure')
+    require(identity(prior_verifier) == identity(client.parent/'packaging/verify_native_release.py')
+        and invocation.get('verifierSha256') == proof['previousVerifier']['sha256']
+        and invocation.get('installerSha256') == proof['installer']['sha256']
+        and invocation.get('sourceClientCommit') == args.client_commit and invocation.get('sourceBackendCommit') == args.source_commit,
+        'Prior failed verifier/installer/source binding differs')
+    command = invocation.get('command')
+    require(type(command) is list and len(command) > 3 and command[1] == '-B'
+        and identity(command[2]) == identity(prior_verifier) and (len(command)-3)%2 == 0, 'Invalid prior native invocation')
+    options = {}
+    for key, value in zip(command[3::2], command[4::2]):
+        require(type(key) is str and key.startswith('--') and key not in options and type(value) is str,
+            'Ambiguous prior native invocation')
+        options[key] = value
+    for key in ('app','version','client-commit','source-commit'):
+        require(options.get('--'+key) == getattr(args,key.replace('-','_')), 'Prior native identity differs')
+    for key in ('installer','signing-receipt','program-directory','client','staged-sources','app-executable','app-asar','source-overlay','source-origin-proof'):
+        value = getattr(args,key.replace('-','_'),None)
+        require(value is not None and options.get('--'+key) is not None
+            and identity(options['--'+key]) == identity(value), 'Prior native input path differs: '+key)
+    recorded_inputs = {'signatureReceiptSha256':Path(args.signing_receipt),
+        'sourceOverlaySha256':Path(args.source_overlay),
+        'buildReceiptSha256':Path(str(installer)+'.build.json'),
+        'payloadBuildReceiptSha256':Path(args.app_executable).parent/'payload-build.json',
+        'baseProvenanceSha256':installer.parent/(args.app+'-1.0.33-base.provenance.json')}
+    require(all(invocation.get(key) == snapshot(path)[-1] for key,path in recorded_inputs.items()),
+        'Prior extraction signing/build/source inputs changed')
+    require(identity(options.get('--report','')) == identity(prior_report_path)
+        and identity(options.get('--output','')) == identity(prior['inspectionRetained']), 'Prior failed output/report differs')
+    app = proof['extractedApp']
+    require(type(app) is dict and set(app) == {'path','volume','fileId'} and type(app['path']) is str
+        and type(app['volume']) is int and type(app['fileId']) is int, 'Invalid reused app identity')
+    extracted = Path(app['path']).absolute()
+    require(identity(extracted) == identity(Path(prior['inspectionRetained'])/'app'), 'Reused app escaped prior inspection')
+    info = physical(extracted,True)
+    require((info.st_dev,info.st_ino) == (app['volume'],app['fileId']), 'Reused app physical identity changed')
+    expected_hash = hashlib.sha256(json.dumps(reference,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    require(proof['expectedReferenceSha256'] == expected_hash, 'Reused extraction reference map changed')
+    listing = legacy.run([seven,'l','-tNsis','-slt','-ba',installer]).decode('utf-8','strict').replace('\r\n','\n')
+    names, aliases = set(), set()
+    for block in listing.strip().split('\n\n'):
+        row = dict(line.split(' = ',1) for line in block.splitlines() if ' = ' in line)
+        if 'Path' not in row:continue
+        name = legacy.safe_name(row['Path'])
+        require(name.casefold() not in aliases and not any(k in row for k in ('Symbolic Link','Hard Link')),
+            'Reused archive contains linked/aliased members')
+        aliases.add(name.casefold())
+        require(len(aliases) <= 200000, 'Reused archive exceeds member bound')
+        if row.get('Folder') == '+' or row.get('Attributes','').startswith('D'):continue
+        require(name in reference and row.get('Size','') in ('',str(reference[name]['size'])), 'Reused archive member/size differs')
+        names.add(name)
+    require(names == set(reference), 'Reused archive roster differs from complete signed reference')
+    files, pes, mapping = scan(extracted)
+    same_tree(mapping,reference,'Reused complete signed application')
+    final = physical(extracted,True)
+    require((final.st_dev,final.st_ino) == (app['volume'],app['fileId']), 'Reused app changed during verification')
+    record = {'status':'passed-reused-extraction-full-byte-revalidation','freshUnpackPerformed':False,
+        'proof':{'path':str(proof_path),'sha256':legacy.digest(proof_path)},'appPhysicalIdentity':app,
+        'priorFailedReport':proof['previousFailedReport'],'priorInvocation':proof['previousInvocation'],
+        'installerSha256':proof['installer']['sha256'],'expectedReferenceSha256':expected_hash,
+        'freshArchiveRosterVerified':True,'currentWholeTreeMatchesReference':True}
+    return extracted, files, pes, mapping, record
+
+
 def same_tree(actual, expected, label):
     require(actual == expected, label + " file census or bytes differ")
 
@@ -704,7 +802,7 @@ def asar_member_bytes(archive, name):
         return raw
 
 
-def compiled_module_tables(*, app, javascript, python, program_map, config):
+def legacy_compiled_module_tables(*, app, javascript, python, program_map, config):
     """Join both compiled authorities to the actual packaged program, not its source inventory."""
     text = javascript.decode("utf-8-sig")
     matches = list(re.finditer(r"\bconst\s+APPLICATION_SPECS\s*=\s*freeze\(\s*", text))
@@ -786,22 +884,158 @@ def compiled_module_tables(*, app, javascript, python, program_map, config):
             "literalTablesEqual": True, "matchesActualPackagedProgram": True}
 
 
+COMPILED_TABLE_NAMES = ("APPLICATION_SPECS", "WORKSPACE_APPLICATION_SPECS", "DISTRICT_PROGRAM_SPECS")
+COMPILED_TABLE_PREAMBLE = ("'use strict';\n"
+    "// Compiled, reviewed program identities; never loaded from data or settings.\n"
+    "// This literal declaration is the sole recursive native table exclusion.\n"
+    "function freeze(value){if(value&&typeof value==='object'){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}\n")
+
+
+def compiled_module_tables(*, app, javascript, python, program_map, config):
+    text = javascript.decode("utf-8-sig").replace("\r\n", "\n")
+    if not re.search(r"\b(?:WORKSPACE_APPLICATION_SPECS|DISTRICT_PROGRAM_SPECS)\b", text):
+        return legacy_compiled_module_tables(app=app, javascript=javascript, python=python,
+            program_map=program_map, config=config)
+    require(text.startswith(COMPILED_TABLE_PREAMBLE), "Compiled JavaScript table preamble contains extra code")
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            require(key not in result, "Compiled table has duplicate JSON keys")
+            result[key] = value
+        return result
+    decoder = json.JSONDecoder(object_pairs_hook=unique)
+    position, js = len(COMPILED_TABLE_PREAMBLE), {}
+    for name in COMPILED_TABLE_NAMES:
+        match = re.match(r"\s*const\s+" + name + r"\s*=\s*freeze\(\s*", text[position:])
+        require(match is not None, "Compiled table assignment is missing, duplicated or out of order")
+        value, end = decoder.raw_decode(text, position + match.end())
+        closing = re.match(r"\s*\);", text[end:])
+        require(closing is not None, "Compiled table assignment contains executable selectors")
+        js[name], position = value, end + closing.end()
+    require(re.fullmatch(r"\s*module\.exports=Object\.freeze\(\{APPLICATION_SPECS,WORKSPACE_APPLICATION_SPECS,DISTRICT_PROGRAM_SPECS\}\);\s*", text[position:]),
+        "Compiled JavaScript exports contain unknown tables or extra code")
+    def literal(node):
+        if isinstance(node, ast.Call):
+            require(isinstance(node.func, ast.Name) and node.func.id == "MappingProxyType" and len(node.args) == 1 and not node.keywords,
+                "Compiled Python table contains executable selectors")
+            return literal(node.args[0])
+        if isinstance(node, ast.Dict):
+            keys = [literal(key) for key in node.keys]
+            require(all(type(key) is str for key in keys) and len(keys) == len(set(keys)), "Compiled Python table has duplicate keys")
+            return dict(zip(keys, (literal(value) for value in node.values)))
+        if isinstance(node, (ast.List, ast.Tuple)):
+            return [literal(value) for value in node.elts]
+        if isinstance(node, ast.Constant) and type(node.value) in (str, int, bool, type(None)):
+            return node.value
+        raise Refused("Compiled Python table is not a closed literal")
+    body = ast.parse(python.decode("utf-8-sig")).body
+    if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant):
+        require(body[0].value.value == "Literal installed-program declarations. No data, factories or downloaded selectors.",
+            "Compiled Python table has an unknown preamble")
+        body = body[1:]
+    require(len(body) == 4 and isinstance(body[0], ast.ImportFrom) and body[0].module == "types" and body[0].level == 0
+        and [(x.name, x.asname) for x in body[0].names] == [("MappingProxyType", None)], "Compiled Python table contains extra code")
+    py = {}
+    for name, node in zip(COMPILED_TABLE_NAMES, body[1:]):
+        require(isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+            and node.targets[0].id == name, "Compiled Python table assignment is unknown or duplicated")
+        py[name] = literal(node.value)
+    require(json.dumps(js,sort_keys=True,separators=(',',':')) == json.dumps(py,sort_keys=True,separators=(',',':')) and all(type(js[name]) is dict for name in COMPILED_TABLE_NAMES), "Compiled JavaScript/Python tables disagree")
+    require(set(js['APPLICATION_SPECS']) == set(js['WORKSPACE_APPLICATION_SPECS']) == {'melange', 'mentat'}
+        and set(js['DISTRICT_PROGRAM_SPECS']) == {'terrier'}, "Compiled application table membership differs")
+    common = {'schemaVersion', 'appId', 'programFiles', 'programFingerprint'}
+    extended = common | {'contractId', 'requiredKinds', 'publicReaders', 'privateBoundaries', 'startupTimeoutMs'}
+    def check(spec, selected_app, contract=None):
+        require(type(spec) is dict and set(spec) == (extended if contract else common)
+            and type(spec['schemaVersion']) is int and spec['schemaVersion'] == 1 and spec['appId'] == selected_app,
+            'Invalid compiled application identity')
+        if contract:
+            require(spec['contractId'] == selected_app + contract and type(spec['startupTimeoutMs']) is int
+                and 1000 <= spec['startupTimeoutMs'] <= 600000, 'Invalid compiled application contract')
+            for field in ('requiredKinds', 'publicReaders', 'privateBoundaries'):
+                values = spec[field]
+                require(type(values) is list and 0 < len(values) <= 32 and all(type(value) is str and 0 < len(value) <= 160 for value in values) and len(set(values)) == len(values), 'Invalid compiled contract selectors')
+        files, seen, total = spec['programFiles'], set(), 0
+        require(type(files) is list and 0 < len(files) <= 512, 'Invalid compiled program table')
+        for row in files:
+            require(type(row) is dict and set(row) == {'root', 'path', 'bytes', 'sha256'}
+                and row['root'] in ('source', 'bootstrap') and type(row['path']) is str and 0 < len(row['path']) <= 400
+                and all(re.fullmatch(r'[A-Za-z0-9_-][A-Za-z0-9._-]{0,127}', part) and not part.endswith('.') for part in row['path'].split('/'))
+                and type(row['bytes']) is int and 0 <= row['bytes'] <= 16 * 1024**2
+                and type(row['sha256']) is str and re.fullmatch('[a-f0-9]{64}', row['sha256']), 'Invalid compiled program descriptor')
+            key = row['root'] + '/' + row['path'].lower()
+            require(key not in seen and not row['path'].endswith(('module_application_inventory.py', 'module-application-inventory.cjs')),
+                'Duplicate or recursive compiled descriptor')
+            seen.add(key); total += row['bytes']
+            if selected_app == app:
+                prefix = 'resources/runtime/' + app + ('/sources/' if row['root'] == 'source' else '/bootstrap/')
+                require(program_map.get(prefix + row['path']) == {'size': row['bytes'], 'sha256': row['sha256']},
+                    'Compiled descriptor differs from actual packaged bytes: ' + key)
+        ordered = sorted(files, key=lambda row: (row['root'], row['path']))
+        fingerprint = hashlib.sha256(json.dumps(ordered, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        require(total <= 64 * 1024**2 and fingerprint == spec['programFingerprint'], 'Compiled program fingerprint/budget differs')
+        return total
+    totals = {}
+    for selected_app in ('melange', 'mentat'):
+        public, workspace = js['APPLICATION_SPECS'][selected_app], js['WORKSPACE_APPLICATION_SPECS'][selected_app]
+        totals[selected_app] = check(public, selected_app, '.public-data.v1')
+        check(workspace, selected_app, '.workspace.v1')
+        require(public['programFiles'] == workspace['programFiles'] and public['programFingerprint'] == workspace['programFingerprint'],
+            'Public/workspace program closures differ')
+    totals['terrier'] = check(js['DISTRICT_PROGRAM_SPECS']['terrier'], 'terrier')
+    require(app in totals, 'Unknown compiled application')
+    spec = js['DISTRICT_PROGRAM_SPECS']['terrier'] if app == 'terrier' else js['APPLICATION_SPECS'][app]
+    modes = config.get('desktopPublicData', {})
+    require(type(modes) is dict and modes.get(app) in (None, 'paged-v1') and (modes.get(app) != 'paged-v1' or app == 'melange'),
+        'Unsupported packaged public data mode')
+    workspace_modes = config.get('desktopWorkspaceData', {})
+    require(type(workspace_modes) is dict and workspace_modes.get(app) in (None, 'workspace-v1') and (app != 'terrier' or not workspace_modes),
+        'Unsupported packaged workspace mode')
+    access, authentication = config.get('desktopAccessMode', 'managed'), config.get('desktopAuthentication', 'password')
+    require(access in ('standalone', 'managed') and authentication in ('windows', 'password')
+        and (authentication != 'windows' or access == 'standalone'), 'Invalid packaged authentication mode')
+    result = {'status':'passed', 'appId':app, 'programFingerprint':spec['programFingerprint'], 'programFileCount':len(spec['programFiles']),
+        'programBytes':totals[app], 'javascriptSha256':hashlib.sha256(javascript).hexdigest(), 'pythonSha256':hashlib.sha256(python).hexdigest(),
+        'publicDataMode':modes.get(app), 'workspaceDataMode':workspace_modes.get(app), 'accessMode':access, 'authentication':authentication,
+        'contractId':spec.get('contractId'), 'requiredKinds':spec.get('requiredKinds', []),
+        'literalTablesEqual':True, 'literalTableNames':list(COMPILED_TABLE_NAMES), 'matchesActualPackagedProgram':True}
+    if app == 'melange' and modes.get(app) == 'paged-v1':
+        result['contractId'] = 'melange.public-data.pages.v1'
+        result['requiredKinds'] = ['melange.official-payroll-pages.v1']
+    if app != 'terrier':
+        workspace = js['WORKSPACE_APPLICATION_SPECS'][app]
+        result['workspaceContract'] = {key:workspace[key] for key in ('contractId','programFingerprint','requiredKinds')}
+        result['workspaceContract']['programFileCount'] = len(workspace['programFiles'])
+    return result
+
+
 def compiled_module_runtime(*, app, client, extracted, expected):
     """Construct the real, byte-bound client contract without launching an application or backend."""
     script = r'''
 const fs=require('node:fs'),path=require('node:path');
 const request=JSON.parse(fs.readFileSync(0,'utf8'));
 const {Runtime}=require(path.join(request.client,'runtime.cjs'));
-const {withCompiledApplicationContract}=require(path.join(request.client,'module-data-startup.cjs'));
-const {createRuntimeModuleBoundary}=require(path.join(request.client,'module-data-runtime-boundary.cjs'));
+const {withCompiledApplicationContract,withCompiledWorkspaceApplicationContract}=require(path.join(request.client,'module-data-startup.cjs'));
+const {createRuntimeModuleBoundary,createRuntimeWorkspaceBoundary}=require(path.join(request.client,'module-data-runtime-boundary.cjs'));
 const runtime=new Runtime(request.app,request.profile,request.resources,{allowStandalone:request.accessMode==='standalone',authentication:request.authentication});
-const result=withCompiledApplicationContract(request.app,{runtime,resources:request.resources,publicDataMode:request.mode},(contract,proof)=>{
+const context={runtime,resources:request.resources,publicDataMode:request.mode};
+const describe=contract=>({status:'passed',contractId:contract.contractId,programFingerprint:contract.programFingerprint,
+ programFileCount:contract.programFiles.length,requiredKinds:contract.requiredKinds,boundarySupported:true});
+const result=withCompiledApplicationContract(request.app,context,(contract,proof)=>{
  if(!contract)throw new Error('Packaged application contract is unsupported');
+ if(request.workspaceMode==='workspace-v1')return withCompiledWorkspaceApplicationContract(request.app,context,(workspaceContract,workspaceProof)=>{
+  if(!workspaceContract)throw new Error('Packaged workspace contract is unsupported');
+  const boundary=createRuntimeWorkspaceBoundary({appId:request.app,profile:request.profile,publicContract:contract,workspaceContract,
+   publicConstructionProof:proof,workspaceConstructionProof:workspaceProof,getRuntime:()=>runtime,getSelected:()=>({}),
+   authorize:async()=>{throw new Error('Acceptance never authorizes a launch');}});
+  if(!boundary||boundary.supportsContracts(contract,workspaceContract)!==true||boundary.supportsContracts(contract,workspaceContract)!==true)
+   throw new Error('Packaged paired native boundary rejects its contracts');
+  return {...describe(contract),pairedBoundarySupported:true,workspaceContract:describe(workspaceContract)};
+ });
  const boundary=createRuntimeModuleBoundary({appId:request.app,profile:request.profile,contract,constructionProof:proof,
-   getRuntime:()=>runtime,getSelected:()=>({}),authorize:async()=>{throw new Error('Acceptance never authorizes a launch');}});
+  getRuntime:()=>runtime,getSelected:()=>({}),authorize:async()=>{throw new Error('Acceptance never authorizes a launch');}});
  if(!boundary||boundary.supportsContract(contract)!==true||boundary.supportsContract(contract)!==true)throw new Error('Packaged native boundary rejects its contract');
- return {status:'passed',contractId:contract.contractId,programFingerprint:contract.programFingerprint,
-   programFileCount:contract.programFiles.length,requiredKinds:contract.requiredKinds,boundarySupported:true};
+ return describe(contract);
 });
 process.stdout.write(JSON.stringify(result));
 '''
@@ -809,7 +1043,7 @@ process.stdout.write(JSON.stringify(result));
     require(node is not None, "Node is required for the packaged application-contract acceptance")
     request = {"app": app, "client": str(client), "resources": str(extracted / "resources"),
                "profile": str(extracted.parent / "unused-module-acceptance-profile"),
-               "mode": expected["publicDataMode"], "accessMode": expected["accessMode"],
+               "mode": expected["publicDataMode"], "workspaceMode": expected.get("workspaceDataMode"), "accessMode": expected["accessMode"],
                "authentication": expected["authentication"]}
     result = subprocess.run([node, "-e", script], input=json.dumps(request).encode(), capture_output=True,
                             timeout=120, creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
@@ -818,6 +1052,12 @@ process.stdout.write(JSON.stringify(result));
     require(value.get("status") == "passed" and value.get("boundarySupported") is True
             and all(value.get(key) == expected[key] for key in ("contractId", "programFingerprint", "programFileCount", "requiredKinds")),
             "Actual packaged application contract differs from compiled-table acceptance")
+    if expected.get("workspaceDataMode") == "workspace-v1":
+        workspace = value.get("workspaceContract", {})
+        require(value.get("pairedBoundarySupported") is True and workspace.get("status") == "passed" and workspace.get("boundarySupported") is True
+            and all(workspace.get(key) == expected["workspaceContract"][key]
+                for key in ("contractId", "programFingerprint", "programFileCount", "requiredKinds")),
+            "Actual packaged workspace contract differs from compiled-table acceptance")
     return {**value, "scope": "Real byte-bound packaged client contract and Runtime roots; no backend/UI/profile writes",
             "clientSource": "Frozen client bytes already matched to actual ASAR by verify_sources",
             "programRoots": "Actual extracted native program"}
@@ -876,7 +1116,7 @@ def verify_sources(*, app, version, program_files, program_map, members, client,
     actual_boot = {name[len(prefix + "bootstrap/"):]: value for name, value in program_map.items() if name.startswith(prefix + "bootstrap/")}
     same_tree(actual_boot, expected_boot, "Frozen runtime bootstrap")
     module_table = {"status": "not-applicable", "reason": "district-application-or-legacy-client"}
-    if app in ("melange", "mentat"):
+    if app in ("melange", "mentat") or (app == "terrier" and version == "1.0.33"):
         name = "module-application-inventory.cjs"
         python_name = prefix + "bootstrap/module_application_inventory.py"
         declares_modules = name in members or python_name in program_files
@@ -1008,6 +1248,24 @@ def verify(args):
         paths.append(staged.parent / "source-provenance.json")
         if getattr(args, "source_origin_proof", None):
             paths.append(Path(args.source_origin_proof).absolute())
+    if getattr(args,'reuse_extraction',None):
+        reuse_proof=bounded_verifier_json(Path(args.reuse_extraction),'extraction reuse proof')
+        paths.extend([Path(args.reuse_extraction),*(Path(reuse_proof[key]['path']) for key in ('previousFailedReport','previousInvocation','previousVerifier'))])
+    verification_authority = None
+    if getattr(args,'verification_authority',None):
+        authority_path = Path(args.verification_authority).absolute()
+        authority = bounded_verifier_json(authority_path,'verifier authority')
+        require(args.version == '1.0.33' and authority.get('purpose') == 'release33-separate-verifier-authority'
+            and authority.get('productionClientCommit') == args.client_commit
+            and type(authority.get('verificationCommit')) is str and re.fullmatch('[a-f0-9]{40}',authority['verificationCommit']),
+            'Verifier Git authority does not bind this production payload')
+        own = authority.get('verifier') or {}
+        require(set(own) == {'path','bytes','sha256'} and identity(own['path']) == identity(__file__)
+            and own['bytes'] == physical(Path(__file__)).st_size and own['sha256'] == snapshot(Path(__file__))[-1],
+            'Verifier source differs from frozen verification authority')
+        paths.append(authority_path)
+        verification_authority = {'path':str(authority_path),'sha256':legacy.digest(authority_path),
+            'verificationCommit':authority['verificationCommit'],'productionClientCommit':args.client_commit,'verifier':own}
     inputs = {str(file): snapshot(file) for file in paths}
     reference_files, reference_pes, reference = scan(program)
     original_reference = dict(reference)
@@ -1024,7 +1282,8 @@ def verify(args):
               "archiveReader": reader, "installerFormat": installer_format,
               "referenceOverlays": {name: str(Path(value).absolute()) for name, value in overlays.items() if value},
               "sourceOverlay": source_binding,
-              "runtimeExecution": "not performed", "recipientPolicyAcceptance": "not tested"}
+              "runtimeExecution": "not performed", "recipientPolicyAcceptance": "not tested",
+              "verificationAuthority": verification_authority}
     with locked_input(installer), contextlib.ExitStack() as locks:
         for file in tool_inputs:
             locks.enter_context(locked_input(file))
@@ -1034,10 +1293,17 @@ def verify(args):
         if installer_format == "builtin-nsis-v1":
             # The container directly holds the program. Extract/census once;
             # there are no install-time plugin DLLs or nested payload archive.
-            outer = extracted = output / "app"
-            used = extract(seven, installer, extracted, MAX_EXPANDED, reserve=reserve,
-                           archive_format="Nsis", expected_files=reference)
-            app_files, app_pes, app_map = scan(extracted)
+            if getattr(args,'reuse_extraction',None):
+                extracted, app_files, app_pes, app_map, reused = reused_builtin_extraction(
+                    args=args,installer=installer,client=client,reference=reference,seven=seven)
+                outer = extracted
+                used = sum(row['size'] for row in app_map.values())
+                report['extractionReuse'] = reused
+            else:
+                outer = extracted = output / "app"
+                used = extract(seven, installer, extracted, MAX_EXPANDED, reserve=reserve,
+                               archive_format="Nsis", expected_files=reference)
+                app_files, app_pes, app_map = scan(extracted)
             nsis_files, nsis_pes, nsis_map = app_files, app_pes, app_map
         else:
             outer, extracted = output / "nsis", output / "app"
@@ -1069,7 +1335,7 @@ def verify(args):
         check_verdicts(rows, items, expected, app_map, nsis_map, args.app, args.version)
         module_acceptance = None
         compiled = source_evidence["compiledModuleTable"]
-        if compiled["status"] == "passed":
+        if compiled["status"] == "passed" and args.app in ("melange", "mentat"):
             print(json.dumps({"phase": "actual-compiled-module-contract", "appId": args.app,
                               "publicDataMode": compiled["publicDataMode"]}), flush=True)
             module_acceptance = compiled_module_runtime(app=args.app, client=client,
@@ -1122,6 +1388,8 @@ def main(argv=None):
     for name in ("version", "installer", "signing-receipt", "program-directory", "client", "staged-sources",
                  "client-commit", "source-commit", "trust-descriptor", "seven-zip", "output", "report"):
         parser.add_argument("--" + name, required=True)
+    parser.add_argument("--verification-authority", help="Exact separately frozen Git verifier authority; production client commit remains unchanged")
+    parser.add_argument("--reuse-extraction", help="Closed33 builtin-only proof binding exact prior failed extraction; all native gates still run")
     parser.add_argument("--source", help="Original frozen source export (provenance; transformed bytes use --staged-sources)")
     parser.add_argument("--app-executable", help="Explicit signed main-executable overlay used by the built-in installer")
     parser.add_argument("--app-asar", help="Explicit ASAR overlay used by the built-in installer")

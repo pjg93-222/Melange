@@ -838,6 +838,67 @@ class CompiledModuleBridgeFixture(unittest.TestCase):
         return n.compiled_module_tables(app=app, javascript=javascript, python=python,
             program_map=self.mapping, config={"desktopPublicData": {app: mode}} if mode else {})
 
+    def three_tables(self, *, js_change=None, py_change=None):
+        public = copy.deepcopy(self.specs)
+        workspace = copy.deepcopy(public)
+        for app, spec in workspace.items():
+            spec['contractId'] = app + '.workspace.v1'
+            spec['requiredKinds'] = [app + '.workspace-fixture.v1']
+        district = {'terrier': {'schemaVersion':1, 'appId':'terrier', 'programFiles':copy.deepcopy(self.rows),
+            'programFingerprint':self.fingerprint(self.rows)}}
+        tables = dict(zip(n.COMPILED_TABLE_NAMES, (public, workspace, district)))
+        py = copy.deepcopy(tables)
+        if js_change:js_change(tables)
+        if py_change:py_change(py)
+        js = n.COMPILED_TABLE_PREAMBLE + ''.join('const '+name+'=freeze('+json.dumps(tables[name])+');\n' for name in n.COMPILED_TABLE_NAMES)
+        js += 'module.exports=Object.freeze({APPLICATION_SPECS,WORKSPACE_APPLICATION_SPECS,DISTRICT_PROGRAM_SPECS});\n'
+        python = 'from types import MappingProxyType\n' + ''.join(name+'=MappingProxyType('+repr(py[name])+')\n' for name in n.COMPILED_TABLE_NAMES)
+        return js.encode(), python.encode()
+
+    def check_three(self, javascript=None, python=None, *, app='mentat'):
+        if javascript is None:javascript, python = self.three_tables()
+        mapping = dict(self.mapping)
+        for key, value in self.mapping.items():mapping[key.replace('/mentat/', '/terrier/')] = value
+        return n.compiled_module_tables(app=app, javascript=javascript, python=python, program_map=mapping,
+            config={'desktopAccessMode':'standalone','desktopAuthentication':'windows',
+                'desktopWorkspaceData':{app:'workspace-v1'} if app!='terrier' else {}})
+
+    def test_three_literal_tables_bind_public_workspace_and_actual_district_program(self):
+        for app in ('melange','mentat','terrier'):
+            with self.subTest(app=app):
+                result=self.check_three(app=app)
+                self.assertTrue(result['matchesActualPackagedProgram'])
+                self.assertEqual(result['literalTableNames'],list(n.COMPILED_TABLE_NAMES))
+                if app!='terrier':self.assertEqual(result['workspaceContract']['contractId'],app+'.workspace.v1')
+
+    def test_three_literals_reject_extra_code_unknown_duplicate_and_omitted_tables(self):
+        js, py=self.three_tables()
+        for bad in (b'doNotExecute();'+js, js+b'doNotExecute();',
+                js.replace(b'DISTRICT_PROGRAM_SPECS});',b'DISTRICT_PROGRAM_SPECS,UNKNOWN});'),
+                js.replace(b'const WORKSPACE_APPLICATION_SPECS=',b'const APPLICATION_SPECS='),
+                js.replace(b'const DISTRICT_PROGRAM_SPECS=',b'const UNKNOWN=')):
+            with self.subTest(bad=bad[-90:]):
+                with self.assertRaises(n.Refused):self.check_three(bad,py)
+        with self.assertRaises(n.Refused):self.check_three(js,py+b'runUnknown()\n')
+
+    def test_three_literals_reject_python_boolean_integer_parity_and_relative_import(self):
+        js, py=self.three_tables(py_change=lambda t:t['APPLICATION_SPECS']['mentat'].__setitem__('schemaVersion',True))
+        with self.assertRaisesRegex(n.Refused,'disagree'):self.check_three(js,py)
+        js, py=self.three_tables()
+        with self.assertRaises(n.Refused):self.check_three(js,py.replace(b'from types',b'from .types'))
+        duplicate_js=js.replace(b'"schemaVersion": 1',b'"schemaVersion": 1,"schemaVersion": 1',1)
+        with self.assertRaisesRegex(n.Refused,'duplicate'):self.check_three(duplicate_js,py)
+        text=py.decode().replace("'schemaVersion': 1", "'schemaVersion': 1, 'schemaVersion': 1",1)
+        with self.assertRaisesRegex(n.Refused,'duplicate'):self.check_three(js,text.encode())
+
+    def test_three_literals_reject_mismatched_or_forged_workspace_and_district_tables(self):
+        cases=[lambda t:t['WORKSPACE_APPLICATION_SPECS']['mentat'].__setitem__('programFingerprint','f'*64),
+            lambda t:t['DISTRICT_PROGRAM_SPECS']['terrier']['programFiles'][0].__setitem__('sha256','f'*64)]
+        for change in cases:
+            with self.subTest(change=change):
+                with self.assertRaises(n.Refused):self.check_three(*self.three_tables(js_change=change))
+                with self.assertRaises(n.Refused):self.check_three(*self.three_tables(js_change=change,py_change=change))
+
     def test_real_file_map_and_both_literals_agree(self):
         result = self.check()
         self.assertEqual(result["status"], "passed")
@@ -905,6 +966,141 @@ class CompiledModuleBridgeFixture(unittest.TestCase):
         self.assertEqual(n.asar_member_bytes(archive, "module-application-inventory.cjs"), javascript)
         with self.assertRaisesRegex(n.Refused, "Missing or redirected"):
             n.asar_member_bytes(archive, "missing.cjs")
+
+
+class ReusedBuiltinExtractionFixture(unittest.TestCase):
+    """Only the external 7z listing is simulated; all physical byte checks run."""
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name).resolve()
+        self.client = self.root / 'frozen/ops/desktop/client'
+        self.client.mkdir(parents=True)
+        self.previous_verifier = self.client.parent / 'packaging/verify_native_release.py'
+        self.previous_verifier.parent.mkdir()
+        self.previous_verifier.write_bytes(b'production2122 verifier fixture; never executed')
+        self.installer = self.root / 'Mentat-1.0.33-win-x64.exe'
+        self.installer.write_bytes(b'closed33 builtin installer fixture; never executed')
+        self.program = self.root / 'reference-program'
+        self.previous_output = self.root / 'previous-inspection'
+        self.extracted = self.previous_output / 'app'
+        self.payload = {'Mentat.exe': pe(b'reused main PE'), 'resources/app.asar': b'closed client fixture',
+                        'resources/runtime/mentat/bootstrap/desktop_backend.py': b'closed bootstrap fixture'}
+        NativeFixture.write_files(self.program, self.payload)
+        NativeFixture.write_files(self.extracted, self.payload)
+        self.reference = n.scan(self.program)[2]
+        self.paths = {}
+        for key, name in (('signing_receipt','signatures.json'), ('source_overlay','overlay.json'),
+                          ('source_origin_proof','origin.json')):
+            self.paths[key] = self.root / name
+            self.paths[key].write_bytes(b'{"closed":"fixture"}')
+        self.paths['staged_sources'] = self.root / 'staged-sources'
+        self.paths['staged_sources'].mkdir()
+        self.paths['app_executable'] = self.root / 'overlay/Mentat.exe'
+        self.paths['app_executable'].parent.mkdir()
+        self.paths['app_executable'].write_bytes(self.payload['Mentat.exe'])
+        self.paths['app_asar'] = self.root / 'overlay/app.asar'
+        self.paths['app_asar'].write_bytes(self.payload['resources/app.asar'])
+        self.build_receipts = {
+            'signatureReceiptSha256': self.paths['signing_receipt'],
+            'sourceOverlaySha256': self.paths['source_overlay'],
+            'buildReceiptSha256': Path(str(self.installer) + '.build.json'),
+            'payloadBuildReceiptSha256': self.paths['app_executable'].parent / 'payload-build.json',
+            'baseProvenanceSha256': self.root / 'mentat-1.0.33-base.provenance.json'}
+        for path in self.build_receipts.values():
+            if not path.exists():path.write_bytes(b'{"bound":"input"}')
+        self.prior_report_path = self.root / 'previous-failed-report.json'
+        self.prior_report = {'status':'failed','appId':'mentat','version':'1.0.33',
+            'error':'Refused: Compiled JavaScript module table is not a closed literal',
+            'inspectionRetained':str(self.previous_output)}
+        self.prior_report_path.write_text(json.dumps(self.prior_report))
+        self.proof_path = self.root / 'reuse.json'
+        self.args = SimpleNamespace(app='mentat',version='1.0.33',installer=str(self.installer),client_commit='c'*40,
+            source_commit='b'*40,installer_format='builtin-nsis-v1',reuse_extraction=str(self.proof_path),
+            program_directory=str(self.program),client=str(self.client),**{key:str(value) for key,value in self.paths.items()})
+        command = ['python.exe','-B',str(self.previous_verifier)]
+        values = {'app':'mentat','version':'1.0.33','client-commit':self.args.client_commit,
+            'source-commit':self.args.source_commit,'installer':str(self.installer),
+            'program-directory':str(self.program),'client':str(self.client),
+            'report':str(self.prior_report_path),'output':str(self.previous_output),
+            **{key.replace('_','-'):str(value) for key,value in self.paths.items()}}
+        for key,value in values.items():command += ['--'+key,value]
+        self.invocation_path = self.root / 'previous-invocation.json'
+        self.invocation = {'command':command,'verifierSha256':self.ref(self.previous_verifier)['sha256'],
+            'installerSha256':self.ref(self.installer)['sha256'],'sourceClientCommit':self.args.client_commit,
+            'sourceBackendCommit':self.args.source_commit,
+            **{key:self.ref(value)['sha256'] for key,value in self.build_receipts.items()}}
+        self.invocation_path.write_text(json.dumps(self.invocation))
+        info = self.extracted.stat()
+        self.proof = {'schemaVersion':1,'purpose':'release33-builtin-extraction-reuse','appId':'mentat',
+            'version':'1.0.33','clientCommit':self.args.client_commit,'sourceCommit':self.args.source_commit,
+            'installer':self.ref(self.installer),'previousFailedReport':self.ref(self.prior_report_path),
+            'previousInvocation':self.ref(self.invocation_path),'previousVerifier':self.ref(self.previous_verifier),
+            'extractedApp':{'path':str(self.extracted),'volume':info.st_dev,'fileId':info.st_ino},
+            'expectedReferenceSha256':hashlib.sha256(json.dumps(self.reference,sort_keys=True,separators=(',',':')).encode()).hexdigest()}
+        self.persist()
+        self.listing = '\n\n'.join('Path = '+name+'\nSize = '+str(row['size'])+'\nFolder = -'
+                                  for name,row in self.reference.items()).encode()
+
+    @staticmethod
+    def ref(path):
+        return {'path':str(path),'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
+
+    def persist(self):
+        self.proof_path.write_text(json.dumps(self.proof))
+
+    def check(self):
+        with mock.patch.object(n.legacy,'run',return_value=self.listing):
+            return n.reused_builtin_extraction(args=self.args,installer=self.installer,
+                client=self.client,reference=self.reference,seven='7z-listing-fixture')
+
+    def test_exact_prior_failure_rechecks_actual_complete_bytes(self):
+        extracted, _files, _pes, mapping, receipt = self.check()
+        self.assertEqual(extracted,self.extracted)
+        self.assertEqual(mapping,self.reference)
+        self.assertEqual(receipt['status'],'passed-reused-extraction-full-byte-revalidation')
+        self.assertFalse(receipt['freshUnpackPerformed'])
+
+    def test_different_installer_path_is_rejected_even_with_identical_bytes(self):
+        other = self.root / 'other-installer.exe'
+        other.write_bytes(self.installer.read_bytes())
+        self.proof['installer'] = self.ref(other)
+        self.persist()
+        with self.assertRaisesRegex(n.Refused,'installer path differs'):self.check()
+
+    def test_other_prior_failure_is_rejected_after_rebinding_evidence_hash(self):
+        self.prior_report['error'] = 'Refused: unrelated verification failure'
+        self.prior_report_path.write_text(json.dumps(self.prior_report))
+        self.proof['previousFailedReport'] = self.ref(self.prior_report_path)
+        self.persist()
+        with self.assertRaisesRegex(n.Refused,'exact known literal-parser failure'):self.check()
+
+    def test_swapped_extracted_directory_identity_is_rejected(self):
+        self.proof['extractedApp']['fileId'] += 1
+        self.persist()
+        with self.assertRaisesRegex(n.Refused,'physical identity changed'):self.check()
+
+    def test_modified_extracted_payload_is_rejected_by_real_scan(self):
+        target = self.extracted / 'resources/app.asar'
+        target.write_bytes(b'x' * target.stat().st_size)
+        with self.assertRaisesRegex(n.Refused,'Reused complete signed application file census or bytes differ'):self.check()
+
+    def test_extra_extracted_payload_is_rejected_by_real_scan(self):
+        (self.extracted / 'unexpected.bin').write_bytes(b'unapproved extra file')
+        with self.assertRaisesRegex(n.Refused,'Reused complete signed application file census or bytes differ'):self.check()
+
+    def test_missing_extracted_payload_is_rejected_by_real_scan(self):
+        (self.extracted / 'resources/app.asar').unlink()
+        with self.assertRaisesRegex(n.Refused,'Reused complete signed application file census or bytes differ'):self.check()
+
+    def test_current_source_or_build_receipt_changes_cannot_reuse_old_inspection(self):
+        for key,path in self.build_receipts.items():
+            with self.subTest(receipt=key):
+                original = path.read_bytes()
+                path.write_bytes(original + b' changed')
+                try:
+                    with self.assertRaisesRegex(n.Refused,'inputs changed'):self.check()
+                finally:path.write_bytes(original)
 
 
 if __name__ == "__main__":
