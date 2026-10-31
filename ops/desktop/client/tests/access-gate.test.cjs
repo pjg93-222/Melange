@@ -48,7 +48,7 @@ test('a restarted pending request without a cached reply can be polled but never
  assert.equal((await gate.action('poll')).requestStatus,'approved');
 });
 test('Runtime refuses missing gate before touching resources or writable roots',async()=>{
- const runtime=new Runtime('melange','unavailable-profile','unavailable-resources');await assert.rejects(runtime.start({dataDirectory:'unavailable'}),/approval/);assert.equal(runtime.child,null);assert.equal(runtime.roots,null);
+ const runtime=new Runtime('melange','unavailable-profile','unavailable-resources');await assert.rejects(runtime.start({dataDirectory:'unavailable'}),/Local authentication is required/);assert.equal(runtime.child,null);assert.equal(runtime.roots,null);
 });
 
 test('request accepts displayName and an optional 1 to 64 character invite code, and hands the trimmed code to the client',async()=>{

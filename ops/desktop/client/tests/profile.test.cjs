@@ -94,7 +94,10 @@ test('a junction into production state is refused after physical resolution',{sk
 test('main process applies the isolated plan before userData, lock, login item, discovery cache and updater use',()=>{
   const source=fs.readFileSync(path.join(__dirname,'..','main.cjs'),'utf8');
   const at=text=>{const index=source.indexOf(text);assert.notEqual(index,-1,text);assert.equal(source.indexOf(text,index+1),-1,'single occurrence: '+text);return index;};
-  const refuse=at('if(isolationRefused){'),aumid=at('app.setAppUserModelId(profile.applicationUserModelId);'),userData=at("app.setPath('userData',profile.directory);"),lock=at('app.requestSingleInstanceLock()');
+  const refuse=at('if(isolationRefused){'),aumid=at('app.setAppUserModelId(profile.applicationUserModelId);'),userData=at("app.setPath('userData',profile.directory);");
+  // A stale isolated instance can legitimately retry the lock. This test
+  // constrains initialization before its first request; lifecycle tests cover retries.
+  const lock=source.indexOf('app.requestSingleInstanceLock()');assert.notEqual(lock,-1);
   assert.ok(refuse<aumid&&aumid<userData&&userData<lock,'refusal precedes identity; userData precedes the single-instance lock');
   assert.ok(source.slice(refuse,aumid).includes('app.exit(2);}else{'),'refused requests exit without selecting any profile');
   assert.equal(source.match(/setLoginItemSettings\(/g).length,1);at('if(profile.registerLoginItem)app.setLoginItemSettings(');
