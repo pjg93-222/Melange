@@ -1,10 +1,9 @@
-"""Congress.gov bill discovery is a soft step: a failure never hard-aborts the weekly refresh.
+"""Congress.gov bill discovery stays strict (D-212): a failed walk is a deferred collection prerequisite that aborts the
+weekly after press acceptance (never COMPLETE); a walk served by a fallback source (GovInfo) is DEGRADED and named.
 
 weekly_refresh.py cannot be imported (module scope takes locks and runs the refresh), so the
-real step(), _soft_fail() and the module-level discovery and abort statements are executed from
-the source text over a stubbed child process. Discovery yields pending-only candidates that
-cannot score, so downstream keeps using the last-good discovery state; the failure is recorded
-in the status marker's soft_failures and the completion summary, never in the abort list.
+real step(), _soft_fail(), _discovery_fallback_source() and the module-level discovery, abort and
+outcome statements are executed from the source text over a stubbed child process.
 
 The same sandbox pins DE-043: the bill repository fetch and the membership sidecar rebind are one
 unit, so the weekly takes a before-image of the repository ahead of the fetch and every hard
@@ -96,28 +95,62 @@ def run_discovery(world):
     run_statement(statement(lambda node: is_step_guard(node, DISCOVERY)), world.ns)
 
 
+def discovery_world(tmp_path, *, returncode, timed_out=False, primary=None):
+    """weekly_world plus the real _discovery_fallback_source over a tmp MB_ROOT whose discovery manifest names `primary`
+    (None: no manifest written)."""
+    world = weekly_world(returncode=returncode, timed_out=timed_out)
+    if primary is not None:
+        out = tmp_path / "data" / "legislation" / "congress_advanced_current"
+        out.mkdir(parents=True)
+        (out / "manifest.json").write_text(json.dumps({"primary_instrument": primary}), encoding="utf-8")
+    world.ns.update({"MB_ROOT": str(tmp_path), "json": json, "_degraded": []})
+    run_statement(statement(lambda n: isinstance(n, ast.Assign) and ast.unparse(n.targets[0]) == "DISCOVERY_PRIMARY"),
+                  world.ns)
+    exec(function_source("_discovery_fallback_source"), world.ns)
+    return world
+
+
+GOVINFO = "GovInfo BILLSTATUS/BILLS official bulk fallback"
+
+
 @pytest.mark.parametrize("failure", [{"returncode": 1}, {"returncode": 124, "timed_out": True}])
-def test_a_failed_discovery_is_a_soft_failure_not_a_deferred_collection_prerequisite(failure):
-    world = weekly_world(**failure)
+def test_a_failed_discovery_is_a_deferred_prerequisite_and_aborts_the_weekly(tmp_path, failure):
+    # D-212: discovery "stays strict" -- an outright failure is never COMPLETE: it aborts after press acceptance
+    world = discovery_world(tmp_path, primary=None, **failure)
+    run_discovery(world)
+    assert world.ns["_deferred_collection_failures"] == [DISCOVERY]
+    assert world.ns["_degraded"] == []
+    assert any("deferred prerequisite" in line for line in world.logs)
+    with pytest.raises(HardAbort):
+        run_statement(statement(is_abort_guard), world.ns)
+    assert world.aborts[0][0] == "deferred collection prerequisites" and world.aborts[0][1] == [DISCOVERY]
+
+
+def test_a_govinfo_fallback_discovery_is_degraded_and_names_its_source(tmp_path):
+    world = discovery_world(tmp_path, returncode=0, primary=GOVINFO)
     run_discovery(world)
     assert world.ns["_deferred_collection_failures"] == []
-    assert world.ns["_soft_failures"] == [DISCOVERY]
+    assert world.ns["_degraded"] == ["Congress.gov bill discovery: served by " + GOVINFO]
+    assert {"degraded": world.ns["_degraded"]} in world.statuses
+    assert any(args[:2] == ("refresh.step", "degraded") for args, _ in world.events)
+    run_statement(statement(is_abort_guard), world.ns)   # degraded is not an abort
     assert world.aborts == []
-    assert {"soft_failures": [DISCOVERY]} in world.statuses
-    failed = [(args, kwargs) for args, kwargs in world.events if args[:2] == ("refresh.step", "failed")]
-    assert len(failed) == 1 and failed[0][1]["metadata"]["hard"] is False
-    assert any("last-good candidate set retained" in line for line in world.logs)
 
 
-def test_discovery_alone_does_not_trip_the_deferred_prerequisites_abort():
-    world = weekly_world()
+def test_a_congress_gov_discovery_is_neither_degraded_nor_deferred(tmp_path):
+    world = discovery_world(tmp_path, returncode=0, primary="Congress.gov Advanced Search - Legislation")
     run_discovery(world)
-    run_statement(statement(is_abort_guard), world.ns)  # the hard abort that follows press acceptance
-    assert world.aborts == []
+    assert world.ns["_deferred_collection_failures"] == [] and world.ns["_degraded"] == []
 
 
-def test_any_other_deferred_collection_failure_still_aborts_after_press_acceptance():
-    world = weekly_world()
+def test_an_unreadable_discovery_manifest_after_success_is_degraded_not_primary(tmp_path):
+    world = discovery_world(tmp_path, returncode=0, primary=None)
+    run_discovery(world)
+    assert world.ns["_degraded"] == ["Congress.gov bill discovery: served by discovery manifest unreadable (FileNotFoundError)"]
+
+
+def test_any_other_deferred_collection_failure_still_aborts_after_press_acceptance(tmp_path):
+    world = discovery_world(tmp_path, returncode=0, primary="Congress.gov Advanced Search - Legislation")
     run_discovery(world)
     world.ns["_deferred_collection_failures"].append("interviews: CNN (14d)")
     with pytest.raises(HardAbort):
@@ -126,12 +159,34 @@ def test_any_other_deferred_collection_failure_still_aborts_after_press_acceptan
     assert world.aborts[0][1] == ["interviews: CNN (14d)"]
 
 
-def test_the_completion_status_and_summary_report_soft_failures():
+@pytest.mark.parametrize("tolerated, degraded, outcome", [
+    ([], [], "COMPLETE"),
+    (["x"], [], "COMPLETE_WITH_KNOWN_GATED_FAILURES"),
+    ([], ["d"], "DEGRADED"),
+    (["x"], ["d"], "DEGRADED_WITH_KNOWN_GATED_FAILURES"),
+])
+def test_the_final_outcome_is_never_complete_when_a_source_was_degraded(tolerated, degraded, outcome):
+    i = next(i for i, n in enumerate(TREE.body)
+             if isinstance(n, ast.Assign) and ast.unparse(n.targets[0]) == "_outcome")
+    ns = {"_tolerated": tolerated, "_degraded": degraded}
+    for node in TREE.body[i:i + 2]:   # the outcome assignment and its DEGRADED rewrite
+        run_statement(node, ns)
+    assert ns["_outcome"] == outcome
+
+
+def test_the_completion_status_and_summary_report_soft_failures_and_degraded():
     final = next(node for node in ast.walk(TREE) if isinstance(node, ast.Call)
                  and isinstance(node.func, ast.Name) and node.func.id == "_write_status"
-                 and any(k.arg == "last_outcome" and isinstance(k.value, ast.IfExp) for k in node.keywords))
-    assert "soft_failures" in {k.arg for k in final.keywords}
-    assert "non-hard step(s) failed" in SOURCE
+                 and any(k.arg == "last_outcome" and ast.unparse(k.value) == "_outcome" for k in node.keywords))
+    assert {"soft_failures", "degraded"} <= {k.arg for k in final.keywords}
+    assert "non-hard step(s) failed" in SOURCE and "'; DEGRADED: %s'" in SOURCE
+
+
+def test_gate1_accepts_degraded_outcomes_exactly_as_it_accepted_complete():
+    sup = (FEC / "collect" / "collector_supervisor.py").read_text(encoding="utf-8")
+    for outcome in ("'COMPLETE'", "'COMPLETE_WITH_KNOWN_GATED_FAILURES'", "'DEGRADED'",
+                    "'DEGRADED_WITH_KNOWN_GATED_FAILURES'"):
+        assert outcome in sup
 
 
 # --- DE-043: the repository fetch and the membership rebind are one unit -----------------------
@@ -314,7 +369,7 @@ def test_the_before_image_is_freed_only_after_the_complete_status_is_written():
              and getattr(node.value.func, "id", None) == "_discard_repository_before_image"]
     final = next(i for i, node in enumerate(TREE.body) if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call)
                  and getattr(node.value.func, "id", None) == "_write_status"
-                 and any(k.arg == "last_outcome" and isinstance(k.value, ast.IfExp) for k in node.value.keywords))
+                 and any(k.arg == "last_outcome" and ast.unparse(k.value) == "_outcome" for k in node.value.keywords))
     assert len(calls) == 1 and calls[0] > final
     assert "_discard_repository_before_image" not in function_source("_hard_abort")
 

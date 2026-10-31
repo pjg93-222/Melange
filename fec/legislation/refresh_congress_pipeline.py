@@ -202,6 +202,10 @@ def steps(admission_limit=None, include_media=False, smoke=False):
     if admission_limit is None:
         admission_limit = admission_budget.key_limit(os.environ)
     result = [("calibration", "calibration_guard.py", [], 900)]
+    # Roster first (Paul 2026-10-20: the roster "needs to always auto-update"): every later step joins on the member roster.
+    # collect/refresh_roster.py exits 0 when it applied, found nothing, or HELD because the official sources disagree;
+    # 2 when the workbook is open (retry later) and 1 on an error (every file restored from its backup).
+    result.append(("roster", "collect/refresh_roster.py", [] if smoke else ["--apply"], 1800))
     result.append(("discovery", None if smoke else "legislation/refresh_legislation_discovery.py", [], 21600))
     # Cost (2026-10-15): --limit bounds the keys looked at; --max-classifier-calls bounds the paid model calls among
     # them (a budget stop is a normal PASS; unattempted keys wait for the next run).
@@ -247,6 +251,12 @@ def steps(admission_limit=None, include_media=False, smoke=False):
     result.append(("pipeline", "run_pipeline.py",
                    [] if (include_media or smoke) else ["--from", "verify_collector_roster_updates.py"], 14400))
     return result
+
+
+def discovery_verdict(root, since):
+    """discovery_status.json written by this run's discovery step; anything else is DEGRADED."""
+    from legislation.refresh_legislation_discovery import read_discovery_status
+    return read_discovery_status(Path(root) / "data/legislation/congress_advanced_current", since=since)
 
 
 def live_log(root, step, status, elapsed=None, note=""):
@@ -471,6 +481,7 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
                  "owner_pid": os.getpid(), "started_at": now(), "run_dir": str(run_dir), "steps": [],
                  "include_media": include_media, "mode": "smoke" if smoke else "full",
                  "deferred_steps": [], "deferred_streaks": dict(previous_streaks), "letters_partial": [],
+                 "degraded_steps": [],
                  "daily_attempt_id": os.environ.get("MELANGE_DAILY_ATTEMPT_ID")}
         stream_id = new_run_id("congress-pipeline")
         trim_live_log(root)
@@ -533,6 +544,8 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
             from run_pipeline import preflight_dependencies
             from legislation.sync_sentinel_bill_ledger import runtime
             preflight_dependencies()
+            import chain_transaction
+            chain_transaction.preflight(root)   # the chain's 30 GB floor, checked at launch instead of after ~35 min of steps
             if runtime() is None:
                 raise RuntimeError("Excel artifact-tool runtime is unavailable")
             selected = steps(admission_limit, include_media, smoke)
@@ -630,6 +643,12 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
                 if row.get("status") == "DEFERRED":
                     state["deferred_steps"] = state["deferred_steps"] + [name]
                     state["deferred_streaks"][name] = previous_streaks.get(name, 0) + 1
+                    if name == "discovery":
+                        # No Congress.gov walk this run; the last good checkpoint is served. That is a
+                        # fallback too, so the day seals DEGRADED, never PASS (review finding 2).
+                        state["discovery_status"] = row["discovery_status"] = "DEGRADED"
+                        state["discovery_source"] = row["discovery_source"] = (
+                            "none: discovery deferred (collector failed twice); last good checkpoint served")
                     write_status(root, state)
                     print(f"{now()} {name}: DEFERRED ({row['duration_seconds']}s)", flush=True)
                     _emit("refresh.step", "deferred", f"Congress pipeline: {row['note']}",
@@ -660,8 +679,22 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
                         if parked_steps:
                             parts.append("parked: " + ", ".join(parked_steps))
                         note = "; ".join(parts)
+                if name == "discovery":
+                    # The GovInfo fallback exits 0 too: the step is DEGRADED (named), never PASS, and
+                    # it does not break the streak of runs without Congress.gov discovery.
+                    verdict = discovery_verdict(root, step_start)
+                    state["discovery_status"] = row["discovery_status"] = verdict["status"]
+                    state["discovery_source"] = row["discovery_source"] = verdict.get("source")
+                    if verdict["status"] != "PASS":
+                        row["status"] = "DEGRADED"
+                        state["degraded_steps"] = state["degraded_steps"] + [name]
+                        note = "; ".join([note] * bool(note) + ["DEGRADED: %s%s" % (
+                            verdict.get("source"), " (%s)" % verdict["reason"] if verdict.get("reason") else "")])
                 if name in RETRYABLE_STEPS:
-                    state["deferred_streaks"][name] = 0           # it completed this run: the streak is broken
+                    if row.get("status") == "DEGRADED":
+                        state["deferred_streaks"][name] = previous_streaks.get(name, 0) + 1
+                    else:
+                        state["deferred_streaks"][name] = 0           # it completed this run: the streak is broken
                 if name in ("letters", "letters_promote"):
                     # Same idea as media's partial_sources: a PARTIAL (or unreadable, or stale) letters receipt is named in the step row,
                     # the receipt and the summary, so a day that collected nothing can never read as a clean PASS.
@@ -704,6 +737,8 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
                 summary += " - PASS with deferred: " + ", ".join(state["deferred_steps"])
             if state.get("media_status") == "PARTIAL":
                 summary += " - media PARTIAL: " + ", ".join(state["partial_sources"])
+            if state["degraded_steps"]:
+                summary += " - discovery DEGRADED: %s" % state.get("discovery_source")
             if state["letters_partial"]:
                 summary += " - letters PARTIAL: " + "; ".join(state["letters_partial"])
             for step_name, streak in state["deferred_streak_alerts"].items():
@@ -716,9 +751,12 @@ def run(root=ROOT, admission_limit=None, include_media=False, smoke=False):
                      + (" media=PARTIAL:" + ",".join(state["partial_sources"])
                         if state.get("media_status") == "PARTIAL" else "")
                      + (" letters=PARTIAL:" + ";".join(state["letters_partial"]) if state["letters_partial"] else "")
+                     + (" discovery=DEGRADED:%s" % state.get("discovery_source") if state["degraded_steps"] else "")
                      + "".join(" %s=DEFERRED_%d_RUNS" % item for item in state["deferred_streak_alerts"].items()))
             print(json.dumps({"status": "PASS", "mode": state["mode"],
                               "deferred_steps": state["deferred_steps"],
+                              "degraded_steps": state["degraded_steps"],
+                              "discovery_status": state.get("discovery_status"),
                               "receipt": str(run_dir / "receipt.json") if smoke else str(root / RECEIPT),
                               "rank_changes": len(movers)}), flush=True)
             return 0

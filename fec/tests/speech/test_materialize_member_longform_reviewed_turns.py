@@ -154,6 +154,30 @@ def test_false_pre_role_label_is_rejected_before_audio_write(tmp_path, monkeypat
     assert not paths[6].exists()
 
 
+def test_materializes_date_bound_current_role_turn_without_relabeling(tmp_path, monkeypatch):
+    paths = fixture_files(tmp_path)
+    selection = json.loads(paths[0].read_text(encoding='utf-8'))
+    selection.update(current_role='Whip', source_era='CURRENT_ROLE_CONDITIONED',
+                     recorded_at='2024-08-16', current_role_assumed_on='2021-01-20')
+    write_jsonl(paths[0], [selection])
+    assert run(paths, monkeypatch) == 0
+    row = json.loads(paths[4].read_text(encoding='utf-8'))
+    assert row['source_era'] == 'CURRENT_ROLE_CONDITIONED'
+    assert row['current_role_assumed_on'] == '2021-01-20'
+
+
+@pytest.mark.parametrize('recorded', ['2020-01-01', None])
+def test_false_or_undated_conditioned_label_refuses_before_audio_write(tmp_path, monkeypatch, recorded):
+    paths = fixture_files(tmp_path)
+    selection = json.loads(paths[0].read_text(encoding='utf-8'))
+    selection.update(current_role='Whip', source_era='CURRENT_ROLE_CONDITIONED',
+                     recorded_at=recorded, current_role_assumed_on='2021-01-20')
+    write_jsonl(paths[0], [selection])
+    with pytest.raises(mod.PromotionRefusal):
+        run(paths, monkeypatch)
+    assert not paths[6].exists()
+
+
 def test_multiple_sources_for_same_member_are_retained():
     result = mod.source_index([{"member": "M", "source_id": "A"}, {"member": "M", "source_id": "B"}], "test")
     assert len(result) == 2

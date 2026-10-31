@@ -188,7 +188,7 @@ def _load_covariates(data_root):
                     "republican": 1.0 if row.get("party") == "Republican" else 0.0,
                     "senate": 1.0 if chamber.get(name) == "Senate" else 0.0,
                 }
-    return [row["member"] for row in roster_rows], out
+    return roster_rows, out
 
 
 def run(original_path, gold_path, criteria_path, prereg_path, data_root, permutations=9999):

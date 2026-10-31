@@ -12,7 +12,8 @@ carries its own, bounded, answer:
   SOURCE_OUTAGE  the source itself is down (``SourceUnavailable``, a documented total-outage exit).
                  The last-good generation is kept and served, and the source is probed on its
                  cadence -- not hammered.
-  BUDGET_QUOTA   the PROVIDER refused (``CLASSIFIER_QUOTA_EXHAUSTED``, a 429 / spend limit).  The step
+  BUDGET_QUOTA   the PROVIDER refused (``CLASSIFIER_QUOTA_EXHAUSTED``, a 429 / spend limit), or refused the
+                 request itself (``CLASSIFIER_REQUEST_REJECTED``: a bad model id or key, D-356).  The step
                  FAILED -- never a PASS, never a PARTIAL (D-211) -- its generation was not installed,
                  so the last-good one is served and labelled STALE_LABELLED.  Not retried before the
                  next daily window (a retry meets the same limit), then one attempt per window; the
@@ -41,7 +42,7 @@ import re
 
 import refresh_state as state_store
 from refresh_state import (BUDGET_QUOTA, DATA_CONTRACT, SOURCE_OUTAGE, STOP_CALLS, STOP_QUOTA,
-                           TRANSIENT)
+                           STOP_REJECTED, TRANSIENT)
 
 # ---- the numbers the owner ruled ----------------------------------------------------------------
 BACKOFF_BASE_MINUTES = 15.0
@@ -62,6 +63,9 @@ _FLAGS = re.IGNORECASE
 
 # Specific to the admissions producer's own two stops.
 _QUOTA_SPECIFIC = re.compile(r'CLASSIFIER_QUOTA_EXHAUSTED|Run stopped on classifier quota', _FLAGS)
+# The api transport's rejected-request stop (D-356): the same stop-and-checkpoint, so the same class -- a retry meets the
+# same refusal, and an unmatched exit would be TRANSIENT and retried up to MAX_ATTEMPTS_PER_DAY times.
+_REJECTED_SPECIFIC = re.compile(r'CLASSIFIER_REQUEST_REJECTED', _FLAGS)
 _CALLS_SPECIFIC = re.compile(
     r'CLASSIFIER_CALL_BUDGET|Run stopped on the classifier call budget', _FLAGS)
 # A generic provider word: honoured only because the step has already failed.
@@ -115,8 +119,13 @@ def _scan_text(stdout, stderr, detail):
 
 
 def quota_reason(text):
-    """STOP_QUOTA when ``text`` carries a provider quota stop, else None."""
-    if _QUOTA_SPECIFIC.search(text) or _QUOTA_GENERIC.search(text):
+    """STOP_QUOTA or STOP_REJECTED when ``text`` carries a provider stop, else None.  The producer's own quota token
+    wins over its rejected-request token; the generic "spend limit" only names a quota when neither token is there."""
+    if _QUOTA_SPECIFIC.search(text):
+        return STOP_QUOTA
+    if _REJECTED_SPECIFIC.search(text):
+        return STOP_REJECTED
+    if _QUOTA_GENERIC.search(text):
         return STOP_QUOTA
     return None
 
@@ -130,9 +139,24 @@ def budget_stop_reason(stdout, stderr):
     generic "spend limit" in a log that ended well proves nothing.
     """
     text = _scan_text(stdout, stderr, '')
-    if _QUOTA_SPECIFIC.search(text):
+    if _QUOTA_SPECIFIC.search(text) or _REJECTED_SPECIFIC.search(text):
         return None
     return STOP_CALLS if _CALLS_SPECIFIC.search(text) else None
+
+
+def evidence_failed_count(stdout):
+    """How many bills the admissions producer reported FAILED on the evidence envelope (D-366/D-369), read from its own
+    closing JSON summary line; 0 when there is none. Any such bill makes the step DEGRADED, never failed: the generation
+    installed, and every other verdict is current."""
+    for line in reversed((stdout or '').strip().split('\n')):
+        line = line.strip()
+        if line.startswith('{') and '"evidence_failed"' in line:
+            try:
+                value = json.loads(line).get('evidence_failed')
+            except ValueError:
+                return 0
+            return value if type(value) is int and value > 0 else 0
+    return 0
 
 
 def _first(pattern, text):

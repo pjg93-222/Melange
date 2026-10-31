@@ -97,8 +97,8 @@ class BuildTest(unittest.TestCase):
         self.assertIn("audits/session_118.json", {f["path"] for f in m["files"]})
         self.assertIn("audits/staffer_network/politico_profile_crawl_1_raw/a.html", {f["path"] for f in m["files"]})
 
-    def test_restricted_lda_corpus_never_ships_even_when_allowed(self):
-        corpus = ["__state__/Melange/staffer_network/normalized/lda-source-native/generation-x/lda_lobbyist_assertions.ndjson.gz",
+    def test_restricted_staffer_sections_never_ship_even_when_allowed(self):
+        corpus = ["__state__/Melange/staffer_network/staffer_clients_section.json",
                   "data/engine/staffer_organisations_section.json", "data/engine/staffer_clients_section.json",
                   "staffer-network.html"]
         for rel in corpus + ["data/engine/staffer_offices_section.json"]:
@@ -127,7 +127,7 @@ class BuildTest(unittest.TestCase):
     def test_renamed_copy_of_restricted_file_is_refused_by_content(self):
         corpus = b"lobbyist rows" * 10
         self._write({
-            "__state__/M/normalized/lda-source-native/g/lda_lobbyist_assertions.ndjson.gz": corpus,
+            "data/engine/staffer_clients_section.json": corpus,
             "__state__/M/normalized/operational-spine/g1/inputs/lda_records.ndjson.gz": corpus,
             "data/engine/neutral.bin": corpus,
             "data/engine/same_size_other.bin": b"other  rows" * 10 + b"xx" * 10,
@@ -163,14 +163,91 @@ class BuildTest(unittest.TestCase):
         shipped = {f["path"] for f in m["files"]}
         self.assertTrue({"y/staffer-free.html", "y/notes.json"} <= shipped)
 
-    def test_derived_lda_stores_are_denied_pending_ruling(self):
-        pending = ["__state__/M/live_catalog/lda_source_catalog_v1.sqlite", "audits/r/lda_activity_v1.sqlite",
-                   "audits/r/lda_activity_v2.sqlite", "__state__/M/normalized/lda-identity-candidates/g/c.ndjson.gz",
-                   "audits/r/lda_activity_v1.sqlite-wal", "audits/r/lda_activity_v1.sqlite-journal"]
-        self._write({rel: rel.encode() for rel in pending})
+    def test_lda_activity_v2_sqlite_is_allowed(self):
+        rel = "audits/r/lda_activity_v2.sqlite"
+        self._write({rel: b"sqlite"})
+        m = data_release.build("melange", self.root, self.out, "data-melange-2026-10-21", [], data_release.DENY,
+                               data_release.DEFAULT_PART_BYTES)
+        self.assertIn(rel, {f["path"] for f in m["files"]})
+        self.assertNotIn(rel, m["excluded"])
+
+    def test_dropped_lda_corpus_digests_are_allowed(self):
+        # The six lda-source-native generation-20260830T231200Z digests dropped under D-399/D-405.
+        dropped = {
+            "2ff6864f8a06e822277083230ab6a59abcc979ca12681e58490c89cb8a85b485",
+            "81841c810269bf967cb3edc10664dbbad5aa17261089eaa67e4f288c2fcda625",
+            "363027b2c3fff40331b304c9dd9b1d7bd81691bc9f9915aaf1b8f4acd0a869b7",
+            "80ac82346c435bb8f1231d9f3425d759ca9a8ae063db879ec104244f9fcd282e",
+            "0d35902244f02688d9ac961379efee0f96e3cfab1184409a4c93bb0584a1aed2",
+            "5dfd3bbb16dea6ce940a687b15c74f07e720073d02b559d8000bb33db49dce8c",
+        }
+        self.assertFalse(dropped & set(data_release.RESTRICTED_SHA256))
+        # Synthetic stand-in for a corpus file: its digest joins the dropped list, and it ships under its
+        # lda-source-native name and as a renamed copy, gzipped or not.
+        rows = b"lda lobbyist assertion rows\n" * 40
+        gz = gzip.compress(rows, mtime=0)
+        dropped |= {hashlib.sha256(rows).hexdigest(), hashlib.sha256(gz).hexdigest()}
+        self.assertFalse(dropped & set(data_release.RESTRICTED_SHA256))
+        files = {"__state__/M/normalized/lda-source-native/g/lda_lobbyist_assertions.ndjson.gz": gz,
+                 "z/copy.ndjson.gz": gz, "z/inflated.ndjson": rows}
+        self._write(files)
+        m = data_release.build("melange", self.root, self.out, "data-melange-2026-10-21", [], data_release.DENY,
+                               data_release.DEFAULT_PART_BYTES)
+        self.assertTrue(set(files) <= {f["path"] for f in m["files"]})
+        self.assertFalse(set(files) & set(m["excluded"]))
+
+    def test_section_copies_with_any_extension_are_denied(self):
+        copies = ["data/engine/staffer_organisations_section.json.gz", "b/staffer_clients_section.json.zst",
+                  "b/staffer_organisations_section.json.bak", "b/staffer_clients_section"]
+        self._write({rel: rel.encode() for rel in copies} | {"data/engine/staffer_offices_section.json": b"{}"})
         m = self._build_all()
-        self.assertTrue(set(pending) <= set(m["excluded"]))
-        self.assertFalse(set(pending) & {f["path"] for f in m["files"]})
+        self.assertTrue(set(copies) <= set(m["excluded"]))
+        self.assertIn("data/engine/staffer_offices_section.json", {f["path"] for f in m["files"]})
+
+    def test_gzipped_copy_of_restricted_content_is_refused(self):
+        known, local = b'{"organisations": [1]}', b"lobbyist rows\n" * 50
+        self._write({
+            "catalog/orgs.json.gz": gzip.compress(known),
+            "data/engine/staffer_clients_section.json": local,
+            "z/copy.bin.gz": gzip.compress(local, mtime=0),
+            "z/fine.ndjson.gz": gzip.compress(b"public rows\n" * 50),
+            "z/corrupt.ndjson.gz": gzip.compress(b"x" * 999)[:10] + b"\xff" * 40,
+        })
+        with mock.patch.dict(data_release.RESTRICTED_SHA256, {hashlib.sha256(known).hexdigest(): len(known)}):
+            m = self._build_all()
+        self.assertTrue({"catalog/orgs.json.gz", "z/copy.bin.gz", "z/corrupt.ndjson.gz"} <= set(m["excluded"]))
+        self.assertIn("z/fine.ndjson.gz", {f["path"] for f in m["files"]})
+
+    def test_recompressed_or_inflated_copy_of_restricted_gz_is_refused(self):
+        rows = b"lobbyist assertion rows\n" * 80
+        self._write({
+            "data/engine/staffer_clients_section.json.gz": gzip.compress(rows, 9, mtime=0),
+            "z/recompressed.bin.gz": gzip.compress(rows, 1, mtime=7),
+            "z/inflated.ndjson": rows,
+            "z/fine.ndjson.gz": gzip.compress(b"public rows\n" * 80, 1, mtime=7),
+        })
+        m = self._build_all()
+        self.assertTrue({"z/recompressed.bin.gz", "z/inflated.ndjson"} <= set(m["excluded"]))
+        self.assertIn("z/fine.ndjson.gz", {f["path"] for f in m["files"]})
+
+    def test_gz_bomb_is_bounded(self):
+        with mock.patch.object(data_release, "GZ_LIMIT", 1 << 20):
+            self._write({"bomb.html.gz": gzip.compress(b" " * (3 << 20)), "ok.html.gz": gzip.compress(b"<p>")})
+            m = self._build_all()
+        self.assertIn("bomb.html.gz", m["excluded"])
+        self.assertIn("ok.html.gz", {f["path"] for f in m["files"]})
+
+    def test_utf16_pages_inlining_odata_are_refused(self):
+        self._write({
+            "a.html": "<script>const ODATA={}</script>".encode("utf-16"),
+            "b.html": "const  CDATA = {}".encode("utf-16-be"),
+            "c.js": "const odata={}".encode("utf-16-le"),
+            "d.html.gz": gzip.compress("const ODATA={}".encode("utf-16")),
+            "e.html": "<script>const SDATA={}</script>".encode("utf-16"),
+        })
+        m = self._build_all()
+        self.assertTrue({"a.html", "b.html", "c.js", "d.html.gz"} <= set(m["excluded"]))
+        self.assertIn("e.html", {f["path"] for f in m["files"]})
 
     def test_single_file_map_cannot_rename_a_credential_in(self):
         m = data_release.build("melange", None, self.out, "data-melange-2026-10-21", ["**/*"], data_release.DENY,

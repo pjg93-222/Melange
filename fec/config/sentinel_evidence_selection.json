@@ -1,0 +1,1878 @@
+{
+ "schema": "sentinel-evidence-selection-config-v1",
+ "authority": "D-366 design, approved as D-369 (Paul 2026-10-27: \"Approve all (Recommended)\"). Editable: a change reclassifies only bills whose evidence was selected; ungated bills never read this file.",
+ "statute_map": [
+  {
+   "title": 12,
+   "from": 1751,
+   "to": 1795,
+   "label": "Federal Credit Union Act (incl. NCUSIF, CLF)"
+  },
+  {
+   "title": 12,
+   "from": 1811,
+   "to": 1835,
+   "label": "Federal Deposit Insurance Act"
+  },
+  {
+   "title": 12,
+   "from": 5481,
+   "to": 5603,
+   "label": "Consumer Financial Protection Act (CFPB)"
+  },
+  {
+   "title": 15,
+   "from": 1601,
+   "to": 1667,
+   "label": "Truth in Lending Act"
+  },
+  {
+   "title": 15,
+   "from": 1681,
+   "to": 1681,
+   "label": "Fair Credit Reporting Act"
+  },
+  {
+   "title": 15,
+   "from": 1691,
+   "to": 1691,
+   "label": "Equal Credit Opportunity Act"
+  },
+  {
+   "title": 15,
+   "from": 1692,
+   "to": 1692,
+   "label": "Fair Debt Collection Practices Act"
+  },
+  {
+   "title": 15,
+   "from": 1693,
+   "to": 1693,
+   "label": "Electronic Fund Transfer Act (incl. interchange)"
+  },
+  {
+   "title": 15,
+   "from": 6801,
+   "to": 6827,
+   "label": "Gramm-Leach-Bliley privacy"
+  },
+  {
+   "title": 12,
+   "from": 2601,
+   "to": 2617,
+   "label": "RESPA"
+  },
+  {
+   "title": 12,
+   "from": 2801,
+   "to": 2811,
+   "label": "HMDA"
+  },
+  {
+   "title": 12,
+   "from": 4001,
+   "to": 4010,
+   "label": "Expedited Funds Availability Act"
+  },
+  {
+   "title": 12,
+   "from": 4701,
+   "to": 4719,
+   "label": "CDFI Fund"
+  },
+  {
+   "title": 12,
+   "from": 5101,
+   "to": 5117,
+   "label": "SAFE Mortgage Licensing Act"
+  },
+  {
+   "title": 12,
+   "from": 1421,
+   "to": 1449,
+   "label": "Federal Home Loan Bank Act"
+  },
+  {
+   "title": 12,
+   "from": 3401,
+   "to": 3423,
+   "label": "Right to Financial Privacy Act"
+  },
+  {
+   "title": 12,
+   "from": 1861,
+   "to": 1867,
+   "label": "Bank Service Company Act (vendor examination)"
+  },
+  {
+   "title": 12,
+   "from": 3301,
+   "to": 3311,
+   "label": "FFIEC"
+  },
+  {
+   "title": 12,
+   "from": 5321,
+   "to": 5333,
+   "label": "FSOC"
+  },
+  {
+   "title": 31,
+   "from": 5311,
+   "to": 5336,
+   "label": "Bank Secrecy Act / AML"
+  },
+  {
+   "title": 26,
+   "from": 501,
+   "to": 501,
+   "label": "Tax exemption (501(c)(14))"
+  },
+  {
+   "title": 10,
+   "from": 987,
+   "to": 987,
+   "label": "Military Lending Act"
+  },
+  {
+   "title": 47,
+   "from": 227,
+   "to": 227,
+   "label": "Telephone Consumer Protection Act"
+  }
+ ],
+ "narrow_terms": [
+  "credit union",
+  "national credit union administration",
+  "federal credit union act",
+  "share insurance",
+  "insured depository institution",
+  "consumer financial protection"
+ ],
+ "wide_terms": [
+  "credit union",
+  "national credit union administration",
+  "federal credit union act",
+  "share insurance",
+  "insured depository institution",
+  "consumer financial protection",
+  "financial institution",
+  "depository institution",
+  "creditor",
+  "mortgage",
+  "lender",
+  "community development financial institution",
+  "account",
+  "advertis"
+ ],
+ "identifier_window": 8,
+ "identifiers_source": {
+  "path": "source_data/legislation/acu_legislation_search_registry.json",
+  "sha256": "ba865417a0e722e0103d8a8ff65b657d15f66fde0fd76eeabaa37ba169d20b39"
+ },
+ "identifiers": [
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "examination",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "supervision",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "notice-and-comment",
+    "rulemaking",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "filing",
+    "threshold",
+    "suspicious",
+    "activity"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "filing",
+    "threshold",
+    "currency",
+    "transaction"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "camels",
+    "rating"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "reputational",
+    "risk",
+    "supervision"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "safety",
+    "and",
+    "soundness",
+    "examination"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "examination",
+    "cycle",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "off-site",
+    "examination",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "examination",
+    "appeal",
+    "rights",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "tailoring",
+    "regulatory",
+    "burden",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "asset",
+    "threshold",
+    "regulatory",
+    "relief"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "ffiec"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "federal",
+    "financial",
+    "institutions",
+    "examination",
+    "council"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "ctr",
+    "threshold"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "currency",
+    "transaction",
+    "report",
+    "threshold"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "sar",
+    "threshold"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "suspicious",
+    "activity",
+    "report",
+    "threshold"
+   ]
+  },
+  {
+   "category": "examination_supervision",
+   "tokens": [
+    "bank",
+    "secrecy",
+    "act",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "credit_union_capital_requirements",
+   "tokens": [
+    "credit",
+    "union",
+    "supplemental",
+    "capital"
+   ]
+  },
+  {
+   "category": "credit_union_capital_requirements",
+   "tokens": [
+    "credit",
+    "union",
+    "additional",
+    "capital"
+   ]
+  },
+  {
+   "category": "credit_union_capital_requirements",
+   "tokens": [
+    "credit",
+    "union",
+    "capital",
+    "requirements"
+   ]
+  },
+  {
+   "category": "credit_union_capital_requirements",
+   "tokens": [
+    "credit",
+    "union",
+    "net",
+    "worth",
+    "ratio"
+   ]
+  },
+  {
+   "category": "credit_union_capital_requirements",
+   "tokens": [
+    "risk-based",
+    "capital",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "credit_union_capital_requirements",
+   "tokens": [
+    "subordinated",
+    "debt",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "credit_union_capital_requirements",
+   "tokens": [
+    "secondary",
+    "capital",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "credit_union_capital_requirements",
+   "tokens": [
+    "prompt",
+    "corrective",
+    "action",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "credit",
+    "union",
+    "budget",
+    "process"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "national",
+    "credit",
+    "union",
+    "share",
+    "insurance",
+    "fund"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "federal",
+    "credit",
+    "union",
+    "act"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "ncua",
+    "budget",
+    "transparency"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "ncua",
+    "overhead",
+    "transfer",
+    "rate"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "share",
+    "insurance",
+    "fund",
+    "equity",
+    "ratio"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "sif",
+    "equity",
+    "ratio"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "central",
+    "liquidity",
+    "facility",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "clf",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "ncua_budget_share_insurance",
+   "tokens": [
+    "ncua",
+    "board"
+   ]
+  },
+  {
+   "category": "interchange",
+   "tokens": [
+    "credit",
+    "card",
+    "routing"
+   ]
+  },
+  {
+   "category": "interchange",
+   "tokens": [
+    "payment",
+    "card",
+    "routing"
+   ]
+  },
+  {
+   "category": "interchange",
+   "tokens": [
+    "routing",
+    "mandate"
+   ]
+  },
+  {
+   "category": "interchange",
+   "tokens": [
+    "unaffiliated",
+    "network"
+   ]
+  },
+  {
+   "category": "interchange",
+   "tokens": [
+    "network",
+    "competition"
+   ]
+  },
+  {
+   "category": "interchange",
+   "tokens": [
+    "competing",
+    "network"
+   ]
+  },
+  {
+   "category": "interchange",
+   "tokens": [
+    "interchange",
+    "fee",
+    "cap"
+   ]
+  },
+  {
+   "category": "interchange",
+   "tokens": [
+    "merchant",
+    "routing",
+    "requirement"
+   ]
+  },
+  {
+   "category": "interchange",
+   "tokens": [
+    "durbin",
+    "amendment"
+   ]
+  },
+  {
+   "category": "payments",
+   "tokens": [
+    "real-time",
+    "payments"
+   ]
+  },
+  {
+   "category": "payments",
+   "tokens": [
+    "fednow"
+   ]
+  },
+  {
+   "category": "payments",
+   "tokens": [
+    "instant",
+    "payment",
+    "fraud"
+   ]
+  },
+  {
+   "category": "payments",
+   "tokens": [
+    "payment",
+    "system",
+    "access"
+   ]
+  },
+  {
+   "category": "payments",
+   "tokens": [
+    "ach",
+    "payment"
+   ]
+  },
+  {
+   "category": "payments",
+   "tokens": [
+    "faster",
+    "payments"
+   ]
+  },
+  {
+   "category": "payments",
+   "tokens": [
+    "payment",
+    "stablecoin"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "central",
+    "bank",
+    "digital",
+    "currency"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "cbdc"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "digital",
+    "asset",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "stablecoin"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "cryptocurrency",
+    "custody"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "digital",
+    "commodity"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "artificial",
+    "intelligence",
+    "underwriting"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "ai",
+    "lending",
+    "model"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "algorithmic",
+    "credit",
+    "decision"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "machine",
+    "learning",
+    "underwriting"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "remote",
+    "online",
+    "notarization"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "fintech",
+    "partnership",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "technology_emerging_issues",
+   "tokens": [
+    "open",
+    "banking"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "financial",
+    "fraud",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "payment",
+    "fraud"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "check",
+    "fraud"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "check",
+    "processing",
+    "vulnerabilities"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "permissible",
+    "information",
+    "sharing"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "payment",
+    "scam"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "authorized",
+    "push",
+    "payment",
+    "fraud"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "elder",
+    "financial",
+    "exploitation"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "fraud",
+    "information",
+    "sharing",
+    "safe",
+    "harbor"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "mail",
+    "theft",
+    "check",
+    "fraud"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "imposter",
+    "scam"
+   ]
+  },
+  {
+   "category": "fraud_prevention",
+   "tokens": [
+    "romance",
+    "scam"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "federal",
+    "data",
+    "privacy",
+    "standard"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "national",
+    "data",
+    "privacy",
+    "standard"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "federal",
+    "preemption",
+    "privacy"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "state",
+    "privacy",
+    "law",
+    "preemption"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "glba",
+    "exemption",
+    "state",
+    "privacy",
+    "law"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "gramm-leach-bliley",
+    "act",
+    "exemption"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "data",
+    "breach",
+    "notification"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "data",
+    "security",
+    "standard"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "mortgage",
+    "trigger",
+    "leads"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "trigger",
+    "lead"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "data",
+    "broker"
+   ]
+  },
+  {
+   "category": "data_privacy_cybersecurity",
+   "tokens": [
+    "permissible",
+    "data",
+    "sharing",
+    "financial",
+    "institution"
+   ]
+  },
+  {
+   "category": "charter_modernization_governance",
+   "tokens": [
+    "federal",
+    "credit",
+    "union",
+    "modernization"
+   ]
+  },
+  {
+   "category": "charter_modernization_governance",
+   "tokens": [
+    "credit",
+    "union",
+    "board",
+    "meeting",
+    "frequency"
+   ]
+  },
+  {
+   "category": "charter_modernization_governance",
+   "tokens": [
+    "credit",
+    "union",
+    "governance"
+   ]
+  },
+  {
+   "category": "charter_modernization_governance",
+   "tokens": [
+    "credit",
+    "union",
+    "diversify"
+   ]
+  },
+  {
+   "category": "charter_modernization_governance",
+   "tokens": [
+    "de",
+    "novo",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "charter_modernization_governance",
+   "tokens": [
+    "credit",
+    "union",
+    "chartering"
+   ]
+  },
+  {
+   "category": "charter_modernization_governance",
+   "tokens": [
+    "fhlb",
+    "membership",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "charter_modernization_governance",
+   "tokens": [
+    "federal",
+    "home",
+    "loan",
+    "bank",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "defense_credit_union_issues",
+   "tokens": [
+    "credit",
+    "union",
+    "servicemembers"
+   ]
+  },
+  {
+   "category": "defense_credit_union_issues",
+   "tokens": [
+    "credit",
+    "union",
+    "military"
+   ]
+  },
+  {
+   "category": "defense_credit_union_issues",
+   "tokens": [
+    "credit",
+    "union",
+    "veteran"
+   ]
+  },
+  {
+   "category": "defense_credit_union_issues",
+   "tokens": [
+    "credit",
+    "union",
+    "nominal",
+    "lease"
+   ]
+  },
+  {
+   "category": "defense_credit_union_issues",
+   "tokens": [
+    "military",
+    "installation",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "defense_credit_union_issues",
+   "tokens": [
+    "on-base",
+    "financial",
+    "services"
+   ]
+  },
+  {
+   "category": "defense_credit_union_issues",
+   "tokens": [
+    "military",
+    "lending",
+    "act",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "defense_credit_union_issues",
+   "tokens": [
+    "defense",
+    "credit",
+    "union",
+    "land",
+    "lease"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "credit",
+    "union",
+    "dual",
+    "charter"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "credit",
+    "union",
+    "federal",
+    "charter"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "credit",
+    "union",
+    "membership"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "field",
+    "of",
+    "membership"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "common",
+    "bond",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "multiple",
+    "common",
+    "bond"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "community",
+    "charter",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "underserved",
+    "area",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "state",
+    "chartered",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "dual",
+    "chartering",
+    "system"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "state",
+    "regulator",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "field_of_membership",
+   "tokens": [
+    "federal",
+    "preemption",
+    "state",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "credit",
+    "union",
+    "tax",
+    "status"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "credit",
+    "union",
+    "cooperative"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "credit",
+    "union",
+    "income",
+    "tax"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "credit",
+    "union",
+    "not-for-profit"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "credit",
+    "union",
+    "non-profit"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "credit",
+    "union",
+    "tax",
+    "exemption"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "repeal",
+    "credit",
+    "union",
+    "tax",
+    "exemption"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "unrelated",
+    "business",
+    "income",
+    "tax",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "ubit"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "appropriations",
+    "financial",
+    "services"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "budget",
+    "reconciliation"
+   ]
+  },
+  {
+   "category": "credit_union_tax_status",
+   "tokens": [
+    "tax",
+    "provision",
+    "reconciliation"
+   ]
+  },
+  {
+   "category": "cdfi_fund",
+   "tokens": [
+    "cdfi"
+   ]
+  },
+  {
+   "category": "cdfi_fund",
+   "tokens": [
+    "community",
+    "development",
+    "financial",
+    "institutions",
+    "fund"
+   ]
+  },
+  {
+   "category": "cdfi_fund",
+   "tokens": [
+    "cdfi",
+    "fund",
+    "appropriations"
+   ]
+  },
+  {
+   "category": "cdfi_fund",
+   "tokens": [
+    "cdfi",
+    "certification"
+   ]
+  },
+  {
+   "category": "cdfi_fund",
+   "tokens": [
+    "cdfi",
+    "bond",
+    "guarantee"
+   ]
+  },
+  {
+   "category": "cdfi_fund",
+   "tokens": [
+    "minority",
+    "depository",
+    "institution"
+   ]
+  },
+  {
+   "category": "cdfi_fund",
+   "tokens": [
+    "mdi"
+   ]
+  },
+  {
+   "category": "cdfi_fund",
+   "tokens": [
+    "underserved",
+    "community",
+    "lending"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "cfpb",
+    "reform"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "consumer",
+    "financial",
+    "protection",
+    "bureau",
+    "reform"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "cfpb",
+    "governance",
+    "structure"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "consumer",
+    "financial",
+    "protection",
+    "bureau",
+    "governance",
+    "structure"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "cfpb",
+    "funding",
+    "structure"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "consumer",
+    "financial",
+    "protection",
+    "bureau",
+    "funding",
+    "structure"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "cfpb",
+    "council"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "cfpb",
+    "commission",
+    "structure"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "cfpb",
+    "congressional",
+    "appropriations"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "cfpb",
+    "cost-benefit",
+    "analysis"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "udaap"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "unfair",
+    "deceptive",
+    "abusive",
+    "acts",
+    "practices"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "abusive",
+    "standard",
+    "dodd-frank"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "section",
+    "small",
+    "business",
+    "data"
+   ]
+  },
+  {
+   "category": "cfpb_issues_structural_reform",
+   "tokens": [
+    "overdraft",
+    "rule",
+    "cfpb"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "credit",
+    "card",
+    "rate",
+    "cap"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "credit",
+    "card",
+    "interest",
+    "rate",
+    "cap"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "card",
+    "processing",
+    "restrictions"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "interchange",
+    "limit"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "overdraft",
+    "fee",
+    "cap"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "overdraft",
+    "lending",
+    "rule"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "credit",
+    "card",
+    "late",
+    "fee"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "usury",
+    "limit",
+    "credit",
+    "card"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "truth",
+    "in",
+    "lending",
+    "act",
+    "interest",
+    "rate"
+   ]
+  },
+  {
+   "category": "credit_card_consumer_fee_mandates",
+   "tokens": [
+    "junk",
+    "fees",
+    "financial",
+    "institution"
+   ]
+  },
+  {
+   "category": "telephone_consumer_protection_act",
+   "tokens": [
+    "telephone",
+    "consumer",
+    "protection",
+    "act"
+   ]
+  },
+  {
+   "category": "telephone_consumer_protection_act",
+   "tokens": [
+    "tcpa"
+   ]
+  },
+  {
+   "category": "telephone_consumer_protection_act",
+   "tokens": [
+    "fcc",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "telephone_consumer_protection_act",
+   "tokens": [
+    "federal",
+    "communications",
+    "commission",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "telephone_consumer_protection_act",
+   "tokens": [
+    "robocall",
+    "financial",
+    "institution"
+   ]
+  },
+  {
+   "category": "telephone_consumer_protection_act",
+   "tokens": [
+    "autodialer",
+    "consent"
+   ]
+  },
+  {
+   "category": "telephone_consumer_protection_act",
+   "tokens": [
+    "prior",
+    "express",
+    "consent",
+    "tcpa"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "credit",
+    "union",
+    "lending"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "credit",
+    "union",
+    "member",
+    "business",
+    "loans"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "de",
+    "minimis",
+    "threshold"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "exempt",
+    "loans",
+    "mbl"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "mbl",
+    "veteran"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "increase",
+    "maximum",
+    "loan",
+    "maturity"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "member",
+    "business",
+    "lending",
+    "cap"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "12.25",
+    "percent",
+    "assets",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "business",
+    "loan",
+    "threshold",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "commercial",
+    "lending",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "loan",
+    "maturity",
+    "limit",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "sba",
+    "7(a)",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "credit",
+    "union",
+    "loan",
+    "limit",
+    "increase"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "credit",
+    "union",
+    "loan",
+    "threshold",
+    "increase"
+   ]
+  },
+  {
+   "category": "member_business_lending",
+   "tokens": [
+    "exempt",
+    "loan",
+    "credit",
+    "union",
+    "veteran"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "credit",
+    "union",
+    "mortgage"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "flood",
+    "insurance",
+    "affordable"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "national",
+    "flood",
+    "insurance",
+    "program",
+    "reauthorization"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "nfip",
+    "reauthorization"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "predictable",
+    "mortgage",
+    "homebuyer"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "regulatory",
+    "exception",
+    "credit",
+    "union",
+    "mortgage",
+    "lender"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "secondary",
+    "market",
+    "liquidity"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "credit",
+    "union",
+    "affordable",
+    "mortgage",
+    "product"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "affordable",
+    "mortgage",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "first-time",
+    "homebuyer",
+    "credit",
+    "union"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "down",
+    "payment",
+    "assistance"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "accessory",
+    "dwelling",
+    "unit",
+    "financing"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "adu",
+    "financing"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "fha",
+    "mortgage",
+    "insurance"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "hmda",
+    "reporting"
+   ]
+  },
+  {
+   "category": "mortgage_lending_housing",
+   "tokens": [
+    "home",
+    "mortgage",
+    "disclosure",
+    "act"
+   ]
+  }
+ ]
+}

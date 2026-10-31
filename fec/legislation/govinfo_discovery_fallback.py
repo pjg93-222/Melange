@@ -56,6 +56,13 @@ DEFAULT_BASELINE = (
 )
 DEFAULT_OUT = ROOT / "data" / "legislation" / "congress_advanced_current"
 MANIFEST_SCHEMA = "acu-govinfo-discovery-fallback-manifest-v1"
+MEMBER_PAGES_MANIFEST_SCHEMA = "acu-congress-advanced-pages-manifest-v1"   # collect_congress_member_pages.mjs
+# Written before the union files are replaced and removed after manifest.json lands (crash safety).
+PENDING_MANIFEST = "manifest.pending.json"
+# Where the cumulative union descends from: the immutable 07-25 baseline (rows byte-equal to it),
+# or a Congress.gov member-pages walk (rows refreshed and source-tagged, never dropped).
+LINEAGE_IMMUTABLE = "immutable_baseline"
+LINEAGE_MEMBER_PAGES = "member_pages_checkpoint"
 RECEIPT_SCHEMA = "acu-govinfo-discovery-fallback-receipt-v1"
 CACHE_SCHEMA = "acu-govinfo-official-xml-cache-v1"
 OFFICIAL_HOST = "www.govinfo.gov"
@@ -849,7 +856,7 @@ def _validate_memberships(rows: list[dict[str, Any]], valid_keys: set[str]) -> s
 
 def _load_cumulative_base(
     baseline_dir: Path, out_dir: Path, registry_sha256: str, selected_ids: set[str]
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], Path, dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], Path, dict[str, Any], str]:
     baseline_manifest_path = baseline_dir / "manifest.json"
     baseline_manifest = _read_json(baseline_manifest_path)
     _require(baseline_manifest.get("status") == "complete", "baseline manifest is not complete")
@@ -874,51 +881,111 @@ def _load_cumulative_base(
         "baseline membership receipt drift",
     )
 
-    current_manifest_path = out_dir / "manifest.json"
-    if current_manifest_path.is_file():
-        current = _read_json(current_manifest_path)
+    current = _current_union(out_dir)
+    if current is not None:
+        manifest, current_records, current_memberships = current
+        base_map = _validate_existing_records(baseline_records)
+        current_map = _validate_existing_records(current_records)
         if (
-            current.get("schema") == MANIFEST_SCHEMA
-            and current.get("status") == "complete"
-            and (current.get("registry") or {}).get("sha256") == registry_sha256
-            and (current.get("immutable_baseline") or {}).get("manifest", {}).get("sha256")
+            manifest.get("schema") == MANIFEST_SCHEMA
+            and (manifest.get("registry") or {}).get("sha256") == registry_sha256
+            and (manifest.get("immutable_baseline") or {}).get("manifest", {}).get("sha256")
             == file_receipt(baseline_manifest_path)["sha256"]
         ):
             # Records a prior run added were matched only against its own selection;
             # reusing them under a wider selection would silently skip the new entries.
             _require(
-                selected_ids.issubset(set(current.get("selected_query_ids") or [])),
+                selected_ids.issubset(set(manifest.get("selected_query_ids") or [])),
                 "prior fallback selection does not cover the current selection; "
                 "rerun with a covering selection or rebuild the fallback output",
             )
-            current_union = current.get("union") or {}
-            current_records_path = out_dir / str(current_union.get("records_file") or "")
-            current_memberships_path = out_dir / str(current_union.get("memberships_file") or "")
-            _require(
-                current_records_path.is_file() and current_memberships_path.is_file(),
-                "prior fallback union files missing",
-            )
-            current_records = _read_ndjson(current_records_path)
-            current_memberships = _read_ndjson(current_memberships_path)
-            _require(
-                current_union.get("unique_record_count") == len(current_records)
-                and current_union.get("records_sha256") == stable_hash(current_records),
-                "prior fallback record receipt drift",
-            )
-            _require(
-                current_union.get("membership_count") == len(current_memberships)
-                and current_union.get("memberships_sha256") == stable_hash(current_memberships),
-                "prior fallback membership receipt drift",
-            )
-            base_map = _validate_existing_records(baseline_records)
-            current_map = _validate_existing_records(current_records)
             _require(set(base_map).issubset(current_map), "prior fallback lost baseline records")
-            _require(
-                all(current_map[key] == row for key, row in base_map.items()),
-                "prior fallback mutated a baseline record",
-            )
-            return current_records, current_memberships, baseline_manifest_path, baseline_manifest
-    return baseline_records, baseline_memberships, baseline_manifest_path, baseline_manifest
+            lineage = manifest.get("cumulative_base") or LINEAGE_IMMUTABLE
+            # Byte-equality with the immutable baseline holds only on that lineage: a member-pages
+            # walk legitimately refreshed and source-tagged the rows it carried forward.
+            if lineage == LINEAGE_IMMUTABLE:
+                _require(
+                    all(current_map[key] == row for key, row in base_map.items()),
+                    "prior fallback mutated a baseline record",
+                )
+            return current_records, current_memberships, baseline_manifest_path, baseline_manifest, lineage
+        if manifest.get("schema") == MEMBER_PAGES_MANIFEST_SCHEMA and manifest.get("slice") is not True:
+            # D-346 interim default (keep all, union): a Congress.gov checkpoint (the member-pages walk,
+            # which carries every earlier record forward, or an older full category search) is the
+            # cumulative base. Starting from the immutable baseline instead would drop what it found.
+            _require(set(base_map).issubset(current_map), "Congress.gov checkpoint lost baseline records")
+            return current_records, current_memberships, baseline_manifest_path, baseline_manifest, LINEAGE_MEMBER_PAGES
+        # A verified union this fallback cannot build on (another registry or baseline, or a slice):
+        # replacing it with the baseline would silently drop rows, so stop and say why.
+        _require(False, "the union in %s does not descend from this registry and baseline (schema %s); "
+                        "refusing to replace it with the baseline" % (out_dir, manifest.get("schema")))
+    return baseline_records, baseline_memberships, baseline_manifest_path, baseline_manifest, LINEAGE_IMMUTABLE
+
+
+def _verified_rows(final: Path, count: Any, sha: Any, *, staged_ok: bool) -> list[dict[str, Any]] | None:
+    """The rows of `final` when they match (count, sha). With staged_ok (the pending manifest), a
+    `.next` sibling that matches is moved into place first: the writer died between its renames."""
+    if final.is_file():
+        rows = _read_ndjson(final)
+        if len(rows) == count and stable_hash(rows) == sha:
+            return rows
+    staged = final.with_name(final.name + ".next")
+    if staged_ok and staged.is_file():
+        rows = _read_ndjson(staged)
+        if len(rows) == count and stable_hash(rows) == sha:
+            _promote(staged, final)
+            return rows
+    return None
+
+
+def _promote(staged: Path, final: Path) -> None:
+    """Rename a staged union file into place; a OneDrive sharing lock gets a few retries."""
+    for attempt in range(5):
+        try:
+            os.replace(staged, final)
+            return
+        except PermissionError:
+            if attempt == 4:
+                raise
+            time.sleep(0.5 * (attempt + 1))
+
+
+def _current_union(out_dir: Path) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]] | None:
+    """The union in out_dir and the manifest its files verify against.
+
+    Writers stage both new union files as `<name>.next`, then write manifest.pending.json (the NEW
+    union), then rename the staged files into place, then write manifest.json and remove the pending
+    one. So after a crash at any point the files verify against manifest.json, or against
+    manifest.pending.json once any staged file left behind is moved into place. A known manifest
+    that names union files none of which verify fails closed.
+    """
+    known = (MANIFEST_SCHEMA, MEMBER_PAGES_MANIFEST_SCHEMA)
+    for path in (out_dir / "manifest.json", out_dir / PENDING_MANIFEST):
+        if not path.is_file():
+            continue
+        manifest = _read_json(path)
+        union = manifest.get("union") or {}
+        if (manifest.get("schema") not in known or manifest.get("status") not in ("complete", "in_progress")
+                or not union.get("records_file") or not union.get("memberships_file")):
+            continue
+        staged_ok = path.name == PENDING_MANIFEST
+        records = _verified_rows(out_dir / str(union["records_file"]), union.get("unique_record_count"),
+                                 union.get("records_sha256"), staged_ok=staged_ok)
+        if records is None:
+            continue
+        memberships = _verified_rows(out_dir / str(union["memberships_file"]), union.get("membership_count"),
+                                     union.get("memberships_sha256"), staged_ok=staged_ok)
+        if memberships is not None:
+            return manifest, records, memberships
+    primary = out_dir / "manifest.json"
+    if primary.is_file():
+        manifest = _read_json(primary)
+        _require(
+            not (manifest.get("schema") in known and manifest.get("status") in ("complete", "in_progress")
+                 and (manifest.get("union") or {}).get("records_file")),
+            "current union receipt drift: the union files match neither manifest.json nor manifest.pending.json",
+        )
+    return None
 
 
 def _counts(rows: list[dict[str, Any]], field: str) -> dict[str, int]:
@@ -1014,7 +1081,7 @@ def run_fallback(
     entry_ids = [str(entry["id"]) for entry in entries]
     _require(len(entry_ids) == len(set(entry_ids)), "duplicate registry entry ID")
 
-    existing_records, existing_memberships, baseline_manifest_path, baseline_manifest = (
+    existing_records, existing_memberships, baseline_manifest_path, baseline_manifest, lineage = (
         _load_cumulative_base(baseline_dir, out_dir, registry_sha256, set(entry_ids))
     )
     existing_by_key = _validate_existing_records(existing_records)
@@ -1390,10 +1457,6 @@ def run_fallback(
     # demote it first: an interrupted run leaves a non-complete manifest, not a drifted one.
     manifest_path = out_dir / "manifest.json"
     prior_manifest = _read_json(manifest_path) if manifest_path.is_file() else {"schema": MANIFEST_SCHEMA}
-    _write_json(manifest_path, {**prior_manifest, "status": "in_progress"})
-    _write_ndjson(records_path, output_records)
-    _write_ndjson(memberships_path, output_memberships)
-    support_receipts = _copy_or_extend_support_files(out_dir=out_dir, prepared=prepared_support)
     browser_failure_receipt = file_receipt(browser_failure_path)
     immutable_manifest_receipt = file_receipt(baseline_manifest_path)
     union = {
@@ -1409,9 +1472,29 @@ def run_fallback(
         "memberships_file": memberships_path.name,
         "memberships_sha256": stable_hash(output_memberships),
     }
+    # Crash safety: both new files are staged, then the new union's manifest lands, then the staged
+    # files are renamed into place, so the files always verify against manifest.json (old) or
+    # manifest.pending.json (new, after any staged file is moved in); see _current_union.
+    staged_records = records_path.with_name(records_path.name + ".next")
+    staged_memberships = memberships_path.with_name(memberships_path.name + ".next")
+    _write_ndjson(staged_records, output_records)
+    _write_ndjson(staged_memberships, output_memberships)
+    pending_path = out_dir / PENDING_MANIFEST
+    _write_json(pending_path, {
+        "schema": MANIFEST_SCHEMA, "status": "complete", "pending": True,
+        "registry": {"path": file_receipt(registry_path)["path"], "sha256": registry_sha256},
+        "immutable_baseline": {"manifest": immutable_manifest_receipt},
+        "selected_query_ids": entry_ids, "cumulative_base": lineage, "union": union,
+    })
+    _write_json(manifest_path, {**prior_manifest, "status": "in_progress"})
+    _promote(staged_records, records_path)
+    _promote(staged_memberships, memberships_path)
+    support_receipts = _copy_or_extend_support_files(out_dir=out_dir, prepared=prepared_support)
     receipt = {
         "schema": RECEIPT_SCHEMA,
-        "status": "PASS",
+        # A fallback is never PASS (memory rule 2026-10-27): Congress.gov was not reached.
+        "status": "DEGRADED",
+        "degraded_source": "GovInfo BILLSTATUS/BILLS official bulk fallback",
         "transport": "official_unauthenticated_govinfo_bulk_xml",
         "security_verification_bypassed": False,
         "browser_failure": browser_failure_receipt,
@@ -1467,7 +1550,10 @@ def run_fallback(
     _write_json(receipt_path, receipt)
     manifest = {
         "schema": MANIFEST_SCHEMA,
+        # "complete" is the union-integrity flag the cumulative base checks; the step verdict is
+        # discovery_status (DEGRADED), mirrored in discovery_status.json by the wrapper.
         "status": "complete",
+        "discovery_status": "DEGRADED",
         "completed_at": datetime.now(timezone.utc).isoformat(),
         "primary_instrument": "GovInfo BILLSTATUS/BILLS official bulk fallback",
         "primary_instrument_temporarily_unavailable": "Congress.gov Advanced Search - Legislation",
@@ -1483,6 +1569,7 @@ def run_fallback(
             "preexisting_records_preserved_losslessly": True,
         },
         "selected_query_ids": entry_ids,
+        "cumulative_base": lineage,
         "collection_contract": contract,
         "fallback_receipt": file_receipt(receipt_path),
         "union": union,
@@ -1490,6 +1577,7 @@ def run_fallback(
         "limitations": receipt["limitations"],
     }
     _write_json(manifest_path, manifest)
+    pending_path.unlink(missing_ok=True)
     return manifest
 
 

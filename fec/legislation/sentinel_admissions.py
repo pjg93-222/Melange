@@ -20,6 +20,9 @@ RELATIVE = Path('data/legislation/sentinel_admissions.json')
 # Sentinel source-outage rule (2026-10-11): the longest an admitted verdict may be carried past its last real
 # verification while the House Code service is unavailable.
 CARRY_FORWARD_MAX_DAYS = 30
+# The two ways an admitted bill's published verdict is kept without a fresh verification, both bound by the limit above: its
+# source was down, or the classifier's fresh answer was refused (an unknown or repeated scoring category).
+CARRIED_FORWARD = ('source_unavailable', 'classifier_invalid_output')
 CLASSES = {'cu_primary', 'shared', 'bank_primary', 'crypto_primary', 'fintech', 'telecom_primary', 'offtopic', 'oppose'}
 
 
@@ -37,7 +40,7 @@ def drop_expired_carries(document, now):
     Every reader of the generation must call this, or they would score different vintages."""
     limit = CARRY_FORWARD_MAX_DAYS * 86400
     expired = {key for key in document['bills']
-               if (document['decisions'].get(key) or {}).get('carried_forward') == 'source_unavailable'
+               if (document['decisions'].get(key) or {}).get('carried_forward') in CARRIED_FORWARD
                and (now - datetime.fromisoformat(document['decisions'][key]['checked_at'].replace('Z', '+00:00'))).total_seconds() > limit}
     if not expired:
         return document
@@ -81,6 +84,9 @@ def load(root, *, max_age_days=8):
     else:
         CT.note_freshness(root, 'sentinel_admissions_carry_expired', CT.FRESH, checked_at=document['checked_at'],
                           window_days=CARRY_FORWARD_MAX_DAYS, producer='fec/legislation/sentinel_admissions.py')
+    failed = document.get('evidence_failed') or {}
+    if not isinstance(failed, dict) or set(failed) & set(document['bills']):
+        raise ValueError('evidence_failed must name bills that are not admitted (D-366)')
     for record in document['sources']:
         source = Path(to_host(record['path']))
         if not source.is_file() or digest(source) != record['sha256']:
@@ -91,7 +97,7 @@ def load(root, *, max_age_days=8):
         if bill['key'] != key or decision['canonical_key'] != key or decision['disposition'] != 'include' or decision.get('confidence') != 'high':
             raise ValueError('sentinel bill admission identity/disposition mismatch')
         checked = datetime.fromisoformat(decision['checked_at'].replace('Z', '+00:00'))
-        if decision.get('carried_forward') == 'source_unavailable':
+        if decision.get('carried_forward') in CARRIED_FORWARD:
             # Sentinel source-outage rule (2026-10-11): checked_at stays the last real verification. One past
             # CARRY_FORWARD_MAX_DAYS was dropped above (D-260); a stamp from the future is a clock fault and still refuses.
             if (now-checked).total_seconds() < -300:
@@ -108,7 +114,7 @@ def load(root, *, max_age_days=8):
             if not category.get('rationale') or not category.get('quote'):
                 raise ValueError('sentinel direction lacks substantive source provenance')
         from legislation.govinfo_discovery_fallback import _parse_bill_text
-        from legislation.refresh_sentinel_admissions import validate_decision, statute_document_text
+        from legislation.refresh_sentinel_admissions import validate_decision, statute_document_text, bound_decision_texts
         import bill_rules as BR
         registry = json.loads((Path(root)/'source_data/legislation/acu_legislation_search_registry.json').read_text(encoding='utf-8'))
         categories = {BR.canonical_category(r['id']) for r in registry['categories']}
@@ -121,6 +127,9 @@ def load(root, *, max_age_days=8):
             raw=Path(to_host(source['path'])).read_bytes()
             texts[source['url']] = (statute_document_text(raw,source) if source.get('kind')=='statute'
                                     else _parse_bill_text(raw,url=source['url'],canonical_key=key))
+        if decision.get('evidence_selection'):
+            # M5a (D-369): the quotes are validated against what the classifier saw, replayed from the sealed manifest.
+            texts = bound_decision_texts(decision)
         validate_decision(decision,key,texts,categories)
         if sorted(bill['areas']) != sorted(c['category'] for c in decision['categories']):
             raise ValueError('bill categories differ from its decision')

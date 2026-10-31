@@ -125,7 +125,7 @@ def load_inputs():
     gold = load_root("data/stance/big5_senate_expert_gold.json")
     roster_rows = load_root("data/engine/congestion.json")
     roster = [row["member"] for row in roster_rows]
-    panels, _ = map_gold(gold, roster)
+    panels, _ = map_gold(gold, roster_rows)
     channels = raw_channels()[TRAIT]
     # Covariates from legislators.csv via the congestion bioguide join (congestion.json has NO
     # party field; legislators party values are 'Republican'/'Democrat'/'Independent').

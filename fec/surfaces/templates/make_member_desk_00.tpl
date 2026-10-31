@@ -918,7 +918,8 @@ function renderRanked(){
   if(HONORS&&(rstate.sort==='tier'||(!area&&rstate.sort==='rank')))r.sort((a,b)=>overallRankOrder(a,b,rstate.sort));
   const potentialSort=!area&&rstate.sort==='potential',adjustedPotentialSort=!area&&rstate.sort==='potential_adjusted',potentialMode=potentialSort||adjustedPotentialSort;
   const standingSort=false;
-  $('#count').textContent=`Showing ${r.length} of ${M.length} members`+(area?` · ${area}`:'');
+  const gone=rstate.q?(D.departed||[]).filter(d=>d.name.toLowerCase().includes(rstate.q)):[];   // former members stay findable
+  $('#count').textContent=`Showing ${r.length} of ${M.length} members`+(area?` · ${area}`:'')+gone.map(d=>` · ${d.name}: ${d.notice}`).join('');
   $('#th-rank').textContent=rstate.sort==='tier'?'Primacy rank':potentialMode?'Opportunity rank':HONORS?(area?'Field rank':standingSort?'Action rank':'Priority rank'):'Rank';
   $('#th-stance').textContent=HONORS?(area?'Recognition · '+area:'Stance · overall'):area?('Stance · '+area):'Stance · overall';
   $('#th-score').textContent=area?(HONORS?'Raw action score':area):(adjustedPotentialSort?(dpAdjustable?'Adjusted potential':'Potential score'):potentialSort?'Potential score':standingSort?'Raw action score':HONORS?'Model score':'Score');
@@ -1079,7 +1080,7 @@ function methodHTML(m){
   else if(P.narrative||P.narrative_status)add('Approach brief','Written from the measures already on this profile: the personality axes, the observed-behaviour percentiles, the speech measures and the hearing-antagonism facet. Those are gathered into one evidence packet per member and drafted by Claude Sonnet on 31 August 2026. Each brief is checked mechanically for length, for banned phrasing, and for wording reused from another member. No check confirms a sentence against the measure it came from.');
   if(m.district_brief)add('District brief',`Three evidence-grounded paragraphs covering household and housing conditions, credit-union relevance, and industry specialization. The corpus was generated ${esc(districtBriefMeta.generated||'—')} and passed deterministic word-band, figure-cap, evidence-grounding, formatting, ban-list, and novelty checks. It is displayed as narrative context, not as a score. ${esc(((districtBriefMeta.known_limitations||[])[0])||'')}`);
   if(m.cook_pvi)add('Cook PVI · 2026 source snapshot',`Cook Political Report's rounded label describes historical presidential partisan lean relative to the nation; it is not an election forecast. This snapshot covers voting House districts only, with no Senate or territorial values. A district-code match does not verify the current member or current district boundaries. Source incumbent names are not used for matching. ${cookPviSourceHTML()} This context does not enter scores, ranks, allocations, receptivity, ROI, or efficiency calculations.`);
-  if(P.big5_pct||P.big5_fb_pct)add('Personality read','Gold-validated: gold-anchored axes use the OOF Senate-gold composites.');
+  if(P.big5_pct||P.big5_fb_pct)add('Personality read','Public-perceived traits with varying panel support; hatching marks weaker fallback evidence.');
   if(X.do_pct!=null)add('Credit-union bill delivery','Sponsored + cosponsored CU bills weighted by role and by how far each advanced. Not passage-weighted, so it does not reward holding the majority.');
   if(X.antag)add('Antagonist flag',`<div style="font-size:11px;font-weight:700;color:#f59e0b;background:#f59e0b22;border:1px solid #f59e0b55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">Signed-mention antagonist set (Aref-Neal splinter)</div>`);
   if(potential.qualified){
@@ -1188,8 +1189,11 @@ function respHTML(m){
   const appr=(P.approach&&!P.brief_v3&&!P.departed_notice)?`<div class=eyebrow style=margin-top:8px>Quick read</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#D2CDBC);background:#2E2514;border:1px solid var(--line,#433317);border-radius:8px;padding:7px 9px">${esc(P.approach)}</div>`:'';
   return `${suscRows}${appr}`;
 }
-/* v3 member brief: every member-supplied field is escaped, and the Basis line is
-   rendered verbatim from the validated packet-backed publication. */
+/* v3 meeting brief (Paul 2026-10-20). Rendered in template order: title, archetype, bottom line, Do (4),
+   Don't (3), warning sign, follow-up, Profile (personality, how X speaks, how X decides), then the
+   Basis line. The Basis line is computed in code (build_member_brief_packets.py) and arrives as
+   B.basis.line; nothing here writes or rewords it. Everything goes through esc(). The block sits
+   inside the Profile section as plain nodes (no <details>), so Print / PDF includes it. */
 function briefV3HTML(B){
   const plural=B.pronoun==='they';
   const lab='color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 2px';
@@ -1198,7 +1202,7 @@ function briefV3HTML(B){
   const para=(k,v)=>`<div data-bv3="${k}" style=margin-bottom:6px><b>${k}.</b> ${esc(v)}</div>`;
   return `<div class=eyebrow style=margin-top:10px>Meeting brief</div>
       <div data-bv3-block style="font-size:12px;line-height:1.52;color:var(--ink,#D2CDBC);background:#2E2514;border:1px solid var(--line,#433317);border-radius:8px;padding:10px 12px">
-        <div data-bv3="title" style="font-size:14px;font-weight:700;margin-bottom:2px">${esc(B.name)} — The ${esc(B.animal)}</div>
+        <div data-bv3="title" style="font-size:14px;font-weight:700;margin-bottom:2px">${esc(B.name)} \u2014 The ${esc(B.animal)}</div>
         <div data-bv3="archetype" style="margin-bottom:8px;color:var(--muted,#B8AD90)">Archetype: ${esc(B.animal)}, ${esc(B.descriptor)}</div>
         ${B.stale?`<div data-bv3="stale" style="margin-bottom:8px;color:#EECD5C;font-weight:700">Evidence updated after this brief was written (${esc(B.stale.date)})</div>`:''}
         ${line('Bottom line',B.bottom_line)}

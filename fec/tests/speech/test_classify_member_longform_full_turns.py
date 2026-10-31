@@ -2,6 +2,7 @@ import importlib.util
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 from types import SimpleNamespace
 import wave
 
@@ -75,30 +76,37 @@ def source_fixture(tmp_path):
             "status": "SELECTED_HARD_NAME_CUE_CANDIDATE", "cues": [{"start_sec": 0, "end_sec": 1, "phrase": "Example Member"}]}
 
 
-def fake_factory(calls, *, stop_reason="end_turn", error=None):
+def fake_run(calls, *, stop_reason="end_turn", error=None, returncode=0, is_error=False, stdout=None):
     raw = json.dumps({"identity_sequence": "MATCH", "identity_basis": "Named host handoff.", "turns": [
         {"start_sec": 3, "end_sec": 20, "opening_words": "These are the opening words", "handoff_basis": "Both handoffs clear."}]})
-    class Client:
-        def __init__(self, **kwargs):
-            calls.append({"client": kwargs})
-            self.messages = self
-        def create(self, **kwargs):
-            calls.append({"request": kwargs})
-            if error:
-                raise error
-            return SimpleNamespace(content=[SimpleNamespace(type="text", text=raw)], stop_reason=stop_reason,
-                                   usage={"input_tokens": 432, "output_tokens": 123}, id="response-test", model=module.MODEL)
-    return Client
+    def run(args, **kwargs):
+        calls.append({"args": args, **kwargs})
+        if error:
+            raise error
+        envelope = {"type": "result", "is_error": is_error, "result": raw, "stop_reason": stop_reason,
+                    "session_id": "response-test", "uuid": "request-test", "total_cost_usd": 0.5,
+                    "usage": {"input_tokens": 432, "output_tokens": 123}, "modelUsage": {module.MODEL: {}}}
+        return SimpleNamespace(returncode=returncode, stdout=stdout if stdout is not None else json.dumps(envelope),
+                               stderr="boom" if returncode else "")
+    return run
 
 
-def test_explicit_timeout_zero_retries_and_exact_usage(tmp_path):
+def test_cli_call_is_subscription_only_with_prompt_on_stdin(tmp_path, monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-should-not-leak")
     source, calls = source_fixture(tmp_path), []
-    result = module.classify_source(source, "test-secret", module.settings(16000, 180), "manifest-hash",
-                                    client_factory=fake_factory(calls))
-    assert calls[0]["client"] == {"api_key": "test-secret", "timeout": 180, "max_retries": 0}
-    assert len([call for call in calls if "request" in call]) == 1
+    result = module.classify_source(source, module.settings(16000, 180), "manifest-hash", run=fake_run(calls))
+    (call,) = calls
+    assert Path(call["args"][0]).stem.lower() == "claude"  # shutil.which resolves claude.CMD on Windows
+    assert call["args"][1:7] == ["-p", "--model", "claude-haiku-5-5", "--output-format", "json", "--no-session-persistence"]
+    assert call["args"][call["args"].index("--effort") + 1] == "low" and "--system-prompt" in call["args"] and "--bare" not in call["args"]
+    assert "ANTHROPIC_API_KEY" not in call["env"] and "ANTHROPIC_AUTH_TOKEN" not in call["env"]
+    assert call["env"]["CLAUDE_CODE_MAX_OUTPUT_TOKENS"] == "16000"
+    assert call["timeout"] == 180 and call["input"].startswith("You are conservatively segmenting")
     assert result["status"] == "FULL_TURN_CANDIDATE_IDENTITY_UNVERIFIED"
+    assert result["classifier_model"] == "claude-haiku-5-5" and result["backend"] == "claude_cli_subscription"
+    assert result["classifier_settings"]["backend"] == "claude_cli_subscription"
     assert result["usage"] == {"input_tokens": 432, "output_tokens": 123}
+    assert result["response_id"] == "response-test" and result["provider_model"] == "claude-haiku-5-5"
     assert result["billing_cost_usd"] is None
     assert result["speaker_identity_authority"] is False
     assert result["final_profile_authority"] is False
@@ -108,12 +116,12 @@ def test_explicit_timeout_zero_retries_and_exact_usage(tmp_path):
 @pytest.mark.parametrize("reason", ["max_tokens", "pause_turn", "tool_use", None])
 def test_noncompleted_response_is_refused_even_with_valid_json(tmp_path, reason):
     calls = []
-    result = module.classify_source(source_fixture(tmp_path), "key", module.settings(8, 20), "input",
-                                    client_factory=fake_factory(calls, stop_reason=reason))
+    result = module.classify_source(source_fixture(tmp_path), module.settings(8, 20), "input",
+                                    run=fake_run(calls, stop_reason=reason))
     assert result["status"] == "CLASSIFIER_RESPONSE_REFUSED"
     assert result["turns"] == []
     assert result["usage"]["output_tokens"] == 123
-    assert len(calls) == 2
+    assert len(calls) == 1
     if reason == "max_tokens":
         assert result["refusal_reason"] == "truncated_max_tokens"
 
@@ -122,23 +130,25 @@ def test_noncompleted_response_is_refused_even_with_valid_json(tmp_path, reason)
 def test_bad_physical_input_fails_before_api_request(tmp_path, kind):
     source, calls = source_fixture(tmp_path), []
     source[kind + "_sha256"] = "wrong-hash"
-    result = module.classify_source(source, "key", module.settings(8000, 20), "input",
-                                    client_factory=fake_factory(calls))
+    result = module.classify_source(source, module.settings(8000, 20), "input", run=fake_run(calls))
     assert result["status"] == "CLASSIFIER_ERROR"
     assert result["api_requests_attempted"] == 0
     assert not calls
 
 
-def test_auth_or_credit_error_is_not_retried_and_key_is_redacted(tmp_path):
+@pytest.mark.parametrize("kwargs", [
+    {"error": subprocess.TimeoutExpired("claude", 20)},
+    {"returncode": 1},
+    {"is_error": True},
+    {"stdout": "not json"},
+])
+def test_cli_failure_timeout_or_error_envelope_is_classifier_error_and_not_retried(tmp_path, kwargs):
     source, calls = source_fixture(tmp_path), []
-    error = RuntimeError("credit failed for test-secret")
-    result = module.classify_source(source, "test-secret", module.settings(8000, 20), "input",
-                                    client_factory=fake_factory(calls, error=error))
+    result = module.classify_source(source, module.settings(8000, 20), "input", run=fake_run(calls, **kwargs))
     assert result["status"] == "CLASSIFIER_ERROR"
+    assert result["turns"] == []
     assert result["api_requests_attempted"] == 1
-    assert len(calls) == 2
-    assert "test-secret" not in json.dumps(result)
-    assert "[REDACTED]" in result["error"]
+    assert len(calls) == 1
 
 
 def test_prompt_includes_entire_transcript_without_character_cap(tmp_path):
@@ -148,9 +158,8 @@ def test_prompt_includes_entire_transcript_without_character_cap(tmp_path):
     words[-1]["word"] = "detail " * 40000 + "FINAL_TRANSCRIPT_MARKER"
     path.write_text("".join(json.dumps(word) + "\n" for word in words), encoding="utf-8")
     source["transcript_sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
-    result = module.classify_source(source, "key", module.settings(8000, 20), "input",
-                                    client_factory=fake_factory(calls))
-    sent = calls[1]["request"]["messages"][0]["content"]
+    result = module.classify_source(source, module.settings(8000, 20), "input", run=fake_run(calls))
+    sent = calls[0]["input"]
     assert len(sent) > 240000
     assert sent.endswith("FINAL_TRANSCRIPT_MARKER")
     assert result["prompt_characters"] == len(sent)
@@ -173,14 +182,13 @@ def test_resume_binds_source_hashes_input_row_and_settings(tmp_path):
     assert module.needs_processing(source, existing, config, retry_errors=True)
 
 
-def test_request_budget_refuses_before_reading_key(tmp_path, monkeypatch):
+def test_request_budget_refuses_before_any_cli_use(tmp_path, monkeypatch):
     source = source_fixture(tmp_path)
     input_path = tmp_path / "input.jsonl"
     input_path.write_text(json.dumps(source) + "\n" + json.dumps({**source, "source_id": "recording-two"}) + "\n")
     monkeypatch.setattr("sys.argv", ["classifier", "--input", str(input_path), "--output", str(tmp_path / "out.jsonl"),
-                                   "--receipt", str(tmp_path / "receipt.json"), "--key", str(tmp_path / "NO-KEY"),
-                                   "--max-requests", "1"])
-    with pytest.raises(SystemExit, match="request budget exceeded before API use"):
+                                   "--receipt", str(tmp_path / "receipt.json"), "--max-requests", "1"])
+    with pytest.raises(SystemExit, match="request budget exceeded before CLI use"):
         module.main()
 
 
@@ -189,22 +197,19 @@ def test_two_recordings_for_one_member_use_separate_resume_keys(tmp_path, monkey
     input_path = tmp_path / "input.jsonl"
     output = tmp_path / "out.jsonl"
     receipt = tmp_path / "receipt.json"
-    key = tmp_path / "key.txt"
-    key.write_text("fake-test-only-key")
     input_path.write_text(json.dumps(source) + "\n" + json.dumps({**source, "source_id": "recording-two"}) + "\n")
     calls = []
-    def fake_classify(row, api_key, config, input_hash):
+    def fake_classify(row, config, input_hash):
         calls.append(module.source_key(row))
         return {**row, "source_input_sha256": module.row_hash(row), "classifier_settings": config,
                 "status": "SCREENED_OUT", "turns": [], "api_requests_attempted": 1}
     monkeypatch.setattr(module, "classify_source", fake_classify)
     monkeypatch.setattr("sys.argv", ["classifier", "--input", str(input_path), "--output", str(output),
-                                   "--receipt", str(receipt), "--key", str(key), "--workers", "1", "--max-requests", "2"])
+                                   "--receipt", str(receipt), "--delay-seconds", "0", "--workers", "1", "--max-requests", "2"])
     assert module.main() == 0
     assert set(calls) == {("Example Member", "recording-one"), ("Example Member", "recording-two")}
     assert len(output.read_text().splitlines()) == 2
     calls.clear()
-    key.unlink()
     assert module.main() == 0
     assert calls == []
 
@@ -213,17 +218,15 @@ def test_member_filter_preserves_other_members_prior_rows(tmp_path, monkeypatch)
     source = source_fixture(tmp_path)
     other = {**source, "member": "Other Member"}
     input_path, output = tmp_path / "input.jsonl", tmp_path / "out.jsonl"
-    key = tmp_path / "key.txt"
-    key.write_text("fake-test-only-key")
     input_path.write_text(json.dumps(source) + "\n" + json.dumps(other) + "\n")
     prior = {**other, "source_input_sha256": module.row_hash(other), "classifier_settings": module.settings(8000, 180),
              "status": "SCREENED_OUT", "turns": [], "api_requests_attempted": 1}
     output.write_text(json.dumps(prior) + "\n")
-    monkeypatch.setattr(module, "classify_source", lambda row, k, config, h: {
+    monkeypatch.setattr(module, "classify_source", lambda row, config, h: {
         **row, "source_input_sha256": module.row_hash(row), "classifier_settings": config,
         "status": "SCREENED_OUT", "turns": [], "api_requests_attempted": 1})
     monkeypatch.setattr("sys.argv", ["classifier", "--input", str(input_path), "--output", str(output),
-                                   "--receipt", str(tmp_path / "receipt.json"), "--key", str(key), "--workers", "1",
+                                   "--receipt", str(tmp_path / "receipt.json"), "--delay-seconds", "0", "--workers", "1",
                                    "--member", "Example Member"])
     assert module.main() == 0
     members = {json.loads(line)["member"] for line in output.read_text().splitlines()}
@@ -240,18 +243,16 @@ def test_member_filter_drops_other_members_stale_rows_but_keeps_failures(tmp_pat
     source = source_fixture(tmp_path)
     other = {**source, "member": "Other Member"}
     input_path, output, receipt = tmp_path / "input.jsonl", tmp_path / "out.jsonl", tmp_path / "receipt.json"
-    key = tmp_path / "key.txt"
-    key.write_text("fake-test-only-key")
     input_path.write_text(json.dumps(source) + "\n" + json.dumps(other) + "\n")
     # The prior row was classified from an earlier version of Other Member's input row.
     prior = {**other, "source_input_sha256": module.row_hash({**other, "cues": []}),
              "classifier_settings": module.settings(8000, 180), "status": status, "turns": [], "api_requests_attempted": 1}
     output.write_text(json.dumps(prior) + "\n")
-    monkeypatch.setattr(module, "classify_source", lambda row, k, config, h: {
+    monkeypatch.setattr(module, "classify_source", lambda row, config, h: {
         **row, "source_input_sha256": module.row_hash(row), "classifier_settings": config,
         "status": "SCREENED_OUT", "turns": [], "api_requests_attempted": 1})
     monkeypatch.setattr("sys.argv", ["classifier", "--input", str(input_path), "--output", str(output),
-                                   "--receipt", str(receipt), "--key", str(key), "--workers", "1",
+                                   "--receipt", str(receipt), "--delay-seconds", "0", "--workers", "1",
                                    "--member", "Example Member"])
     assert module.main() == 0
     rows = {json.loads(line)["member"]: json.loads(line) for line in output.read_text().splitlines()}
@@ -268,23 +269,21 @@ def test_member_filter_checks_other_members_rows_against_their_own_settings(tmp_
     source = source_fixture(tmp_path)
     other = {**source, "member": "Other Member"}
     input_path, output, receipt = tmp_path / "input.jsonl", tmp_path / "out.jsonl", tmp_path / "receipt.json"
-    key = tmp_path / "key.txt"
-    key.write_text("fake-test-only-key")
     prior = {**other, "source_input_sha256": module.row_hash(other), "classifier_settings": module.settings(8000, 180),
              "status": "FULL_TURN_CANDIDATE_IDENTITY_UNVERIFIED", "turns": [{"duration_seconds": 17.0}]}
     output.write_text(json.dumps(prior) + "\n")
     current_other = {**other, "cues": []} if input_changed else other
     input_path.write_text(json.dumps(source) + "\n" + json.dumps(current_other) + "\n")
-    monkeypatch.setattr(module, "classify_source", lambda row, k, config, h: {
+    monkeypatch.setattr(module, "classify_source", lambda row, config, h: {
         **row, "source_input_sha256": module.row_hash(row), "classifier_settings": config,
         "status": "SCREENED_OUT", "turns": [], "api_requests_attempted": 1})
     monkeypatch.setattr("sys.argv", ["classifier", "--input", str(input_path), "--output", str(output),
-                                   "--receipt", str(receipt), "--key", str(key), "--workers", "1",
+                                   "--receipt", str(receipt), "--delay-seconds", "0", "--workers", "1",
                                    "--member", "Example Member", "--timeout-seconds", "300"])
     assert module.main() == 0
     rows = {json.loads(line)["member"]: json.loads(line) for line in output.read_text().splitlines()}
     assert ("Other Member" in rows) is not input_changed
     if not input_changed:
         assert rows["Other Member"] == prior
-    assert rows["Example Member"]["classifier_settings"] == module.settings(8000, 300.0)
+    assert rows["Example Member"]["classifier_settings"] == module.settings(module.CLI_MAX_OUTPUT_TOKENS, 300.0)
     assert json.loads(receipt.read_text())["counts"]["sources_with_full_turn_candidates"] == (0 if input_changed else 1)

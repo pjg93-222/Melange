@@ -51,42 +51,39 @@ DENY = [
 ]
 # Credential stores, the consumer's marker and its download cache: excluded even when --allow names them, and
 # also matched against the real absolute path (a --map can mount .../credentials or rename keys.json to anything).
-# Restricted LDA identity corpus (receipt: publication_enabled false, restricted-machine-local) and the
-# staffer sections/page that inline it as ODATA/CDATA (GOVERNANCE_MATRIX M-07, D-332; X2). Fail closed: a copy
-# of any of these under another name is refused by content hash, and any page carrying the ODATA/CDATA
-# islands is refused by content (see select()).
+# Restricted staffer organisations/clients sections and the staffer-network page that inlines them as
+# ODATA/CDATA (GOVERNANCE_MATRIX M-07, D-332; X2). The LDA corpus and stores they are built from are not
+# restricted (D-399, D-405). Fail closed: a copy of any of these under another name is refused by content hash,
+# and any page carrying the ODATA/CDATA islands is refused by content (see select()).
 RESTRICTED = [
-    "**/lda-source-native/**", "**/staffer_organisations_section.json", "**/staffer_clients_section.json",
+    # Trailing * takes .gz/.zst/.bak copies; staffer_offices_section.json is public and stays shippable.
+    "**/staffer_organisations_section*", "**/staffer_clients_section*",
     "**/staffer-network.html",
-    # Derived LDA stores: pending Paul ruling on LDA restriction scope (X2 Q1).
-    # Trailing * also takes the -wal/-shm/-journal sidecars, which hold database pages.
-    "**/lda_source_catalog_v1.sqlite*", "**/lda_activity_v1.sqlite*", "**/lda_activity_v2.sqlite*",
-    "**/lda-identity-candidates*",
+    # LDA stores are not restricted (D-405, 2026-10-28).
 ]
 HARD_DENY = [
     "**/accounts.sqlite3", "**/*.dpapi", "**/keys/**", "**/keys.json", "**/.env*", "**/credentials/**",
     "**/*.pfx", "**/*.pem", ".melange-data-release.json", "__state__/data-download/**",
 ] + RESTRICTED
-# sha256 -> bytes of known restricted files (lda-source-native generation-20260830T231200Z and the
-# staffer_{organisations,clients}_section.json builds seen on the owner machine, 2026-10-28). Any member with
+# sha256 -> bytes of known restricted files (the staffer_{organisations,clients}_section.json builds seen on
+# the owner machine, 2026-10-28; the lda-source-native digests were dropped under D-399/D-405). Any member with
 # this content is refused whatever its name; restricted files present in the build are added at build time,
 # so a new generation's copies are caught too. ponytail: a new section build that is renamed AND absent from
 # the build under its own name escapes this list; regenerate the digests when the sections are rebuilt.
 RESTRICTED_SHA256 = {
-    "2ff6864f8a06e822277083230ab6a59abcc979ca12681e58490c89cb8a85b485": 110195153,
-    "81841c810269bf967cb3edc10664dbbad5aa17261089eaa67e4f288c2fcda625": 58789826,
-    "363027b2c3fff40331b304c9dd9b1d7bd81691bc9f9915aaf1b8f4acd0a869b7": 430061239,
-    "80ac82346c435bb8f1231d9f3425d759ca9a8ae063db879ec104244f9fcd282e": 1928569,
-    "0d35902244f02688d9ac961379efee0f96e3cfab1184409a4c93bb0584a1aed2": 2503228,
-    "5dfd3bbb16dea6ce940a687b15c74f07e720073d02b559d8000bb33db49dce8c": 2386,
     "d3b2b1a9dea5d5ea9d44a0a1329d51a836c99539518c391b900c8220d847a774": 3892182,
     "06db0d498a9e090bf676e0ceb139a4bc97c3b61bc5ec2f52ab4259ebc8feb3ee": 3892182,
     "c0808b7b7991deda567c6d44bdd6cc479d2a12ec2a00ad7c25d342f38a000a72": 3940057,
     "f085bc383b7a77df591c46315b62be56551f2fe33af0c69f4db88efde5631b0b": 3939693,
 }
 # The staffer panel's organisations/clients islands (make_staffer_network_html.py, make_combined.py).
-INLINE_RESTRICTED = re.compile(rb"const\s+[oc]data\s*=", re.I)
+# UTF-8/ASCII, plus the UTF-16LE and UTF-16BE (BOM or not) encodings of the same marker, matched on raw bytes.
+INLINE_RESTRICTED = re.compile(
+    rb"const\s+[oc]data\s*="
+    rb"|c\x00o\x00n\x00s\x00t\x00(?:\s\x00)+[oc]\x00d\x00a\x00t\x00a\x00(?:\s\x00)*=\x00"
+    rb"|\x00c\x00o\x00n\x00s\x00t(?:\x00\s)+\x00[oc]\x00d\x00a\x00t\x00a(?:\x00\s)*\x00=", re.I)
 PAGE_SUFFIXES = (".html", ".htm", ".js", ".mjs", ".cjs")
+GZ_LIMIT = 2 * 1024**3  # decompressed bytes read from one .gz page; past this it is excluded (bomb cap)
 
 
 def _match(rel: str, patterns: list[str]) -> bool:
@@ -160,33 +157,73 @@ def select(sources, allow: list[str], deny: list[str]):
         else:
             kept.append((rel, p))
     # Content checks, so a rename cannot carry restricted data out: hash only where sizes collide.
+    # A kept .gz is checked by its decompressed content too, so restricted digests are needed whenever one exists.
     sizes = {p.stat().st_size for _, p in kept}
+    any_gz = any(p.name.lower().endswith(".gz") for _, p in kept)
     digests = dict(RESTRICTED_SHA256)
     for p in restricted:
-        if p.stat().st_size in sizes:
+        if p.stat().st_size and (any_gz or p.stat().st_size in sizes):
             digests[sha256_file(p)] = p.stat().st_size
+        # A restricted .gz is also known by its content, so a recompressed or inflated copy is caught.
+        # ponytail: inflates the whole restricted corpus each build (seconds per GB).
+        if p.name.lower().endswith(".gz"):
+            try:
+                got = _gz_sha256(p, float("inf"))
+            except (OSError, EOFError, zlib.error):
+                got = None
+            if got and got[1]:
+                digests[got[0]] = got[1]
     deny_sizes = set(digests.values()) - {0}
     clean = []
     for rel, p in kept:
         size = p.stat().st_size
-        if (size in deny_sizes and sha256_file(p) in digests) or _inlines_restricted(p):
+        if ((size in deny_sizes and sha256_file(p) in digests) or _gz_restricted(p, digests, max(deny_sizes))
+                or _inlines_restricted(p)):
             excluded.append((rel, size))
         else:
             clean.append((rel, p))
     return clean, sorted(excluded)
 
 
+def _gz_sha256(p: Path, cap) -> tuple[str, int] | None:
+    """(sha256, size) of a .gz's decompressed content, streamed; None once it inflates past ``cap``."""
+    h, n = hashlib.sha256(), 0
+    with gzip.open(p, "rb") as fh:
+        while chunk := fh.read(1 << 20):
+            n += len(chunk)
+            if n > cap:
+                return None
+            h.update(chunk)
+    return h.hexdigest(), n
+
+
+def _gz_restricted(p: Path, digests: dict, cap: int) -> bool:
+    """A .gz whose decompressed content has a restricted digest. Stopped past ``cap`` (the largest restricted
+    size, so nothing bigger can match: the bomb cap). Unreadable gzip fails closed."""
+    if not p.name.lower().endswith(".gz"):
+        return False
+    try:
+        got = _gz_sha256(p, cap)
+    except (OSError, EOFError, zlib.error):
+        return True
+    return got is not None and got[0] in digests
+
+
 def _inlines_restricted(p: Path) -> bool:
-    """A page or script (or its .gz) carrying the staffer ODATA/CDATA islands. Unreadable gzip fails closed."""
+    """A page or script (or its .gz) carrying the staffer ODATA/CDATA islands. Unreadable gzip, or a .gz page
+    that inflates past GZ_LIMIT, fails closed."""
     name = p.name.lower()
     if not name.removesuffix(".gz").endswith(PAGE_SUFFIXES):
         return False
     # Streamed, so a ~100 MB page or a .gz bomb never sits in memory. ponytail: a marker whose whitespace run
     # straddles a 1 MiB chunk boundary by more than 4 KiB is missed; the generators emit "const ODATA=".
-    tail = b""
+    tail, n = b"", 0
     try:
         with (gzip.open(p, "rb") if name.endswith(".gz") else p.open("rb")) as fh:
             while chunk := fh.read(1 << 20):
+                n += len(chunk)
+                if name.endswith(".gz") and n > GZ_LIMIT:
+                    return True
                 buf = tail + chunk
                 if INLINE_RESTRICTED.search(buf):
                     return True

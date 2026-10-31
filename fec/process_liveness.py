@@ -83,3 +83,19 @@ def process_start_time(pid):
         return boot+ticks_since_boot/hertz
     except (OSError,IndexError,ValueError,StopIteration,AttributeError):
         return None
+
+
+def boot_time():
+    """Unix epoch of the last boot, or None.  No process outlives a reboot, so anything last known
+    alive before this instant is dead whatever its pid now names -- and, unlike a process's start
+    time, this needs no handle on that process (a SYSTEM-owned pid denies the query)."""
+    try:
+        if os.name=='nt':
+            import ctypes,time
+            kernel=ctypes.WinDLL('kernel32')
+            kernel.GetTickCount64.restype=ctypes.c_ulonglong   # ms since boot, sleep included
+            return time.time()-kernel.GetTickCount64()/1000.0
+        with open('/proc/stat',encoding='utf-8',errors='replace') as handle:
+            return next(float(line.split()[1]) for line in handle if line.startswith('btime '))
+    except (OSError,AttributeError,ValueError,StopIteration):
+        return None

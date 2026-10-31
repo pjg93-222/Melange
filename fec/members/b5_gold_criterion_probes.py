@@ -51,7 +51,7 @@ def main():
     insiders = {name_key(r["source_name"], True): r for r in records if r["panel"] == "senate_insiders"}
     academics = {name_key(r["source_name"], True): r for r in records if r["panel"] == "academic_experts"}
     both = sorted(set(insiders) & set(academics))
-    roster = [row["member"] for row in load("data/engine/congestion.json")]
+    roster = load("data/engine/congestion.json")
     panels, _ = map_gold(gold, roster)
     shared = sorted(set(panels["senate_insiders"]) & set(panels["academic_experts"]))
 

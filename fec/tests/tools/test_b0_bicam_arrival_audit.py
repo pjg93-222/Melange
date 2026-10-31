@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from fec import roster as roster_source
 from fec.tools import b0_bicam_arrival_audit as b0
 
 
@@ -243,14 +244,15 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
         members = [{"member_id": f"m{index}", "bioguide_id": value} for index, value in enumerate(identifiers)]
         return roster, legislators, voteview, members
 
-    def test_08_roster_bar_passes_533_and_names_misses_duplicates(self) -> None:
+    def test_08_roster_bar_passes_the_roster_size_and_names_misses_duplicates(self) -> None:
         roster, legislators, voteview, members = self._roster_files()
-        result = b0.audit_roster(roster, legislators, voteview, members)
+        result = b0.audit_roster(roster, legislators, voteview, members, expected_roster=533)
         self.assertTrue(result["pass"])
         self.assertEqual(result["joined"], 533)
+        self.assertFalse(b0.audit_roster(roster, legislators, voteview, members, expected_roster=535)["pass"])   # the bar is the caller's roster size
         roster, legislators, voteview, members = self._roster_files(533, True)
         members = members[:-1]
-        result = b0.audit_roster(roster, legislators, voteview, members)
+        result = b0.audit_roster(roster, legislators, voteview, members, expected_roster=533)
         self.assertFalse(result["pass"])
         self.assertEqual(result["roster_duplicates"], ["B000000"])
         self.assertEqual(result["missing_from_bicam"], ["B000532"])
@@ -448,6 +450,10 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
         self._write_csv(snapshot / "bills_sponsored.csv", ["bill_id", "member_id", "relationship"], [[f"b{index}", "m0", "cosponsor"] for index in range(1, 649)])
         roster = integration / "congestion.json"
         roster.write_text(json.dumps([{"bioguide": value} for value in identifiers]), encoding="utf-8")
+        (integration / "data" / "engine").mkdir(parents=True)                      # the bar is the roster's size in the --repo-root tree
+        (integration / "data" / "engine" / "roster.json").write_text(json.dumps({
+            "schema": roster_source.SCHEMA, "members": [{"member": f"Member {index}", "bioguide": value} for index, value in enumerate(identifiers)],
+        }), encoding="utf-8")
         legislators = integration / "legislators.csv"
         voteview = integration / "voteview.csv"
         self._write_csv(legislators, ["bioguide_id"], [[value] for value in identifiers])

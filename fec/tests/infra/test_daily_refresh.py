@@ -33,6 +33,14 @@ def local_calendar(monkeypatch):
     monkeypatch.setattr(daily, 'local_day', lambda: DAY)
 
 
+@pytest.fixture(autouse=True)
+def unreadable_start_times(monkeypatch):
+    # Fake pids must not be judged by whatever real process owns that pid on the test host;
+    # None is "cannot tell", which keeps the pid-only answer.  Pid-reuse tests override this.
+    monkeypatch.setattr(daily, 'process_start_time', lambda pid: None)
+    monkeypatch.setattr(daily, 'boot_time', lambda: None)
+
+
 def state(root):
     return daily.read(root / daily.STATE)
 
@@ -572,3 +580,78 @@ def test_w2_third_full_attempt_in_a_day_is_capped(tmp_path, monkeypatch, capsys)
     assert json.loads(capsys.readouterr().out.strip().splitlines()[-1])['status'] == 'CAPPED'
     assert day(tmp_path)['status'] == 'CAPPED' and 'cap is 2' in day(tmp_path)['capped_reason']
     assert events and events[-1][0] == 'daily_refresh.capped'
+
+
+def stale_gate(root, **fields):
+    path = root / '.daily_refresh.lock'
+    path.write_text(json.dumps({'pid': 4242, 'token': 'previous-boot', **fields}), encoding='ascii')
+    return path.stat().st_mtime
+
+
+@pytest.mark.parametrize('legacy', [False, True])
+def test_reused_pid_does_not_hold_the_daily_gate(tmp_path, monkeypatch, legacy):
+    """After a reboot the gate named a pid Windows had handed to conhost.exe: not the writer."""
+    written = stale_gate(tmp_path, **({} if legacy else {'proc_start': 1000.0}))
+    monkeypatch.setattr(daily, 'process_alive', lambda pid: pid == 4242)
+    monkeypatch.setattr(daily, 'process_start_time', lambda pid: written + 3600 if pid == 4242 else None)
+    calls = fake_launch(tmp_path, monkeypatch)
+    assert daily.run(tmp_path, trigger='first-use') == 0
+    assert len(calls) == 1 and day(tmp_path)['status'] == 'PASS'
+
+
+@pytest.mark.parametrize('fields, start', [({'proc_start': 1000.0}, 1000.5), ({}, -60), ({'proc_start': 1000.0}, None)])
+def test_same_or_unknown_holder_still_owns_the_daily_gate(tmp_path, monkeypatch, fields, start):
+    written = stale_gate(tmp_path, **fields)
+    monkeypatch.setattr(daily, 'process_alive', lambda pid: pid == 4242)
+    live = None if start is None else (start if fields else written + start)
+    monkeypatch.setattr(daily, 'process_start_time', lambda pid: live if pid == 4242 else None)
+    monkeypatch.setattr(daily.subprocess, 'Popen', lambda *a, **k: pytest.fail('must not launch'))
+    assert daily.run(tmp_path, trigger='first-use') == 75
+    assert (tmp_path / '.daily_refresh.lock').exists()
+
+
+def test_reused_child_pid_is_not_a_running_daily_child(tmp_path, monkeypatch):
+    attempt = interrupted_attempt(tmp_path)
+    attempt['child_proc_start'] = 1000.0
+    daily.write(tmp_path / daily.STATE, {'schema': daily.SCHEMA, 'days': {
+        DAY: {'date': DAY, 'observed_at': daily.utc_now(), 'observed_trigger': 'first-use',
+              'status': 'RUNNING', 'attempts': [attempt], 'success': None}}})
+    monkeypatch.setattr(daily, 'process_alive', lambda pid: pid == 8123)
+    monkeypatch.setattr(daily, 'process_start_time', lambda pid: 9000.0 if pid == 8123 else None)
+    calls = fake_launch(tmp_path, monkeypatch)
+    assert daily.run(tmp_path, trigger='retry') == 0
+    assert len(calls) == 1
+    assert day(tmp_path)['attempts'][0]['status'] == 'INTERRUPTED'
+
+
+def test_launched_child_and_gate_record_their_start_times(tmp_path, monkeypatch):
+    monkeypatch.setattr(daily, 'process_start_time', lambda pid: 1234.5)
+    seen = {}
+    fake_launch(tmp_path, monkeypatch)
+    original = daily.subprocess.Popen
+
+    def launch(command, **kwargs):
+        seen['lock'] = json.loads((tmp_path / '.daily_refresh.lock').read_text(encoding='ascii'))
+        return original(command, **kwargs)
+    monkeypatch.setattr(daily.subprocess, 'Popen', launch)
+    assert daily.run(tmp_path, trigger='first-use') == 0
+    assert seen['lock']['proc_start'] == 1234.5
+    assert day(tmp_path)['attempts'][0]['child_proc_start'] == 1234.5
+
+
+def test_gate_written_before_the_last_boot_is_stale_even_when_the_pid_is_unreadable(tmp_path, monkeypatch):
+    """The 2026-10-26 incident: pid 10232 became a SYSTEM conhost whose start time cannot be read."""
+    written = stale_gate(tmp_path)
+    monkeypatch.setattr(daily, 'process_alive', lambda pid: pid == 4242)
+    monkeypatch.setattr(daily, 'boot_time', lambda: written + 7 * 3600)
+    calls = fake_launch(tmp_path, monkeypatch)
+    assert daily.run(tmp_path, trigger='first-use') == 0
+    assert len(calls) == 1
+
+
+def test_gate_written_after_the_last_boot_with_unreadable_pid_is_held(tmp_path, monkeypatch):
+    written = stale_gate(tmp_path)
+    monkeypatch.setattr(daily, 'process_alive', lambda pid: pid == 4242)
+    monkeypatch.setattr(daily, 'boot_time', lambda: written - 3600)
+    monkeypatch.setattr(daily.subprocess, 'Popen', lambda *a, **k: pytest.fail('must not launch'))
+    assert daily.run(tmp_path, trigger='first-use') == 75

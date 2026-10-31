@@ -188,7 +188,8 @@ CHAIN=[
     ('personal_texture_layer.py',['--refresh-local']),
     ('communication_style.py',[]),
     ('validate_communication_style.py',[]),
-    ('b5_external_gold_validate.py',[]),
+    # Gold evaluation is explicit research/audit work. Routine rendering uses
+    # accepted frozen weights and never refits or reopens historical panels.
     ('b5_gold_multitrait_validate.py',[]),
     ('b5_profile_basis.py',[]),
     ('validate_guarded_profile_artifacts.py',[]),
@@ -312,7 +313,7 @@ if not DESK_RESPONSIVENESS:
 # whole chain on stale receipts (08-30, 09-04). Only exit code 2 -- the producer's own contract
 # refusal (SpeechBuildError in its main) -- is tolerated: the failure logs, records a receipt, and the
 # chain continues on the last-good artifact. A crash (any other nonzero exit) still aborts the chain.
-# audit_full.py must remain the LAST chain entry (weekly_refresh chain-tail guard).
+# audit_full.py must remain the LAST chain entry and carry live_sync_chain_journal_closed (chain-tail guard, weekly_refresh + refresh_tick).
 #
 # SELF-HEALING PHASE 2 (Paul 2026-10-15, tiered degrade): the same containment now covers the other DISPLAY-ONLY steps. A step is
 # listed only if its outputs are rendered / narrative / distribution layers and no rank, honors or allocation producer reads them

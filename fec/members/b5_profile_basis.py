@@ -63,27 +63,27 @@ def member_basis(name,blue,dispositions,roles,style,audio,gold_traits):
         'personality_facets':{
             'Openness':{
                 'z':external['O']['z'],'percentile':external['O']['percentile'],'status':external['O']['status'],
-                'scope':'broad public expert-perceived Openness; one-panel association supported; not private curiosity',
+                'scope':'broad public expert-perceived Openness; historically one-panel association supported; not private curiosity',
             },
             'Conscientiousness':{
                 'z':external['C']['z'],'percentile':external['C']['percentile'],'status':external['C']['status'],
-                'scope':'broad public expert-perceived Conscientiousness; one-panel association supported without discriminant dominance',
+                'scope':'broad public expert-perceived Conscientiousness; historical one-panel association without discriminant dominance',
             },
             'Extraversion':{
                 'z':anchored.get('E') if anchored else None,
                 'percentile':anchored.get('percentile') if anchored else None,
                 'status':'available_external_gold_anchor' if anchored else 'unavailable_missing_observer_channel',
-                'scope':'OOF-validated public-personality E estimate from visibility-calibrated Blue, '
+                'scope':'accepted public-personality E estimate with fixed weights from visibility-calibrated Blue, '
                         'observer-item Pink, interaction dominance, and role-adjusted visibility; not '
                         'self-report or a private-state measure',
             },
             'Agreeableness':{
                 'z':external['A']['z'],'percentile':external['A']['percentile'],'status':external['A']['status'],
-                'scope':'broad public expert-perceived Agreeableness validated against both independent panels',
+                'scope':'broad public expert-perceived Agreeableness with historical support from both Senate rating panels',
             },
             'Neuroticism':{
                 'z':external['N']['z'],'percentile':external['N']['percentile'],'status':external['N']['status'],
-                'scope':'broad public expert-perceived Neuroticism, reverse expert Emotional Stability; one-panel association supported; not diagnosis',
+                'scope':'broad public expert-perceived Neuroticism, reverse expert Emotional Stability; historical one-panel association; not diagnosis',
             },
             'Openness_text_issue_breadth':{
                 'z':b.get('O'),'scope':'qualified text read anchored to legislative issue breadth',
@@ -133,7 +133,13 @@ def build():
     if gold_doc.get('schema')!='big5-gold-anchored-v2' or gold_doc.get('status')!='ACTIVE_WITH_TRAIT_LEVEL_GATES':
         raise ValueError('multitrait external-gold artifact missing or wrong schema/status')
     if (gold_doc.get('traits') or {}).get('E',{}).get('status')!='ACTIVE_EXTERNAL_GOLD_ANCHORED':
-        raise ValueError('externally anchored E failed OOF validation')
+        raise ValueError('accepted externally anchored E status missing')
+    design=gold_doc.get('design') or {}
+    if (design.get('production_weights')!='frozen_accepted_weights' or
+            design.get('predictions_are_out_of_fold') is not False):
+        raise ValueError('accepted Big Five fixed-weight contract missing')
+    if any(set(row.get('members') or {})-set(roster) for row in (gold_doc.get('traits') or {}).values()):
+        raise ValueError('Big Five artifact contains noncurrent roster members')
     inactive=[trait for trait,row in (gold_doc.get('traits') or {}).items()
               if not str(row.get('status') or '').startswith('ACTIVE_')]
     if inactive:
@@ -155,12 +161,13 @@ def build():
         'construct_contract':{
             'legacy_blue_E':'retained at 20% as the visibility-calibrated channel in anchored E',
             'visibility':'observed and formal-role-adjusted public exposure is separately labeled context and a 10% E channel',
-            'Extraversion':'OOF external-gold-checked public-personality estimate: 20% Blue, 60% Pink, '
+            'Extraversion':'accepted fixed-weight public-personality estimate: 20% Blue, 60% Pink, '
                            '10% interaction dominance, 10% role-adjusted visibility; not self-report/private state',
-            'Openness':'broad gold estimate integrated with one-panel association support; qualified text facet retained separately',
-            'Conscientiousness':'broad gold estimate integrated with one-panel association support but no discriminant dominance; qualified text/diligence context retained',
-            'Agreeableness':'broad two-panel gold-anchored A integrated; qualified low-antagonism facet remains separate',
-            'Neuroticism':'broad reverse-ES estimate integrated with one-panel association support; qualified affective-content read remains separate',
+            'Openness':'accepted broad estimate with historical one-panel association support; qualified text facet retained separately',
+            'Conscientiousness':'accepted broad estimate with historical one-panel association but no discriminant dominance; qualified text/diligence context retained',
+            'Agreeableness':'accepted broad A with historical two-panel support; qualified low-antagonism facet remains separate',
+            'Neuroticism':'accepted broad reverse-ES estimate with historical one-panel association; qualified affective-content read remains separate',
+            'validation':'historical panel support is preserved separately from current fixed-weight correction diagnostics; no fresh confirmatory claim',
             'external_gold_traits':'all O/C/E/A/N estimates propagate with panel-strength labels; missing member evidence remains null',
             'communication_style':'direct text/interaction observations; facets are not averaged into E',
             'audio':'speech-level delivery and topic-conditioned within-speaker pitch deviations only; '

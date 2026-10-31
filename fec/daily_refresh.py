@@ -22,7 +22,7 @@ import uuid
 import bounded_subprocess
 from lane_file_io import replace_atomic
 from paths import ROOT as ROOT_TEXT
-from process_liveness import process_alive
+from process_liveness import boot_time, process_alive, process_start_time
 try:
     from surfaces.glassbox_emit import emit as _gb
 except Exception:  # pragma: no cover - the stream is optional, the gate is not
@@ -48,10 +48,53 @@ CLOCK_SLACK_SECONDS = 1
 # this many full chain attempts; an attempt whose child only found the lease busy (BUSY) never
 # ran the chain and does not count.
 MAX_DAILY_ATTEMPTS = 2
+# Two readings of one kernel creation-time record differ only by rounding (as pipeline_lock).
+PROC_START_TOLERANCE_SECONDS = 2.0
+# Uptime and wall clock are read a moment apart; a lock written seconds before boot is impossible anyway.
+BOOT_SLACK_SECONDS = 60
 
 
 class Busy(RuntimeError):
     pass
+
+
+def same_process(pid, proc_start=None, existed_at=None):
+    """Does ``pid`` still name the process we recorded, not a later process that reused the pid?
+
+    Windows recycles pids: after a reboot the daily gate named pid 10232, now a conhost.exe, and
+    every daily refresh was refused BUSY until a human removed the lock.  ``proc_start`` is the
+    recorded creation time; without it (records written before it existed) ``existed_at`` is an
+    epoch at which the recorded process was known alive, and a process created after that cannot
+    be it, and nothing known alive before the last boot survived it (this one needs no handle on
+    the process, which a SYSTEM-owned pid such as that conhost denies).  An unreadable start time
+    with no other evidence keeps the pid-only answer: held.
+    """
+    if not process_alive(pid):
+        return False
+    boot = boot_time()
+    try:
+        if existed_at is not None and boot is not None and float(existed_at) < boot - BOOT_SLACK_SECONDS:
+            return False
+    except (TypeError, ValueError):
+        pass
+    live = process_start_time(pid)
+    try:
+        if live is None:
+            return True
+        if proc_start is not None:
+            return abs(float(live) - float(proc_start)) <= PROC_START_TOLERANCE_SECONDS
+        if existed_at is not None:
+            return float(live) <= float(existed_at) + PROC_START_TOLERANCE_SECONDS
+    except (TypeError, ValueError):
+        pass
+    return True
+
+
+def _epoch(stamp):
+    try:
+        return datetime.fromisoformat(stamp).timestamp()
+    except (TypeError, ValueError):
+        return None
 
 
 def utc_now():
@@ -107,7 +150,8 @@ def daily_lock(root):
         try:
             fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             try:
-                os.write(fd, json.dumps({'pid': os.getpid(), 'token': token}).encode('ascii'))
+                os.write(fd, json.dumps({'pid': os.getpid(), 'token': token,
+                                         'proc_start': process_start_time(os.getpid())}).encode('ascii'))
             finally:
                 os.close(fd)
             break
@@ -116,7 +160,12 @@ def daily_lock(root):
                 prior = read(path)
             except (OSError, ValueError):
                 prior = {}
-            alive = process_alive(prior.get('pid')) if isinstance(prior, dict) else False
+            try:
+                written = path.stat().st_mtime   # the writer was alive when it wrote the lock
+            except FileNotFoundError:
+                written = None
+            alive = (same_process(prior.get('pid'), prior.get('proc_start'), written)
+                     if isinstance(prior, dict) else False)
             malformed = not isinstance(prior, dict) or not prior.get('pid')
             stale = not alive and (not malformed or time.time() - path.stat().st_mtime >= 30)
             if attempt == 0 and stale:
@@ -232,14 +281,19 @@ def verified_completion(root, attempt, *, current_media):
     return {'attempt_id': attempt['id'], 'include_media': True, 'owner_pid': pid,
             'completed_at': receipt['completed_at'], 'receipt': str(immutable),
             'receipt_sha256': digest(immutable), 'media_receipt_sha256': bound['sha256'],
-            'media_status': media_document['status']}
+            'media_status': media_document['status'],
+            'discovery_status': receipt.get('discovery_status'),
+            'discovery_source': receipt.get('discovery_source')}
 
 
 def completion_status(completion):
-    """PARTIAL when the media receipt behind a verified completion was PARTIAL, else PASS.
+    """DEGRADED when discovery ran on a fallback (GovInfo, not Congress.gov); else PARTIAL when the
+    media receipt behind a verified completion was PARTIAL; else PASS. A fallback is never PASS.
 
     Either way day['success'] is set, so the day is complete and a later retry returns ALREADY_COMPLETE.
     """
+    if completion.get('discovery_status') == 'DEGRADED':
+        return 'DEGRADED'
     return 'PARTIAL' if completion.get('media_status') == 'PARTIAL' else 'PASS'
 
 
@@ -257,7 +311,8 @@ def reconcile(root, state):
             if attempt.get('status') != 'RUNNING':
                 continue
             inspect_child_status(root, attempt)
-            if process_alive(attempt.get('child_pid')):
+            if same_process(attempt.get('child_pid'), attempt.get('child_proc_start'),
+                            _epoch(attempt.get('heartbeat_at'))):
                 active = True
                 continue
             try:
@@ -354,6 +409,7 @@ def run(root=ROOT, *, trigger='manual', timeout_seconds=72 * 60 * 60):
                                                cwd=root, env=environment, stdin=subprocess.DEVNULL,
                                                stdout=log, stderr=subprocess.STDOUT, **options)
                     attempt['child_pid'] = process.pid
+                    attempt['child_proc_start'] = process_start_time(process.pid)
                     save_state(root, state)
                     while process.poll() is None:
                         try:

@@ -7537,8 +7537,9 @@ def test_industry_html_member_names_carry_the_member_desk_address():
         # shared application code retains all ten member-rendering call sites:
         # industry attention, sector public mentions, champions, company
         # attention, company public mentions, champion detail, forecast, the
-        # member-desk tier board, the v2 boards, and the screen (2026-08-11).
-        # Counted
+        # member-desk tier board and the screen (2026-08-11), plus the tier moves
+        # under the tier board (D-362 data). The v2 boards and their seat diff left
+        # with the retired LDA board panels (Paul 2026-10-27, "Remove them"). Counted
         # variable-name-agnostically: loops bind different names than `row`.
         assert document.count("memberLink(") == 10
         assert 'class="member left">${esc(row.n)}' not in document
@@ -7676,33 +7677,18 @@ def test_champions_page_suppresses_tier_zero_and_keeps_real_tier_labels():
     with tempfile.TemporaryDirectory() as directory:
         _build_industry_fixture(directory)
         document = _industry_family_documents(directory)["champions"]
-    rows = _industry_page_data(document)["championsV2"]["sectors"]["credit_union"][
-        "champions"
-    ]
-    tier_zero = next(row for row in rows if row["tier"] == 0)
-    tier_three = next(row for row in rows if row["tier"] == 3)
-    renderer = document.split("function v2Member(row){", 1)[1].split("\n}", 1)[0]
-    assert 'const metadata=currentSector==="credit_union"&&[1,2,3].includes(row.tier)' in renderer
-    assert '` <span class=subtle>Tier ${esc(row.tier)}</span>`' in renderer
-    assert '${esc(row.bioguide)}</span>' not in renderer
     assert "Tier 0" not in document
     with open(MLN.__file__, encoding="utf-8") as builder_file:
         builder_source = builder_file.read()
+    # The loader still sanitises non-CU tiers on the boards.json rows it validates.
     assert 'if sector != "credit_union":' in builder_source
     assert 'row["tier"] = None' in builder_source
     assert (
         'receipt["non_cu_tier_rows_sanitized"] = non_cu_tier_rows_sanitized'
         in builder_source
     )
-
-    def rendered_metadata(row):
-        if row["tier"] not in {1, 2, 3}:
-            return ""
-        return f"Tier {row['tier']}"
-
-    assert rendered_metadata(tier_zero) == ""
-    assert rendered_metadata(tier_three) == "Tier 3"
-    assert "Tier 3" in rendered_metadata(tier_three)
+    # The tier board lists only tiers 1-3 (renderIndustryTierBoard filters row.tier===tier for 1, 2, 3).
+    assert "${rows(1)}" in document and "${rows(2)}" in document and "${rows(3)}" in document
 
 
 def test_industry_tier_board_non_cu_wording_and_parity_gate_are_source_guarded():
@@ -7836,32 +7822,31 @@ def test_industry_title_cells_ellipsis_in_both_skins_and_keep_hover_titles():
     assert tooltip in documents["landing"]
 
 
-def test_champions_board_merges_chambers_with_ratified_exact_columns():
+def test_champions_page_retires_the_lda_board_panels_and_keeps_the_tier_boards():
+    """Paul 2026-10-27: "Remove them" (the three LDA boards); "I still want the champions,
+    tier 2, and tier 3 for the other industries"."""
     with tempfile.TemporaryDirectory() as directory:
         _build_industry_fixture(directory)
         document = _industry_family_documents(directory)["champions"]
-    board_expectations = {
-        "champions": ("data-v2-board=threats", 1, 7),
-        "threats": ("<summary>Mixed records ▾</summary>", 1, 6),
-        "mixed": ("<summary>Most lobbied ▾</summary>", 2, 6),
-    }
-    for board, (end_marker, expected_tables, expected_columns) in board_expectations.items():
-        fragment = document.split(f"data-v2-board={board}", 1)[1].split(
-            end_marker, 1
-        )[0]
-        headers = re.findall(r"<thead><tr>(.*?)</tr></thead>", fragment)
-        assert len(headers) == expected_tables
-        assert all(header.count("<th") == expected_columns for header in headers)
-    assert document.count("id=v2-champions-body") == 1
-    assert document.count("id=v2-threats-body") == 1
-    assert document.count("id=v2-mixed-house") == 1
-    assert document.count("id=v2-mixed-senate") == 1
-    assert document.count("data-v2-chamber=") == 3
-    assert '<button type=button data-v2-chamber=Both class=active aria-pressed=true>' in document
-    assert 'const colspan=boardName==="champions"?7:6' in document
-    assert 'if(boardName==="champions")markup.push(' in document
-    assert '<div class=subtle>Issues: ${esc(issues.join("; "))}</div>' in document
-    assert "No oppose-signed evidence in this sector yet — this board is empty " in document
+    for gone in ("data-v2-board=", "id=v2-champions-body", "id=v2-threats-body",
+                 "id=v2-mixed-house", "id=v2-mixed-senate", "data-v2-chamber=",
+                 "champion-member-search", "v2-run-diff", "<h3>Most supportive",
+                 "<h3>Most opposed</h3>", "<h3>Mixed record</h3>", "Changes since the previous run"):
+        assert gone not in document, gone
+    # Paul 2026-10-28: nothing stands in the boards' place until contact inference v1 ships.
+    for gone in ("lobbying-contacts", "Lobbying contacts", "contact-inference"):
+        assert gone not in document, gone
+    # The tier board is shown open, for every sector the page carries.
+    assert "<details class=tierfold open><summary>Tier board — member-desk methodology ▾</summary>" in document
+    assert "id=industry-tier-board-panel" in document
+    data = _industry_page_data(document)["championsV2"]
+    assert set(data) == {"receipt", "industry_tiers", "tier_moves"}
+    assert data["receipt"] == {"sector_order": list(CV2.SECTORS)}
+    for sector in CV2.SECTORS:
+        rows = data["industry_tiers"]["industries"][sector]["rows"]
+        assert rows and {row["tier"] for row in rows} <= {0, 1, 2, 3}
+    # No board rows (and so no board numbers) ship in the page.
+    assert "sectors" not in data and "run_diff" not in data["receipt"]
 
 
 def test_bill_marking_state_options_are_data_driven_and_congress_aware():
@@ -10229,11 +10214,16 @@ def _champions_v2_producer_fixture(directory):
         ["bioguide", "congress", "chamber", "net_directional"],
         panel_rows,
     )
-    pillar_path = os.path.join(root, "pillar_inputs_snapshot.json")
-    os.makedirs(os.path.dirname(pillar_path), exist_ok=True)
-    with open(pillar_path, "w", encoding="utf-8") as handle:
+    # O is the rank authority's live legislative pillar (D-362), not the 09-03 snapshot.
+    ranks_path = os.path.join(root, "ranks_python.json")
+    os.makedirs(os.path.dirname(ranks_path), exist_ok=True)
+    with open(ranks_path, "w", encoding="utf-8") as handle:
         json.dump(
-            {"O": {name: 0.2 + index / 10 for index, name in enumerate(names.values())}},
+            {"legislative_pillar": {
+                "schema": "live-legislative-pillar-v1",
+                "pillar": {name: 0.2 + index / 10 for index, name in enumerate(names.values())},
+                "inputs_sha256": {"legislation_routing_audit.json": "0" * 64},
+            }},
             handle,
             sort_keys=True,
         )
@@ -10290,7 +10280,7 @@ def _champions_v2_producer_fixture(directory):
         "signed_attention_path": signed_path,
         "interactions_path": interactions_path,
         "panel_path": panel_path,
-        "pillar_path": pillar_path,
+        "ranks_path": ranks_path,
         "member_bundle_path": bundle_path,
         "titles_path": titles_path,
         "bill_directions_path": directions_path,
@@ -10700,23 +10690,333 @@ def test_champions_v2_non_cu_components_are_empty_and_receipted_as_two():
     ]
 
 
+def test_champions_v2_o_is_the_rank_authority_live_legislative_pillar():
+    # D-362: the CU "O" component is ranks_python.json legislative_pillar.pillar.
+    with tempfile.TemporaryDirectory() as directory:
+        kwargs = _champions_v2_producer_fixture(directory)
+        with open(kwargs["ranks_path"], encoding="utf-8") as handle:
+            live = json.load(handle)["legislative_pillar"]["pillar"]
+        payload = CV2.build_payload(**kwargs)
+        rows = [
+            row for board in ("champions", "threats", "mixed")
+            for row in payload["sectors"]["credit_union"][board]
+        ]
+        assert rows
+        assert all(row["components"]["O"] == live[row["name"]] for row in rows)
+        source = payload["receipt"]["o_source"]
+        assert source["path"] == "ranks_python.json"
+        assert source["field"] == "legislative_pillar.pillar"
+        # A moved live score moves the composite: the board is no longer stagnant.
+        ally = next(row for row in rows if row["name"] == "Fixture Ally")
+        document = json.load(open(kwargs["ranks_path"], encoding="utf-8"))
+        document["legislative_pillar"]["pillar"]["Fixture Ally"] = 0.0
+        with open(kwargs["ranks_path"], "w", encoding="utf-8") as handle:
+            json.dump(document, handle)
+        moved = CV2.build_payload(**kwargs)
+        moved_ally = next(
+            row for board in ("champions", "threats", "mixed")
+            for row in moved["sectors"]["credit_union"][board]
+            if row["name"] == "Fixture Ally"
+        )
+        assert moved_ally["components"]["O"] == 0.0
+        assert moved_ally["composite"] < ally["composite"]
+
+
+def test_champions_v2_never_reads_the_stale_pillar_snapshot():
+    assert "pillar_path" not in CV2.build_payload.__code__.co_varnames
+    assert not any(
+        "pillar_inputs_snapshot" in str(path) for path in CV2._default_paths().values()
+    )
+    with tempfile.TemporaryDirectory() as directory:
+        kwargs = _champions_v2_producer_fixture(directory)
+        # A snapshot beside the rank authority must be ignored outright.
+        snapshot = os.path.join(os.path.dirname(kwargs["ranks_path"]), "pillar_inputs_snapshot.json")
+        with open(snapshot, "w", encoding="utf-8") as handle:
+            json.dump({"O": {name: 0.99 for name in _CHAMPIONS_V2_NAMES.values()},
+                       "stamped": "2026-09-03T21:04:35-04:00"}, handle)
+        payload = CV2.build_payload(**kwargs)
+        assert all(
+            row["components"]["O"] != 0.99
+            for board in ("champions", "threats", "mixed")
+            for row in payload["sectors"]["credit_union"][board]
+        )
+        # No live pillar in the rank authority (policy off): fail closed, no fallback.
+        with open(kwargs["ranks_path"], "w", encoding="utf-8") as handle:
+            json.dump({"legislative_pillar": None}, handle)
+        try:
+            CV2.build_payload(**kwargs)
+        except CV2.ChampionsV2Error as exc:
+            assert "pillar_inputs_snapshot" in str(exc) and "no live legislative pillar" in str(exc)
+        else:
+            raise AssertionError("champions_v2 built boards without the live legislative pillar")
+
+
+def _champions_v2_run_main(kwargs, out, crown_tiers, generation):
+    from unittest import mock
+
+    seats = {name: index + 1 for index, name in enumerate(sorted(crown_tiers, key=lambda n: (crown_tiers[n] or 9, n)))}
+    argv = [
+        "--signed-attention", kwargs["signed_attention_path"],
+        "--interactions", kwargs["interactions_path"],
+        "--panel", kwargs["panel_path"],
+        "--ranks", kwargs["ranks_path"],
+        "--member-bundle", kwargs["member_bundle_path"],
+        "--titles", kwargs["titles_path"],
+        "--bill-directions", kwargs["bill_directions_path"],
+        "--out", out,
+    ]
+    with mock.patch.object(CV2, "_load_crown_tiers", lambda: (dict(crown_tiers), seats, generation)), \
+            mock.patch.object(CV2.identity.MemberNameResolver, "from_paths",
+                              lambda *a, **k: kwargs["resolver"]):
+        assert CV2.main(argv) == 0
+    with open(out, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def _champions_v2_assert_crown_law(payload, crown_tiers):
+    crowns = {bio for bio, name in _CHAMPIONS_V2_NAMES.items() if crown_tiers[name] == 1}
+    threats = {row["bioguide"] for boards in payload["sectors"].values() for row in boards["threats"]}
+    seats = {row["bioguide"] for boards in payload["sectors"].values() for row in boards["champions"]}
+    assert crowns.isdisjoint(threats)            # prong 1: a crown is never a threat
+    assert seats.isdisjoint(threats)             # prong 2: champion-anywhere and threat-anywhere never meet
+
+
+def test_champions_v2_run_diff_is_written_every_run_including_no_change():
+    with tempfile.TemporaryDirectory() as directory:
+        kwargs = _champions_v2_producer_fixture(directory)
+        tiers = kwargs.pop("crown_tiers")
+        out = os.path.join(directory, "out", "boards.json")
+        first = _champions_v2_run_main(kwargs, out, tiers, "gen-1")
+        first_diff = first["receipt"]["run_diff"]
+        assert first_diff["schema"] == "champions-v2-run-diff-v1"
+        assert first_diff["baseline"].startswith("none")
+        assert first_diff["changed"] is True
+        entered = first_diff["sectors"]["credit_union"]["champions"]["entered"]
+        assert {item["bioguide"] for item in entered} == {
+            row["bioguide"] for row in first["sectors"]["credit_union"]["champions"]
+        }
+        assert all(item["from"] == "absent" and item["reason"] for item in entered)
+        standing_path = os.path.join(directory, "out", "standing.json")
+        standing = json.load(open(standing_path, encoding="utf-8"))
+        assert standing["boards_generated_utc"] == first["generated_utc"]
+
+        second = _champions_v2_run_main(kwargs, out, tiers, "gen-1")
+        diff = second["receipt"]["run_diff"]
+        assert diff["baseline"] == "previous boards.json"
+        assert diff["previous_generated_utc"] == first["generated_utc"]
+        assert diff["changed"] is False and diff["tier_moves"] == []
+        assert diff["summary"].startswith("No champions, threat or mixed seat changed")
+        assert all(
+            diff["sectors"][sector][board][key] == []
+            for sector in CV2.SECTORS for board in ("champions", "threats", "mixed")
+            for key in ("entered", "left")
+        )
+        dated = sorted(os.listdir(os.path.join(directory, "out", "diffs")))
+        assert len(dated) == 2 and all(name.startswith("champions_diff_") for name in dated)
+        latest = json.load(open(os.path.join(directory, "out", "diffs", dated[-1]), encoding="utf-8"))
+        assert latest["generated_utc"] == second["generated_utc"]
+        assert latest["changed"] is False
+        _champions_v2_assert_crown_law(second, tiers)
+
+
+def test_champions_v2_run_diff_names_entries_exits_and_tier_moves_with_reasons():
+    with tempfile.TemporaryDirectory() as directory:
+        kwargs = _champions_v2_producer_fixture(directory)
+        tiers = kwargs.pop("crown_tiers")
+        out = os.path.join(directory, "out", "boards.json")
+        before = _champions_v2_run_main(kwargs, out, tiers, "gen-1")
+        _champions_v2_assert_crown_law(before, tiers)
+        # The crown passes from Fixture Crown Mixed to Fixture Veto, and Fixture Ally's live score drops.
+        swapped = dict(tiers, **{"Fixture Crown Mixed": 2, "Fixture Veto": 1})
+        document = json.load(open(kwargs["ranks_path"], encoding="utf-8"))
+        document["legislative_pillar"]["pillar"]["Fixture Ally"] = 0.0
+        with open(kwargs["ranks_path"], "w", encoding="utf-8") as handle:
+            json.dump(document, handle)
+        after = _champions_v2_run_main(kwargs, out, swapped, "gen-2")
+        _champions_v2_assert_crown_law(after, swapped)
+        diff = after["receipt"]["run_diff"]
+        assert diff["changed"] is True
+        assert diff["honors_generation"] == "gen-2" and diff["previous_honors_generation"] == "gen-1"
+        cu = diff["sectors"]["credit_union"]
+        threats_in = {item["bioguide"]: item for item in cu["threats"]["entered"]}
+        threats_out = {item["bioguide"]: item for item in cu["threats"]["left"]}
+        mixed_in = {item["bioguide"]: item for item in cu["mixed"]["entered"]}
+        assert threats_in["C000001"]["from"] == "mixed" and threats_in["C000001"]["to"] == "threats"
+        assert "moved because it lost the crown (tier 1 -> 2; crown law)" in threats_in["C000001"]["reason"]
+        assert "other members' scores changed" not in threats_in["C000001"]["reason"]
+        assert threats_out["V000001"]["to"] == "mixed" and "V000001" in mixed_in
+        moves = {item["bioguide"]: item for item in diff["tier_moves"]}
+        assert moves["C000001"]["from_tier"] == 1 and moves["C000001"]["to_tier"] == 2
+        assert "loses the crown" in moves["C000001"]["reason"]
+        assert "gains the crown" in moves["V000001"]["reason"]
+        assert "credit_union: champions" in diff["summary"] and "tier moves 2" in diff["summary"]
+        # Fixture Ally keeps its seat; its O change is visible in its standing, not as a move.
+        standing = json.load(open(os.path.join(directory, "out", "standing.json"), encoding="utf-8"))
+        assert standing["sectors"]["credit_union"]["A000001"]["components"]["O"] == 0.0
+        # A rerun on the same inputs changes nothing but keeps the last real change visible.
+        rerun = _champions_v2_run_main(kwargs, out, swapped, "gen-2")["receipt"]["run_diff"]
+        assert rerun["changed"] is False
+        assert rerun["last_change"]["generated_utc"] == after["generated_utc"]
+        assert rerun["last_change"]["sectors"]["credit_union"]["threats"]["entered"]
+        again = _champions_v2_run_main(kwargs, out, swapped, "gen-2")["receipt"]["run_diff"]
+        assert again["last_change"]["generated_utc"] == after["generated_utc"]
+        assert "last_change" not in again["last_change"]
+
+
+def test_champions_v2_first_run_after_deploy_and_unusable_previous_files():
+    with tempfile.TemporaryDirectory() as directory:
+        kwargs = _champions_v2_producer_fixture(directory)
+        tiers = kwargs.pop("crown_tiers")
+        out = os.path.join(directory, "out", "boards.json")
+        first = _champions_v2_run_main(kwargs, out, tiers, "gen-1")
+        standing_path = os.path.join(directory, "out", "standing.json")
+        # LIVE today: a previous boards.json from before D-362 and no standing.json.
+        os.remove(standing_path)
+        diff = _champions_v2_run_main(kwargs, out, tiers, "gen-1")["receipt"]["run_diff"]
+        assert diff["baseline"].startswith("previous boards.json (no matching standing.json")
+        assert diff["changed"] is False
+        # A standing.json from another run, or with malformed sectors, is ignored, not trusted.
+        standing = json.load(open(standing_path, encoding="utf-8"))
+        standing["boards_generated_utc"] = first["generated_utc"]
+        json.dump(standing, open(standing_path, "w", encoding="utf-8"))
+        assert _champions_v2_run_main(kwargs, out, tiers, "gen-1")["receipt"]["run_diff"][
+            "baseline"].startswith("previous boards.json (no matching")
+        current = json.load(open(out, encoding="utf-8"))
+        json.dump({"schema": CV2.STANDING_SCHEMA, "boards_generated_utc": current["generated_utc"],
+                   "sectors": ["not", "a", "dict"]}, open(standing_path, "w", encoding="utf-8"))
+        assert _champions_v2_run_main(kwargs, out, tiers, "gen-1")["receipt"]["run_diff"][
+            "baseline"].startswith("previous boards.json (no matching")
+        # A corrupt previous boards.json does not stop the build; the diff says why it has no baseline.
+        with open(out, "w", encoding="utf-8") as handle:
+            handle.write("{not json")
+        diff = _champions_v2_run_main(kwargs, out, tiers, "gen-1")["receipt"]["run_diff"]
+        assert diff["baseline"].startswith("none") and "cannot read previous champions boards" in diff["baseline"]
+        assert diff["changed"] is True
+
+
+def test_champions_v2_diff_reason_explains_a_seat_lost_to_the_cut():
+    def row(bioguide, composite, o_value):
+        return {"bioguide": bioguide, "name": bioguide, "chamber": "House", "tier": 2,
+                "composite": composite, "threat": 0.0,
+                "components": {"O": o_value, "supportive_att": 3, "opposition_att": 0}}
+
+    seated = [row("S%06d" % index, 1.0 - index / 100, 0.5) for index in range(25)]
+    old_payload = {"schema": CV2.SCHEMA, "generated_utc": "t0", "receipt": {},
+                   "sectors": {sector: {"champions": [], "threats": [], "mixed": []} for sector in CV2.SECTORS}}
+    old_payload["sectors"]["credit_union"]["champions"] = seated[:24] + [row("L000001", 0.70, 0.9)]
+    new_payload = {"generated_utc": "t1", "receipt": {"honors_generation": "g"},
+                   "sectors": {sector: {"champions": [], "threats": [], "mixed": []} for sector in CV2.SECTORS}}
+    new_payload["sectors"]["credit_union"]["champions"] = seated
+    standing = {sector: {} for sector in CV2.SECTORS}
+    standing["credit_union"] = {item["bioguide"]: CV2._standing_entry(item, "champions", (2, None)) for item in seated}
+    standing["credit_union"]["L000001"] = CV2._standing_entry(row("L000001", 0.5, 0.1), "below_cut", (2, None))
+    diff = CV2.champions_diff(old_payload, None, new_payload, standing)
+    left = diff["sectors"]["credit_union"]["champions"]["left"]
+    assert [item["bioguide"] for item in left] == ["L000001"]
+    reason = left[0]["reason"]
+    assert "below the champions cut" in reason and "House cut 0.7600" in reason
+    assert "O 0.9000 -> 0.1000" in reason
+    assert diff["previous_o_source"].startswith("not recorded")
+    # A non-crown tier move (2 -> 3) is not the cause of a seat lost to a falling O.
+    tiered = dict(standing, credit_union=dict(standing["credit_union"]))
+    tiered["credit_union"]["L000001"] = CV2._standing_entry(row("L000001", 0.5, 0.1), "below_cut", (3, None))
+    old_standing = {sector: {} for sector in CV2.SECTORS}
+    old_standing["credit_union"] = {item["bioguide"]: CV2._standing_entry(item, "champions", (2, None))
+                                    for item in old_payload["sectors"]["credit_union"]["champions"]}
+    reason = CV2.champions_diff(old_payload, old_standing, new_payload, tiered)[
+        "sectors"]["credit_union"]["champions"]["left"][0]["reason"]
+    assert "crown" not in reason and "O 0.9000 -> 0.1000" in reason
+    # Entering champions from the mixed board is its own routing change, not a seat opening above it.
+    mixed_old = CV2._standing_entry(dict(row("X000001", 0.9, 0.5), components={"O": 0.5, "supportive_att": 3, "opposition_att": 3}), "mixed", (2, None))
+    seated_new = CV2._standing_entry(dict(row("X000001", 0.9, 0.5), components={"O": 0.5, "supportive_att": 3, "opposition_att": 2}), "champions", (2, None))
+    boards = {"champions": [dict(row("X000001", 0.9, 0.5))], "threats": [], "mixed": []}
+    reason, changed = CV2._move_reason(mixed_old, seated_new, boards, "X000001", {})
+    assert changed == {"opposition_att": [3, 2]}
+    assert "members above it left" not in reason and "opposition_att 3 -> 2" in reason
+    # No previous standing: an entrant's old placement is unrecorded, not "no attention".
+    entered = diff["sectors"]["credit_union"]["champions"]["entered"]
+    assert [(item["bioguide"], item["from"]) for item in entered] == [("S000024", "off_board")]
+
+
+def test_champions_page_keeps_the_tier_moves_under_the_tier_board():
+    # The run diff's rank_honors tier moves stay visible (Paul 2026-10-27: "I still want the
+    # champions, tier 2, and tier 3"); its board seat changes do not ship.
+    move = {"bioguide": "A000001", "name": "Fixture Tier Mover", "from_tier": 2, "to_tier": 1,
+            "reason": "tier 2 -> 1 on the rank_honors board; gains the crown (crown law: never on a threat board)"}
+    seat = {"bioguide": "B000001", "name": "Fixture Seat", "chamber": "Senate", "from": "below_cut",
+            "to": "champions", "inputs_changed": {}, "reason": "below the champions cut -> a champions seat"}
+    empty = {"entered": [], "left": []}
+    sectors = {sector: {board: dict(empty) for board in ("champions", "threats", "mixed")} for sector in CV2.SECTORS}
+    sectors["credit_union"]["champions"] = {"entered": [seat], "left": []}
+    changed = {"schema": "champions-v2-run-diff-v1", "changed": True, "sectors": sectors,
+               "summary": "credit_union: champions +1/-0; tier moves 1", "tier_moves": [move],
+               "previous_generated_utc": "t0", "generated_utc": "t1"}
+    rerun = {"schema": "champions-v2-run-diff-v1", "changed": False, "summary": "No change",
+             "sectors": {sector: {} for sector in CV2.SECTORS}, "tier_moves": [],
+             "previous_generated_utc": "t1", "generated_utc": "t2", "last_change": changed}
+    for run_diff, stamp in ((changed, "t1"), (rerun, "t1")):
+        with tempfile.TemporaryDirectory() as directory:
+            data_root = os.path.join(directory, "derived")
+            os.makedirs(data_root, exist_ok=True)
+            _industry_html_fixture(data_root)
+            boards_path = os.path.join(data_root, "champions_v2", "boards.json")
+            with open(boards_path, encoding="utf-8") as handle:
+                boards = json.load(handle)
+            boards["receipt"]["run_diff"] = run_diff
+            with open(boards_path, "w", encoding="utf-8") as handle:
+                json.dump(boards, handle)
+            MLN.build(
+                data_root,
+                os.path.join(directory, "lobby-network.html"),
+                bill_directions_path=os.path.join(data_root, "data", "legislation", "bill_directions.csv"),
+                bills_audit_path=os.path.join(data_root, "bills_audit.csv"),
+                industry_tiers_path=_industry_tiers_fixture_path(data_root),
+                **_identity_paths(data_root),
+            )
+            document = _industry_family_documents(directory)["champions"]
+        data = _industry_page_data(document)["championsV2"]
+        assert data["tier_moves"] == {"generated_utc": stamp, "previous_generated_utc": "t0", "moves": [move]}
+        assert "Fixture Seat" not in document and "below the champions cut" not in document
+        assert "<div id=industry-tier-board></div><div id=tier-moves></div>" in document
+        assert "Tier moves since the previous run" in document
+        assert 'if(currentSector!=="credit_union"||!block){target.innerHTML="";return;}' in document
+
+
+def test_champions_v2_loader_still_refuses_a_malformed_run_diff():
+    # The run diff is still written into boards.json (D-362 data); the page no longer shows it.
+    with tempfile.TemporaryDirectory() as directory:
+        data_root = os.path.join(directory, "derived")
+        os.makedirs(data_root, exist_ok=True)
+        _industry_html_fixture(data_root)
+        boards_path = os.path.join(data_root, "champions_v2", "boards.json")
+        with open(boards_path, encoding="utf-8") as handle:
+            boards = json.load(handle)
+        boards["receipt"]["run_diff"] = {"schema": "other"}
+        with open(boards_path, "w", encoding="utf-8") as handle:
+            json.dump(boards, handle)
+        try:
+            MLN._load_champions_v2(boards_path)
+        except MLN.IngestError as exc:
+            assert "run diff malformed" in str(exc)
+        else:
+            raise AssertionError("malformed run diff was accepted")
+
+
 def test_champions_v2_page_headline_panels_and_unsigned_demotion_are_explicit():
     with tempfile.TemporaryDirectory() as directory:
         _build_industry_fixture(directory)
         document = _industry_family_documents(directory)["champions"]
     for heading in ("Most supportive", "Most opposed", "Mixed record"):
-        assert f"<h3>{heading}</h3>" in document
+        assert f"<h3>{heading}</h3>" not in document
     # The words also occur in the enclosing summary, so pin the panel heading.
     assert "<h3>Most lobbied</h3>" in document
     assert (
         "Heavy lobbying around this member's bills, from both sides. "
         "Not an alignment ranking; see the boards above."
     ) in document
-    assert "Chamber-normalized scores are not cross-chamber comparable" in document
-    assert (
-        "A Tier-1 crown (overall display Champion) never appears on a sector threat board."
-        in document
-    )
+    # The board method notes left with the board panels.
+    assert "Chamber-normalized scores are not cross-chamber comparable" not in document
+    assert "never appears on a sector threat board" not in document
 
 
 def _efficiency_layers_fixture():
@@ -11118,7 +11418,7 @@ TESTS = (
     test_industry_tier_board_non_cu_wording_and_parity_gate_are_source_guarded,
     test_industry_tier_board_responsiveness_present_and_absent,
     test_industry_title_cells_ellipsis_in_both_skins_and_keep_hover_titles,
-    test_champions_board_merges_chambers_with_ratified_exact_columns,
+    test_champions_page_retires_the_lda_board_panels_and_keeps_the_tier_boards,
     test_bill_marking_state_options_are_data_driven_and_congress_aware,
     test_industry_methodology_notes_fold_without_losing_honesty_text,
     test_company_picker_is_searchable_grouped_and_populated,

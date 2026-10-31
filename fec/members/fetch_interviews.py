@@ -10,7 +10,7 @@ Sources (adapters):
            mention, "MULLIN:" after — intros build a per-segment surname alias map.
   * MTP  — nbcnews.com Meet the Press weekly transcript pages (hub + archive page discovery).
            Labels: "SEN. ELIZABETH WARREN:" (title-prefixed full names).
-Attribution: normalized full-name match against the 533 roster (titles stripped); surname-only
+Attribution: normalized full-name match against the member roster (titles stripped); surname-only
 continuation labels resolve ONLY via the segment's own intro aliases; unresolvable speakers are
 DROPPED, never guessed (same discipline as fetch_congressional_record). Since D-157 F-22 the two
 honorific + roster-unique-surname fallbacks in resolve_full are dropped too (IV_NAME_MATCH=surname
