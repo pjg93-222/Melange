@@ -46,11 +46,14 @@ class RefreshInventoryTests(unittest.TestCase):
         (self.here / 'desktop_workspace.py').write_bytes(b'reviewed trusted workspace interface')
         (self.here / 'workspace_data_contract.py').write_bytes(b'fixed passive workspace roles')
         (self.here / 'module_workspace_handoff.py').write_bytes(b'bounded native dual handoff')
+        (self.here / 'native_windows_signature.py').write_bytes(b'reviewed native WinTrust boundary')
         self.workspace_helpers = ('workspace_archive.py','workspace_sqlite.py','workspace_graph.py','workspace_cache.py',
             'module_workspace_inputs.py','workspace_melange.py','workspace_mentat.py','module_workspace_installers.py',
             'module_workspace_render.py','module_workspace_ui_templates.py','module_workspace_combined_ui.py','module_workspace_industry_ui.py')
         for name in self.workspace_helpers:
             (self.here / name).write_bytes(('reviewed fixed helper '+name).encode())
+        for name in ('module_workspace_clean_ui.py', 'module_workspace_clean_assets.py'):
+            (self.here / name).write_bytes(('reviewed native modern Melange helper '+name).encode())
         (self.source / 'new_source.py').write_bytes(b'new reviewed source')
         for target, value in (('HERE', self.here), ('ROOT', self.source), ('ADDITIONS', {'melange': ('new_source.py',)})):
             instance = patch.object(refresh, target, value)
@@ -70,10 +73,11 @@ class RefreshInventoryTests(unittest.TestCase):
             self.assertEqual(spec['programFingerprint'], hashlib.sha256(refresh.encoded(spec['programFiles'])).hexdigest())
             bootstrap = {row['path']: row for row in spec['programFiles'] if row['root'] == 'bootstrap'}
             expected = {'old_bootstrap.py', 'terrier_standalone.py', 'desktop_credentials.py', 'terrier_github_snapshot.py',
-                        'desktop_workspace.py', 'workspace_data_contract.py', 'module_workspace_handoff.py'}
+                        'desktop_workspace.py', 'workspace_data_contract.py', 'module_workspace_handoff.py', 'native_windows_signature.py'}
             expected.update(self.workspace_helpers)
             if app == 'melange':
                 expected.add('module_catalogue_cache.py')
+                expected.update(('module_workspace_clean_ui.py', 'module_workspace_clean_assets.py'))
             self.assertEqual(set(bootstrap), expected)
             for name, row in bootstrap.items():
                 raw = (self.here / name).read_bytes()

@@ -101,8 +101,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_application_contracts.py",
-        "bytes": 23842,
-        "sha256": "9f74f066e9b112e6f4543fefe25c37a97ee0317e4aae06a7c85ccfd4f664939f"
+        "bytes": 23935,
+        "sha256": "cabbb8d04f8c0aae2c515707d6f308adf18b14e30d51fb5ac53444415dd7272d"
       },
       {
         "root": "bootstrap",
@@ -133,6 +133,18 @@ const APPLICATION_SPECS=freeze({
         "path": "module_public_input_installers.py",
         "bytes": 18820,
         "sha256": "ec9992465a4410199c92428b5a97ffefdeb6d55c0ab9e1152f3a9a956fa6f9ba"
+      },
+      {
+        "root": "bootstrap",
+        "path": "module_workspace_clean_assets.py",
+        "bytes": 985233,
+        "sha256": "99a8731795ec8f55945076168c1ede64e19d850361b6e1044d37096e1a512c8a"
+      },
+      {
+        "root": "bootstrap",
+        "path": "module_workspace_clean_ui.py",
+        "bytes": 24847,
+        "sha256": "e7bf17bae19d8c48db04c7c8fbd910d47c8f5a779f24970437a801745b735d99"
       },
       {
         "root": "bootstrap",
@@ -245,8 +257,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 21082,
-        "sha256": "7d41a2545a466d59c2d7d7862f9232df2f6a16d282d9693b286d2c6e3b47dbe3"
+        "bytes": 22142,
+        "sha256": "781666677f24a47abc92f21a90b0d3948d765cdd72eb25a1712f5d899c36c2a4"
       },
       {
         "root": "bootstrap",
@@ -591,7 +603,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "b5aa23f316ed6470c31438483207683dc17fad70f223086d2ad1cb0b96b3a32b",
+    "programFingerprint": "8de289914a21830795230bf1e9086f7906da86113b9e90d5e709f07d306afd8b",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -2356,8 +2368,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_application_contracts.py",
-        "bytes": 23842,
-        "sha256": "9f74f066e9b112e6f4543fefe25c37a97ee0317e4aae06a7c85ccfd4f664939f"
+        "bytes": 23935,
+        "sha256": "cabbb8d04f8c0aae2c515707d6f308adf18b14e30d51fb5ac53444415dd7272d"
       },
       {
         "root": "bootstrap",
@@ -2388,6 +2400,18 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
         "path": "module_public_input_installers.py",
         "bytes": 18820,
         "sha256": "ec9992465a4410199c92428b5a97ffefdeb6d55c0ab9e1152f3a9a956fa6f9ba"
+      },
+      {
+        "root": "bootstrap",
+        "path": "module_workspace_clean_assets.py",
+        "bytes": 985233,
+        "sha256": "99a8731795ec8f55945076168c1ede64e19d850361b6e1044d37096e1a512c8a"
+      },
+      {
+        "root": "bootstrap",
+        "path": "module_workspace_clean_ui.py",
+        "bytes": 24847,
+        "sha256": "e7bf17bae19d8c48db04c7c8fbd910d47c8f5a779f24970437a801745b735d99"
       },
       {
         "root": "bootstrap",
@@ -2500,8 +2524,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 21082,
-        "sha256": "7d41a2545a466d59c2d7d7862f9232df2f6a16d282d9693b286d2c6e3b47dbe3"
+        "bytes": 22142,
+        "sha256": "781666677f24a47abc92f21a90b0d3948d765cdd72eb25a1712f5d899c36c2a4"
       },
       {
         "root": "bootstrap",
@@ -2846,7 +2870,7 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "b5aa23f316ed6470c31438483207683dc17fad70f223086d2ad1cb0b96b3a32b",
+    "programFingerprint": "8de289914a21830795230bf1e9086f7906da86113b9e90d5e709f07d306afd8b",
     "requiredKinds": [
       "melange.dashboard-pages.v1",
       "melange.staffer-display-graph.v1",
@@ -4611,8 +4635,8 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_application_contracts.py",
-        "bytes": 23842,
-        "sha256": "9f74f066e9b112e6f4543fefe25c37a97ee0317e4aae06a7c85ccfd4f664939f"
+        "bytes": 23935,
+        "sha256": "cabbb8d04f8c0aae2c515707d6f308adf18b14e30d51fb5ac53444415dd7272d"
       },
       {
         "root": "bootstrap",
@@ -4643,6 +4667,18 @@ const DISTRICT_PROGRAM_SPECS=freeze({
         "path": "module_public_input_installers.py",
         "bytes": 18820,
         "sha256": "ec9992465a4410199c92428b5a97ffefdeb6d55c0ab9e1152f3a9a956fa6f9ba"
+      },
+      {
+        "root": "bootstrap",
+        "path": "module_workspace_clean_assets.py",
+        "bytes": 985233,
+        "sha256": "99a8731795ec8f55945076168c1ede64e19d850361b6e1044d37096e1a512c8a"
+      },
+      {
+        "root": "bootstrap",
+        "path": "module_workspace_clean_ui.py",
+        "bytes": 24847,
+        "sha256": "e7bf17bae19d8c48db04c7c8fbd910d47c8f5a779f24970437a801745b735d99"
       },
       {
         "root": "bootstrap",
@@ -4761,8 +4797,8 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 21082,
-        "sha256": "7d41a2545a466d59c2d7d7862f9232df2f6a16d282d9693b286d2c6e3b47dbe3"
+        "bytes": 22142,
+        "sha256": "781666677f24a47abc92f21a90b0d3948d765cdd72eb25a1712f5d899c36c2a4"
       },
       {
         "root": "bootstrap",
@@ -5953,7 +5989,7 @@ const DISTRICT_PROGRAM_SPECS=freeze({
         "sha256": "2bf4e7a744568b9f18fdac2ff080f36e293d3cce044d869744cc0f701b05e64a"
       }
     ],
-    "programFingerprint": "3120c9f29b654be3474d2f74a07f0ab783e67ac0263a138e12aaef9f3bd32338"
+    "programFingerprint": "74636917ecad587d944ab433a73235dc0b02614d738bdf1087f6e4ccdf125473"
   }
 });
 module.exports=Object.freeze({APPLICATION_SPECS,WORKSPACE_APPLICATION_SPECS,DISTRICT_PROGRAM_SPECS});

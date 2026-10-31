@@ -177,6 +177,7 @@ def application_contract(app_id, contract_id):
                     'workspace_cache.py', 'workspace_' + app_id + '.py')
         if app_id == 'melange':
             required += ('module_workspace_render.py', 'module_workspace_ui_templates.py',
+                         'module_workspace_clean_ui.py', 'module_workspace_clean_assets.py',
                          'module_workspace_combined_ui.py', 'module_workspace_industry_ui.py', 'melange_module_data.py')
         else:
             required += ('mentat_module_data.py',)

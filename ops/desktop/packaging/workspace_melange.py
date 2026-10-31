@@ -300,9 +300,24 @@ class MelangeBinding:
         return {'schemaVersion':1,'appId':'melange','contractId':'melange.workspace.v1',
                 'sourceDigest':self.prepared.source['manifestSha256'],'releaseTag':self.prepared.source['releaseTag'],'roles':role_specs}
 
+    def _clean_workspace(self):
+        if getattr(self,'_clean',None) is None:
+            from module_workspace_clean_ui import CleanWorkspace
+            main={key:value for key,value in self.dashboard.content.data.items() if key!='memberCount'}
+            self._clean=CleanWorkspace(main,self._render(),self.industry.content.data['pages'],
+                self._provenance(),self.industry.content.data['derivation'],
+                lambda:self.dashboard.snapshot.json('member-profiles'))
+        return self._clean
+
     def handle_request(self,handler):
         _data(self.verify())
         url=urlsplit(handler.path);path=unquote(url.path)
+        if path=='/' or path.startswith('/staffer-live/approved/'):
+            status,raw,content_type=self._clean_workspace().response(path)
+            handler.send_response(status);handler.send_header('Content-Type',content_type)
+            handler.send_header('Content-Length',str(len(raw)));handler.send_header('Cache-Control','no-store')
+            handler.send_header('X-Content-Type-Options','nosniff');handler.send_header('Referrer-Policy','no-referrer');handler.end_headers()
+            handler.wfile.write(raw);return True
         aliases={'/Moneyball Dashboard.html':None,'/cu-member-desk.html':'m','/staffer-network.html':'s'}
         if path in aliases:
             field=aliases[path]

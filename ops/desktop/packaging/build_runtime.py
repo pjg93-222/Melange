@@ -37,6 +37,7 @@ BOOTSTRAP_FILES = (
     'workspace_archive.py', 'workspace_sqlite.py', 'workspace_graph.py', 'workspace_cache.py',
     'module_workspace_inputs.py', 'workspace_melange.py', 'workspace_mentat.py', 'module_workspace_installers.py',
     'module_workspace_render.py', 'module_workspace_ui_templates.py',
+    'module_workspace_clean_ui.py', 'module_workspace_clean_assets.py',
     'module_workspace_combined_ui.py', 'module_workspace_industry_ui.py',
     'melange_public_provenance.py', 'melange_public_payroll_normalize.py', 'melange_public_payroll_projection.py',
 )

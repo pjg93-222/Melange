@@ -21,7 +21,8 @@ WORKSPACE_BOOTSTRAP = ('native_windows_signature.py', 'desktop_workspace.py', 'w
     'module_workspace_inputs.py', 'workspace_melange.py', 'workspace_mentat.py', 'module_workspace_installers.py',
     'module_workspace_render.py', 'module_workspace_ui_templates.py',
     'module_workspace_combined_ui.py', 'module_workspace_industry_ui.py')
-BOOTSTRAP_ADDITIONS = {'melange': ('terrier_standalone.py', 'desktop_credentials.py', 'terrier_github_snapshot.py', 'module_catalogue_cache.py', *WORKSPACE_BOOTSTRAP),
+BOOTSTRAP_ADDITIONS = {'melange': ('terrier_standalone.py', 'desktop_credentials.py', 'terrier_github_snapshot.py', 'module_catalogue_cache.py',
+                                 'module_workspace_clean_ui.py', 'module_workspace_clean_assets.py', *WORKSPACE_BOOTSTRAP),
                        'mentat': ('terrier_standalone.py', 'desktop_credentials.py', 'terrier_github_snapshot.py', *WORKSPACE_BOOTSTRAP)}
 
 
