@@ -424,14 +424,26 @@ class LiveService:
             self.metrics['ambiguous_identity_links_kept_separate'] = len(set(self.evidence_exceptions))
             self.metrics['evidence_and_names_ms'] = round((time.perf_counter() - mark) * 1000, 2)
             self.stage = 'Checking the complete lobbying activity index'
+            native_inputs = getattr(self, '_desktop_workspace_inputs', None)
+            if native_inputs is not None:
+                from workspace_melange import MelangeBinding
+                if type(native_inputs) is not MelangeBinding or native_inputs.service is not self:
+                    raise ValueError('The analytical input binding is not a native workspace capability')
+                mark = time.perf_counter()
+                self.activity_provider = native_inputs.activity_index(self.static.nodes)
+                self.metrics['activity_index_load_ms'] = round((time.perf_counter() - mark) * 1000, 2)
+                self.inventory.setdefault('sourcecoverage', {}).setdefault('lda', {}).update(
+                    routing_activity_source_ids=self.activity_provider.receipt['counts']['source_person_ids'])
             activity_path = self.source_root / 'audits/staffer_live_runtime/lda_activity_v1.sqlite'
             activity_pin = self.source_root / 'audits/staffer_live_runtime/ecosystem_activity_pin.json'
-            if activity_pin.is_file():
+            if native_inputs is None and activity_pin.is_file():
                 selected_activity = json.loads(activity_pin.read_text(encoding='utf-8-sig'))
                 if selected_activity.get('status') != 'PASS' or selected_activity.get('database') != 'lda_activity_v2.sqlite':
                     raise ValueError('Ecosystem activity pin not approved')
                 activity_path = activity_pin.parent / selected_activity['database']
-            if activity_path.is_file():
+            if native_inputs is not None:
+                pass  # The closed native slot above supplied the verified index.
+            elif activity_path.is_file():
                 mark = time.perf_counter()
                 self.activity_provider = ActivityIndex(activity_path, self.static.nodes)
                 if activity_pin.is_file() and self.activity_provider.receipt['sha256'] != selected_activity.get('sha256'):
@@ -593,7 +605,7 @@ class LiveService:
                 ident = node['id']
                 uuid = node.get('source_profile_uuid') or ident.removeprefix('politico:')
                 fingerprint = node.get('profile_content_sha256') or content.get(uuid) or digest(rows_by_id.get(ident, original))
-                proof = {**node.get('provenance', {}), 'path': str(getattr(self.profiles, 'path', self.profiles.raw_dir)),
+                proof = {**node.get('provenance', {}), 'path': str(getattr(self.profiles, '_desktop_input_path', getattr(self.profiles, 'path', self.profiles.raw_dir))),
                          'sha256': fingerprint, 'profile_uuid': uuid,
                          'receipt_sha256': receipt, 'accepted_prefix_sha256': prefix}
                 node.update(source_profile_uuid=uuid, profile_content_sha256=fingerprint,

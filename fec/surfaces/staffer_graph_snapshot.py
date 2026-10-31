@@ -44,7 +44,12 @@ def digest(path):
 
 
 class StaticGraph:
-    def __init__(self, source_root):
+    def __init__(self, source_root, *, display_input=None):
+        if display_input is not None:
+            from workspace_graph import VerifiedDisplayInput
+            if type(display_input) is not VerifiedDisplayInput:
+                raise ValueError('Graph display input must be a verified native projection')
+        self._native_display = display_input
         self.root = Path(source_root)
         if self.root.name != "staffer_network":
             self.root = self.root / "audits" / "staffer_network"
@@ -236,7 +241,9 @@ class StaticGraph:
                    + [i for i in exact if rank[i] >= first_unresolved] + [i for i in rest if rank[i] >= first_unresolved])
         return ordered if want is None else ordered[:want]
 
-    def _load(self):
+    def _input_layout(self):
+        if self._native_display is not None:
+            return self._native_display.layout(self)
         base = self.root / GENERATION
         verification_path = self.root / VERIFICATION / "staffer_social_network_verification_receipt.json"
         self.verification = json.loads(verification_path.read_text(encoding="utf-8"))
@@ -273,6 +280,12 @@ class StaticGraph:
             original = Path(spec["path"])
             candidate = self.root / original.parent.name / original.name
             return self._verified(candidate, spec, role)
+
+        return artifact, upstream
+
+    def _load(self):
+        artifact, upstream = self._input_layout()
+        files = {x["role"]: x for x in self.receipt["files"]}
 
         def display_label(row, node_id):
             # "name" is the v6 groups artifact's spelling of the same string the
@@ -527,6 +540,8 @@ class StaticGraph:
             "verification_status": self.verification.get("status"), "named_regression_checks": self.verification.get("named_regression_checks", {}),
             "review_status": "REVIEW_REQUIRED", "canonical_eligible": False, "canonical_employment_promotions": 0,
             "weights_changed": False, "generation": GENERATION}
+        if self._native_display is not None:
+            result['display_projection'] = self.display_projection
         self._view_cache[key] = result
         while len(self._view_cache) > 32:
             self._view_cache.popitem(last=False)

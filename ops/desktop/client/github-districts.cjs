@@ -1,35 +1,45 @@
 'use strict';
-// Owner-only public transport. Approval credentials never enter this transport;
+// Public signed data for an approved owner or explicit standalone local mode.
+// Approval credentials never enter this transport;
 // the recipient access-server dataset client retains its separate TLS protocol.
 const fs=require('node:fs'),fsp=fs.promises,path=require('node:path'),crypto=require('node:crypto');
 const {pipeline}=require('node:stream/promises'),{Transform}=require('node:stream');
 const {canonical}=require('./access-client.cjs');
-const {strictJson,exact}=require('./dataset-protocol.cjs');
+const {strictJson:datasetJson,exact:datasetExact}=require('./dataset-protocol.cjs');
 const {response}=require('./github-source.cjs');
+const {deadline}=require('./github-discovery.cjs');
+const network=require('./network-transport.cjs');
 const protocol=require('./github-district-protocol.cjs');
+function strictJson(value){try{return datasetJson(value);}catch(error){throw new protocol.DistrictDataError(error.message);}}
+function exact(value,fields){try{return datasetExact(value,fields);}catch(error){throw new protocol.DistrictDataError(error.message);}}
 const {REPOSITORY,POINTER_PATH,ROLES,IDS,COMMIT,MAX_MANIFEST,assetURL,requireValue}=protocol;
 const API='https://api.github.com/repos/'+REPOSITORY,TAG_HOPS=4;
-class ConnectionError extends Error{constructor(cause){super('GitHub district connection unavailable');this.cause=cause;}}
-const connectionFailure=error=>error?.githubRateLimit===true||['ENETUNREACH','EHOSTUNREACH','ENOTFOUND','EAI_AGAIN','ECONNRESET','ECONNREFUSED','ETIMEDOUT'].includes(error?.code)||/^GitHub (?:request (?:deadline exceeded|timed out)|release unavailable \((?:502|503|504)\))$/.test(error?.message||'');
+class ConnectionError extends Error{constructor(cause){super('GitHub district connection unavailable');this.cause=cause;if(cause?.retryableNetwork===true&&network.RETRYABLE.has(cause.reason))Object.assign(this,{reason:cause.reason,code:cause.reason,retryableNetwork:true,retryAfterMs:cause.retryAfterMs});}}
+const connectionFailure=error=>error?.githubRateLimit===true||network.classifyNetworkError(error)?.retryableNetwork===true;
 const TEXT=Object.freeze({checking:'Checking GitHub district data.',downloading:'Downloading verified district data from GitHub.',verifying:'Verifying district data.',ready:'Using verified GitHub district data cached on this computer.',offline:'GitHub could not be reached. Using previously verified district data.',update:'New GitHub district data is ready. Reopen this district to use it.',error:'GitHub district data could not be verified. Existing files were preserved.'});
 function canceled(signal){if(signal?.aborted)throw new Error('GitHub district operation canceled');}
-async function streamed(url,{asset=false,signal,deadlineMs}={}){
- canceled(signal);const stream=await response(url,{asset,deadlineMs});
+async function streamed(url,{asset=false,cdn=false,apiRaw=false,signal,deadlineMs}={}){
+ canceled(signal);const stream=await response(url,{asset,cdn,apiRaw,signal,deadlineMs});
  const abort=()=>stream.destroy(new Error('GitHub district operation canceled'));
  signal?.addEventListener('abort',abort,{once:true});stream.once('close',()=>signal?.removeEventListener('abort',abort));
  if(signal?.aborted)abort();return stream;
 }
 const publicTransport=Object.freeze({
- async read(url,{maxBytes,signal,asset=false}){const stream=await streamed(url,{asset,signal}),chunks=[];let size=0;for await(const chunk of stream){size+=chunk.length;if(size>maxBytes){stream.destroy();throw new Error('GitHub district metadata exceeds limit');}chunks.push(chunk);}return Buffer.concat(chunks);},
- async download(url,target,{bytes,signal,onProgress}){let count=0;const stream=await streamed(url,{asset:true,signal,deadlineMs:60*60*1000});const counter=new Transform({transform(chunk,_encoding,done){count+=chunk.length;if(count>bytes)return done(new Error('GitHub district archive exceeds declared size'));onProgress?.(count);done(null,chunk);}});await pipeline(stream,counter,fs.createWriteStream(target,{flags:'wx',mode:0o600}),{signal});if(count!==bytes)throw new Error('GitHub district archive is incomplete');const file=await fsp.open(target,'r+');try{await file.sync();}finally{await file.close();}}
+ async read(url,{maxBytes,signal,asset=false,cdn=false,apiRaw=false}){const stream=await streamed(url,{asset,cdn,apiRaw,signal}),chunks=[];let size=0;for await(const chunk of stream){size+=chunk.length;if(size>maxBytes){stream.destroy();throw new protocol.DistrictDataError('GitHub district metadata exceeds limit');}chunks.push(chunk);}return Buffer.concat(chunks);},
+ async download(url,target,{bytes,signal,onProgress}){let count=0;const stream=await streamed(url,{asset:true,signal,deadlineMs:60*60*1000});const counter=new Transform({transform(chunk,_encoding,done){count+=chunk.length;if(count>bytes)return done(new protocol.DistrictDataError('GitHub district archive exceeds declared size'));onProgress?.(count);done(null,chunk);}});await pipeline(stream,counter,fs.createWriteStream(target,{flags:'wx',mode:0o600}),{signal});if(count!==bytes)throw new protocol.DistrictDataError('GitHub district archive is incomplete');const file=await fsp.open(target,'r+');try{await file.sync();}finally{await file.close();}}
 });
 const fingerprint=stat=>[String(stat.dev),String(stat.ino),String(stat.size),String(stat.mtimeNs),String(stat.ctimeNs)].join('|');
-async function digest(file,signal){
+async function digest(file,signal,{retain=false}={}){
+ canceled(signal);
  const before=await fsp.lstat(file,{bigint:true});requireValue(before.isFile()&&!before.isSymbolicLink(),'Unsafe GitHub district file');
- const hash=crypto.createHash('sha256');let bytes=0;
- for await(const chunk of fs.createReadStream(file)){canceled(signal);hash.update(chunk);bytes+=chunk.length;}
- requireValue(fingerprint(await fsp.lstat(file,{bigint:true}))===fingerprint(before)&&BigInt(bytes)===before.size,'GitHub district file changed while verifying');
- return {bytes,sha256:hash.digest('hex'),fingerprint:fingerprint(before)};
+ const hash=crypto.createHash('sha256');let bytes=0,handle,handedOff=false;
+ try{
+  if(retain){handle=await fsp.open(file,'r');requireValue(fingerprint(await handle.stat({bigint:true}))===fingerprint(before),'GitHub district file changed before verifying');}
+  const stream=retain?handle.createReadStream({highWaterMark:4*1024*1024,signal,autoClose:false}):fs.createReadStream(file,{highWaterMark:4*1024*1024,signal});
+  for await(const chunk of stream){canceled(signal);hash.update(chunk);bytes+=chunk.length;}
+  requireValue(fingerprint(await fsp.lstat(file,{bigint:true}))===fingerprint(before)&&BigInt(bytes)===before.size&&(!handle||fingerprint(await handle.stat({bigint:true}))===fingerprint(before)),'GitHub district file changed while verifying');
+  handedOff=retain;return {bytes,sha256:hash.digest('hex'),fingerprint:fingerprint(before),...(retain?{handle}:{})};
+ }finally{if(handle&&!handedOff)await handle.close();}
 }
 const within=(root,target)=>{const relative=path.relative(root,target);return relative!==''&&!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative);};
 async function safeDirectory(root,target,{create=false}={}){
@@ -60,45 +70,114 @@ async function discardStaging(root,stagingRoot,target){
  }
  await remove(target,0);
 }
-function identity(authorization){const grant=authorization.accepted.grant;return {appId:'terrier',repository:REPOSITORY,serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,accountIdentity:grant.accountIdentity};}
+function identity(authorization){
+ if(authorization.mode==='standalone'){const local=authorization.identity;return {mode:'standalone',appId:'terrier',repository:REPOSITORY,deviceId:local.deviceId,accountId:local.accountId,accountIdentity:local.accountIdentity};}
+ const grant=authorization.accepted.grant;return {appId:'terrier',repository:REPOSITORY,serverId:grant.serverId,deviceId:grant.deviceId,principalId:grant.principalId,accountIdentity:grant.accountIdentity};
+}
 function legacy(configuration){return path.resolve(configuration.terrierLegacy.dataDirectory);}
-function configurationFor(configuration,entry,root){const {ownerGitHubData,...base}=configuration;if(entry.source==='legacy')return base;return {...base,ownerGitHubData:{schemaVersion:1,district:configuration.district,cacheRoot:root,catalogueSha256:entry.manifestSha256}};}
+function localDirectory(configuration){return configuration.terrierLegacy?legacy(configuration):path.join(path.resolve(configuration.dataDirectory),'districts',configuration.district);}
+function configurationFor(configuration,entry,root,authorization){
+ const {ownerGitHubData,standaloneGitHubData,...base}=configuration;
+ if(entry.source==='legacy'||entry.source==='local')return base;
+ const field=protocol.standaloneAuthorized(configuration,authorization)?'standaloneGitHubData':'ownerGitHubData';
+ return {...base,[field]:{schemaVersion:2,district:configuration.district,cacheRoot:root,catalogueSha256:entry.manifestSha256}};
+}
 class GitHubDistricts{
- constructor({resources,profile,root,publicKeys,store,transport=publicTransport,checkExisting,extract,onStatus=()=>{},signal,now=Date.now,statfs=fsp.statfs}){
+ constructor({resources,profile,root,publicKeys,store,previousStore=null,transport=publicTransport,checkExisting,prepareCheckExisting=null,extract,onStatus=()=>{},signal,now=Date.now,random=Math.random,statfs=fsp.statfs,deferActivation=false}){
   requireValue(typeof profile==='string'&&typeof root==='string'&&publicKeys&&Object.keys(publicKeys).length>0&&Object.keys(publicKeys).length<=8&&store?.read&&store?.write&&typeof transport?.read==='function'&&typeof transport.download==='function'&&typeof checkExisting==='function'&&typeof extract==='function','GitHub district provider requires pinned keys and protected storage');
   for(const [id,value]of Object.entries(publicKeys))requireValue(/^[A-Za-z0-9._-]{1,100}$/.test(id)&&typeof value==='string'&&Buffer.from(value,'base64').length===32&&Buffer.from(value,'base64').toString('base64')===value,'Invalid GitHub district verification key');
-  Object.assign(this,{resources,profile:path.resolve(profile),root:path.resolve(root),publicKeys:structuredClone(publicKeys),store,transport,checkExisting,extract,onStatus,signal,now,statfs});this.states=new Map();this.busy=false;
+  requireValue(previousStore===null||typeof previousStore.read==='function','Invalid previous public dataset journal');
+  requireValue(prepareCheckExisting===null||typeof prepareCheckExisting==='function','Invalid native reader preparation');
+  requireValue(typeof now==='function'&&typeof random==='function','Invalid district rate-limit clock');
+  requireValue(typeof deferActivation==='boolean','Invalid district activation policy');
+  Object.assign(this,{resources,profile:path.resolve(profile),root:path.resolve(root),publicKeys:structuredClone(publicKeys),store,previousStore,transport,checkExisting,prepareCheckExisting,extract,onStatus,signal,now,random,statfs,deferActivation});this.states=new Map();this.busy=false;this.retries=new Map();this.verifiedDirectories=new Map();
+ }
+ permitPublicRequest(url){const retry=this.retries.get(new URL(url).hostname);if(retry?.until>this.now())throw new ConnectionError(Object.assign(network.networkFailure('rate_limited','GitHub district checks are rate limited',{retryAfterMs:retry.until-this.now()}),{githubRateLimit:true,retryAt:retry.until,retryAfter:retry.retryAfter,resetAt:retry.resetAt}));}
+ connection(error,url){
+  if(error?.githubRateLimit===true){const origin=new URL(url).hostname,retry={until:Math.max(this.retries.get(origin)?.until||0,deadline(error,this.now(),this.random)),retryAfter:error.retryAfter,resetAt:error.resetAt};this.retries.set(origin,retry);error=Object.assign(network.networkFailure('rate_limited','GitHub district checks are rate limited',{retryAfterMs:retry.until-this.now()}),{githubRateLimit:true,retryAt:retry.until,retryAfter:retry.retryAfter,resetAt:retry.resetAt});}
+  const classified=network.classifyNetworkError(error);return connectionFailure(classified)?new ConnectionError(classified):classified;
  }
  status(configuration,phase,extra={}){const previous=this.states.get(configuration.district),retained={};for(const key of ['releaseTag','catalogueSequence','checkedAt','verifiedAt'])if(previous?.[key]!==undefined)retained[key]=previous[key];const value={provider:'github',repository:REPOSITORY,district:configuration.district,phase,cached:previous?.cached||false,canRefresh:true,...retained,...extra};this.states.set(configuration.district,value);this.onStatus(structuredClone(value));return structuredClone(value);}
  info(configuration){return this.states.has(configuration?.district)?structuredClone(this.states.get(configuration.district)):null;}
  async initialize(){
   await fsp.mkdir(this.root,{recursive:true,mode:0o700});requireValue(!(await fsp.lstat(this.root)).isSymbolicLink(),'Unsafe GitHub cache root');this.realRoot=await fsp.realpath(this.root);this.root=this.realRoot;
-  for(const name of ['github-districts','github-districts/datasets','github-districts/downloads','github-districts/staging'])await safeDirectory(this.realRoot,path.join(this.root,...name.split('/')),{create:true});
+  for(const name of ['github-districts','github-districts/datasets-v2','github-districts/downloads','github-districts/staging'])await safeDirectory(this.realRoot,path.join(this.root,...name.split('/')),{create:true});
  }
- directory(manifestSha256,district){return path.join(this.root,'github-districts','datasets',manifestSha256,district);}
+ directory(manifestSha256,district){return path.join(this.root,'github-districts','datasets-v2',manifestSha256,district);}
  async readState(authorization){
-  const expected=identity(authorization),saved=await this.store.read();
+  const expected=identity(authorization);let saved=await this.store.read();
+  if(!saved&&expected.mode==='standalone'&&this.previousStore){
+   const previous=await this.previousStore.read();
+   if(previous){
+    // The original protected journal stays intact. Carry only independently
+    // verified catalogue history, never its server authority or active mapping.
+    exact(previous.identity,['appId','repository','serverId','deviceId','principalId','accountIdentity']);
+    requireValue(previous.identity.appId==='terrier'&&previous.identity.repository===REPOSITORY,'Invalid previous district journal identity');
+    const checked=this.checkedState(previous,previous.identity);
+    requireValue(checked.latest!==null||Object.keys(checked.catalogues).length===0,'Previous district high-water mark is missing');
+    if(checked.latest){
+     const latest=this.catalogue(checked).pointer.value.catalogSequence;
+     for(const key of Object.keys(checked.catalogues))requireValue(this.catalogue(checked,key).pointer.value.catalogSequence<=latest,'Previous district high-water mark is inconsistent');
+     saved={schemaVersion:1,identity:expected,latest:checked.latest,catalogues:{[checked.latest]:checked.catalogues[checked.latest]},active:{},staged:{}};
+     await this.commit(saved);
+    }
+   }
+  }
   if(!saved)return {schemaVersion:1,identity:expected,latest:null,catalogues:{},active:{},staged:{}};
+  return this.checkedState(saved,expected);
+ }
+ checkedState(saved,expected){
   exact(saved,['schemaVersion','identity','latest','catalogues','active','staged']);requireValue(saved.schemaVersion===1&&canonical(saved.identity)===canonical(expected),'GitHub district state belongs to another owner');
   requireValue(Buffer.byteLength(JSON.stringify(saved))<6*1024*1024&&saved.catalogues&&typeof saved.catalogues==='object'&&!Array.isArray(saved.catalogues)&&Object.keys(saved.catalogues).length<=16);
   for(const [key,item]of Object.entries(saved.catalogues)){exact(item,['envelope','manifestBase64','commit']);requireValue(COMMIT.test(item.commit)&&typeof item.manifestBase64==='string'&&item.manifestBase64.length<4*Math.ceil(MAX_MANIFEST/3));const checked=protocol.pointer(item.envelope,this.publicKeys);requireValue(checked.digest===key);const bytes=Buffer.from(item.manifestBase64,'base64');requireValue(bytes.toString('base64')===item.manifestBase64);protocol.manifest(bytes,checked);}
   if(saved.latest!==null)requireValue(typeof saved.latest==='string'&&Object.hasOwn(saved.catalogues,saved.latest));
-  for(const group of ['active','staged']){requireValue(saved[group]&&typeof saved[group]==='object'&&!Array.isArray(saved[group])&&Object.keys(saved[group]).length<=3);for(const [id,item]of Object.entries(saved[group])){exact(item,['pointerDigest','manifestSha256','catalogSequence','releaseTag','source','verifiedAt']);const checked=this.catalogue(saved,item.pointerDigest);requireValue(IDS.includes(id)&&['cache','legacy'].includes(item.source)&&item.manifestSha256===checked.manifest.sha256&&item.catalogSequence===checked.pointer.value.catalogSequence&&item.releaseTag===checked.pointer.value.releaseTag&&typeof item.verifiedAt==='string'&&Number.isFinite(Date.parse(item.verifiedAt)));}}
+  for(const group of ['active','staged']){requireValue(saved[group]&&typeof saved[group]==='object'&&!Array.isArray(saved[group])&&Object.keys(saved[group]).length<=3);for(const [id,item]of Object.entries(saved[group])){exact(item,['pointerDigest','manifestSha256','catalogSequence','releaseTag','source','verifiedAt']);const checked=this.catalogue(saved,item.pointerDigest);requireValue(IDS.includes(id)&&(['cache','legacy'].includes(item.source)||expected.mode==='standalone'&&item.source==='local')&&item.manifestSha256===checked.manifest.sha256&&item.catalogSequence===checked.pointer.value.catalogSequence&&item.releaseTag===checked.pointer.value.releaseTag&&typeof item.verifiedAt==='string'&&Number.isFinite(Date.parse(item.verifiedAt)));}}
   return structuredClone(saved);
  }
  catalogue(state,key=state.latest){requireValue(key&&Object.hasOwn(state.catalogues,key),'No previously verified GitHub district catalogue');const row=state.catalogues[key],pointer=protocol.pointer(row.envelope,this.publicKeys);return {pointer,manifest:protocol.manifest(Buffer.from(row.manifestBase64,'base64'),pointer)};}
+ async hasCachedInventory(manifest){
+  requireValue(/^[a-f0-9]{64}$/.test(manifest.sha256));
+  for(const namespace of ['datasets','datasets-v2']){
+   let current=this.root,missing=false;
+   for(const part of ['', 'github-districts',namespace,manifest.sha256]){
+    if(part)current=path.join(current,part);
+    let stat;try{stat=await fsp.lstat(current);}catch(error){if(error.code==='ENOENT'){missing=true;break;}throw error;}
+    // An unexpected object preserves its signed inventory. Never traverse a
+    // link, or mistake an unsafe/temporarily unavailable path for retired data.
+    if(stat.isSymbolicLink()||!stat.isDirectory())return true;
+   }
+   if(missing)continue;
+   for(const district of IDS){try{await fsp.lstat(path.join(current,district));return true;}catch(error){if(error.code!=='ENOENT')throw error;}}
+  }
+  // A retained compressed download still needs its signed inventory. Presence
+  // is conservative here; reuse and retirement verify the actual archive bytes.
+  let downloads=this.root;
+  for(const part of ['', 'github-districts','downloads']){
+   if(part)downloads=path.join(downloads,part);
+   let stat;try{stat=await fsp.lstat(downloads);}catch(error){if(error.code==='ENOENT')return false;throw error;}
+   if(stat.isSymbolicLink()||!stat.isDirectory())return true;
+  }
+  for(const asset of manifest.assets.values()){
+   requireValue(/^[a-f0-9]{64}$/.test(asset.sha256));
+   try{await fsp.lstat(path.join(downloads,asset.sha256+'.zip'));return true;}catch(error){if(error.code!=='ENOENT')throw error;}
+  }
+  return false;
+ }
  async commit(state){
-  const keep=new Set([state.latest,...Object.values(state.active).map(item=>item.pointerDigest),...Object.values(state.staged).map(item=>item.pointerDigest)]);for(const key of Object.keys(state.catalogues))if(!keep.has(key))delete state.catalogues[key];
-  requireValue(Object.keys(state.catalogues).length<=7&&Buffer.byteLength(JSON.stringify(state))<6*1024*1024);await this.store.write(structuredClone(state));
+  const keep=new Set([state.latest,...Object.values(state.active).map(item=>item.pointerDigest),...Object.values(state.staged).map(item=>item.pointerDigest)]);
+  for(const key of Object.keys(state.catalogues))if(!keep.has(key)&&!await this.hasCachedInventory(this.catalogue(state,key).manifest))delete state.catalogues[key];
+  requireValue(Object.keys(state.catalogues).length<=16&&Buffer.byteLength(JSON.stringify(state))<6*1024*1024);await this.store.write(structuredClone(state));
  }
  async discoverCatalogue(state){
-  const read=async(url,options={})=>{canceled(this.signal);let bytes;try{bytes=await this.transport.read(url,{maxBytes:512*1024,signal:this.signal,...options});}catch(error){throw connectionFailure(error)?new ConnectionError(error):error;}requireValue(Buffer.isBuffer(bytes));return bytes;};
-  const commit=strictJson(await read(API+'/commits/main')).sha;requireValue(typeof commit==='string'&&COMMIT.test(commit)&&commit!=='0'.repeat(40),'Invalid GitHub branch commit');
-  const content=strictJson(await read(API+'/contents/'+POINTER_PATH+'?ref='+commit));
-  requireValue(content.type==='file'&&content.encoding==='base64'&&typeof content.content==='string'&&content.content.length<32768&&content.path===POINTER_PATH&&Number.isInteger(content.size)&&content.size>0&&content.size<=16384,'Invalid GitHub district pointer response');
-  const compact=content.content.replaceAll('\n','');const pointerBytes=Buffer.from(compact,'base64');requireValue(pointerBytes.toString('base64')===compact&&pointerBytes.length===content.size);
+  const read=async(url,options={})=>{canceled(this.signal);this.permitPublicRequest(url);let bytes;try{bytes=await this.transport.read(url,{maxBytes:512*1024,signal:this.signal,...options});}catch(error){throw this.connection(error,url);}requireValue(Buffer.isBuffer(bytes));return bytes;};
+  let pointerBytes;try{pointerBytes=await read('https://raw.githubusercontent.com/'+REPOSITORY+'/main/'+POINTER_PATH,{cdn:true,maxBytes:16384});}catch(error){if(error?.retryableNetwork!==true||!['timeout','unreachable'].includes(error.reason))throw error;pointerBytes=await read(API+'/contents/'+POINTER_PATH+'?ref=main',{apiRaw:true,maxBytes:16384});}
   const previous=state.latest?this.catalogue(state).pointer:null,checked=protocol.pointer(strictJson(pointerBytes),this.publicKeys,previous?{catalogSequence:previous.value.catalogSequence,pointerDigest:previous.digest}:{});
-  if(state.latest===checked.digest)return this.catalogue(state);
+  if(state.latest===checked.digest){const cached=this.catalogue(state);if(canonical(cached.pointer.envelope)===canonical(checked.envelope))return cached;}
+  // Cached catalogues live only in the owner/profile-bound native journal and
+  // were committed AFTER the public release/tag checks below. A changed signed
+  // pointer or key epoch must perform them again; a loose manifest never proves it.
+  const release=strictJson(await read(API+'/releases/tags/'+checked.value.releaseTag));
+  requireValue(release.tag_name===checked.value.releaseTag&&release.draft===false&&release.prerelease===true,'GitHub district data requires a public data prerelease');
   const tag=strictJson(await read(API+'/git/ref/tags/'+checked.value.releaseTag));
   requireValue(tag.ref==='refs/tags/'+checked.value.releaseTag,'GitHub district release commit changed');
   // Signed releases use annotated tags; peel a bounded chain of tag objects to the commit.
@@ -109,34 +188,80 @@ class GitHubDistricts{
   }
   requireValue(target?.type==='commit'&&target.sha===checked.value.releaseCommit,'GitHub district release commit changed');
   const bytes=await read(assetURL(checked.value.releaseTag,checked.value.manifest.asset),{maxBytes:checked.value.manifest.bytes,asset:true}),manifest=protocol.manifest(bytes,checked);
-  state.catalogues[checked.digest]={envelope:checked.envelope,manifestBase64:bytes.toString('base64'),commit};state.latest=checked.digest;await this.commit(state);return {pointer:checked,manifest};
+  state.catalogues[checked.digest]={envelope:checked.envelope,manifestBase64:bytes.toString('base64'),commit:target.sha};state.latest=checked.digest;await this.commit(state);return {pointer:checked,manifest};
+ }
+ async verifyInventory(directory,files){
+  const expected=new Set(files.map(item=>item.role)),parents=new Set(),seen=new Set();
+  for(const name of expected){const parts=name.split('/');for(let count=1;count<parts.length;count++)parents.add(parts.slice(0,count).join('/'));}
+  const walk=async(current,prefix='')=>{
+   for(const entry of await fsp.readdir(current,{withFileTypes:true})){
+    canceled(this.signal);const relative=prefix+entry.name;
+    requireValue(!entry.isSymbolicLink(),'Public district cache contains a link');
+    if(entry.isDirectory()){requireValue(parents.has(relative),'Unexpected public district directory');await safeDirectory(directory,path.join(directory,relative));await walk(path.join(current,entry.name),relative+'/');}
+    else{requireValue(entry.isFile()&&expected.has(relative)&&!seen.has(relative),'Unexpected public district file');seen.add(relative);}
+   }
+  };
+  await walk(directory);requireValue(seen.size===expected.size,'Public district inventory is incomplete');
  }
  async verifyDirectory(directory,district,files,{managed=false}={}){
+  let reader,retained=false,currentDirectory=directory;const verified=[];
+  const closeHandles=async()=>{await Promise.allSettled(verified.map(item=>item?.handle?.close()));};
+  const drainReader=async()=>{const owned=reader;reader=null;await owned?.cancel();};
   try{
    if(managed)await safeDirectory(this.realRoot,directory);else{const stat=await fsp.lstat(directory);requireValue(stat.isDirectory()&&!stat.isSymbolicLink());}
-   const verified=[];
-   for(const item of files){
-    const file=path.join(directory,item.role),actual=await digest(file,this.signal);if(actual.bytes!==item.bytes||actual.sha256!==item.sha256)return false;
-    verified.push({file,fingerprint:actual.fingerprint});
-    if(item.role.endsWith('.sqlite3')){for(const suffix of ['-wal','-shm','-journal'])if(await fsp.lstat(file+suffix).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;}))return false;
-     const header=Buffer.alloc(20),handle=await fsp.open(file,'r');try{requireValue((await handle.read(header,0,20,0)).bytesRead===20&&header.subarray(0,16).toString('latin1')==='SQLite format 3\0'&&header[18]===1&&header[19]===1);}finally{await handle.close();}}
-   }
-   canceled(this.signal);if(await this.checkExisting(directory,district)!==true)return false;
+   if(managed)await this.verifyInventory(directory,files);
+   reader=this.prepareCheckExisting?.(directory,district,{signal:this.signal,files});
+   requireValue(!reader||typeof reader.run==='function'&&typeof reader.cancel==='function','Invalid native reader preparation');
+   verified.length=files.length;const reads=new AbortController();let next=0,failed;
+   const abort=()=>reads.abort(this.signal?.reason);this.signal?.addEventListener('abort',abort,{once:true});if(this.signal?.aborted)abort();
+   const worker=async()=>{
+    while(!failed&&!reads.signal.aborted){
+     const index=next++;if(index>=files.length)return;const item=files[index];
+     try{
+      canceled(reads.signal);const file=path.join(directory,item.role);if(path.dirname(file)!==directory)await safeDirectory(directory,path.dirname(file));
+      const actual=await digest(file,reads.signal,{retain:this.deferActivation});verified[index]={file,fingerprint:actual.fingerprint,handle:actual.handle};requireValue(actual.bytes===item.bytes&&actual.sha256===item.sha256,'GitHub district file integrity failed');
+      if(item.role.endsWith('.sqlite3')){for(const suffix of ['-wal','-shm','-journal'])requireValue(!await fsp.lstat(file+suffix).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;}),'GitHub district database has sidecars');
+       const header=Buffer.alloc(20),handle=await fsp.open(file,'r');try{requireValue((await handle.read(header,0,20,0)).bytesRead===20&&header.subarray(0,16).toString('latin1')==='SQLite format 3\0'&&header[18]===1&&header[19]===1);}finally{await handle.close();}}
+      canceled(reads.signal);
+     }catch(error){failed??=error;reads.abort(error);return;}
+    }
+   };
+   try{
+    // Both readers settle before native checks or returning a failure. A failed
+    // or cancelled sibling cannot leave background reads behind this operation.
+    const results=await Promise.allSettled([worker(),worker()]);const rejected=results.find(result=>result.status==='rejected');
+    if(rejected)throw rejected.reason;if(failed)throw failed;canceled(reads.signal);
+   }finally{this.signal?.removeEventListener('abort',abort);}
+   canceled(this.signal);const valid=reader?await reader.run():await this.checkExisting(directory,district,{files});await drainReader();canceled(this.signal);if(valid!==true)return false;
    for(const item of verified){const stat=await fsp.lstat(item.file,{bigint:true});requireValue(!stat.isSymbolicLink()&&fingerprint(stat)===item.fingerprint,'GitHub district files changed during metadata validation');if(item.file.endsWith('.sqlite3'))for(const suffix of ['-wal','-shm','-journal'])if(await fsp.lstat(item.file+suffix).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;}))return false;}
+   if(managed)await this.verifyInventory(directory,files);
+   if(this.deferActivation){
+    await this.verifiedDirectories.get(directory)?.close();
+    this.verifiedDirectories.set(directory,{close:closeHandles,relocate:target=>{for(const item of verified)item.file=path.join(target,path.relative(currentDirectory,item.file));currentDirectory=target;},verify:async()=>{
+     try{
+      canceled(this.signal);if(managed){await safeDirectory(this.realRoot,currentDirectory);await this.verifyInventory(currentDirectory,files);}
+      for(const item of verified){const held=await item.handle.stat({bigint:true}),named=await fsp.lstat(item.file,{bigint:true});requireValue(named.isFile()&&!named.isSymbolicLink()&&fingerprint(named)===item.fingerprint&&fingerprint(held)===item.fingerprint,'Verified district changed before activation');}
+     }catch(error){const failure=require('./startup-failure.cjs');if(protocol.isDistrictDataError(error))throw failure.dataStartupFailure({reason:'integrity'});if(['EACCES','EPERM','ENOENT','EBUSY','EIO'].includes(error?.code))throw failure.dataStartupFailure({reason:'storage'});throw error;}
+    }});retained=true;
+   }
    return true;
-  }catch(error){if(this.signal?.aborted)throw error;return false;}
+  }catch(error){if(this.signal?.aborted||error?.code==='program'||error instanceof TypeError||error instanceof ReferenceError||error instanceof SyntaxError||require('./startup-failure.cjs').isDataStartupFailure(error))throw error;return false;}finally{await drainReader();if(!retained)await closeHandles();}
  }
  summary(bundle){return {releaseTag:bundle.releaseTag,catalogueSequence:bundle.catalogSequence,verifiedAt:bundle.verifiedAt,cached:true};}
- async useVerified(configuration,state,entry,{offline=false}={}){
-  const checked=this.catalogue(state,entry.pointerDigest),directory=entry.source==='legacy'?legacy(configuration):this.directory(entry.manifestSha256,configuration.district);
-  if(!await this.verifyDirectory(directory,configuration.district,checked.manifest.runtime[configuration.district],{managed:entry.source==='cache'}))return null;
-  this.status(configuration,offline?'offline':'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:offline?TEXT.offline:TEXT.ready});return configurationFor(configuration,entry,this.root);
+ async useVerified(configuration,state,entry,{offline=false,authorization}={}){
+  const checked=this.catalogue(state,entry.pointerDigest),directory=entry.source==='legacy'?legacy(configuration):entry.source==='local'?localDirectory(configuration):this.directory(entry.manifestSha256,configuration.district);
+  if(!await this.verifyDirectory(directory,configuration.district,checked.manifest.dataFiles[configuration.district],{managed:entry.source==='cache'}))return null;
+  if(this.deferActivation)return this.launchConfiguration(configuration,state,entry,authorization);
+  this.status(configuration,offline?'offline':'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:offline?TEXT.offline:TEXT.ready});return configurationFor(configuration,entry,this.root,authorization);
  }
- async prepare(configuration,state,checked){
-  const district=configuration.district,{pointer,manifest}=checked,files=manifest.runtime[district];
+ async prepare(configuration,state,checked,authorization){
+  const district=configuration.district,{pointer,manifest}=checked,files=manifest.dataFiles[district];
   this.status(configuration,'verifying',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,checkedAt:new Date(this.now()).toISOString(),message:TEXT.verifying});
   let source;
-  if(await this.verifyDirectory(legacy(configuration),district,files))source='legacy';
+  const standalone=protocol.standaloneAuthorized(configuration,authorization);
+  // Standalone data needs the schema2 descriptor so native startup also activates
+  // its verified summary in the separate account state. Preserve original local files.
+  if(!standalone&&await this.verifyDirectory(legacy(configuration),district,files))source='legacy';
   const place=this.directory(manifest.sha256,district);
   if(!source&&await this.verifyDirectory(place,district,files,{managed:true}))source='cache';
   if(!source){
@@ -145,24 +270,54 @@ class GitHubDistricts{
    // have it open. A new catalogue receives a new directory.
    const occupied=await fsp.lstat(place).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error;});requireValue(!occupied,'Existing GitHub district cache failed verification');
    const space=await this.statfs(this.root),need=asset.bytes+files.reduce((sum,item)=>sum+item.bytes,0)+512*1024*1024;requireValue(Number(space.bavail)*Number(space.bsize)>=need,'Insufficient GitHub district staging space');
-   let archiveReady=false;try{const actual=await digest(archive,this.signal);archiveReady=actual.bytes===asset.bytes&&actual.sha256===asset.sha256;}catch(error){if(error.code!=='ENOENT')throw error;}
+   let archiveReady=false;try{const actual=await digest(archive,this.signal);requireValue(actual.bytes===asset.bytes&&actual.sha256===asset.sha256,'Existing GitHub district archive failed verification');archiveReady=true;}catch(error){if(error.code!=='ENOENT')throw error;}
    if(!archiveReady){
     const temporary=archive+'.'+crypto.randomUUID()+'.part';
     let progressAt=0,progressBytes=-8*1024*1024;
     this.status(configuration,'downloading',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,receivedBytes:0,totalBytes:asset.bytes,message:TEXT.downloading});
-    try{try{await this.transport.download(assetURL(pointer.value.releaseTag,asset.name),temporary,{bytes:asset.bytes,signal:this.signal,onProgress:receivedBytes=>{requireValue(Number.isSafeInteger(receivedBytes)&&receivedBytes>=0&&receivedBytes<=asset.bytes);const time=this.now();if(receivedBytes!==asset.bytes&&time-progressAt<250&&receivedBytes-progressBytes<8*1024*1024)return;progressAt=time;progressBytes=receivedBytes;this.status(configuration,'downloading',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,receivedBytes,totalBytes:asset.bytes,message:TEXT.downloading});}});}catch(error){throw connectionFailure(error)?new ConnectionError(error):error;}const actual=await digest(temporary,this.signal);requireValue(actual.bytes===asset.bytes&&actual.sha256===asset.sha256,'GitHub district archive integrity failed');await fsp.rename(temporary,archive);}finally{await fsp.unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}
+    try{try{this.permitPublicRequest(assetURL(pointer.value.releaseTag,asset.name));await this.transport.download(assetURL(pointer.value.releaseTag,asset.name),temporary,{bytes:asset.bytes,signal:this.signal,onProgress:receivedBytes=>{requireValue(Number.isSafeInteger(receivedBytes)&&receivedBytes>=0&&receivedBytes<=asset.bytes);const time=this.now();if(receivedBytes!==asset.bytes&&time-progressAt<250&&receivedBytes-progressBytes<8*1024*1024)return;progressAt=time;progressBytes=receivedBytes;this.status(configuration,'downloading',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,receivedBytes,totalBytes:asset.bytes,message:TEXT.downloading});}});}catch(error){throw this.connection(error,assetURL(pointer.value.releaseTag,asset.name));}const actual=await digest(temporary,this.signal);requireValue(actual.bytes===asset.bytes&&actual.sha256===asset.sha256,'GitHub district archive integrity failed');await fsp.rename(temporary,archive);}finally{await fsp.unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}
    }
    this.status(configuration,'verifying',{releaseTag:pointer.value.releaseTag,catalogueSequence:pointer.value.catalogSequence,message:TEXT.verifying});
    try{
     const result=await this.extract({archive,destination:staging,district,files:structuredClone(files)});
     requireValue(result===true||result?.ok===true&&result.district===district&&result.sourceMetadataAccepted===true,'GitHub district extractor refused data');
-    requireValue(await this.verifyDirectory(staging,district,files,{managed:true}),'Extracted GitHub district data failed verification');
-    const names=await fsp.readdir(staging);requireValue(names.length===ROLES.length&&names.every(name=>ROLES.includes(name)),'Unexpected files in GitHub district staging');
-    await safeDirectory(this.realRoot,path.dirname(place),{create:true});canceled(this.signal);await fsp.rename(staging,place);
+    const names=await fsp.readdir(staging),expectedTop=new Set(files.map(item=>item.role.split('/')[0]));requireValue(names.length===expectedTop.size&&names.every(name=>expectedTop.has(name)),'Unexpected files in GitHub district staging');
+    await safeDirectory(this.realRoot,path.dirname(place),{create:true});canceled(this.signal);
+    if(this.deferActivation){
+     // Windows can refuse directory renames with retained read handles. Move
+     // the still-unaccepted owned candidate first, then hash its final paths.
+     const owned=await fsp.lstat(staging,{bigint:true});await fsp.rename(staging,place);
+     try{requireValue(await this.verifyDirectory(place,district,files,{managed:true}),'Extracted GitHub district data failed verification');}
+     catch(error){
+      const held=this.verifiedDirectories.get(place);this.verifiedDirectories.delete(place);await held?.close();
+      await safeDirectory(this.realRoot,place);const current=await fsp.lstat(place,{bigint:true});requireValue(current.dev===owned.dev&&current.ino===owned.ino,'Failed candidate ownership changed');
+      await fsp.rename(place,staging);throw error;
+     }
+    }else{requireValue(await this.verifyDirectory(staging,district,files,{managed:true}),'Extracted GitHub district data failed verification');await fsp.rename(staging,place);}
    }finally{await discardStaging(this.realRoot,stagingRoot,staging);}
    source='cache';
   }
   return {pointerDigest:pointer.digest,manifestSha256:manifest.sha256,catalogSequence:pointer.value.catalogSequence,releaseTag:pointer.value.releaseTag,source,verifiedAt:new Date(this.now()).toISOString()};
+ }
+ launchConfiguration(configuration,state,entry,authorization){
+  const effective=configurationFor(configuration,entry,this.root,authorization),district=configuration.district;
+  const directory=entry.source==='cache'?this.directory(entry.manifestSha256,district):legacy(configuration),held=this.verifiedDirectories.get(directory);
+  requireValue(held,'Verified district launch handles are unavailable');this.verifiedDirectories.delete(directory);
+  const files=this.catalogue(state,entry.pointerDigest).manifest.dataFiles[district];
+  const identity=value=>value?canonical(Object.fromEntries(['pointerDigest','manifestSha256','catalogSequence','releaseTag','source'].map(key=>[key,value[key]]))):null;
+  const previousActive=identity(state.active[district]),expectedStaged=identity(state.staged[district]),candidate=identity(entry);
+  const checkState=latest=>{if(identity(latest.active[district])===candidate)return;if(identity(latest.active[district])!==previousActive||identity(latest.staged[district])!==expectedStaged){const changed=new Error('The selected district changed before activation.');changed.code=changed.reason='context';throw changed;}};
+  const verify=async()=>{await held.verify();checkState(await this.readState(authorization));};
+  try{return require('./district-runtime-input.cjs').bindDistrictConfiguration(effective,{profile:this.profile,directory,district,files,verify,close:held.close,
+   commit:async()=>{
+    const latest=await this.readState(authorization),staged=latest.staged[district];
+    checkState(latest);
+    if(identity(latest.active[district])===candidate)return;
+    latest.active[district]=structuredClone(entry);if(staged)delete latest.staged[district];
+    try{await this.commit(latest);}catch(error){if(error instanceof TypeError||error instanceof ReferenceError||error instanceof SyntaxError||error?.code==='program')throw error;throw require('./startup-failure.cjs').dataStartupFailure({reason:protocol.isDistrictDataError(error)?'integrity':'storage'});}
+    this.status(configuration,'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:TEXT.ready});
+   }});
+  }catch(error){held.close().catch(()=>{});throw error;}
  }
  async operation(configuration,authorization,{stageOnly=false}={}){
   if(!protocol.authorized(configuration,authorization))return stageOnly?null:configuration;
@@ -174,21 +329,35 @@ class GitHubDistricts{
    const checked=await this.discoverCatalogue(state);
    const previous=state.active[configuration.district];
    if(stageOnly&&previous?.pointerDigest===checked.pointer.digest)return this.status(configuration,'ready',{...this.summary(previous),checkedAt:new Date(this.now()).toISOString(),updateAvailable:false,message:TEXT.ready});
-   const entry=await this.prepare(configuration,state,checked);
+   const entry=await this.prepare(configuration,state,checked,authorization);
    if(stageOnly){
     state.staged[configuration.district]=entry;await this.commit(state);
     const update=Boolean(previous&&previous.manifestSha256!==entry.manifestSha256);
     return this.status(configuration,update?'update-ready':'ready',{...this.summary(update?previous:entry),checkedAt:new Date(this.now()).toISOString(),updateAvailable:update,message:update?TEXT.update:TEXT.ready});
    }
+   if(this.deferActivation){state.staged[configuration.district]=entry;await this.commit(state);return this.launchConfiguration(configuration,state,entry,authorization);}
    state.active[configuration.district]=entry;delete state.staged[configuration.district];await this.commit(state);
-   this.status(configuration,'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:TEXT.ready});return configurationFor(configuration,entry,this.root);
+   this.status(configuration,'ready',{...this.summary(entry),checkedAt:new Date(this.now()).toISOString(),message:TEXT.ready});return configurationFor(configuration,entry,this.root,authorization);
   }catch(error){
    // Only connection failures permit offline use; untrusted metadata and
    // signature/rollback failures remain visible and preserve accepted state.
-   if(!this.signal?.aborted&&error instanceof ConnectionError&&state?.active?.[configuration.district]){const reused=await this.useVerified(configuration,state,state.active[configuration.district],{offline:true});if(reused)return stageOnly?this.info(configuration):reused;}
+   if(!this.signal?.aborted&&error instanceof ConnectionError&&state?.active?.[configuration.district]){const reused=await this.useVerified(configuration,state,state.active[configuration.district],{offline:true,authorization});if(reused)return stageOnly?this.info(configuration):reused;}
    const active=state?.active?.[configuration.district];if(!this.signal?.aborted)this.status(configuration,'error',{...(active?this.summary(active):{}),cached:Boolean(active),message:TEXT.error});throw error;
   }
-  finally{this.busy=false;}
+  finally{const unused=[...this.verifiedDirectories.values()];this.verifiedDirectories.clear();await Promise.allSettled(unused.map(item=>item.close()));this.busy=false;}
+ }
+ async retireInactive(configuration,authorization){
+  requireValue(protocol.standaloneAuthorized(configuration,authorization)&&configuration.standaloneGitHubData,'Local public district authorization is required');
+  requireValue(!this.busy,'GitHub district preparation is already running');
+  this.busy=true;
+  try{
+   await this.initialize();const state=await this.readState(authorization),selected=configuration.standaloneGitHubData,active=state.active[configuration.district];
+   requireValue(active?.source==='cache'&&active.manifestSha256===selected.catalogueSha256&&path.resolve(selected.cacheRoot)===this.root,'Only the active verified public district may retire previous caches');
+   const manifests=Object.keys(state.catalogues).map(key=>this.catalogue(state,key).manifest);
+   const staged=state.staged[configuration.district],stagedGeneration=staged?.source==='cache'?{schemaVersion:2,district:configuration.district,catalogueSha256:staged.manifestSha256}:null;
+   const result=await require('./public-district-cache.cjs').retirePublicDistrictCaches({root:this.root,configuration,manifests,stagedGeneration});
+   await this.commit(state);return result;
+  }finally{this.busy=false;}
  }
  ensure(configuration,authorization){return this.operation(configuration,authorization);}
  discover(configuration,authorization,{stageOnly=true}={}){return this.operation(configuration,authorization,{stageOnly});}

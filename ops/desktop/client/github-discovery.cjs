@@ -3,7 +3,9 @@
 // remain in the updater. SQLite provides cross-process locks released on crash.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {DatabaseSync}=require('node:sqlite');
-const TTL=6*60*60*1000,JITTER=30*60*1000,MAX_DELAY=7*24*60*60*1000,MAX_BYTES=4*1024*1024;
+// Expire before the 15-minute lifecycle timer: a full 15-minute cache measured
+// after a fetch can otherwise miss that timer's next tick and wait 30 minutes.
+const TTL=14*60*1000,JITTER=0,LEGACY_TTL=6*60*60*1000,LEGACY_JITTER=30*60*1000,MANUAL_INTERVAL=60*1000,MAX_DELAY=7*24*60*60*1000,MAX_BYTES=4*1024*1024;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function rateLimit(status,headers={},body=''){
  const limited=status===429||(status===403&&(String(headers['x-ratelimit-remaining'])==='0'||headers['retry-after']!==undefined||/rate limit|abuse detection/i.test(body)));
@@ -20,11 +22,12 @@ function deadline(error,now,random){
  return now+Math.min(MAX_DELAY,Math.max(60*1000,requested||60*60*1000))+Math.floor(random()*60000);
 }
 class DiscoveryCache{
- constructor({directory,repository,validate,now=Date.now,random=Math.random,onStatus=()=>{},waitMs=2000}){
+ constructor({directory,repository,validate,now=Date.now,random=Math.random,onStatus=()=>{},waitMs=2000,cooldownScope='api'}){
+  if(!['api','cdn'].includes(cooldownScope))throw new Error('Invalid GitHub cooldown scope');
   this.repository=repository;this.validate=validate;this.now=now;this.random=random;this.onStatus=onStatus;this.waitMs=waitMs;
   this.directory=path.resolve(directory);fs.mkdirSync(this.directory,{recursive:true,mode:0o700});
   const id=crypto.createHash('sha256').update(repository).digest('hex');
-  this.filename=path.join(this.directory,id+'.sqlite');this.cooldownFile=path.join(this.directory,id+'-cooldown.sqlite');
+  this.filename=path.join(this.directory,id+'.sqlite');this.cooldownFile=path.join(this.directory,id+(cooldownScope==='cdn'?'-cdn':'')+'-cooldown.sqlite');
  }
  open(filename,sql){
   if(fs.existsSync(filename)){const stat=fs.lstatSync(filename);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>MAX_BYTES*3)throw new Error('GitHub discovery cache is invalid');}
@@ -35,8 +38,12 @@ class DiscoveryCache{
  read(db){
   const row=db.prepare('SELECT repository,checked,next,payload FROM discovery WHERE id=1').get();if(!row)return null;
   const now=this.now();
-  if(row.repository!==this.repository||!Number.isSafeInteger(row.checked)||row.checked<0||row.checked>now+300000||!Number.isSafeInteger(row.next)||row.next<row.checked+TTL||row.next>row.checked+TTL+JITTER||typeof row.payload!=='string'||Buffer.byteLength(row.payload)>MAX_BYTES)return null;
-  try{return {checkedAt:row.checked,nextCheckAt:row.next,releases:this.validate(JSON.parse(row.payload))};}catch{return null;}
+  if(row.repository!==this.repository||!Number.isSafeInteger(row.checked)||row.checked<0||row.checked>now+300000||!Number.isSafeInteger(row.next)||typeof row.payload!=='string'||Buffer.byteLength(row.payload)>MAX_BYTES)return null;
+  const current=row.next===row.checked+TTL,legacy=row.next>=row.checked+LEGACY_TTL&&row.next<=row.checked+LEGACY_TTL+LEGACY_JITTER;
+  if(!current&&!legacy)return null;
+  // Preserve a valid old list as an offline fallback, but never inherit the old
+  // six-hour wait after upgrading. The separate persisted quota cooldown stays.
+  try{return {checkedAt:row.checked,nextCheckAt:row.checked+TTL,releases:this.validate(JSON.parse(row.payload))};}catch{return null;}
  }
  cooldown(){
   let db;try{db=this.cooldownDB();const row=db.prepare('SELECT repository,recorded,until FROM cooldown WHERE id=1').get();if(!row)return 0;
@@ -60,21 +67,24 @@ class DiscoveryCache{
  }
  async request(operation){await this.permitted();try{return await operation();}catch(error){await this.note(error);throw error;}}
  result(cached,extra={}){this.onStatus({checkedAt:cached.checkedAt,nextCheckAt:cached.nextCheckAt,cached:true,...extra});return cached.releases;}
- async get(refresh){
+ async get(refresh,{forceRefresh=false}={}){
+  // An explicit check can refresh an older list while repeated clicks and
+  // competing processes still share a recent successful response.
+  const reusable=cached=>cached&&this.now()<(forceRefresh===true?cached.checkedAt+MANUAL_INTERVAL:cached.nextCheckAt);
   const started=Date.now();let db,locked=false,cached;
   try{
    db=this.cacheDB();cached=this.read(db);const until=this.cooldown();
    if(until){if(cached)return this.result(cached,{backoffUntil:until});this.onStatus({backoffUntil:until});throw new Error('GitHub API paused until '+new Date(until).toISOString());}
-   if(cached&&this.now()<cached.nextCheckAt)return this.result(cached);
+   if(reusable(cached))return this.result(cached);
    while(!locked){
     try{db.exec('BEGIN IMMEDIATE');locked=true;}
     catch(error){if(!/locked|busy/i.test(error.message))throw error;
      if(Date.now()-started>=this.waitMs){if(cached)return this.result(cached,{refreshDeferred:true});throw new Error('GitHub release discovery is already refreshing; retry later');}
-     await sleep(50);cached=this.read(db);if(cached&&this.now()<cached.nextCheckAt)return this.result(cached);
+     await sleep(50);cached=this.read(db);if(reusable(cached))return this.result(cached);
     }
    }
    // Another app may have finished just before this writer acquired the lock.
-   cached=this.read(db);if(cached&&this.now()<cached.nextCheckAt)return this.result(cached);
+   cached=this.read(db);if(reusable(cached))return this.result(cached);
    await this.permitted();
    const releases=this.validate(await refresh()),payload=JSON.stringify(releases);
    if(Buffer.byteLength(payload)>MAX_BYTES)throw new Error('GitHub discovery metadata exceeds cache limit');
@@ -85,4 +95,4 @@ class DiscoveryCache{
   finally{if(locked)try{db.exec('ROLLBACK');}catch{}db?.close();}
  }
 }
-module.exports={DiscoveryCache,rateLimit,deadline,TTL,JITTER,MAX_DELAY,MAX_BYTES};
+module.exports={DiscoveryCache,rateLimit,deadline,TTL,JITTER,MANUAL_INTERVAL,MAX_DELAY,MAX_BYTES};

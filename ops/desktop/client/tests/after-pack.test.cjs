@@ -83,6 +83,31 @@ test('afterPack without packager metadata (unit use) leaves no include behind',a
   const context=build(t);await quiet({appOutDir:context.appOutDir});assert.equal(fs.existsSync(path.join(context.output,'installer.generated.nsh')),false);
 });
 
+test('native no-uninstaller metadata generates the pinned custom script for this build',async t=>{
+  const context=build(t,'melange','1.0.21');context.packager.config.extraMetadata.desktopAppConfig.desktopUninstaller=false;
+  await quiet(context);
+  assert.ok(fs.existsSync(path.join(context.output,'installer.no-uninstaller.nsi')));
+  const evidence=JSON.parse(fs.readFileSync(path.join(context.output,'nsis-no-uninstaller.provenance.json'),'utf8'));
+  assert.equal(evidence.mode,'native-without-uninstaller');assert.equal(evidence.electronBuilderVersion,'26.15.3');
+});
+
+test('built-in directory packaging writes the native updater pin without generating legacy NSIS files',async t=>{
+  const context=build(t,'mentat','1.0.23');context.electronPlatformName='win32';
+  const publisher='CN=Melange Systems Desktop Release (self-signed)';
+  context.packager.config.win={target:['dir']};
+  context.packager.config.publish={provider:'generic',url:'https://127.0.0.1/desktop-feed-disabled-until-paired/'};
+  Object.assign(context.packager.config.extraMetadata.desktopAppConfig,{desktopUninstaller:false,windowsPublisherName:publisher});
+  await quiet(context);
+  const config=require('js-yaml').load(fs.readFileSync(path.join(context.appOutDir,'resources','app-update.yml'),'utf8'));
+  assert.deepEqual(config,{provider:'generic',url:context.packager.config.publish.url,updaterCacheDirName:'mentat-desktop-updater',publisherName:[publisher]});
+  for(const file of ['installer.generated.nsh','installer.no-uninstaller.nsi','nsis-no-uninstaller.provenance.json'])assert.equal(fs.existsSync(path.join(context.output,file)),false);
+});
+
+test('non-Windows packaging does not generate NSIS installer inputs',async t=>{
+  const context=build(t);context.electronPlatformName='darwin';await quiet(context);
+  assert.equal(fs.existsSync(path.join(context.output,'installer.generated.nsh')),false);
+});
+
 // ---- N20: the public installer ships a no-data dashboard shell only ----
 test('N20: afterPack fails on a real Moneyball.html or a Melange dataset, and passes on the shell-only runtime',async t=>{
   const shell=['melange/sources/fec/surfaces/staffer_live_server.py','melange/bootstrap/melange_bootstrap.py','terrier/sources/data/field_dictionary.csv'];

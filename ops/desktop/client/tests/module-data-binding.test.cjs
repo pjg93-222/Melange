@@ -14,6 +14,18 @@ async function fixture(t,appId='mentat'){
  return {...f,candidate,options,role:path.join(candidate.snapshotRoot,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json'),cache:f.options.cacheRoot};
 }
 function metadataFiles(f){return {pointer:path.join(f.cache,'pointers',f.candidate.pointerDigest+'.json'),manifest:path.join(f.cache,'manifests',f.candidate.manifestSha256+'.json')};}
+
+for(const mode of ['success','hash failure','cancel','drain mutation'])test(`module prewarm binding ${mode} preserves hashing and post-reader identity checks`,async t=>{
+ const f=await fixture(t),adapter=f.options.registry['mentat.fixture.v1'],read=adapter.validateSnapshot,controller=new AbortController(),events=[],before=await f.store.read(),open=fs.promises.open;
+ t.mock.method(fs.promises,'open',async function(file,...args){const handle=await open.call(this,file,...args);if(file===f.role){events.push('hash');const read=handle.read.bind(handle);handle.read=async(...options)=>{const result=await read(...options);if(result.bytesRead===0)events.push('hashed');return result;};}return handle;});
+ adapter.prepareSnapshot=async options=>{assert.deepEqual(Object.keys(options),['signal']);assert.equal(options.signal,controller.signal);events.push('prewarm');if(mode==='cancel')controller.abort();return {
+  validateSnapshot:async input=>{assert.equal(events.at(-1),'hashed');events.push('reader');return read(input);},
+  cancel:async()=>{events.push('drain');if(mode==='drain mutation')fs.writeFileSync(f.role,Buffer.alloc(f.remote.bytes.length,120));}
+ };};
+ if(mode==='hash failure')fs.writeFileSync(f.role,Buffer.alloc(f.remote.bytes.length,120));
+ const result=validateModuleBinding({...f.options,signal:controller.signal});if(mode==='success'){await result;assert.deepEqual(events,['prewarm','hash','hashed','reader','drain']);}else{await assert.rejects(result);assert.equal(events.at(-1),'drain');assert.equal(events.includes('reader'),mode==='drain mutation');}
+ assert.equal(events[0],'prewarm');assert.deepEqual(await f.store.read(),before);
+});
 test('binding derives only the checked fixed redirected root, preserves exact source identity and performs no writes',async t=>{
  const f=environment('mentat');t.after(()=>f.cleanup());const local=path.join(fs.realpathSync.native(f.temporary),'local');fs.mkdirSync(local);const redirect=redirectedLocalCache(t,local);
  const previous=process.env.LOCALAPPDATA;t.after(()=>{if(previous===undefined)delete process.env.LOCALAPPDATA;else process.env.LOCALAPPDATA=previous;});process.env.LOCALAPPDATA=local;

@@ -1,11 +1,11 @@
 'use strict';
-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const read=name=>fs.readFileSync(path.join(__dirname,'..',name),'utf8');
 // Owner decision: updates are always on. The Ed25519-signed manifest and sha256/sha512 checks (trust.cjs, github-source.cjs)
 // gate every install; the Windows certificate store and Authenticode chain are not consulted.
 test('updates are checked unconditionally and the Authenticode chain checks are skipped',()=>{
  const main=read('main.cjs');
- assert.match(main,/catch\{enrollmentDeferred=true;\}\r?\n\s*await updater\.check\(\);/);
+ assert.match(main,/catch\{enrollmentDeferred=true;\}\r?\n\s*if\(manual&&githubSource\)\{await githubSource\.refreshDiscovery\(\);if\(updater\.checkPromise\)await updater\.checkPromise;\}\r?\n\s*await updater\.check\(\);/);
  assert.doesNotMatch(main,/publisher-trust|publisherTrusted|trustPublisher|trustUpdates|trust-updates|offerUpdateTrust|UPDATES_UNTRUSTED|updatesTrusted|Turn on updates/);
  // The installer publisher check is not disabled: updater.cjs uses its default, native-signature.cjs, which pins the
  // signer thumbprint to the signed manifest's publisherThumbprints (tests/publisher-thumbprint.test.cjs).
@@ -14,6 +14,40 @@ test('updates are checked unconditionally and the Authenticode chain checks are 
  assert.match(main,/^\s*require\('electron-updater'\)\.autoUpdater\.verifyUpdateCodeSignature=async\(\)=>null;/m);
  // updater.cjs nativeTrust refuses every update when electron-updater has no publisherName, which verifyUpdateCodeSignature:true provides.
  assert.match(read('builder.cjs'),/verifyUpdateCodeSignature:true/);
+});
+
+function checkerFixture(refresh=async()=>{}){
+ const calls=[],context={portable:false,checkingUpdates:false,closing:false,githubConfig:null,accessGate:null,background:false,
+  updater:{osShutdown:false,check:async()=>calls.push('check')},githubSource:{refreshDiscovery:async()=>{calls.push('refresh');await refresh();},discoverySummary:()=> 'Refresh deferred.'},
+  updateGitHubStatus:value=>calls.push(value),updateStatus:value=>calls.push(value),drainActivity:async()=>{},accessOperation:async()=>{},enrollApproved:async()=>{}};
+ const main=read('main.cjs'),body=main.slice(main.indexOf('async function checkUpdates('),main.indexOf('async function recoverPrevious('));
+ vm.runInNewContext(body+'\nthis.check=checkUpdates;',context);return {context,calls};
+}
+test('manual menu check refreshes discovery before updater while automatic checks reuse normal cache policy',async()=>{
+ const {context,calls}=checkerFixture();await context.check();assert.equal(calls.includes('refresh'),false);assert.ok(calls.includes('check'));
+ calls.length=0;await context.check({manual:true});assert.ok(calls.indexOf('refresh')<calls.indexOf('check'));
+ assert.match(read('main.cjs'),/label:'Check for updates',click:\(\)=>checkUpdates\(\{manual:true\}\)/);
+});
+test('failed manual refresh reports deferral and cannot be overwritten by cached no-update result',async()=>{
+ const {context,calls}=checkerFixture(async()=>{throw new Error('network unavailable');});await context.check({manual:true});
+ assert.equal(calls.includes('check'),false);assert.ok(calls.some(value=>/Update deferred.*Refresh deferred/.test(value)));
+ assert.equal(context.checkingUpdates,false);
+});
+test('manual discovery is checked after an active automatic startup confirmation completes',async()=>{
+ let release;const pending=new Promise(resolve=>{release=resolve;});
+ const {context,calls}=checkerFixture();
+ context.updater.checkPromise=pending.then(()=>{context.updater.checkPromise=null;calls.push('confirmed');});
+ const manual=context.check({manual:true});await new Promise(setImmediate);
+ assert.equal(calls.includes('refresh'),true);assert.equal(calls.includes('check'),false);
+ release();await manual;
+ assert.ok(calls.indexOf('confirmed')<calls.indexOf('check'));
+ assert.equal(calls.filter(value=>value==='check').length,1);
+});
+test('repeated manual clicks share the active check and do not start concurrent refreshes',async()=>{
+ let release,entered;const started=new Promise(resolve=>{entered=resolve;});
+ const {context,calls}=checkerFixture(async()=>{entered();await new Promise(resolve=>{release=resolve;});});
+ const first=context.check({manual:true});await started;await context.check({manual:true});assert.equal(calls.filter(value=>value==='refresh').length,1);
+ release();await first;assert.equal(calls.filter(value=>value==='check').length,1);
 });
 // Owner decision: the app never asks for a workspace folder or a district before launch. District switching lives inside the opened app.
 test('the settings page has no folder, district or certificate-trust control and every script id exists',()=>{

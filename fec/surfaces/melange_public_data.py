@@ -186,12 +186,16 @@ def _row(value, documents):
 
 
 class PublicDataCatalogue:
-    def __init__(self, capability, snapshot, *, cancelled=lambda: False):
+    def __init__(self, capability, snapshot, *, cancelled=lambda: False, validation_cache=None):
         p.require(capability is _CAPABILITY)
+        if validation_cache is not None:
+            from module_catalogue_cache import ValidationCache
+            p.require(type(validation_cache) is ValidationCache)
         self._lock, self._streams, self._stamps, self._paths = threading.Lock(), {}, {}, {}
         self._index = {role: array('Q') for role in ROLES}
         self._counts = {role: 0 for role in ROLES}
         self._closed = False
+        self._validation_cache_hit = False
         try:
             for role in ('observations', 'receipt'):
                 path = Path(snapshot.files[role])
@@ -222,6 +226,7 @@ class PublicDataCatalogue:
                 and receipt['output']['bytes'] == snapshot.objects['observations']['bytes']
                 and receipt['output']['sha256'] == snapshot.objects['observations']['sha256']
                 and hashlib.sha256(raw).hexdigest() == snapshot.objects['receipt']['sha256'])
+            p.require(sum(receipt['recordCounts'].values()) == receipt['output']['records'])
             _exact(receipt['canonicalPromotions'], ('identity', 'employment', 'office', 'date'))
             p.require(all(type(v) is int and v == 0 for v in receipt['canonicalPromotions'].values()))
             _exact(receipt['coverage'], ('sourceNativeObservations', 'fullApplication'))
@@ -236,6 +241,28 @@ class PublicDataCatalogue:
                 'historicalProducer': 'SEE_SOURCE_RECEIPTS_NOT_INFERRED_FROM_CURRENT_CODE',
                 'sourceExtraction': 'RECEIPT_REPORTED_NOT_INDEPENDENTLY_REPLAYED'})
             self._receipt_raw, self.revision = p.canonical(receipt), hashlib.sha256(raw).hexdigest()
+            cached = (validation_cache.load(snapshot, roles=ROLES, block=BLOCK, counts=receipt['recordCounts'])
+                      if validation_cache is not None else None)
+            if cached is not None:
+                # A protected successful semantic scan does not replace fresh
+                # content verification. Hash the exact handles retained by this
+                # reader, rather than trusting names, mtimes or earlier probes.
+                stream, h, total = self._streams['observations'], hashlib.sha256(), 0
+                while True:
+                    p.require(not cancelled(), 'Public data preparation was cancelled')
+                    chunk = stream.read(4 * 1024 ** 2)
+                    if not chunk:
+                        break
+                    total += len(chunk)
+                    p.require(total <= receipt['output']['bytes'])
+                    h.update(chunk)
+                p.require(total == receipt['output']['bytes'] and h.hexdigest() == receipt['output']['sha256'])
+                self._counts = dict(receipt['recordCounts'])
+                self._index = {role: array('Q', cached[role]) for role in ROLES}
+                self._check()
+                p.require(not cancelled(), 'Public data preparation was cancelled')
+                self._validation_cache_hit = True
+                return
             stream, h, total, count, current, seen = self._streams['observations'], hashlib.sha256(), 0, 0, 0, set()
             csv_count = pdf_count = repairs = 0
             while True:
@@ -270,6 +297,11 @@ class PublicDataCatalogue:
                 'senateExcludedRecords': input_counts['senate-personal-unfiltered'] - self._counts[ROLES[1]],
                 'senateAcceptedRepairs': repairs})
             self._check()
+            p.require(not cancelled(), 'Public data preparation was cancelled')
+            if validation_cache is not None:
+                validation_cache.save(snapshot, roles=ROLES, block=BLOCK, counts=self._counts, index=self._index)
+                self._check()
+                p.require(not cancelled(), 'Public data preparation was cancelled')
         except BaseException:
             self.close()
             raise
@@ -324,11 +356,11 @@ class PublicDataCatalogue:
         self._closed = True
 
 
-def prepare_public_data(snapshot, *, cancelled=lambda: False):
+def prepare_public_data(snapshot, *, cancelled=lambda: False, validation_cache=None):
     from module_data_snapshot import Snapshot
     p.require(type(snapshot) is Snapshot and snapshot.app == 'melange' and snapshot.kind == KIND
               and set(snapshot.files) == set(snapshot.objects) == {'observations', 'receipt'})
-    return PublicDataCatalogue(_CAPABILITY, snapshot, cancelled=cancelled)
+    return PublicDataCatalogue(_CAPABILITY, snapshot, cancelled=cancelled, validation_cache=validation_cache)
 
 
 def handle_public_data_request(handler, path, query, reader):

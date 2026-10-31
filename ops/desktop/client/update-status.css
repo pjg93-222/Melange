@@ -1,0 +1,7 @@
+.desktop-update{box-sizing:border-box;margin:18px 0;padding:12px 14px;border:1px solid #d8dfe5;border-radius:10px;background:#f5f7fa;color:#334155;font:13px/1.5 system-ui,sans-serif;text-align:left}
+.desktop-installed-version{display:block;font-size:12px;color:#526174}
+.desktop-update-message{margin:4px 0 0!important;color:inherit!important;font-size:13px!important}
+.desktop-update[data-state="current"]{border-color:#b8d7c8;background:#f2f8f4}
+.desktop-update[data-state="ready"]{border-color:#b3cce0;background:#f0f6fb}
+.desktop-update[data-state="unavailable"]{border-color:#dfc99f;background:#fbf7ef}
+.loading-update{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);width:min(500px,calc(100% - 32px));margin:0}

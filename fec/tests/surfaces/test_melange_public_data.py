@@ -1,8 +1,13 @@
 """Passive consumer tests; every document/row is generated synthetic fixture."""
 import copy
+import base64
 import hashlib
 import http.client
 import json
+import os
+import io
+import shutil
+import struct
 from pathlib import Path
 import sys
 import tempfile
@@ -187,6 +192,205 @@ class PublicDataTests(unittest.TestCase):
             public.prepare_public_data({'approved': True})
         with self.assertRaises(ValueError):
             public.PublicDataCatalogue(None, None)
+        with self.assertRaises(ValueError):
+            self.prepare(validation_cache={'validated': True})
+
+    def validation_cache(self, *, profile=None, fingerprint='a' * 64, source=None):
+        from module_catalogue_cache import validation_cache
+        profile = profile or self.root / 'profile'
+        profile.mkdir(exist_ok=True)
+        cache = validation_cache(profile=profile, program_fingerprint=fingerprint,
+            source=source or {'manifestSha256': 'b' * 64, 'pointerDigest': 'c' * 64})
+        self.assertIsNotNone(cache)
+        return cache
+
+    @unittest.skipUnless(os.name == 'nt', 'Actual Windows DPAPI required')
+    def test_protected_warm_index_skips_scan_but_pages_keep_row_checks(self):
+        self.rewrite(self.long_rows())
+        cache = self.validation_cache()
+        cold = self.prepare(validation_cache=cache)
+        expected = {(role, offset): cold.observations(role, offset, 4)
+            for role in public.ROLES for offset in (0, max(0, cold._counts[role] - 4))}
+        expected[public.ROLES[0], 127] = cold.observations(public.ROLES[0], 127, 4)
+        self.assertFalse(cold._validation_cache_hit)
+        cold.close()
+        with patch.object(public, '_row', wraps=public._row) as row_check:
+            warm = self.prepare(validation_cache=cache)
+            self.assertTrue(warm._validation_cache_hit)
+            self.assertEqual(row_check.call_count, 0)
+            for (role, offset), page in expected.items():
+                self.assertEqual(warm.observations(role, offset, 4), page)
+            self.assertGreater(row_check.call_count, 0)
+
+    @unittest.skipUnless(os.name == 'nt', 'Actual Windows DPAPI required')
+    def test_cache_ciphertext_owner_code_source_and_data_changes_require_scan(self):
+        from module_catalogue_cache import KIND
+        import native_access_state as protected
+        cache = self.validation_cache()
+        cold = self.prepare(validation_cache=cache)
+        cold.close()
+        raw = cache._target.read_bytes()
+        # The same ciphertext cannot authorize a second profile.
+        other = self.validation_cache(profile=self.root / 'other-profile')
+        other._target.write_bytes(raw)
+        reader = self.prepare(validation_cache=other)
+        self.assertFalse(reader._validation_cache_hit)
+        reader.close()
+        for changed in (self.validation_cache(fingerprint='d' * 64),
+                        self.validation_cache(source={'manifestSha256': 'e' * 64})):
+            cache._target.write_bytes(raw)
+            reader = self.prepare(validation_cache=changed)
+            self.assertFalse(reader._validation_cache_hit)
+            reader.close()
+        cache._target.write_bytes(raw[:-1] + bytes([raw[-1] ^ 1]))
+        reader = self.prepare(validation_cache=cache)
+        self.assertFalse(reader._validation_cache_hit)
+        reader.close()
+        value = protected.read(cache._profile, KIND)
+        self.assertEqual(value['binding']['windowsSid'], protected.windows_sid())
+        # Even an authenticated record with a wrong account identity is a miss.
+        value['binding']['windowsSid'] = 'S-1-0-0'
+        protected.write(cache._profile, KIND, value)
+        reader = self.prepare(validation_cache=cache)
+        self.assertFalse(reader._validation_cache_hit)
+        reader.close()
+        rows = [p.strict_json(v) for v in self.data_file.read_bytes().splitlines()]
+        rows[0]['sourceExtracted']['title'] = 'changed synthetic title'
+        self.rewrite(rows)
+        reader = self.prepare(validation_cache=cache)
+        self.assertFalse(reader._validation_cache_hit)
+
+    @unittest.skipUnless(os.name == 'nt', 'Actual Windows DPAPI required')
+    def test_malformed_authenticated_offsets_are_misses_and_writes_are_optional(self):
+        from module_catalogue_cache import KIND
+        import native_access_state as protected
+        self.rewrite(self.long_rows())
+        cache = self.validation_cache()
+        self.prepare(validation_cache=cache).close()
+        original = protected.read(cache._profile, KIND)
+        for mutate in (lambda v: v['index'][public.ROLES[0]].__setitem__(0, True),
+                       lambda v: v['binding'].__setitem__('indexSchema', True),
+                       lambda v: v['index'][public.ROLES[0]].__setitem__(1, 0),
+                       lambda v: v['index'][public.ROLES[0]].append(1),
+                       lambda v: v['index'][public.ROLES[1]].__setitem__(0, public.MAX_BYTES),
+                       lambda v: v['counts'].__setitem__(public.ROLES[1], True),
+                       lambda v: v.update(untrustedPath='C:/outside')):
+            value = copy.deepcopy(original)
+            mutate(value)
+            protected.write(cache._profile, KIND, value)
+            reader = self.prepare(validation_cache=cache)
+            self.assertFalse(reader._validation_cache_hit)
+            reader.close()
+        cache._target.write_bytes(b'not a protected record')
+        with patch('module_catalogue_cache.os.replace', side_effect=OSError('synthetic disk failure')):
+            reader = self.prepare(validation_cache=cache)
+            self.assertFalse(reader._validation_cache_hit)
+            self.assertEqual(reader.catalogue()['status'], 'available')
+        self.assertEqual(list(cache._profile.glob('*.tmp')), [])
+
+    @unittest.skipUnless(os.name == 'nt', 'Actual Windows DPAPI required')
+    def test_warm_read_cancellation_and_changed_opened_content_refuse(self):
+        from module_catalogue_cache import ValidationCache
+        cache = self.validation_cache()
+        self.prepare(validation_cache=cache).close()
+        calls = 0
+        def cancelled():
+            nonlocal calls
+            calls += 1
+            return calls >= 2
+        with self.assertRaises(ValueError):
+            self.prepare(validation_cache=cache, cancelled=cancelled)
+        original_load = ValidationCache.load
+        def changed(instance, *args, **kwargs):
+            result = original_load(instance, *args, **kwargs)
+            raw = self.data_file.read_bytes()
+            self.data_file.write_bytes(raw.replace(b'DO.', b'NO.', 1))
+            return result
+        with patch.object(ValidationCache, 'load', changed), self.assertRaises(ValueError):
+            self.prepare(validation_cache=cache)
+
+    @unittest.skipUnless(os.name == 'nt', 'Actual Windows DPAPI required')
+    def test_verified_parent_handoff_runs_real_public_wrapper_and_profile_bound_cache(self):
+        # Generated parent/protocol fixture; real reader and DPAPI, no network.
+        from module_application_contracts import (ApplicationContract, ProgramFile,
+            ModuleInputError, canonical, program_fingerprint)
+        from module_data_handoff import prepare_handoff
+        from module_data_launch import APPS
+        from module_public_input_installers import (prepare_public_readers, install_public_readers,
+            PUBLIC_IDS, PRIVATE_IDS)
+        self.prepare().close()
+        profile = self.root / 'parent-profile'
+        profile.mkdir()
+        cache = profile / 'packs/github-module-data'
+        for name in ('pointers', 'manifests', 'snapshots'):
+            (cache / name).mkdir(parents=True)
+        repository, purpose = APPS['melange']
+        objects = []
+        for role, path in (('observations', self.data_file), ('receipt', self.receipt_file)):
+            raw = path.read_bytes()
+            sha = hashlib.sha256(raw).hexdigest()
+            objects.append({'role': role, 'bytes': len(raw), 'sha256': sha,
+                'segments': [{'asset': role + '.bin', 'bytes': len(raw), 'sha256': sha}]})
+        tag = 'module-data-2026-10-22-fixture'
+        dataset_id = '11111111-1111-4111-8111-111111111111'
+        manifest = {'schemaVersion': 1, 'purpose': purpose + 'sets', 'appId': 'melange',
+            'repository': repository, 'releaseTag': tag, 'datasets': [{'datasetId': dataset_id,
+            'revisionId': '22222222-2222-4222-8222-222222222222', 'kind': public.KIND,
+            'adapterVersion': 1, 'objects': objects, 'counts': {'files': 2}}]}
+        manifest_raw = canonical(manifest)
+        manifest_sha = hashlib.sha256(manifest_raw).hexdigest()
+        pointer = {'schemaVersion': 1, 'purpose': purpose, 'appId': 'melange', 'repository': repository,
+            'catalogSequence': 1, 'releaseTag': tag, 'releaseCommit': 'a' * 40,
+            'manifest': {'asset': 'manifest.json', 'bytes': len(manifest_raw), 'sha256': manifest_sha}}
+        pointer_raw = canonical(pointer)
+        pointer_sha = hashlib.sha256(pointer_raw).hexdigest()
+        envelope = {'schemaVersion': 1, 'keyId': 'synthetic-native-key',
+            'payload': base64.b64encode(pointer_raw).decode(), 'signature': base64.b64encode(b'\0' * 64).decode()}
+        (cache / 'pointers' / (pointer_sha + '.json')).write_bytes(canonical(envelope))
+        (cache / 'manifests' / (manifest_sha + '.json')).write_bytes(manifest_raw)
+        target = cache / 'snapshots' / manifest_sha / dataset_id / 'public-data'
+        target.mkdir(parents=True)
+        shutil.copy2(self.data_file, target / self.data_file.name)
+        shutil.copy2(self.receipt_file, target / self.receipt_file.name)
+        source = {'schemaVersion': 1, 'appId': 'melange', 'repository': repository, 'catalogSequence': 1,
+            'releaseTag': tag, 'releaseCommit': 'a' * 40, 'manifestSha256': manifest_sha,
+            'pointerDigest': pointer_sha, 'cacheRoot': str(cache)}
+        actual_source = ROOT / 'fec/surfaces/melange_public_data.py'
+        raw = actual_source.read_bytes()
+        files = (ProgramFile('source', 'fec/surfaces/melange_public_data.py', len(raw), hashlib.sha256(raw).hexdigest()),)
+        contract = ApplicationContract('melange', 'melange.public-data.v1', program_fingerprint(files), files,
+            (public.KIND,), PUBLIC_IDS['melange'], PRIVATE_IDS['melange'], prepare_public_readers, install_public_readers)
+        data, state = self.root / 'handoff-data', self.root / 'handoff-state'
+        data.mkdir(); state.mkdir()
+        binding = {'contractId': contract.contract_id, 'programFingerprint': contract.program_fingerprint,
+            'sourceDigest': manifest_sha, 'sourceFingerprint': hashlib.sha256(canonical(source)).hexdigest()}
+        message = {'schemaVersion': 1, 'appId': 'melange', 'contractId': contract.contract_id,
+            'programFingerprint': contract.program_fingerprint, 'profileRoot': str(profile), 'sourceRoot': str(ROOT),
+            'originalDataRoot': str(data), 'stateRoot': str(state), 'source': source, 'binding': binding,
+            'launchNonce': base64.urlsafe_b64encode(b'x' * 32).rstrip(b'=').decode()}
+        def run(value):
+            raw = canonical(value)
+            return prepare_handoff(io.BytesIO(struct.pack('>I', len(raw)) + raw), app_id='melange',
+                profile_root=profile, source_root=ROOT, original_data_root=data, state_root=state,
+                bootstrap_root=ROOT / 'ops/desktop/packaging')
+        with patch('module_application_contracts.application_contract', return_value=contract), \
+             patch('module_data_handoff.application_contract', return_value=contract), \
+             patch.object(sys.modules['fec'], '__path__', [str(ROOT / 'fec')]), \
+             patch.object(sys.modules['fec.surfaces'], '__path__', [str(ROOT / 'fec/surfaces')]):
+            first = run(message).readers[public.KIND]['reader']
+            self.assertFalse(first._validation_cache_hit)
+            expected = first.observations(public.ROLES[0], 0, 2)
+            first.close()
+            second = run(message).readers[public.KIND]['reader']
+            self.assertTrue(second._validation_cache_hit)
+            self.assertEqual(second.observations(public.ROLES[0], 0, 2), expected)
+            second.close()
+            for changed in ({**message, 'profileRoot': str(self.root)},
+                            {**message, 'programFingerprint': '0' * 64},
+                            {**message, 'source': {**source, 'manifestSha256': '0' * 64}}):
+                with patch('module_catalogue_cache.validation_cache') as make_cache, self.assertRaises(ModuleInputError):
+                    run(changed)
+                make_cache.assert_not_called()
 
     def test_fixed_route_seam_uses_only_installed_public_reader(self):
         reader = self.prepare()

@@ -84,7 +84,7 @@ class PublicComponent:
     source_fingerprint: str
 
 
-def prepare_public_component(snapshot, *, source, is_cancelled=lambda:False):
+def prepare_public_component(snapshot, *, source, is_cancelled=lambda:False, validation_cache=None):
     require(type(snapshot) is Snapshot and supported_public_kind(snapshot.app, snapshot.kind)
             and type(source) is dict and source.get('appId') == snapshot.app
             and callable(is_cancelled) and not is_cancelled())
@@ -96,7 +96,8 @@ def prepare_public_component(snapshot, *, source, is_cancelled=lambda:False):
             reader = prepare_public_pages(snapshot, source, cancelled=is_cancelled)
             require(type(reader) is PagedPublicDataCatalogue)
         else:
-            reader = module.prepare_public_data(snapshot, cancelled=is_cancelled)
+            cache_options = {'validation_cache': validation_cache} if validation_cache is not None else {}
+            reader = module.prepare_public_data(snapshot, cancelled=is_cancelled, **cache_options)
             require(type(reader) is module.PublicDataCatalogue)
     else:
         reader = module.prepare(snapshot.root, source_digest=digest, source_fingerprint=fingerprint)
@@ -206,7 +207,18 @@ def prepare_public_readers(**options):
     kinds = tuple(options.get('required_kinds', ()))
     require(app_id in PUBLIC_KINDS and len(kinds) == 1 and supported_public_kind(app_id, kinds[0]))
     from module_data_launch import prepare_module_readers
-    return prepare_module_readers(**options, reader_registry={kinds[0]: prepare_public_component})
+    def prepare(snapshot, *, source, is_cancelled):
+        cache = None
+        if app_id == 'melange' and snapshot.kind == PUBLIC_KINDS['melange']:
+            from module_application_contracts import application_contract
+            from module_catalogue_cache import validation_cache
+            contract = application_contract('melange', 'melange.public-data.v1')
+            require(contract is not None)
+            cache = validation_cache(profile=options['profile'],
+                program_fingerprint=contract.program_fingerprint, source=source)
+        return prepare_public_component(snapshot, source=source,
+            is_cancelled=is_cancelled, validation_cache=cache)
+    return prepare_module_readers(**options, reader_registry={kinds[0]: prepare})
 
 
 def public_reader(prepared):

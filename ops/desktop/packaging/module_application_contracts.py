@@ -11,12 +11,24 @@ import os
 from pathlib import Path
 import re
 import stat
+import sys
+import threading
 from types import MappingProxyType
 
 
 class ModuleInputError(ValueError):
     def __init__(self):
         super().__init__('Native module input is unavailable.')
+
+
+class DataIntakeBlocked(ModuleInputError):
+    """A known cached-input failure, never an import/program/factory exception."""
+    def __init__(self, reason='integrity'):
+        super().__init__()
+        if reason not in ('integrity', 'storage'):
+            raise ValueError('Invalid data intake status')
+        self.reason = reason
+        self.native_status = None
 
 
 def require(value):
@@ -88,8 +100,13 @@ class ApplicationContract:
 
 _FIELDS = frozenset(('schemaVersion', 'appId', 'contractId', 'programFiles', 'programFingerprint',
                      'requiredKinds', 'publicReaders', 'privateBoundaries', 'startupTimeoutMs'))
-_SHARED = frozenset(('desktop_backend.py', 'module_application_contracts.py', 'module_data_handoff.py',
-                     'module_data_launch.py', 'module_data_snapshot.py', 'module_public_input_installers.py'))
+_SHARED = frozenset(('desktop_backend.py', 'desktop_workspace.py', 'module_application_contracts.py', 'module_data_handoff.py',
+                     'module_data_launch.py', 'module_data_snapshot.py', 'module_public_input_installers.py',
+                     'workspace_data_contract.py', 'module_workspace_handoff.py',
+                     'workspace_archive.py', 'workspace_sqlite.py', 'workspace_graph.py', 'workspace_cache.py',
+                     'module_workspace_inputs.py', 'workspace_melange.py', 'workspace_mentat.py', 'module_workspace_installers.py',
+                     'module_workspace_render.py', 'module_workspace_ui_templates.py',
+                     'module_workspace_combined_ui.py', 'module_workspace_industry_ui.py'))
 _APPLICATION = MappingProxyType({
     'melange': frozenset(('fec/surfaces/melange_public_data.py', 'fec/surfaces/staffer_live_server.py',
         'fec/surfaces/melange_public_pages.py', 'fec/surfaces/demand_data.py',
@@ -110,19 +127,37 @@ def application_contract(app_id, contract_id):
     framed native handoff before consumer preparation or original-root writes.
     """
     paged = app_id == 'melange' and contract_id == 'melange.public-data.pages.v1'
-    if app_id not in _APPLICATION or (contract_id != app_id + '.public-data.v1' and not paged):
+    workspace = app_id in _APPLICATION and contract_id == app_id + '.workspace.v1'
+    if app_id not in _APPLICATION or (contract_id != app_id + '.public-data.v1' and not paged and not workspace):
         return None
     from module_application_inventory import APPLICATION_SPECS
     from module_public_input_installers import PUBLIC_KINDS, PUBLIC_IDS, PRIVATE_IDS, PAGED_KIND
     from module_public_input_installers import prepare_public_readers, install_public_readers
     spec = APPLICATION_SPECS[app_id]
+    require(type(spec) is MappingProxyType and set(spec) == _FIELDS
+            and spec['contractId'] == app_id + '.public-data.v1'
+            and spec['requiredKinds'] == (PUBLIC_KINDS[app_id],)
+            and spec['publicReaders'] == PUBLIC_IDS[app_id]
+            and spec['privateBoundaries'] == PRIVATE_IDS[app_id])
+    # Both independently verified inputs bind the SAME installed program union.
+    # Only fixed compiled metadata/factories differ, never a downloaded selector.
+    kinds, readers, boundaries = (PUBLIC_KINDS[app_id],), PUBLIC_IDS[app_id], PRIVATE_IDS[app_id]
+    prepare, install = prepare_public_readers, install_public_readers
     if paged:
         spec = MappingProxyType({**spec, 'contractId': contract_id, 'requiredKinds': (PAGED_KIND,)})
+        kinds = (PAGED_KIND,)
+    if workspace:
+        from workspace_data_contract import WORKSPACE_KINDS, WORKSPACE_READERS, WORKSPACE_PRIVATE_BOUNDARIES
+        from module_workspace_installers import prepare_workspace_readers, install_workspace_readers
+        kinds, readers, boundaries = WORKSPACE_KINDS[app_id], WORKSPACE_READERS[app_id], WORKSPACE_PRIVATE_BOUNDARIES[app_id]
+        prepare, install = prepare_workspace_readers, install_workspace_readers
+        spec = MappingProxyType({**spec, 'contractId': contract_id, 'requiredKinds': kinds,
+            'publicReaders': readers, 'privateBoundaries': boundaries})
     require(type(spec) is MappingProxyType and set(spec) == _FIELDS
             and type(spec['schemaVersion']) is int and spec['schemaVersion'] == 1
             and spec['appId'] == app_id and spec['contractId'] == contract_id
-            and spec['requiredKinds'] == ((PAGED_KIND,) if paged else (PUBLIC_KINDS[app_id],))
-            and spec['publicReaders'] == PUBLIC_IDS[app_id] and spec['privateBoundaries'] == PRIVATE_IDS[app_id]
+            and spec['requiredKinds'] == kinds
+            and spec['publicReaders'] == readers and spec['privateBoundaries'] == boundaries
             and type(spec['startupTimeoutMs']) is int
             and spec['startupTimeoutMs'] == (600000 if app_id == 'melange' else 300000)
             and type(spec['programFiles']) is tuple)
@@ -131,12 +166,24 @@ def application_contract(app_id, contract_id):
     files = tuple(ProgramFile(**row) for row in rows)
     paths = {(item.root, item.path) for item in files}
     require(all(('bootstrap', path) in paths for path in _SHARED)
+            and (app_id != 'melange' or all(('bootstrap', path) in paths
+                 for path in ('module_catalogue_cache.py', 'native_access_state.py')))
             and all(('source', path) in paths for path in _APPLICATION[app_id])
             and not any(item.path.endswith(('module_application_inventory.py', 'module-application-inventory.cjs'))
                         for item in files))
+    if workspace:
+        required = ('module_workspace_installers.py', 'module_workspace_inputs.py',
+                    'workspace_archive.py', 'workspace_sqlite.py', 'workspace_graph.py',
+                    'workspace_cache.py', 'workspace_' + app_id + '.py')
+        if app_id == 'melange':
+            required += ('module_workspace_render.py', 'module_workspace_ui_templates.py',
+                         'module_workspace_combined_ui.py', 'module_workspace_industry_ui.py', 'melange_module_data.py')
+        else:
+            required += ('mentat_module_data.py',)
+        require(all(('bootstrap', path) in paths for path in required))
     return ApplicationContract(app_id, contract_id, spec['programFingerprint'], files,
         spec['requiredKinds'], spec['publicReaders'], spec['privateBoundaries'],
-        prepare_public_readers, install_public_readers, spec['startupTimeoutMs'])
+        prepare, install, spec['startupTimeoutMs'])
 
 
 def _stamp(info):
@@ -160,8 +207,53 @@ def _regular(path, directory=False):
 
 def verify_program(contract, *, source_root, bootstrap_root):
     """Read only the compiled table, never a downloaded inventory or import path."""
+    require(type(contract) is ApplicationContract)
+    return verify_compiled_files(contract.program_files, contract.program_fingerprint,
+                                 source_root=source_root, bootstrap_root=bootstrap_root)
+
+
+_VERIFIED, _VERIFY_LOCK = {}, threading.Lock()
+
+
+def _root_ids(roots):
+    return tuple((r, (lambda i: (i.st_dev, i.st_ino, i.st_mode))(_regular(Path(r), True))) for r in roots)
+
+
+def verify_generation(key, roots, verify, *, full, kind):
+    """One full scan per launch generation; ordinary callers only recheck root identity."""
     try:
-        require(type(contract) is ApplicationContract)
+        state = _VERIFIED.get(key)
+        if not full and state:
+            require(_root_ids(roots) == state)
+            return True
+        with _VERIFY_LOCK:  # ponytail: one process-wide lock, at most 2 generations per process
+            state = _VERIFIED.get(key)
+            require(state is not False)  # a poisoned generation fails closed until restart
+            if not full and state:
+                require(_root_ids(roots) == state)
+                return True
+            before = _root_ids(roots)  # captured before the scan so a mid-scan root swap cannot be blessed
+            try:
+                verify()
+                require(_root_ids(roots) == before)
+            except Exception:
+                _VERIFIED[key] = False
+                raise
+            _VERIFIED[key] = before
+            try:  # a diagnostic must never fail startup
+                sys.stderr.write('DESKTOP_PROGRAM_VERIFIED kind=' + kind + '\n')  # stderr: stdout carries diagnostics
+                sys.stderr.flush()
+            except (OSError, ValueError, AttributeError):
+                pass
+            return True
+    except OSError:
+        raise ModuleInputError() from None
+
+
+def verify_compiled_files(files, fingerprint, *, source_root, bootstrap_root):
+    """Shared byte verifier for compiled application and district-probe tables."""
+    try:
+        require(fingerprint == program_fingerprint(files))
         roots = {}
         for name, value in (('source', source_root), ('bootstrap', bootstrap_root)):
             path = Path(value)
@@ -172,7 +264,7 @@ def verify_program(contract, *, source_root, bootstrap_root):
         for root in roots.values():
             _regular(root, True)
         directories = {}
-        for item in contract.program_files:
+        for item in files:
             root = roots[item.root]
             current = root
             for part in ('', *item.path.split('/')[:-1]):

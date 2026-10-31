@@ -10,7 +10,7 @@ function backendCommand(resources,appId,platform=process.platform,runtimeRoot=pa
   if(fs.existsSync(interpreter)&&fs.existsSync(bootstrap)){
     // Ignore environment-based Python injection and user site packages while retaining
     // bootstrap sibling imports. Python subprocesses keep real interpreter semantics.
-    return {binary:interpreter,args:['-E','-s','-u',bootstrap],runtime};
+    return {binary:interpreter,args:['-B','-E','-s','-u',bootstrap],runtime};
   }
   const frozen=path.join(runtime,platform==='win32'?'desktop-backend.exe':'desktop-backend');
   if(fs.existsSync(frozen))return {binary:frozen,args:[],runtime};

@@ -8,11 +8,14 @@ const path=require('node:path');
 const {appDefinition}=require('./apps.cjs');
 const {backendCommand,backendEnvironment}=require('./backend-command.cjs');
 const {runtimeRoots,prepareRuntimeRoots,validatedLaunchPath,refuseInstalledOverlap}=require('./runtime-roots.cjs');
-const {initializeModuleRuntime,consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,writeModuleFrame}=require('./module-data-runtime-boundary.cjs');
+const {initializeModuleRuntime,consumeModuleCapability,activeModule,setActiveModule,clearActiveModule,matchesModuleHealth,checkWarmModule,writeModuleFrame,verifyProgramPair}=require('./module-data-runtime-boundary.cjs');
+const {observeStartupData}=require('./startup-data-diagnostic.cjs');
 // One value per app process, never written anywhere: Terrier's approved owner session is bound to this native launch.
 const OWNER_SESSION_KEY=crypto.randomBytes(32).toString('base64url');
 function freePort(){return new Promise((resolve,reject)=>{const s=net.createServer();s.once('error',reject);s.listen(0,'127.0.0.1',()=>{const port=s.address().port;s.close(()=>resolve(port));});});}
-function health(origin,token,appId){return new Promise(resolve=>{const request=http.get(origin+'/__desktop/health',{headers:{'X-Desktop-Token':token},timeout:1000},response=>{let body='';response.on('data',c=>{body+=c;if(body.length>4096)response.destroy();});response.on('error',()=>resolve(null));response.on('close',()=>resolve(null));response.on('end',()=>{try{const value=JSON.parse(body);if(response.statusCode!==200||value.appId!==appId){resolve(null);return;}resolve({launchPath:validatedLaunchPath(appId,value.launchPath),...(Object.hasOwn(value,'moduleData')?{appId:value.appId,pid:value.pid,moduleData:value.moduleData}:{})});}catch{resolve(null);}});});request.on('timeout',()=>request.destroy());request.on('error',()=>resolve(null));});}
+// Native health verifies both installed data bindings; a valid response can exceed one second on a busy Windows host.
+const HEALTH_REQUEST_TIMEOUT_MS=5000;
+function health(origin,token,appId){return new Promise(resolve=>{const request=http.get(origin+'/__desktop/health',{headers:{'X-Desktop-Token':token},timeout:HEALTH_REQUEST_TIMEOUT_MS},response=>{let body='';response.on('data',c=>{body+=c;if(body.length>4096)response.destroy();});response.on('error',()=>resolve(null));response.on('close',()=>resolve(null));response.on('end',()=>{try{const value=JSON.parse(body);if(response.statusCode!==200||value.appId!==appId){resolve(null);return;}resolve({launchPath:validatedLaunchPath(appId,value.launchPath),...(Object.hasOwn(value,'moduleData')?{appId:value.appId,pid:value.pid,moduleData:value.moduleData}:{}),...(Object.hasOwn(value,'workspaceData')?{workspaceData:value.workspaceData}:{}),...(Object.hasOwn(value,'districtData')?{appId:value.appId,pid:value.pid,districtData:value.districtData}:{})});}catch{resolve(null);}});});request.on('timeout',()=>request.destroy());request.on('error',()=>resolve(null));});}
 async function probe(origin,token,appId){return Boolean(await health(origin,token,appId));}
 function activity(origin,token,appId){return new Promise(resolve=>{
   if(!origin||!token){resolve(null);return;}
@@ -24,26 +27,58 @@ function activity(origin,token,appId){return new Promise(resolve=>{
 });}
 function refuseModuleDataSettings(configuration){
   // Settings cannot turn their source descriptor into a native launch capability.
-  if(configuration!==null&&configuration!==undefined&&Object.hasOwn(configuration,'ownerGitHubModuleData'))throw new Error('GitHub module data startup is unavailable in this build.');
+  if(configuration!==null&&configuration!==undefined&&['ownerGitHubModuleData','ownerGitHubWorkspaceData'].some(key=>Object.hasOwn(configuration,key)))throw new Error('GitHub module data startup is unavailable in this build.');
+}
+const childExited=child=>Boolean(child&&(child.exitCode!=null||child.signalCode!=null));
+function waitForChildExit(child,timeout){
+  if(childExited(child))return Promise.resolve(true);
+  return new Promise(resolve=>{
+    let timer;const done=()=>{clearTimeout(timer);child.removeListener('exit',done);resolve(childExited(child));};
+    child.once('exit',done);timer=setTimeout(done,timeout);if(childExited(child))done();
+  });
+}
+function requestWindowsStop(child){
+  return new Promise(resolve=>{
+    let killer,timer,finished=false;
+    const done=()=>{if(finished)return;finished=true;clearTimeout(timer);resolve();};
+    const fallback=()=>{try{child.kill();}catch{}done();};
+    try{killer=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});}catch{fallback();return;}
+    killer.once('error',fallback);killer.once('exit',done);
+    timer=setTimeout(()=>{try{killer.kill('SIGKILL');}catch{}done();},5000);
+    if(childExited(killer))done();
+  });
 }
 class Runtime {
-  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,confine=null,logRoot=null}={}){this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
+  constructor(appId,userData,resources,{protectedPaths=[],rendererFactory=null,scrapeFactory=null,authorize=null,allowStandalone=false,authentication='password',confine=null,logRoot=null,districtInputRequired=false}={}){this.districtInputRequired=districtInputRequired===true;this.allowStandalone=allowStandalone===true;if(!['windows','password'].includes(authentication)||(authentication==='windows'&&!this.allowStandalone))throw new Error('Unsupported runtime authentication mode');this.authentication=authentication;this.logRoot=logRoot;this.definition=appDefinition(appId);this.userData=userData;this.resources=resources;this.protectedPaths=protectedPaths;this.rendererFactory=rendererFactory;this.scrapeFactory=scrapeFactory;this.scrape=null;this.authorize=authorize;this.confine=confine;this.authorization=null;this.renderer=null;this.child=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
     initializeModuleRuntime(this,()=>{const command=backendCommand(this.resources,this.definition.id);return {source:path.join(command.runtime,'sources'),bootstrap:path.join(command.runtime,'bootstrap')};});}
   async start(configuration,capability){
+    const districtInput=this.definition.id==='terrier'?require('./district-runtime-input.cjs').consumeDistrictConfiguration(this,configuration):null;
+    try{
+    if(this.districtInputRequired&&(configuration.standaloneGitHubData||configuration.terrierGitHubData)&&!districtInput)throw require('./startup-failure.cjs').programFailure();
+    if(districtInput)await districtInput.validate();
+    if(this.stopPromise||(this.stoppingChild&&!childExited(this.stoppingChild)))throw new Error('Application shutdown is still pending.');
+    if(this.stoppingChild){if(this.child===this.stoppingChild)this.child=null;this.stoppingChild=null;}
     refuseModuleDataSettings(configuration);
     configuration=structuredClone(configuration);
     const moduleInput=capability===undefined?null:consumeModuleCapability(this,capability,configuration);
     const generation=this.generation||0,check=()=>{if(generation!==(this.generation||0))throw new Error('Application startup cancelled.');moduleInput?.guard();};
     if(moduleInput){await moduleInput.validate();check();}
-    if(typeof this.authorize!=='function')throw new Error('Administrator approval and local authentication are required.');
+    if(typeof this.authorize!=='function')throw new Error('Local authentication is required.');
     const authorization=await this.authorize(configuration);
     check();
     moduleInput?.checkAuthorization(authorization);
-    if(!authorization?.accepted?.grant||authorization.accepted.revoked)throw new Error('Administrator approval is required.');
+    if(authorization?.mode==='standalone'){
+      if(!this.allowStandalone||authorization.identity?.appId!==this.definition.id)throw new Error('Local authorization is unavailable in this build.');
+      require('./access-lifecycle.cjs').authorizationIdentity(authorization);
+      if((authorization.session?.method==='windows-session')!==(this.authentication==='windows'))throw new Error('The local sign-in does not match this build.');
+    }else if(!authorization?.accepted?.grant||authorization.accepted.revoked)throw new Error('Administrator approval is required.');
     if(this.child&&this.authorization&&require('./access-lifecycle.cjs').authorizationIdentity(authorization)!==require('./access-lifecycle.cjs').authorizationIdentity(this.authorization))throw new Error('Close the app before changing its approved account.');
     this.authorization=authorization;
     const desired=runtimeRoots(this.definition.id,this.userData,configuration);
+    if(desired.standaloneDistrictData&&!this.allowStandalone)throw new Error('Local district data is unavailable in this build.');
+    if(desired.standaloneDistrictData&&authorization.mode!=='standalone')throw new Error('Local district authorization is required.');
     if(this.child){if(JSON.stringify(desired)!==JSON.stringify(this.roots))throw new Error('Close the app before changing its district or data directory.');
+      if(districtInput){const child=this.child,ready=await health(this.origin,this.token,this.definition.id);check();if(this.child!==child||!districtInput.matchesWarm(ready,this.roots))throw require('./startup-failure.cjs').programFailure();await districtInput.commit();check();}
       checkWarmModule(this,configuration,authorization);
       if(activeModule(this)){const child=this.child,ready=await health(this.origin,this.token,this.definition.id);check();if(this.child!==child||!matchesModuleHealth(this,ready))throw new Error('Native module input is unavailable.');}
       this.configuration=configuration;return this.origin;}
@@ -57,9 +92,10 @@ class Runtime {
     // logRoot (Terrier's private store, main.cjs) keeps backend.log out of the synced profile; the legacy owner and the other apps log in the profile.
     const state=roots.state,logs=this.logRoot&&!roots.legacyOwner?this.logRoot:path.join(this.userData,'logs');fs.mkdirSync(logs,{recursive:true});
     const environment={...backendEnvironment(),DESKTOP_LAUNCH_TOKEN:this.token};
+    if(authorization.mode==='standalone')delete environment.DESKTOP_ACCESS_PRINCIPAL;
     if(appId==='terrier'){
       if(!authorization.principal||authorization.principal.districtId!==roots.district)throw new Error('Approved Terrier account is required.');
-      environment.DESKTOP_ACCESS_PRINCIPAL=JSON.stringify(authorization.principal);
+      if(authorization.mode!=='standalone')environment.DESKTOP_ACCESS_PRINCIPAL=JSON.stringify(authorization.principal);
     }
     // The existing owner's one password and sign-in for all districts live in the profile's desktop-level state.
     const ownerRoot=roots.legacyOwner?path.join(this.userData,'state','terrier-owner'):null;
@@ -74,32 +110,78 @@ class Runtime {
     const log=fs.openSync(path.join(logs,'backend.log'),'a',0o600);
     const args=[...command.args,'--app',appId,'--port',String(port),'--source-root',path.join(runtime,'sources'),'--data-root',roots.data,'--state-root',state];
     if(appId==='terrier') args.push('--district',roots.district);
+    if(appId==='terrier'&&authorization.mode==='standalone')args.push('--standalone');
+    if(appId==='terrier'&&authorization.mode==='standalone'&&this.authentication==='windows')args.push('--windows-session');
     if(roots.legacyOwner) args.push('--legacy-owner',roots.legacyOwner,'--owner-root',ownerRoot);
     if(roots.githubDistrictData===true) args.push('--github-district-data');
-    if(moduleInput)args.push('--desktop-module-input','--profile-root',this.userData);
+    if(moduleInput)args.push(moduleInput.wire==='workspace'?'--desktop-workspace-input':'--desktop-module-input','--profile-root',this.userData);
+    if(districtInput)args.push('--desktop-district-input','--profile-root',this.userData);
     let child;
-    try{child=spawn(binary,args,{cwd:runtime,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:[moduleInput?'pipe':'ignore',log,log]});}catch(error){if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});this.renderer=null;this.scrape=null;throw error;}finally{fs.closeSync(log);}
+    try{child=spawn(binary,args,{cwd:runtime,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:[moduleInput||districtInput?'pipe':'ignore',moduleInput||districtInput?'pipe':log,log]});}catch(error){if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});this.renderer=null;this.scrape=null;throw error;}finally{fs.closeSync(log);}
     this.child=child;
-    let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');clearActiveModule(this,child);if(this.child===child){this.child=null;this.configuration=null;}if(renderer){Promise.resolve(renderer.close()).catch(()=>{});if(this.renderer===renderer)this.renderer=null;}if(scrape&&this.scrape===scrape){this.scrape=null;Promise.resolve(scrape.close()).catch(()=>{});}});
+    let intake=null;
+    let failed=null;child.once('error',error=>{failed=error;});child.once('exit',(code)=>{failed=new Error('Backend stopped (exit '+code+'). See backend.log.');clearActiveModule(this,child);if(this.child===child){this.child=null;this.configuration=null;}if(renderer&&this.renderer===renderer){this.renderer=null;Promise.resolve(renderer.close()).catch(()=>{});}if(scrape&&this.scrape===scrape){this.scrape=null;Promise.resolve(scrape.close()).catch(()=>{});}});
     try{
-      if(moduleInput){setActiveModule(this,moduleInput,child);moduleInput.claimChild(child);check();await writeModuleFrame(child,moduleInput.frame(roots),moduleInput.signal);check();}
+      if(moduleInput){setActiveModule(this,moduleInput,child);moduleInput.claimChild(child);check();
+        intake=observeStartupData(child,{appId,launchNonce:moduleInput.launchNonce,programFingerprint:moduleInput.contract.programFingerprint,
+          sourceDigests:{public:moduleInput.binding.sourceDigest,...(moduleInput.workspaceBinding?{workspace:moduleInput.workspaceBinding.sourceDigest}:{})},
+          guard:()=>{moduleInput.guard();verifyProgramPair(this,moduleInput.contract,moduleInput.workspaceContract);}});
+        if(child.stdout){const output=fs.createWriteStream(path.join(logs,'backend.log'),{flags:'a',mode:0o600});output.on('error',()=>{child.stdout.unpipe(output);child.stdout.resume();});child.stdout.pipe(output);}
+        await writeModuleFrame(child,moduleInput.frame(roots),moduleInput.signal);check();}
+      if(districtInput){
+        const frame=districtInput.frame(roots,path.join(runtime,'sources'));intake=observeStartupData(child,districtInput.diagnostic());
+        if(child.stdout){const output=fs.createWriteStream(path.join(logs,'backend.log'),{flags:'a',mode:0o600});output.on('error',()=>{child.stdout.unpipe(output);child.stdout.resume();});child.stdout.pipe(output);}
+        await writeModuleFrame(child,frame,undefined,districtInput.maximum);check();
+      }
+      let districtCommitted=false;
       const deadline=Date.now()+(moduleInput?moduleInput.startupTimeoutMs:120000);
-      while(Date.now()<deadline){check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');const ready=await health(this.origin,this.token,appId);check();if(ready&&(!moduleInput||matchesModuleHealth(this,ready))){this.launchPath=ready.launchPath;this.configuration=configuration;return this.origin;}await new Promise(r=>setTimeout(r,250));}
+      while(Date.now()<deadline){check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');const ready=await health(this.origin,this.token,appId);check();if(failed)throw failed;if(this.child!==child)throw new Error('Application startup cancelled.');
+        if(districtInput&&ready&&!districtCommitted&&districtInput.matches(ready,'prepared')){await districtInput.commitNative(this.origin,this.token);check();districtCommitted=true;continue;}
+        if(ready&&(!moduleInput||matchesModuleHealth(this,ready))&&(!districtInput||districtInput.matches(ready,'active'))){if(districtInput){await districtInput.commit();check();}intake?.markHealthy();this.launchPath=ready.launchPath;this.configuration=configuration;return this.origin;}await new Promise(r=>setTimeout(r,250));}
       throw new Error('Application startup timed out. See backend.log.');
     }catch(error){
+      const blocked=intake&&!require('./startup-failure.cjs').isDataStartupFailure(error)?await intake.blockedAfterExit({waitForExit:Boolean(districtInput)}):null;if(blocked)throw blocked;
       // Module teardown follows the coordinator's protected provider drain.
       // Ordinary starts retain their existing immediate owned-child cleanup.
       if(!moduleInput&&this.child===child)await this.stop();
       throw error;
     }
+    }catch(error){
+      if(districtInput){
+        require('./district-data-probe.cjs').verifyDistrictProgram(this);
+        if(this.child)await this.stop();
+        try{await this.authorize(configuration);}catch{const paused=new Error('The current Windows sign-in is unavailable.');paused.code=paused.reason='authorization';throw paused;}
+        if(['EACCES','EPERM','ENOENT','EBUSY','ENOSPC','EDQUOT','EIO','EROFS'].includes(error?.code))throw require('./startup-failure.cjs').dataStartupFailure({reason:'storage'});
+      }
+      throw error;
+    }finally{await districtInput?.close();}
   }
   originalConfiguration(){return this.configuration===null?null:structuredClone(this.configuration);}
   async verifyModuleHealth(binding){const active=activeModule(this),child=this.child,generation=this.generation||0,origin=this.origin,token=this.token;if(!active||active.child!==child)return false;const value=await health(origin,token,this.definition.id);return this.child===child&&(this.generation||0)===generation&&this.origin===origin&&this.token===token&&activeModule(this)===active&&matchesModuleHealth(this,value,binding);}
-  async stop(){this.generation=(this.generation||0)+1;const child=this.child,renderer=this.renderer,scrape=this.scrape;clearActiveModule(this);this.child=null;this.renderer=null;this.scrape=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});if(!child)return;
-    if(process.platform==='win32') await new Promise(resolve=>{const killer=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});killer.once('error',()=>{child.kill();resolve();});killer.once('exit',resolve);});
-    else {try{process.kill(-child.pid,'SIGTERM');}catch{}}
-    if(child.exitCode===null)await Promise.race([new Promise(r=>child.once('exit',r)),new Promise(r=>setTimeout(r,5000))]);
-    if(child.exitCode===null){if(process.platform==='win32')child.kill('SIGKILL');else try{process.kill(-child.pid,'SIGKILL');}catch{}}
+  stop(){
+    this.requestsAllowed=false;
+    if(this.stopPromise)return this.stopPromise;
+    this.generation=(this.generation||0)+1;
+    const child=this.stoppingChild||this.child,renderer=this.renderer,scrape=this.scrape;
+    this.stoppingChild=child;clearActiveModule(this);
+    this.renderer=null;this.scrape=null;this.origin=null;this.token=null;this.launchPath='/';this.roots=null;this.configuration=null;
+    const operation=(async()=>{
+      if(renderer)await Promise.resolve().then(()=>renderer.close()).catch(()=>{});
+      if(scrape)await Promise.resolve().then(()=>scrape.close()).catch(()=>{});
+      if(child&&!childExited(child)){
+        if(process.platform==='win32')await requestWindowsStop(child);
+        else try{process.kill(-child.pid,'SIGTERM');}catch{}
+        if(!await waitForChildExit(child,5000)){
+          try{if(process.platform==='win32')child.kill('SIGKILL');else process.kill(-child.pid,'SIGKILL');}catch{}
+          // A signal request is not proof of exit: callers may retire its data only after this resolves.
+          if(!await waitForChildExit(child,5000))throw Object.assign(new Error('Backend shutdown did not complete. Its data must be retained.'),{code:'BACKEND_STOP_TIMEOUT'});
+        }
+      }
+      if(this.child===child)this.child=null;
+      if(this.stoppingChild===child)this.stoppingChild=null;
+    })();
+    const pending=operation.finally(()=>{if(this.stopPromise===pending)this.stopPromise=null;});
+    this.stopPromise=pending;return pending;
   }
   activity(){return activity(this.origin,this.token,this.definition.id);}
 }

@@ -155,7 +155,8 @@ async function verifyPackageFile(filename, manifest) {
   const stat=fs.lstatSync(filename);
   if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==manifest.package.size) throw Object.assign(new Error('Cached package size or type changed'),{code:'PACKAGE_INTEGRITY'});
   const sha256=crypto.createHash('sha256'),sha512=crypto.createHash('sha512');
-  for await(const chunk of fs.createReadStream(filename)){sha256.update(chunk);sha512.update(chunk);}
+  // Larger bounded reads avoid thousands of small file-system requests per installer.
+  for await(const chunk of fs.createReadStream(filename,{highWaterMark:4*1024*1024})){sha256.update(chunk);sha512.update(chunk);}
   if(sha256.digest('hex')!==manifest.package.sha256||sha512.digest('base64')!==manifest.package.sha512)throw Object.assign(new Error('Cached package integrity failed'),{code:'PACKAGE_INTEGRITY'});
   return filename;
 }

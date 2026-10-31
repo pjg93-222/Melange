@@ -2,6 +2,8 @@
 const {contextBridge,ipcRenderer}=require('electron');
 contextBridge.exposeInMainWorld('desktopAccess',Object.freeze({
  info:()=>ipcRenderer.invoke('desktop-access:info'),
+ getUpdateInfo:()=>ipcRenderer.invoke('desktop:update-info'),
+ onUpdateStatus:callback=>{if(typeof callback!=='function')throw new Error('Update status callback required');const listener=(_event,value)=>callback(value);ipcRenderer.on('desktop:update-status',listener);return()=>ipcRenderer.removeListener('desktop:update-status',listener);},
  request:value=>ipcRenderer.invoke('desktop-access:request',value),
  poll:()=>ipcRenderer.invoke('desktop-access:poll'),
  activate:value=>ipcRenderer.invoke('desktop-access:activate',value),
