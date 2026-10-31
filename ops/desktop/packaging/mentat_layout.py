@@ -135,10 +135,10 @@ def prepare_workspace(code, data, state):
         else:
             missing.append({'path': str(link), 'target': str(target)})
     if missing and os.name == 'nt':
-        environment = dict(os.environ, MENTAT_DESKTOP_LINKS=json.dumps(missing))
-        script = "$ErrorActionPreference='Stop'; foreach($link in ($env:MENTAT_DESKTOP_LINKS | ConvertFrom-Json)) { New-Item -ItemType Junction -Path $link.path -Target $link.target | Out-Null }"
-        subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script], env=environment,
-                       capture_output=True, timeout=45, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        # Direct junction creation: work PCs block powershell.exe launched by the app.
+        import _winapi
+        for item in missing:
+            _winapi.CreateJunction(item['target'], item['path'])
     elif missing:
         for item in missing:
             Path(item['path']).symlink_to(item['target'], target_is_directory=True)
