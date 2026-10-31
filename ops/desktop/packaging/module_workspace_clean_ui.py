@@ -91,14 +91,53 @@ def frames(main, pages, context, derivation):
     return documents
 
 
-def catalog(base):
+def member_identity(member):
+    honors = member.get('honors') if isinstance(member, dict) else None
+    value = honors.get('member_id') if isinstance(honors, dict) else None
+    if not isinstance(value, str) or not re.fullmatch(r'[A-Z][0-9]{6}', value):
+        raise ValueError('Verified member identity is unavailable')
+    return value
+
+
+def member_profiles_by_id(base, heavy):
+    if not isinstance(base, dict) or not isinstance(heavy, dict):
+        raise ValueError('Verified member profile data is unavailable')
+    members = base.get('members')
+    profiles = heavy.get('members_heavy')
+    if not isinstance(members, list) or not isinstance(profiles, list) or len(members) != len(profiles):
+        raise ValueError('Verified member profile roster differs')
+    identities = [member_identity(member) for member in members]
+    if len(set(identities)) != len(identities):
+        raise ValueError('Verified member identities are duplicated')
+    indexed = {}
+    for profile in profiles:
+        bio = profile.get('bio') if isinstance(profile, dict) else None
+        identity = bio.get('bioguide') if isinstance(bio, dict) else None
+        if not isinstance(identity, str) or not re.fullmatch(r'[A-Z][0-9]{6}', identity) or identity in indexed:
+            raise ValueError('Verified profile identities are missing or duplicated')
+        indexed[identity] = profile
+    if set(indexed) != set(identities):
+        raise ValueError('Verified member and profile identities differ')
+    return indexed
+
+
+def catalog(base, heavy):
+    profiles = member_profiles_by_id(base, heavy)
     rows = []
     fields = ('name', 'chamber', 'district', 'party', 'state', 'rank', 'score', 'invested', 'alloc',
         'ind_money', 'money_source_status', 'eff_value', 'opt_alloc', 'gap', 'roi', 'committee',
         'committees', 'overall_stance', 'stances', 'adjrank')
     for index, member in enumerate(base['members']):
         row = {name: member.get(name) for name in fields}
-        row.update(id=str(index), bio={}, latest='', billCount=None, articleCount=None)
+        profile = profiles[member_identity(member)]
+        bio = profile['bio']
+        articles, bills = profile.get('articles'), profile.get('bills')
+        dates = [article.get('date') for article in articles
+                 if isinstance(article, dict) and isinstance(article.get('date'), str)] if isinstance(articles, list) else None
+        row.update(id=str(index), bio={name: bio.get(name) for name in ('bioguide', 'state', 'url')},
+            staffdir=profile.get('staffdir'), latest=max(dates, default='') if dates is not None else None,
+            billCount=len(bills) if isinstance(bills, list) else None,
+            articleCount=len(articles) if isinstance(articles, list) else None)
         rows.append(row)
     # Existing navigation uses these presentation glyphs only. No data/model meaning.
     icons = {'Members': 'M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2M16 7a4 4 0 11-8 0 4 4 0 018 0'}
@@ -148,8 +187,9 @@ class CleanWorkspace:
         self.context = provenance_context(context)
         self.heavy_loader = heavy_loader
         self.heavy = None
+        self._heavy_by_id = None
         self.documents = frames(main, pages, context, derivation)
-        self.values = {'catalog': catalog(main['members']),
+        self.values = {'catalog': catalog(main['members'], self._heavy()),
             'colors': colour_maps(self.documents), 'bills': main['members']['bill_live'],
             'champions': industry['champions'], 'forecasts': industry['forecast'],
             'research-bills': industry['bills'], 'cu-fintech': industry['screen'],
@@ -169,6 +209,12 @@ class CleanWorkspace:
             if not isinstance(value, dict) or len(value.get('members_heavy', [])) != len(self.main['members']['members']):
                 raise ValueError('Verified member profile roster differs')
             safe_tree(value)
+            self._heavy_by_id = member_profiles_by_id(self.main['members'], value)
+            # The separate, unchanged signed profile stream uses the declared
+            # stock-positional merge. Check that contract rather than assuming
+            # its row order while deriving catalog/member metadata by identity.
+            if [row['bio']['bioguide'] for row in value['members_heavy']] != [member_identity(row) for row in self.main['members']['members']]:
+                raise ValueError('Signed profile order differs from the bound member roster')
             self.heavy = value
         return self.heavy
 
@@ -190,7 +236,9 @@ class CleanWorkspace:
             elif re.fullmatch(r'member-(0|[1-9][0-9]{0,3})', key):
                 index = int(key[7:])
                 if index < len(self.main['members']['members']):
-                    value = {**self.main['members']['members'][index], **self._heavy()['members_heavy'][index], 'id': str(index)}
+                    self._heavy()
+                    member = self.main['members']['members'][index]
+                    value = {**member, **self._heavy_by_id[member_identity(member)], 'id': str(index)}
             if value is not None:
                 return (200, json.dumps(value, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode(), 'application/json; charset=utf-8')
         value = self.documents.get(name)
