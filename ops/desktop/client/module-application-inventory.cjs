@@ -23,8 +23,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 51315,
+        "sha256": "8d9c405b4350232cfb9fd918030db9b66543bdcfc0d00b1a712af27d9e449961"
       },
       {
         "root": "bootstrap",
@@ -585,7 +585,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "9905726decc1234e80e3af8757b19a7c53470ac25772c32963997cca3c214499",
+    "programFingerprint": "6c6c16ba05964c5e66c5c34cb0c00b6fa28a319bff171450718875bd68201fc0",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -620,8 +620,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 51315,
+        "sha256": "8d9c405b4350232cfb9fd918030db9b66543bdcfc0d00b1a712af27d9e449961"
       },
       {
         "root": "bootstrap",
@@ -1442,8 +1442,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/server.py",
-        "bytes": 231271,
-        "sha256": "78dd33b88e1ce45828bf71044d32f4788051576c0ed3593e4e6e71bb92ae42fa"
+        "bytes": 235643,
+        "sha256": "d48502d9c77e5ae9925a37e8556b845936bf75f91774f87146c01826373f21cf"
       },
       {
         "root": "source",
@@ -2226,7 +2226,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "2b722a70116a43a7bb139723d328abadf7a1fdde3986ab9f5374cbfdeaf1f10a",
+    "programFingerprint": "f54cdea9c901bb39a43f1971d70d81cfcceeff4a242d9a0548941c1e2b0d6937",
     "requiredKinds": [
       "mentat.public-fec-tables.v1"
     ],
@@ -2266,8 +2266,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 51315,
+        "sha256": "8d9c405b4350232cfb9fd918030db9b66543bdcfc0d00b1a712af27d9e449961"
       },
       {
         "root": "bootstrap",
@@ -2828,7 +2828,7 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "9905726decc1234e80e3af8757b19a7c53470ac25772c32963997cca3c214499",
+    "programFingerprint": "6c6c16ba05964c5e66c5c34cb0c00b6fa28a319bff171450718875bd68201fc0",
     "requiredKinds": [
       "melange.dashboard-pages.v1",
       "melange.staffer-display-graph.v1",
@@ -2867,8 +2867,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 51315,
+        "sha256": "8d9c405b4350232cfb9fd918030db9b66543bdcfc0d00b1a712af27d9e449961"
       },
       {
         "root": "bootstrap",
@@ -3689,8 +3689,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/server.py",
-        "bytes": 231271,
-        "sha256": "78dd33b88e1ce45828bf71044d32f4788051576c0ed3593e4e6e71bb92ae42fa"
+        "bytes": 235643,
+        "sha256": "d48502d9c77e5ae9925a37e8556b845936bf75f91774f87146c01826373f21cf"
       },
       {
         "root": "source",
@@ -4473,7 +4473,7 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "2b722a70116a43a7bb139723d328abadf7a1fdde3986ab9f5374cbfdeaf1f10a",
+    "programFingerprint": "f54cdea9c901bb39a43f1971d70d81cfcceeff4a242d9a0548941c1e2b0d6937",
     "requiredKinds": [
       "mentat.aggregate-forecast-core.v1",
       "mentat.report-analysis.v1"
@@ -4509,8 +4509,8 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 51315,
+        "sha256": "8d9c405b4350232cfb9fd918030db9b66543bdcfc0d00b1a712af27d9e449961"
       },
       {
         "root": "bootstrap",
@@ -5923,7 +5923,7 @@ const DISTRICT_PROGRAM_SPECS=freeze({
         "sha256": "2bf4e7a744568b9f18fdac2ff080f36e293d3cce044d869744cc0f701b05e64a"
       }
     ],
-    "programFingerprint": "401427e3058111a81f0d76e91afb892a4ca7b5c3de3cbd71ce80c4c6402f2398"
+    "programFingerprint": "266f656b67e478a9c5339942a5aae1ce0dd68cbcd6e09026b6f3cb820d5b93f4"
   }
 });
 module.exports=Object.freeze({APPLICATION_SPECS,WORKSPACE_APPLICATION_SPECS,DISTRICT_PROGRAM_SPECS});

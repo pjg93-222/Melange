@@ -117,3 +117,49 @@ reads stat the fixed workbook set without repeatedly decoding sheet metadata.
 These changes do not establish that every Mentat feature is backed by GitHub.
 Future source edits require another standard inventory refresh and appropriate
 integration checks before packaging.
+
+## Expected client disconnects
+
+Native Mentat commit `9dd6d3db22a09ef2129f4b4027bc52704805881c`
+(parent `2b623be182881039e974940b652fab7d39a87ce6`) catches broken pipes,
+resets and aborted connections before the broad native GET error handler can
+try sending a second response. Its six focused tests passed on independent
+review; ordinary validation/I/O errors and successful access logging remain.
+
+Workspace routes write during `guarded_handler.parse_request`, before native
+`do_GET`. The shared desktop adapter therefore also catches those same three
+exception classes around `handle_one_request`. It closes the canceled
+connection without sending another response. All other exceptions retain
+their existing behavior. The existing native guard is still needed to stop
+its own broad error handler attempting a second write.
+
+```text
+python -B -m unittest test_desktop_disconnect test_desktop_backend -q
+```
+
+**35 tests passed**: four new boundary tests and 31 existing backend tests.
+The new tests exercise actual stdlib request parsing, intercepted workspace
+responses, native responses, all three expected disconnect classes, premature
+request-read cancellation, and propagation of generic I/O/validation errors.
+The original adapter reproduces four disconnect errors across the two
+regression test methods. Native-source tests are separately run with:
+
+```text
+python -B -m unittest discover -s mentat/tests -p test_graph_client_disconnect.py -v
+```
+
+The public native checkout lacks some declared program sources (first missing
+input: `mentat/forecast/anchors/build_giving_anchors.py`). Inventory generation
+therefore used an isolated staging of exactly 230 source files, 7,898,582
+bytes, from the assembled 1.0.39 runtime. Every file matched its existing size
+and SHA-256 before copying. Only the reviewed native `mentat/app/server.py`
+was overlaid. The standard `refresh_module_inventory.outputs` generator was
+run for shared bootstrap descriptors, then for Mentat against that staging.
+This final refresh changes only `desktop_backend.py` in shared bootstrap
+contracts and `mentat/app/server.py` in Mentat public/workspace contracts;
+all other source descriptors are preserved. Both generated inventories are
+stable on repeat generation, and the 14 inventory tests passed again.
+
+Release assembly must include the reviewed native commit as well as this
+common-client branch: the inventories now pin its server bytes. No runtime,
+installer or release was produced by these integration changes.

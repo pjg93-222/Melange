@@ -60,6 +60,14 @@ def guarded_handler(handler, token, app_id, *, module_installation=None, workspa
         from module_application_contracts import ModuleInputError
         raise ModuleInputError()
     class DesktopHandler(handler):
+        def handle_one_request(self):
+            try:
+                return super().handle_one_request()
+            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+                # Workspace routes can write during parse_request, before the
+                # native do_GET guard. A canceled client needs no second reply.
+                self.close_connection = True
+
         def parse_request(self):
             if not super().parse_request():
                 return False
