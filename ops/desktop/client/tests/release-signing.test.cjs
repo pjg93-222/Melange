@@ -70,6 +70,23 @@ test('signature invocation preserves default policy and environment without over
  }
  assert.equal(calls.length,2);
 });
+test('explicit build opt-in scopes policy to the fixed signing child only',async t=>{
+ const f=fixture(t),nativeFile=fs.realpathSync.native(f.main),nativeRoot=fs.realpathSync.native(f.root);
+ for(const verify of [false,true]){
+  let called;
+  await signFile(f.main,f.root,{verify,owned:true,processExecutionPolicy:true,execute:async(command,args,settings)=>{
+   called={command,args,settings};return {stdout:JSON.stringify({path:nativeFile,status:'Valid',sha256:f.digest(f.main),thumbprint:THUMBPRINT,timestamped:true})};
+  }});
+  assert.equal(called.command,String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`);
+  assert.deepEqual(called.args,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(__dirname,'..','sign-staged-binary.ps1'),'-File',nativeFile,'-Root',nativeRoot,'-Mode',verify?'Verify':'Sign','-RequirePublisher']);
+  assert.equal(Object.hasOwn(called.settings,'env'),false);
+ }
+ const calls=[];const hook=options(app,{env:{...f.env,DESKTOP_SIGNING_PROCESS_EXECUTION_POLICY:'Bypass'},platform:'win32',toolset:f.toolset,sign:async(file,root,request)=>{calls.push(request);return f.sign(file,root,request);}});
+ await hook.beforePack(f.context);await hook.afterSign(f.context);
+ assert.ok(calls.length>0);assert.ok(calls.every(call=>call.processExecutionPolicy===true));
+ assert.throws(()=>options(app,{env:{...f.env,DESKTOP_SIGNING_PROCESS_EXECUTION_POLICY:'Unrestricted'},platform:'win32'}),/Unsupported process/);
+});
+
 test('signature evidence refuses a same-byte replacement after fake execution',async t=>{
  const f=fixture(t);let reached=false;
  await assert.rejects(signFile(f.main,f.root,{verify:true,execute:async(command,args)=>{

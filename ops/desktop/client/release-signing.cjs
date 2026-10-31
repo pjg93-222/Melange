@@ -24,7 +24,8 @@ async function signPool(files,task){
  // Drain every in-flight operation before returning failure or releasing a phase.
  if(failed)throw failure;
 }
-async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
+async function signFile(file,root,{verify=false,owned=false,execute=run,processExecutionPolicy=false}={}){
+ if(typeof processExecutionPolicy!=='boolean')throw new Error('Explicit boolean process signing policy required');
  const requestedFile=path.resolve(file),requestedRoot=path.resolve(root);
  if(!within(requestedRoot,requestedFile))throw new Error('Refusing binary outside private build root');
  const snapshot=(target,directory)=>{
@@ -42,7 +43,7 @@ async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
   }
  };
  checkIdentity();
- const args=['-NoProfile','-NonInteractive','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
+ const args=['-NoProfile','-NonInteractive',...(processExecutionPolicy?['-ExecutionPolicy','Bypass']:[]),'-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
  const {stdout}=await execute(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,args,{windowsHide:true,timeout:300000,maxBuffer:1024*1024});
  checkIdentity();
  const result=JSON.parse(stdout.replace(/^\uFEFF/,''));
@@ -56,6 +57,8 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
  if(typeof builtinInstaller!=='boolean'||(builtinInstaller&&!withoutUninstaller))throw new Error('Built-in installer signing requires the no-uninstaller contract');
  const configured=env.DESKTOP_SIGNING_CERT_SHA1;
  if(!configured)return {};
+ const processPolicy=env.DESKTOP_SIGNING_PROCESS_EXECUTION_POLICY||'';
+ if(!['','Bypass'].includes(processPolicy))throw new Error('Unsupported process signing policy');
  if(platform!=='win32'||configured!==THUMBPRINT||env.WINDOWS_PUBLISHER_NAME!==SUBJECT||!env.DESKTOP_SIGNING_ROOT||!path.isAbsolute(env.DESKTOP_SIGNING_ROOT)||!env.DESKTOP_DIST_ROOT||!within(path.resolve(env.DESKTOP_SIGNING_ROOT),path.resolve(env.DESKTOP_DIST_ROOT)))throw new Error('Release signing requires the approved certificate and a private build/dist root');
  if(env.CSC_LINK||env.WIN_CSC_LINK||env.CSC_KEY_PASSWORD||env.WIN_CSC_KEY_PASSWORD||env.ELECTRON_BUILDER_OFFLINE==='true')throw new Error('Release signing uses only the existing CurrentUser certificate and online timestamps');
  // A cached executable can bypass the sign hook and omits fuses from its key.
@@ -64,7 +67,7 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
  ancestors(root,true);
  const identity=file=>path.resolve(file).toLowerCase();
  const owned=file=>path.basename(file)===app.name+'.exe'||/__uninstaller\.exe$/i.test(file)||new RegExp('^'+app.name+'-[0-9]+\\.[0-9]+\\.[0-9]+.*\\.exe$').test(path.basename(file))||(appDirectory&&identity(file)===identity(path.join(appDirectory,'resources','elevate.exe')));
- const record=async(file,verify=false,forceOwned=owned(file))=>{const result=await sign(file,root,{verify,owned:forceOwned});records.push(result);return result;};
+ const record=async(file,verify=false,forceOwned=owned(file))=>{const result=await sign(file,root,{verify,owned:forceOwned,processExecutionPolicy:processPolicy==='Bypass'});records.push(result);return result;};
  const verifyToolCopies=()=>{
   if(builtinInstaller){
    const current=tree(path.join(root,'nsis'));
