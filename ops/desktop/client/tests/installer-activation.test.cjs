@@ -67,27 +67,16 @@ test('malformed, cross-app, target, token and version receipts cannot prove comp
   assert.equal((await activation.observeAttempt(f.attempt,{...f.context,processes:async()=>[],now:f.context.now+activation.MAX_AMBIGUOUS_MS+1})).status,'abandoned');
   assert.equal((await activation.observeAttempt(null,f.context)).status,'abandoned');
 });
-test('process inspection uses fixed hidden bounded script and returns no command lines',async t=>{
-  const f=fixture(t);let input,request;
-  const execute=(command,args,options,callback)=>{
-    request={command,args,options};const stdin=new EventEmitter();stdin.end=value=>{input=JSON.parse(value);callback(null,JSON.stringify([f.process]),'');};return {stdin};
-  };
-  assert.deepEqual(await activation.inspectProcesses(f.attempt,{execute,platform:'win32'}),[f.process]);
-  assert.deepEqual(input,{installerPath:f.attempt.installerPath,token:f.attempt.token});
-  assert.equal(request.options.windowsHide,true);assert.equal(request.options.timeout,10000);assert.equal(request.options.maxBuffer,32768);
-  assert.equal(Buffer.from(request.args.at(-1),'base64').toString('utf16le'),activation.PROCESS_SCRIPT);
-  assert.ok(!request.args.join(' ').includes(f.attempt.token));
-  assert.match(activation.PROCESS_SCRIPT,/ExecutablePath/);assert.match(activation.PROCESS_SCRIPT,/CreationDate/);
-});
-test('actual Windows process query binds an inert child to its path, nonce and creation',async t=>{
-  if(process.platform!=='win32'){t.skip('Windows process inspection');return;}
-  const f=fixture(t),attempt=activation.createAttempt({appId:'mentat',version:'1.0.31',installerPath:process.execPath,target:f.attempt.target});
-  const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)','--','--desktop-activation='+attempt.token],{windowsHide:true,stdio:'ignore'});
-  try{
-    await once(child,'spawn');const rows=await activation.inspectProcesses(attempt);
-    assert.equal(rows.length,1);assert.equal(rows[0].pid,child.pid);assert.equal(rows[0].installerPath.toLowerCase(),process.execPath.toLowerCase());
-    assert.ok(Date.parse(rows[0].startedAt)>=Date.parse(attempt.startedAt));assert.equal(Object.hasOwn(rows[0],'commandLine'),false);
-  }finally{const exited=once(child,'exit');child.kill();await exited;}
+test('process inspection uses only the authenticated fixed native observer and projects no arguments',async t=>{
+  const f=fixture(t);let request,verified=false;
+  const verify=(resources,appId)=>{assert.equal(resources,'resources');assert.equal(appId,'mentat');verified=true;return {binary:'pinned-python',args:['-I','-S','-B','fixed-probe.py']};};
+  const probe=async(command,mode,input,options)=>{assert.equal(verified,true);request={command,mode,input,options};return [f.process];};
+  assert.deepEqual(await activation.inspectProcesses(f.attempt,{verify,probe,resources:'resources',appId:'mentat',platform:'win32'}),[f.process]);
+  assert.deepEqual(request.input,{installerPath:f.attempt.installerPath,token:f.attempt.token});
+  assert.equal(request.mode,'--desktop-installer-processes');assert.equal(request.options.timeout,10000);assert.equal(request.options.limit,32768);
+  assert.ok(!request.command.args.join(' ').includes(f.attempt.token));
+  await assert.rejects(activation.inspectProcesses(f.attempt,{verify,probe:async()=>{throw new Error('WMI unavailable');},resources:'resources',appId:'mentat',platform:'win32'}),/WMI unavailable/);
+  await assert.rejects(activation.inspectProcesses(f.attempt,{verify,probe:async()=>[{...f.process,commandLine:'forbidden'}],resources:'resources',appId:'mentat',platform:'win32'}),/Invalid Windows installer observation/);
 });
 
 // An inert fixture compiles the actual parser/receipt functions. It never

@@ -16,7 +16,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 ADDITIONS = {'melange': ('fec/surfaces/melange_public_pages.py', 'fec/surfaces/demand_data.py',
                          'fec/surfaces/staffer_live_generation.py')}
-WORKSPACE_BOOTSTRAP = ('desktop_workspace.py', 'workspace_data_contract.py', 'module_workspace_handoff.py',
+WORKSPACE_BOOTSTRAP = ('native_windows_signature.py', 'desktop_workspace.py', 'workspace_data_contract.py', 'module_workspace_handoff.py',
     'workspace_archive.py', 'workspace_sqlite.py', 'workspace_graph.py', 'workspace_cache.py',
     'module_workspace_inputs.py', 'workspace_melange.py', 'workspace_mentat.py', 'module_workspace_installers.py',
     'module_workspace_render.py', 'module_workspace_ui_templates.py',

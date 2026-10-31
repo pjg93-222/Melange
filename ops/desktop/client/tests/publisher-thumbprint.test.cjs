@@ -1,16 +1,17 @@
 'use strict';
 // Installer publisher pinning end to end: the real updater with the real native-signature.cjs default, only the
-// PowerShell Get-AuthenticodeSignature answer is simulated. Owner decision (Task 4, 2026-10-23): the signer thumbprint
+// fixed native Windows signature verdict is simulated. Owner decision (Task 4, 2026-10-23): the signer thumbprint
 // must be in the Ed25519-signed manifest's publisherThumbprints; Status Valid is not required and no trust store is
 // consulted; the sha256/sha512 gates still authenticate the bytes; a manifest without the field is refused.
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto');
-const childProcess=require('node:child_process');
-const PIN='0EBC9AD04E929CDD731EDB5D278A4143BC3D3D30',OTHER='1111111111111111111111111111111111111111';
+const {verdict,PIN}=require('./fixtures/native-signature-verdict.cjs');
+const OTHER='1111111111111111111111111111111111111111';
 let signer={status:0,thumbprint:PIN},signatureCalls=0;
-// Installed before updater.cjs loads, so native-signature.cjs binds this double. Each test file runs in its own process.
-childProcess.execFile=(file,args,options,callback)=>{
-  signatureCalls++;
-  return {stdin:{on(){},end(input){const {path:target}=JSON.parse(input);process.nextTick(()=>callback(null,JSON.stringify({status:signer.status,path:target,thumbprint:signer.thumbprint}),''));}}};
+// Real updater/default native verifier; only the authenticated probe boundary is doubled.
+require('../signature-probe-runtime.cjs').verifyProbeRuntime=()=>({binary:'fixture-python',args:[]});
+require('../desktop-probe.cjs').desktopProbe=async(command,mode,input)=>{
+  assert.equal(mode,'--desktop-windows-signature');signatureCalls++;
+  return verdict(input.path,signer.status,signer.thumbprint);
 };
 const platform=Object.getOwnPropertyDescriptor(process,'platform');
 Object.defineProperty(process,'platform',{...platform,value:'win32'});

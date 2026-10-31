@@ -37,6 +37,10 @@ const releaseSigning=require('./release-signing.cjs').options(selected,{withoutU
 const outputDir=process.env.DESKTOP_DIST_ROOT?path.join(path.resolve(process.env.DESKTOP_DIST_ROOT),selected.id):'dist/'+selected.id;
 module.exports={
   ...releaseSigning,
+  beforePack:async context=>{
+    if(context.electronPlatformName==='win32')require('./signature-probe-runtime.cjs').verifyProbeLayout(runtime,selected.id);
+    if(releaseSigning.beforePack)await releaseSigning.beforePack(context);
+  },
   appId:selected.applicationId,productName:selected.name,artifactName:selected.name+'-${version}-${os}-${arch}.${ext}',
   directories:{output:outputDir},asar:true,
   files:[...require('./release-files.cjs')],

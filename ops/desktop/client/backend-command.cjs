@@ -20,9 +20,9 @@ function backendCommand(resources,appId,platform=process.platform,runtimeRoot=pa
 function backendEnvironment(){
   const environment={...process.env};
   for(const key of Object.keys(environment)){
-    if(/^(ACCESS_|CU_|MENTAT_|MONEYBALL_|MELANGE_|DESKTOP_MODULE_)/.test(key)||/^PYTHON(?:HOME|PATH|USERBASE|STARTUP|INSPECT)$/.test(key))delete environment[key];
+    if(/^(ACCESS_|CU_|MENTAT_|MONEYBALL_|MELANGE_|DESKTOP_MODULE_)/.test(key)||/^PYTHON(?:HOME|PATH|USERBASE|STARTUP|INSPECT)$/.test(key)||key==='__PYVENV_LAUNCHER__')delete environment[key];
   }
-  environment.PYTHONNOUSERSITE='1';environment.PYTHONUNBUFFERED='1';
+  environment.PYTHONDONTWRITEBYTECODE='1';environment.PYTHONNOUSERSITE='1';environment.PYTHONUNBUFFERED='1';
   return environment;
 }
 module.exports={backendCommand,backendEnvironment};

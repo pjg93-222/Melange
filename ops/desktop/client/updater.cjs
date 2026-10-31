@@ -33,8 +33,8 @@ class DesktopUpdater {
     Object.assign(this,options);
     this.platform=options.platform||process.platform;this.arch=options.arch||process.arch;
     this.request=options.request||jsonRequest;this.download=options.download||downloadVerified;
-    this.verifyNativePackage=options.verifyNativePackage||verifyWindowsPackage;
-    this.observeActivation=options.observeActivation||activation.observeAttempt;
+    this.verifyNativePackage=options.verifyNativePackage||((filename,pins,settings)=>verifyWindowsPackage(filename,pins,{...settings,resources:options.resources||process.resourcesPath,appId:this.appId}));
+    this.observeActivation=options.observeActivation||((attempt,settings)=>activation.observeAttempt(attempt,{...settings,processes:value=>activation.inspectProcesses(value,{resources:options.resources||process.resourcesPath,appId:this.appId})}));
     this.makeFeed=options.makeFeed||verifiedFeed;this.busy=false;this.feed=null;this.ready=null;
     this.checkPromise=null;this.startupConfirmationRequested=false;this.startupConfirmationQueued=false;
     this.autoUpdater.autoDownload=false;this.autoUpdater.autoInstallOnAppQuit=false;
