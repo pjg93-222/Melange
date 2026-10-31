@@ -1,0 +1,700 @@
+{
+  "schema": "member-briefs-v3-exemplars",
+  "status": "GOLD_DRAFT_FOR_REVIEW",
+  "written": "2026-10-20",
+  "revised": "2026-10-28 (Paul: TR.C uses outside personality and archetype re-cited to non-trait items, three passages reworded; before that 2026-10-21, pilot 3: leaked moves removed, signature items drive bullets, one bullet per item)",
+  "style_guide": "fec/members/member_briefs_v3_style_guide.md",
+  "evidence_source": "data/members/member_narrative_evidence_v4.json (ids per style guide section 9.1)",
+  "note": "Each exemplar is the writer output schema plus display_name. Exemplars show shape and evidence binding, not wording to copy: style guide section 14 check 11 fails any brief that shares six or more consecutive words with an exemplar. Basis and Confidence lines are computed in code and are absent by design.",
+  "selection": [
+    {
+      "display_name": "Hakeem Jeffries",
+      "animal": "Bull",
+      "evidence_tier": "rich",
+      "why": "leadership member; all six Bull slots matched; party-free leadership title; outcome appeal with communion below most, so no people-first advice"
+    },
+    {
+      "display_name": "Mike Johnson",
+      "animal": "Terrier",
+      "evidence_tier": "rich",
+      "why": "leadership member; only usable long-form (pre-role, provisional) finding; Bull disqualified by a strongly opposite careful-detail slot; descriptor adjusted because cross-party data is absent"
+    },
+    {
+      "display_name": "Elizabeth Warren",
+      "animal": "Blue Jay",
+      "evidence_tier": "rich",
+      "why": "template animal on six slots; heavy repeated-defensive evidence; appeal is mixed, so the brief carries no framing advice; public sensibilities used as honest common ground"
+    },
+    {
+      "display_name": "Brian Fitzpatrick",
+      "animal": "Beaver",
+      "evidence_tier": "rich",
+      "why": "coined animal: Owl matches five slots but leaves two top-band cooperative items (cross-party work, agreeableness) unexplained; appeal is mixed, so no framing advice; first entry of the shared Beaver registry"
+    },
+    {
+      "display_name": "Maxine Waters",
+      "animal": "Bear",
+      "evidence_tier": "rich",
+      "why": "tie-break example: Blue Jay six slots, Bear five; Bear wins on the community appeal; its unexplained top-band items form a range theme (wide), which is advisory, so no coin"
+    },
+    {
+      "display_name": "Frank Lucas",
+      "animal": "Tortoise",
+      "evidence_tier": "thin",
+      "why": "thin evidence: no interview or audio data; hearing tone is the only cue item, so the Warning sign uses the observed form; appeal is mixed, so no framing advice; issue range is described, never used for ask advice"
+    }
+  ],
+  "coined_registry": [
+    {
+      "animal": "Beaver",
+      "descriptor": "cooperative and wide-ranging",
+      "image": "builds with others",
+      "signature": [
+        [
+          "BH.coop",
+          "hi"
+        ],
+        [
+          "TR.A",
+          "hi"
+        ]
+      ],
+      "first_member": "Brian Fitzpatrick",
+      "also": [
+        "Alex Padilla (pilot)",
+        "Marie Gluesenkamp Perez (pilot)"
+      ]
+    },
+    {
+      "animal": "Ox",
+      "descriptor": "practical and narrowly focused",
+      "image": "pulls one furrow at a time",
+      "signature": [
+        [
+          "TR.O",
+          "lo"
+        ],
+        [
+          "BH.breadth",
+          "lo"
+        ]
+      ],
+      "first_member": "Vince Fong (pilot)",
+      "also": []
+    },
+    {
+      "animal": "Hare",
+      "descriptor": "wide-ranging and loose",
+      "image": "covers ground fast and moves on early",
+      "signature": [
+        [
+          "BH.breadth",
+          "hi"
+        ],
+        [
+          "BH.diligence",
+          "lo"
+        ],
+        [
+          "RC",
+          "less"
+        ]
+      ],
+      "first_member": "Linda Sánchez (pilot)",
+      "also": [
+        "Dwight Evans (pilot)"
+      ]
+    }
+  ],
+  "exemplars": [
+    {
+      "display_name": "Hakeem Jeffries",
+      "archetype": {
+        "animal": "Bull",
+        "descriptor": "skeptical and disciplined",
+        "justification": "He is hard to win over, holds the floor, defends his ground, and has one of the strongest follow-through records in the House."
+      },
+      "bottom_line": "Bring a tight case built on results, with a source behind every claim, and expect him to push back. A stronger argument moves him more than added pressure.",
+      "do": [
+        "Bring the paperwork for the next step, ready to move",
+        "Back each claim with a source he can check",
+        "Match his short answers with short answers of your own",
+        "Take his objections one at a time and answer each plainly"
+      ],
+      "dont": [
+        "Say anything in the room you would not want repeated in public",
+        "Open with small talk or a long setup",
+        "Take his mild tone in hearings as a sign he agrees"
+      ],
+      "warning_sign": "He normally answers cleanly, with almost no filler. If his replies start to fill up with false starts and hedges, he is unsure of his ground. Stop, ask what would settle it, and offer the answer in writing.",
+      "follow_up": "Within a day, send a one-page memo that takes each objection he raised in turn, with the source for every fact.",
+      "personality": "Jeffries is skeptical by default and hard to win over. He prefers familiar ground to new ideas, and he runs a little hotter than most. Few members match how reliably he votes and sees his bills through, and he describes his work in careful, detailed terms. He is his party's House leader and about as visible as anyone in the chamber. In hearings, though, he is one of the least combative members.",
+      "speaks": "In interviews his answers are short and clean, with almost no filler; few in the House use less. He talks a little faster than most, and his pitch moves more than most, so short replies still carry energy. Once he has the floor, he keeps it. Challenge a point and he defends it, show after show. Expect a crisp exchange rather than a speech, and keep your own answers just as tight.",
+      "decides": "Results move him, not sentiment. Show what the policy will do, and source it. He gives outside pressure less weight than most members do, so let the argument do the work. Once he takes a position he holds it, so get your strongest point in early. When he takes on a bill, he tends to see it through, so his yes is worth the work.",
+      "evidence_refs": {
+        "archetype": [
+          "TR.A",
+          "BH.dominance",
+          "DF",
+          "BH.diligence",
+          "BH.wpt",
+          "MA"
+        ],
+        "bottom_line": [
+          "MA",
+          "DF",
+          "RC"
+        ],
+        "do.1": [
+          "BH.diligence"
+        ],
+        "do.2": [
+          "MA"
+        ],
+        "do.3": [
+          "BH.wpt",
+          "IX.wpt_mean"
+        ],
+        "do.4": [
+          "DF",
+          "IX.defense"
+        ],
+        "dont.1": [
+          "VI.observed"
+        ],
+        "dont.2": [
+          "IX.discmark"
+        ],
+        "dont.3": [
+          "HA",
+          "TR.A"
+        ],
+        "warning_sign": [
+          "IX.discmark"
+        ],
+        "follow_up": [
+          "DF",
+          "MA"
+        ],
+        "personality": [
+          "TR.A",
+          "TR.O",
+          "TR.N",
+          "BH.diligence",
+          "QR.diligence",
+          "LD",
+          "VI.observed",
+          "HA"
+        ],
+        "speaks": [
+          "BH.wpt",
+          "IX.wpt_mean",
+          "IX.discmark",
+          "AU.pace",
+          "AU.pitch",
+          "BH.dominance",
+          "DF"
+        ],
+        "decides": [
+          "MA",
+          "RC",
+          "DF",
+          "BH.diligence"
+        ]
+      }
+    },
+    {
+      "display_name": "Mike Johnson",
+      "archetype": {
+        "animal": "Terrier",
+        "descriptor": "quick and forceful",
+        "justification": "He is very outgoing, takes charge of conversations in quick, short answers, and his follow-through on votes and bills is much weaker than most members'."
+      },
+      "bottom_line": "Get the result you want into your first sentence and keep every point short. Expect quick replies, and pin any yes to a written next step with his staff.",
+      "do": [
+        "Answer his warm, upbeat tone in kind before you get to the ask",
+        "Keep each point to a sentence or two",
+        "Meet his pushback with one clear fact",
+        "Turn any yes into a named next step with a date"
+      ],
+      "dont": [
+        "Open with background, history, or feelings about the issue",
+        "Count on pressure to do the work",
+        "Let one of his longer answers eat up your time"
+      ],
+      "warning_sign": "He usually defends his position point by point. If he suddenly agrees with everything you say, he is closing the meeting, not committing. Ask him plainly which part he will act on, and write it down in front of him.",
+      "follow_up": "Send his staff a short recap the same day: what he agreed to, who owns the next step, and the date.",
+      "personality": "Johnson is Speaker of the House and one of the most visible members of the chamber. He is very outgoing, and in conversation he takes charge fast and keeps it. Familiar ground suits him better than new ideas, and his bills cover fewer issues than most. Careful detail is not his strength, and his follow-through on votes and bills is much weaker than most. Expect energy in the room, and plan on driving the follow-up yourself.",
+      "speaks": "He talks fast, with one of the quickest paces in the House, shorter pauses than most, and a pitch that rises and falls a lot. His answers run shorter than most and often come in quick runs, so the exchange moves. With the floor in hand he keeps it, and he defends his position across many different shows. In one long podcast interview before he became Speaker, a broad question with several parts drew a single unbroken answer. Answer in kind: brief, quick, and to the point.",
+      "decides": "He decides on results. Bring him the result in a few plain lines; that fits him far better than an appeal to feelings. Expect him to challenge the case on the spot, so bring the one fact that answers it. Pressure counts for somewhat less with him than with most members, so the case has to carry the weight. With his follow-through weak, treat a yes in the room as the start of the work and get the next step in writing.",
+      "evidence_refs": {
+        "archetype": [
+          "TR.E",
+          "TR.C",
+          "BH.diligence",
+          "BH.dominance",
+          "IX.burst",
+          "MA",
+          "FC.excitement"
+        ],
+        "bottom_line": [
+          "MA",
+          "BH.wpt",
+          "IX.burst",
+          "BH.diligence"
+        ],
+        "do.1": [
+          "FC.warmth",
+          "FC.excitement"
+        ],
+        "do.2": [
+          "BH.wpt",
+          "IX.burst"
+        ],
+        "do.3": [
+          "DF",
+          "IX.defense"
+        ],
+        "do.4": [
+          "BH.diligence"
+        ],
+        "dont.1": [
+          "MA"
+        ],
+        "dont.2": [
+          "RC"
+        ],
+        "dont.3": [
+          "IX.gini",
+          "BH.dominance"
+        ],
+        "warning_sign": [
+          "DF",
+          "IX.defense"
+        ],
+        "follow_up": [
+          "BH.diligence",
+          "MA"
+        ],
+        "personality": [
+          "LD",
+          "VI.observed",
+          "TR.E",
+          "BH.dominance",
+          "TR.O",
+          "BH.breadth",
+          "TR.C",
+          "BH.diligence"
+        ],
+        "speaks": [
+          "AU.pace",
+          "AU.pause",
+          "AU.pitch",
+          "BH.wpt",
+          "IX.burst",
+          "BH.dominance",
+          "DF",
+          "LF.mike-johnson-better-for-america-01.1"
+        ],
+        "decides": [
+          "MA",
+          "DF",
+          "RC",
+          "BH.diligence"
+        ]
+      }
+    },
+    {
+      "display_name": "Elizabeth Warren",
+      "archetype": {
+        "animal": "Blue Jay",
+        "descriptor": "curious, intense, and combative",
+        "justification": "She is one of the most outgoing and curious members, keeps the floor as well as anyone, and defends her position harder than almost anyone in the Senate."
+      },
+      "bottom_line": "Come with short answers ready. She will hold the floor and push back hard, so keep every reply brief and on point.",
+      "do": [
+        "Answer her questions in a line or two",
+        "Prepare for hard pushback and answer each point directly",
+        "Match her energy instead of slowing the room down",
+        "Tie the case to families short on money where it honestly fits"
+      ],
+      "dont": [
+        "Try to out-talk her for the floor",
+        "Mistake her plain, unforceful wording for a soft position",
+        "Let her sharp tone rattle you"
+      ],
+      "warning_sign": "She usually holds the floor and fires back fast. If she goes quiet and lets you run on, she has stopped engaging with your case. Stop, ask what she would need to see, and offer a written answer.",
+      "follow_up": "Within a few days, send written answers to every question she raised, each in a sentence or two.",
+      "personality": "Warren is one of the most outgoing and most curious members of the Senate, and her bills cover more issues than most. She gets worked up much more easily than most, and her language runs more emotional than most. Detail and routine are not her strengths, and her attendance and follow-through on bills trail most senators. In hearings she is more combative than most. She serves as vice chair of her party's Senate conference and is one of the most visible senators. She has spoken about a childhood of money worries after her father's job loss.",
+      "speaks": "In interviews her answers are among the shortest in the Senate. Yet few senators hold on to the floor longer, so expect a fast run of brief, pointed replies. Challenge her and she defends her ground harder than almost anyone, show after show. Her words are full of energy and action, though her word choice is much less forceful than most. Keep your replies as short as hers, and never try to win the floor back.",
+      "decides": "Once she takes a side, she holds the line and defends it hard, so make your case early, while her position is still open. She has spoken about her family's money struggles and her brothers' military service. Stories about families under strain or about service members fit ground she already stands on. A push from outside moves her a bit less than most, so a sourced case does more.",
+      "evidence_refs": {
+        "archetype": [
+          "TR.E",
+          "TR.O",
+          "QR.antagonism",
+          "FC.excitement",
+          "BH.dominance",
+          "DF",
+          "TR.N"
+        ],
+        "bottom_line": [
+          "BH.wpt",
+          "BH.dominance",
+          "DF"
+        ],
+        "do.1": [
+          "BH.wpt",
+          "IX.wpt_mean"
+        ],
+        "do.2": [
+          "DF",
+          "IX.defense"
+        ],
+        "do.3": [
+          "TR.E",
+          "FC.excitement"
+        ],
+        "do.4": [
+          "PS.1"
+        ],
+        "dont.1": [
+          "BH.dominance"
+        ],
+        "dont.2": [
+          "FC.assertiveness"
+        ],
+        "dont.3": [
+          "QR.antagonism",
+          "HA"
+        ],
+        "warning_sign": [
+          "BH.dominance",
+          "DF",
+          "BH.wpt"
+        ],
+        "follow_up": [
+          "DF"
+        ],
+        "personality": [
+          "TR.E",
+          "TR.O",
+          "BH.breadth",
+          "TR.N",
+          "QR.affect",
+          "TR.C",
+          "QR.diligence",
+          "BH.diligence",
+          "HA",
+          "LD",
+          "VI.observed",
+          "PS.1"
+        ],
+        "speaks": [
+          "BH.wpt",
+          "IX.wpt_mean",
+          "BH.dominance",
+          "DF",
+          "FC.excitement",
+          "FC.activity",
+          "FC.assertiveness"
+        ],
+        "decides": [
+          "DF",
+          "PS.1",
+          "PS.2",
+          "RC"
+        ]
+      }
+    },
+    {
+      "display_name": "Brian Fitzpatrick",
+      "archetype": {
+        "animal": "Beaver",
+        "descriptor": "cooperative and wide-ranging",
+        "justification": "His cross-party work, issue range, and agreeable manner all sit near the top of the chamber, and no template animal is built on coalition building."
+      },
+      "bottom_line": "Show him partners from both parties before you make the ask, then give his first answer room to run. Polite, repeated follow-up moves him more than most.",
+      "do": [
+        "Name the members of both parties who already back the ask",
+        "Give his first answer room to run",
+        "Bring the working details of how the plan would run",
+        "Follow up more than once after the meeting"
+      ],
+      "dont": [
+        "Read his filler words as doubt",
+        "Oversell it with hype or big promises",
+        "Read his agreeable manner as a commitment"
+      ],
+      "warning_sign": "His sentences usually trail off as he thinks out loud. If they start landing crisp and complete, he has moved to a prepared answer and stopped working the problem with you. Ask an open question that gets him thinking again.",
+      "follow_up": "Send a short written summary within a day that names supporters from both parties and one clear next step.",
+      "personality": "Fitzpatrick ranks with the most agreeable members of the House and is as hard to fluster as anyone. He is curious, about as organized as anyone in the chamber, and more outgoing than most. His record points the same way: few members work with the other party as much as he does, and few have bills that cover as many issues. In hearings his tone is a little milder than most, and he is very visible for a member in his role.",
+      "speaks": "He talks fast, much faster than most, with shorter pauses than most, a very even volume, and a pitch that moves more than most. His answers run longer than most, and his longest ones run long too, so give each answer time. The words themselves are busy and practical but low on excitement, gentler than most, and more emotionally charged. Expect long answers, and save your sharpest point for a pause.",
+      "decides": "He decides with partners. A bill that already has support from both parties fits the way he works, and a plan with names attached gives him something to build on. He talks a case through at length before he settles, so expect a long first discussion and plan on a second one. Few members have bills that range as widely as his, so look for one that already touches your ask.",
+      "evidence_refs": {
+        "archetype": [
+          "BH.coop",
+          "TR.A",
+          "BH.breadth",
+          "QR.breadth",
+          "TR.C",
+          "TR.N"
+        ],
+        "bottom_line": [
+          "BH.coop",
+          "IX.wpt_mean",
+          "RC"
+        ],
+        "do.1": [
+          "BH.coop"
+        ],
+        "do.2": [
+          "IX.wpt_mean",
+          "IX.wpt_p90"
+        ],
+        "do.3": [
+          "FC.activity"
+        ],
+        "do.4": [
+          "RC"
+        ],
+        "dont.1": [
+          "IX.discmark"
+        ],
+        "dont.2": [
+          "FC.excitement"
+        ],
+        "dont.3": [
+          "TR.A",
+          "PROC"
+        ],
+        "warning_sign": [
+          "IX.cutoff"
+        ],
+        "follow_up": [
+          "BH.coop",
+          "RC"
+        ],
+        "personality": [
+          "TR.A",
+          "TR.N",
+          "TR.O",
+          "TR.C",
+          "TR.E",
+          "BH.coop",
+          "BH.breadth",
+          "VI.role",
+          "HA"
+        ],
+        "speaks": [
+          "AU.pace",
+          "AU.pause",
+          "AU.volume",
+          "AU.pitch",
+          "IX.wpt_mean",
+          "IX.wpt_p90",
+          "FC.activity",
+          "FC.excitement",
+          "QR.antagonism",
+          "QR.affect"
+        ],
+        "decides": [
+          "BH.coop",
+          "IX.wpt_mean",
+          "BH.breadth"
+        ]
+      }
+    },
+    {
+      "display_name": "Maxine Waters",
+      "archetype": {
+        "animal": "Bear",
+        "descriptor": "warm and sharp-tongued",
+        "justification": "Her words are both warm and as sharp as anyone's, and a people-first case about community impact fits her better than an abstract one."
+      },
+      "bottom_line": "Lead with the people and communities your issue helps, then make one clear, concrete ask. Expect strong words, and do not flinch.",
+      "do": [
+        "Start with one real person the issue would help",
+        "Let her finish her longer answers before you respond",
+        "Keep your own tone even when hers turns sharp",
+        "Come back more than once and keep the ask the same"
+      ],
+      "dont": [
+        "Count on one meeting to bring her around",
+        "Skip the personal welcome and go straight to business",
+        "Bring a hearing-room grilling into a private meeting"
+      ],
+      "warning_sign": "Sharp words are her normal register, not a warning. If she turns soft-spoken and noncommittal, she has lost interest in the ask. Thank her, ask who on her staff should carry it, and stop there.",
+      "follow_up": "Send her office a short letter within a few days that names the people and places affected, restates the ask, and offers a second meeting.",
+      "personality": "Waters is as curious as anyone in the House and among the toughest to win over. Her bills cover as many issues as anyone's, and she shows up for votes and moves her bills more reliably than most. She is fairly outgoing, gets worked up more easily than nearly anyone, and is about as visible as any member of the House. Warm words sit beside as sharp an edge as anyone's, and hearings bring out a more combative side than most members show.",
+      "speaks": "On the House floor she speaks much more slowly than most, with longer pauses, a much flatter pitch, and a voice whose volume swings more than most. Her interview answers are usually short, but she will take a long stretch when she wants one, and her answer length varies as much as anyone's. Once she has the floor, few members keep it longer. Her words are warm, excited, and forceful, with heavy emotional charge. Give her the long stretch, then answer the point she ends on.",
+      "decides": "She decides by who is helped and who is hurt. A case built on constituent stories and community impact fits her far better than an abstract argument, and patient follow-up matters. Outside pressure moves her somewhat more than it moves most members, so a clear ask, made more than once, has real room. Once she takes up an issue, she covers a lot of ground and follows through more than most.",
+      "evidence_refs": {
+        "archetype": [
+          "MA",
+          "FC.warmth",
+          "QR.antagonism",
+          "HA",
+          "TR.N",
+          "QR.affect",
+          "AU.volume"
+        ],
+        "bottom_line": [
+          "MA",
+          "QR.antagonism"
+        ],
+        "do.1": [
+          "MA"
+        ],
+        "do.2": [
+          "IX.wpt_p90",
+          "IX.gini"
+        ],
+        "do.3": [
+          "QR.antagonism"
+        ],
+        "do.4": [
+          "RC"
+        ],
+        "dont.1": [
+          "TR.A",
+          "PROC"
+        ],
+        "dont.2": [
+          "FC.warmth"
+        ],
+        "dont.3": [
+          "HA"
+        ],
+        "warning_sign": [
+          "QR.antagonism"
+        ],
+        "follow_up": [
+          "MA",
+          "RC"
+        ],
+        "personality": [
+          "TR.O",
+          "TR.A",
+          "BH.breadth",
+          "BH.diligence",
+          "TR.E",
+          "TR.N",
+          "VI.observed",
+          "FC.warmth",
+          "QR.antagonism",
+          "HA"
+        ],
+        "speaks": [
+          "AU.floor",
+          "AU.pace",
+          "AU.pause",
+          "AU.pitch",
+          "AU.volume",
+          "IX.wpt_mean",
+          "IX.wpt_p90",
+          "IX.gini",
+          "BH.dominance",
+          "FC.warmth",
+          "FC.excitement",
+          "FC.assertiveness",
+          "QR.affect"
+        ],
+        "decides": [
+          "MA",
+          "RC",
+          "BH.breadth",
+          "BH.diligence"
+        ]
+      }
+    },
+    {
+      "display_name": "Frank Lucas",
+      "archetype": {
+        "animal": "Tortoise",
+        "descriptor": "reserved and thorough",
+        "justification": "He is one of the most reserved members, careful and organized, and one of the most reliable at seeing his work through."
+      },
+      "bottom_line": "Bring your case early and give him time to study it. He is reserved, and he follows through.",
+      "do": [
+        "Send a brief a few days before the meeting",
+        "Keep the group small and the tone low-key",
+        "Give him the full timeline and who owns each step",
+        "Link the issue to the history he talks about, where it honestly fits"
+      ],
+      "dont": [
+        "Spring a new ask on him halfway through",
+        "Pitch it as a cross-party showpiece",
+        "Leave without asking what else he needs to decide"
+      ],
+      "warning_sign": "His tone is usually mild, even in hearings. If he stops asking questions and lets you finish without a word, you have not reached him yet. Ask him directly what he would need to see, and leave it with him.",
+      "follow_up": "Within a few days, send a written answer to every question he raised, in the order he raised them.",
+      "personality": "Lucas is one of the most reserved members of the House. He is very careful, organized, and fairly open to new ideas, and few House members vote and see their bills through as reliably. The issues his bills cover range widely. His cross-party work runs a little behind most members'. He has spoken about the Oklahoma City bombing as the defining tragedy of his generation.",
+      "speaks": "In hearings his tone stays mild; few members are less combative there. Describing his own work, he goes into careful detail and ranges across many subjects. He has passed along his grandfather's stories about the Black Sunday dust storm.",
+      "decides": "His bills reach into a wide spread of subjects, so ask which of them your issue already touches. Give him the material early and the time to read it. Once he commits to a bill, he sees it through, so his word is worth earning.",
+      "evidence_refs": {
+        "archetype": [
+          "TR.E",
+          "TR.C",
+          "BH.diligence",
+          "QR.diligence",
+          "HA"
+        ],
+        "bottom_line": [
+          "TR.E",
+          "BH.diligence"
+        ],
+        "do.1": [
+          "TR.E",
+          "BH.diligence"
+        ],
+        "do.2": [
+          "TR.E",
+          "HA"
+        ],
+        "do.3": [
+          "BH.diligence"
+        ],
+        "do.4": [
+          "PS.1",
+          "PS.2"
+        ],
+        "dont.1": [
+          "PROC"
+        ],
+        "dont.2": [
+          "BH.coop"
+        ],
+        "dont.3": [
+          "PROC"
+        ],
+        "warning_sign": [
+          "HA"
+        ],
+        "follow_up": [
+          "BH.diligence"
+        ],
+        "personality": [
+          "TR.E",
+          "TR.C",
+          "TR.O",
+          "BH.diligence",
+          "BH.breadth",
+          "BH.coop",
+          "PS.1"
+        ],
+        "speaks": [
+          "HA",
+          "QR.diligence",
+          "QR.breadth",
+          "PS.2"
+        ],
+        "decides": [
+          "BH.breadth",
+          "TR.E",
+          "BH.diligence"
+        ]
+      }
+    }
+  ]
+}
