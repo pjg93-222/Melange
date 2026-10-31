@@ -173,8 +173,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_workspace_ui_templates.py",
-        "bytes": 477649,
-        "sha256": "e339c5a9a8c8ca6b96ba7cb34c5144b4e6b8723f35dbd82d268f2622d9241125"
+        "bytes": 480703,
+        "sha256": "14c90b024408f71a0ac684b8a05579ba8e33d44dc2c892f2c647bfaa2694339c"
       },
       {
         "root": "bootstrap",
@@ -245,8 +245,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 21112,
-        "sha256": "f30a795c16b34b8d7ed4bfd7b893b5d69257368d7d75f9c84b0cadbffed7bc72"
+        "bytes": 21082,
+        "sha256": "7d41a2545a466d59c2d7d7862f9232df2f6a16d282d9693b286d2c6e3b47dbe3"
       },
       {
         "root": "bootstrap",
@@ -591,7 +591,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "c1331d38430b8fe6f4fbae2396cd65a1879eea0b3f7f19bd085b4179fdfea00f",
+    "programFingerprint": "16bd4219bca4bddb35bade935fe686affceb0e341de6257b5581e5fc93977a77",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -2428,8 +2428,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_workspace_ui_templates.py",
-        "bytes": 477649,
-        "sha256": "e339c5a9a8c8ca6b96ba7cb34c5144b4e6b8723f35dbd82d268f2622d9241125"
+        "bytes": 480703,
+        "sha256": "14c90b024408f71a0ac684b8a05579ba8e33d44dc2c892f2c647bfaa2694339c"
       },
       {
         "root": "bootstrap",
@@ -2500,8 +2500,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 21112,
-        "sha256": "f30a795c16b34b8d7ed4bfd7b893b5d69257368d7d75f9c84b0cadbffed7bc72"
+        "bytes": 21082,
+        "sha256": "7d41a2545a466d59c2d7d7862f9232df2f6a16d282d9693b286d2c6e3b47dbe3"
       },
       {
         "root": "bootstrap",
@@ -2846,7 +2846,7 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "c1331d38430b8fe6f4fbae2396cd65a1879eea0b3f7f19bd085b4179fdfea00f",
+    "programFingerprint": "16bd4219bca4bddb35bade935fe686affceb0e341de6257b5581e5fc93977a77",
     "requiredKinds": [
       "melange.dashboard-pages.v1",
       "melange.staffer-display-graph.v1",
@@ -4683,8 +4683,8 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_workspace_ui_templates.py",
-        "bytes": 477649,
-        "sha256": "e339c5a9a8c8ca6b96ba7cb34c5144b4e6b8723f35dbd82d268f2622d9241125"
+        "bytes": 480703,
+        "sha256": "14c90b024408f71a0ac684b8a05579ba8e33d44dc2c892f2c647bfaa2694339c"
       },
       {
         "root": "bootstrap",
@@ -4761,8 +4761,8 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 21112,
-        "sha256": "f30a795c16b34b8d7ed4bfd7b893b5d69257368d7d75f9c84b0cadbffed7bc72"
+        "bytes": 21082,
+        "sha256": "7d41a2545a466d59c2d7d7862f9232df2f6a16d282d9693b286d2c6e3b47dbe3"
       },
       {
         "root": "bootstrap",
@@ -5953,7 +5953,7 @@ const DISTRICT_PROGRAM_SPECS=freeze({
         "sha256": "2bf4e7a744568b9f18fdac2ff080f36e293d3cce044d869744cc0f701b05e64a"
       }
     ],
-    "programFingerprint": "2aa9b7d1c6aa0c1beddaa22f29aed9f9cc01cf7aa4570bbe455109a6806ea969"
+    "programFingerprint": "23797991559deecd8364a53775ddc3143593cc3fac751b79eb76b7fab8b8925e"
   }
 });
 module.exports=Object.freeze({APPLICATION_SPECS,WORKSPACE_APPLICATION_SPECS,DISTRICT_PROGRAM_SPECS});
