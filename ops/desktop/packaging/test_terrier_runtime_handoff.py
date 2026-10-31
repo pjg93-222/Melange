@@ -24,8 +24,8 @@ class DistrictRuntimeHandoffTests(unittest.TestCase):
             value.mkdir()
         self.options = SimpleNamespace(app='terrier', district='co-05', github_district_data=True,
             windows_session=False, source_root=paths['source'], data_root=paths['data'], state_root=paths['state'], profile_root=paths['profile'])
-        key = 'co-cd005-123456abcdef'
-        roles = sorted([*handoff.ROLES, *('snapshots/' + key + '/' + name for name in handoff.BASE_FILES)])
+        snapshot_id = 'co-cd005-123456abcdef'
+        roles = sorted([*handoff.ROLES, *('snapshots/' + snapshot_id + '/' + name for name in handoff.BASE_FILES)])
         files = []
         for role in roles:
             file = paths['data'] / role

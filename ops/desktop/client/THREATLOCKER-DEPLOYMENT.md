@@ -89,8 +89,8 @@ an assumed vendor certificate. The 1.0.22 native inventory contains `.exe`,
 modules; executable native files can also have `.com` or `.bin` extensions.
 Use file identity and the audit operation, not only the extension.
 
-- [1.0.22 signer summary: 13 certificates](deployment/desktop-1.0.22-signers.csv)
-- [1.0.22 native signature inventory: 1,164 file rows](deployment/desktop-1.0.22-signature-inventory.csv)
+- [Historical 1.0.22 signer summary: 13 certificates](https://github.com/pjg93-222/Melange/blob/6fe78f8a2e577394176ee3f5d1fe9c23937e96f3/ops/desktop/client/deployment/desktop-1.0.22-signers.csv)
+- [Historical 1.0.22 native signature inventory: 1,164 file rows](https://github.com/pjg93-222/Melange/blob/6fe78f8a2e577394176ee3f5d1fe9c23937e96f3/ops/desktop/client/deployment/desktop-1.0.22-signature-inventory.csv)
 
 These exports describe local inspection of 1.0.22, not 1.0.23 or work-PC
 approval. `downloaded-installer/` denotes the installer asset; other paths are

@@ -12,11 +12,11 @@ function fixture(t){
  const verify=runtime=>{try{native.verifyProgram(runtime,contract);return contract;}catch{throw failures.programFailure();}};
  const file=path.resolve(__dirname,'../district-runtime-input.cjs'),real=createRequire(file),module={exports:{}};
  vm.runInNewContext(fs.readFileSync(file,'utf8'),{module,require:name=>name==='./district-data-probe.cjs'?{...real(name),verifyDistrictProgram:verify}:name==='./backend-command.cjs'?{backendCommand:()=>({runtime:root})}:real(name),Buffer,URL,setTimeout,clearTimeout,structuredClone},{filename:file});
- const api=module.exports,key='co-cd005-123456abcdef',roles=[...ROLES,'snapshots/'+key+'/manifest.json'],files=roles.map(role=>{const raw=Buffer.from('{}'),file=path.join(directory,role);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,raw);return{role,path:'co-05/data/'+role,bytes:raw.length,sha256:hash(raw)};});
+ const api=module.exports,snapshotId='co-cd005-123456abcdef',roles=[...ROLES,'snapshots/'+snapshotId+'/manifest.json'],files=roles.map(role=>{const raw=Buffer.from('{}'),file=path.join(directory,role);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,raw);return{role,path:'co-05/data/'+role,bytes:raw.length,sha256:hash(raw)};});
  const configuration={dataDirectory:directory,district:'co-05',standaloneGitHubData:{schemaVersion:2}},calls=[];let input;
  api.bindDistrictConfiguration(configuration,{profile,directory,district:'co-05',files,verify:async()=>calls.push('verify'),commit:async()=>calls.push('commit'),close:async()=>calls.push('close')});
  t.after(async()=>{await input?.close();await api.discardDistrictConfiguration(configuration);fs.rmSync(root,{recursive:true,force:true});});
- return {api,runtime,configuration,calls,source,key,roots:{data:directory,state,district:'co-05'},consume(){input=api.consumeDistrictConfiguration(runtime,configuration);return input;}};
+ return {api,runtime,configuration,calls,source,snapshotId,roots:{data:directory,state,district:'co-05'},consume(){input=api.consumeDistrictConfiguration(runtime,configuration);return input;}};
 }
 test('copied settings cannot mint a district capability; original is consumed once and secret stays only in stdin',async t=>{
  const f=fixture(t);assert.equal(f.api.consumeDistrictConfiguration(f.runtime,structuredClone(f.configuration)),null);
@@ -25,7 +25,7 @@ test('copied settings cannot mint a district capability; original is consumed on
  assert.equal(frame.commitToken.length,43);assert.equal(JSON.stringify(f.configuration).includes(frame.commitToken),false);
  assert.equal(JSON.stringify(input.diagnostic()).includes(frame.commitToken),false);
  const context=Object.fromEntries(['schemaVersion','appId','launchNonce','programFingerprint','sourceDigest','district','rootsDigest'].map(key=>[key,frame[key]]));
- const health={pid:71,districtData:{...context,phase:'prepared',snapshot:f.key}};
+ const health={pid:71,districtData:{...context,phase:'prepared',snapshot:f.snapshotId}};
  assert.equal(input.matches(health,'prepared'),true);assert.equal(input.matches(health,'active'),false);
  for(const [name,value]of [['launchNonce','x'.repeat(43)],['sourceDigest','0'.repeat(64)],['programFingerprint','1'.repeat(64)]])assert.equal(input.matches({...health,districtData:{...health.districtData,[name]:value}},'prepared'),false);
  assert.equal(input.matches({...health,pid:72},'prepared'),false);
