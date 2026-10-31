@@ -1,0 +1,14 @@
+{
+ "schema": "member-briefs-v3-receipt-v1",
+ "status": "PASS",
+ "created_utc": "2026-10-30T21:46:02.007519Z",
+ "briefs_sha256": "53650d6bed4fd40a316e123993c646a9a036e1c52542745ed5ac48218f369b98",
+ "packets_sha256": "f6cec86b7dfc99923d352368a470e47fce7a8ce848910bec3c9ec431df718c87",
+ "packet_receipt_sha256": "437d4b00101862609a51f7ace3ef69461b9fd6c9c8a25c4b52f4d26052e6ab2c",
+ "ledger_sha256": "cee48b2017778459ffde4a56889662fc14d043015476060180f02e73e66f1125",
+ "counts": {
+  "briefs": 520,
+  "passed": 520,
+  "failed": 0
+ }
+}

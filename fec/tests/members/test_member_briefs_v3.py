@@ -997,15 +997,34 @@ def edit(**changes):
 
 
 def test_schema_counts_and_missing_ref_keys_fail(packet):
+    for count in (0, V.MAX_BULLETS + 1):                                      # D-416: at least one of each, a sanity cap above
+        for key in ("do", "dont"):
+            b = good_brief()
+            b[key] = (b[key] * 9)[:count]
+            assert kinds(b, packet) == {("*", "schema")}, (key, count)
     b = good_brief()
-    b["do"] = b["do"][:3]
-    assert kinds(b, packet) == {("*", "schema")}
+    b["do"] = b["do"][:3]                                                     # a shorter list keeps a stale do.4 ref key
+    assert kinds(b, packet) == {("evidence_refs", "schema")}
     b = good_brief()
     del b["evidence_refs"]["do.4"]
     assert kinds(b, packet) == {("evidence_refs", "schema")}
     b = good_brief()
     b["extra"] = 1
     assert kinds(b, packet) == {("*", "schema")}
+
+
+def test_do_and_dont_counts_follow_the_evidence(packet):
+    """D-416: no fixed count; the ref keys follow each list (do.1..do.N, dont.1..dont.M) and every bullet is still checked."""
+    b = good_brief()
+    b["do"], b["dont"] = b["do"][:2], b["dont"][:1]
+    for k in ("do.3", "do.4", "dont.2", "dont.3"):
+        del b["evidence_refs"][k]
+    assert not {k for k in kinds(b, packet) if k[1] == "schema"}
+    b = good_brief()
+    b["do"] = b["do"] + ["Ask for the next step before you leave."]
+    b["evidence_refs"]["do.5"] = ["PROC"]
+    got = kinds(b, packet)
+    assert not {k for k in got if k[1] == "schema"} and ("do.5", "form") in got     # the fifth bullet is checked like the rest
 
 
 def test_word_bands_fail_and_thin_tier_gets_shorter_floors(packet):

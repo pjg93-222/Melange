@@ -43,8 +43,17 @@ RECEIPT_PATH = ROOT / "data/members/member_briefs_v3.receipt.json"
 
 KEYS = ("archetype", "bottom_line", "do", "dont", "warning_sign", "follow_up", "personality", "speaks",
         "decides", "evidence_refs")
-REF_KEYS = (["archetype", "bottom_line"] + ["do.%d" % i for i in range(1, 5)] + ["dont.%d" % i for i in range(1, 4)]
-            + ["warning_sign", "follow_up", "personality", "speaks", "decides"])
+MAX_BULLETS = 8   # D-416: the Do and Don't counts follow the evidence (at least one each); this is a sanity cap, not a target
+
+
+def bullet_keys(brief: dict) -> list[str]:
+    """do.1 .. do.N and dont.1 .. dont.M for this brief's own counts (D-416)."""
+    return ["do.%d" % i for i in range(1, len(brief["do"]) + 1)] + ["dont.%d" % i for i in range(1, len(brief["dont"]) + 1)]
+
+
+def ref_keys(brief: dict) -> list[str]:
+    """The evidence_refs keys this brief must carry: one per field, one per bullet."""
+    return ["archetype", "bottom_line"] + bullet_keys(brief) + ["warning_sign", "follow_up", "personality", "speaks", "decides"]
 PROSE = ("bottom_line", "warning_sign", "follow_up", "personality", "speaks", "decides")
 
 # ---- banned language: v2 lists (imported) + guide section 11 additions -------------------------
@@ -392,13 +401,13 @@ def validate_brief(brief: dict, packet: dict, *, require_binding: bool = False) 
             and all(isinstance(v, str) for v in arch.values())):
         return [{"field": "archetype", "kind": "schema", "detail": "archetype needs animal, descriptor, justification strings"}], warnings
     shape_ok = (all(isinstance(brief[k], str) for k in PROSE)
-                and isinstance(brief["do"], list) and len(brief["do"]) == 4 and all(isinstance(x, str) for x in brief["do"])
-                and isinstance(brief["dont"], list) and len(brief["dont"]) == 3 and all(isinstance(x, str) for x in brief["dont"]))
+                and all(isinstance(brief[k], list) and 1 <= len(brief[k]) <= MAX_BULLETS and all(isinstance(x, str) for x in brief[k])
+                        for k in ("do", "dont")))
     if not shape_ok:
-        return [{"field": "*", "kind": "schema", "detail": "do needs 4 strings, dont 3, every other field a string"}], warnings
+        return [{"field": "*", "kind": "schema", "detail": "do and dont each need 1 to %d strings, every other field a string" % MAX_BULLETS}], warnings
     refs = brief["evidence_refs"]
-    if not isinstance(refs, dict) or set(refs) != set(REF_KEYS):
-        return [{"field": "evidence_refs", "kind": "schema", "detail": "evidence_refs keys must be exactly %s" % ", ".join(REF_KEYS)}], warnings
+    if not isinstance(refs, dict) or set(refs) != set(ref_keys(brief)):
+        return [{"field": "evidence_refs", "kind": "schema", "detail": "evidence_refs keys must be exactly %s" % ", ".join(ref_keys(brief))}], warnings
     texts = all_text(brief)
     if stamp is None and require_binding:
         issues.append({"field": "packet_sha256", "kind": "schema", "detail": "brief does not store the packet_sha256 its writer saw"})
@@ -435,7 +444,7 @@ def validate_brief(brief: dict, packet: dict, *, require_binding: bool = False) 
         band(k, brief[k], 35 if thin else 60, 110)
 
     # 3. bullets
-    for field in ["do.%d" % i for i in range(1, 5)] + ["dont.%d" % i for i in range(1, 4)]:
+    for field in bullet_keys(brief):
         t = texts[field].strip()
         if t.endswith((".", "!", "?")):
             bad(field, "form", "bullet must not end with a period")
@@ -511,7 +520,7 @@ def validate_brief(brief: dict, packet: dict, *, require_binding: bool = False) 
     appeals = packet.get("appeals") or {}
     mixed = appeals.get("dims") == ["mixed"]
     proc_total = 0
-    for key in REF_KEYS:
+    for key in ref_keys(brief):
         cited = refs[key]
         if not isinstance(cited, list) or not cited or not all(isinstance(x, str) for x in cited):
             bad("evidence_refs." + key, "ref_missing", "needs a non-empty list of ids")
@@ -629,8 +638,8 @@ def validate_brief(brief: dict, packet: dict, *, require_binding: bool = False) 
                                  "detail": "the warning sign says %s %s-, which a %s bullet (%r) says the opposite of" % (cue.split("|")[0].strip("(?:"), verb[:4], "Do" if kind_list is brief["do"] else "Don't", bullet[:40])})
 
     # 21. two Do bullets that share four content words (a reviewer check: warning only)
-    content = [{w for w in re.findall(r"[a-z']+", texts["do.%d" % i].casefold()) if w not in _FUNCTION_WORDS} for i in range(1, 5)]
-    for j in range(1, 4):
+    content = [{w for w in re.findall(r"[a-z']+", texts["do.%d" % i].casefold()) if w not in _FUNCTION_WORDS} for i in range(1, len(brief["do"]) + 1)]
+    for j in range(1, len(content)):
         twin = next((i for i in range(j) if len(content[i] & content[j]) >= 4), None)
         if twin is not None:
             warnings.append({"field": "do.%d" % (j + 1), "kind": "do_duplication",
@@ -660,7 +669,7 @@ def validate_brief(brief: dict, packet: dict, *, require_binding: bool = False) 
     def ref_list(key):
         return {c for c in refs.get(key) or [] if isinstance(c, str)} - {"PROC"}
 
-    bullet_refs = {k: {c for c in refs.get(k) or [] if isinstance(c, str)} for k in ["do.%d" % i for i in range(1, 5)] + ["dont.%d" % i for i in range(1, 4)]}
+    bullet_refs = {k: {c for c in refs.get(k) or [] if isinstance(c, str)} for k in bullet_keys(brief)}
     visibility = [k for k, ids_ in bullet_refs.items() if any(c.startswith("VI.") for c in ids_)]
     if len(visibility) > 1:                                       # 25. at most one bullet per brief on public visibility
         bad("*", "bullet_budget", "%d bullets cite VI.* (%s); at most one bullet per brief may" % (len(visibility), ", ".join(visibility)))

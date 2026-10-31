@@ -34,8 +34,8 @@ Rendered order. Items marked CODE are produced by code, not by the model.
 | `<Name> — The <Animal>` heading (rendered by code from the display name and `archetype.animal`) | CODE, from `archetype.animal` |
 | `Archetype: <Animal>, <descriptor>` | CODE renders; model writes `animal` and `descriptor` |
 | `Bottom line:` | model `bottom_line` |
-| `Do` with four bullets | model `do` |
-| `Don't` with three bullets | model `dont` |
+| `Do` with one or more bullets, as many as the evidence supports (D-416) | model `do` |
+| `Don't` with one or more bullets, as many as the evidence supports (D-416) | model `dont` |
 | `Warning sign:` | model `warning_sign` |
 | `Follow-up:` | model `follow_up` |
 | `Profile`, then run-in `Personality.` | CODE adds label; model `personality` |
@@ -71,8 +71,8 @@ Word counts are hard limits checked in code. Targets are what good briefs usuall
 | `archetype.descriptor` | 2 or 3 adjectives, at most 6 words | 2 adjectives | lower case; "x and y" or "x, y, and z" |
 | `archetype.justification` | 12 to 30 words, one sentence | 18 to 25 | plain sentence naming the evidence pattern, no ids |
 | `bottom_line` | 15 to 30 words, 1 or 2 sentences (thin tier: 12 to 30) | 18 to 26 | second person; the one thing to remember |
-| `do` | exactly 4 items, each 3 to 15 words | 5 to 12 | verb-led imperative, no trailing period |
-| `dont` | exactly 3 items, each 3 to 15 words | 4 to 10 | verb-led, no trailing period, never starts with Don't, Do not, Never, Avoid, or Not |
+| `do` | at least 1 item (count follows the evidence, D-416; code caps a list at 8), each 3 to 15 words | 5 to 12 | verb-led imperative, no trailing period |
+| `dont` | at least 1 item (count follows the evidence, D-416; code caps a list at 8), each 3 to 15 words | 4 to 10 | verb-led, no trailing period, never starts with Don't, Do not, Never, Avoid, or Not |
 | `warning_sign` | 25 to 45 words, 2 or 3 sentences | 30 to 40 | cue, meaning, action (section 7) |
 | `follow_up` | 15 to 35 words, 1 or 2 sentences | 18 to 28 | what to send, to whom, by when, in what form |
 | `personality` | 60 to 110 words (thin tier: 35 to 110) | 70 to 95 | who this person is |
@@ -456,7 +456,7 @@ Early-era long-form findings: A long-form finding whose `era` is PRE_CONGRESS_* 
 
 ### 9.3 Binding rules
 
-1. `evidence_refs` has one key per field: `archetype`, `bottom_line`, `do.1` to `do.4`, `dont.1` to `dont.3`, `warning_sign`, `follow_up`, `personality`, `speaks`, `decides`. Every key has a non-empty list.
+1. `evidence_refs` has one key per field: `archetype`, `bottom_line`, `do.1` to `do.N` and `dont.1` to `dont.M` (one per bullet, for the brief's own counts), `warning_sign`, `follow_up`, `personality`, `speaks`, `decides`. Every key has a non-empty list.
 2. Every cited id exists in the packet, is not neutral, and is allowed for that field by 9.2.
 3. Every Do, Don't, Warning sign, and Follow-up cites at least one id that is not `TR.*`.
 4. Every factual clause in a field is supported by one of that field's cited ids, at the right direction and strength.
@@ -539,7 +539,7 @@ Within one brief:
 Exemplars are shape only (R10, B6, S2; where they differ, the stricter limit governs):
 
 - The writer never reads the gold exemplar of its own member's animal. The orchestrator hands each batch only the gold exemplars whose animals differ from that member's animal (a batch with mixed animals gets, per member, the exemplars of the other animals). The writer prompt no longer carries inline example briefs (pilot 3); it carries a structure skeleton with placeholders only.
-- When the member's animal equals an exemplar's animal (gold: Bull Jeffries, Terrier Johnson, Blue Jay Warren, Beaver Fitzpatrick, Bear Waters, Tortoise Lucas; this should not happen under R10, but the limits hold if it does): at most one Do and at most one Don't may make the same move as that exemplar (so at most two of the seven bullets); the Warning sign, Follow-up, and `decides` must each make a different move from the exemplar's (the prescribed follow-up form, a recap with owners and dates, is exempt; only content beyond the form counts); the Warning sign cue rests on a different item than the exemplar's cue whenever another cue-eligible item exists; and at least two bullets rest on a top- or bottom-band item that the exemplar never cites.
+- When the member's animal equals an exemplar's animal (gold: Bull Jeffries, Terrier Johnson, Blue Jay Warren, Beaver Fitzpatrick, Bear Waters, Tortoise Lucas; this should not happen under R10, but the limits hold if it does): at most one Do and at most one Don't may make the same move as that exemplar (so at most two bullets in all); the Warning sign, Follow-up, and `decides` must each make a different move from the exemplar's (the prescribed follow-up form, a recap with owners and dates, is exempt; only content beyond the form counts); the Warning sign cue rests on a different item than the exemplar's cue whenever another cue-eligible item exists; and at least two bullets rest on a top- or bottom-band item that the exemplar never cites.
 - Start from this member's two or three strongest items that the exemplar does not have.
 - Tracking fallback (item 2), precisely: the "two bullets on an item the exemplar never cites" test first uses the member's top- and bottom-band items (level +3 or -3) against every id the exemplar cites anywhere. If the exemplar cites all of them, compare against the ids cited in the exemplar's Do and Don't bullets only. If those also cover all of them, repeat both steps with the member's well-band items (level +2 or -2). If no such item exists at either band, the test is waived; it is also waived when the packet has no Do/Don't-citable item outside those the exemplar uses.
 - Cross-animal leaks (item 1): the writer prompt carries no example briefs, only a structure skeleton. Any gold exemplar a writer is handed is of another animal, and at most one bullet in the whole brief may make the same move as any one exemplar; the Warning sign cue item and change never repeat an exemplar's.
@@ -616,7 +616,7 @@ The measures that appear in almost every brief are where repetition creeps in. R
 
 ## 14. Mechanical checks the code runs (fail closed)
 
-1. Output parses as JSON with exactly the schema keys; `do` has 4 strings, `dont` has 3.
+1. Output parses as JSON with exactly the schema keys; `do` and `dont` each have at least 1 string (at most 8, a sanity cap; D-416), and `evidence_refs` has a `do.N` / `dont.N` key for each bullet.
 2. Word counts per section 3, tier-aware.
 3. Bullets: no trailing period; first word not in {Do, Don't, Never, Avoid, Not, The, A, An, He, She, They, His, Her, Their, It}.
 4. No digits; no U+2014 or U+2013.
