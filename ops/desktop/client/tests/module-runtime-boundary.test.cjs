@@ -48,7 +48,21 @@ test('actual dual native intake rejects data with both source digests without ac
  await assert.rejects(f.startup.start(f.selected,await f.data.options.authorize()),error=>isDataStartupFailure(error)&&error.dataReason==='integrity');
  assert.equal(f.data.journal.active,null);assert.equal(f.workspaceData.journal.active,null);
 });
-function fixture(t,{appId='mentat',healthChange=null,onPipe=null,onSpawn=null,rendererFactory=null,beforeConstruct=null,workspace=false}={}){
+for(const absent of [false,true])test(`Mentat with ${absent?'no workspace key':'an empty workspace config (builder output)'} starts after only the public prepare, with no workspace binding`,async t=>{
+ const f=fixture(t,{appId:'mentat',noWorkspaceKey:absent}),original=structuredClone(f.selected);
+ assert.equal(f.context.applicationConfig.desktopWorkspaceData?.mentat,undefined);
+ assert.equal(f.startup.constructor.name,'ModuleDataStartup');assert.equal(f.startup.supported,true);
+ const origin=await f.startup.start(f.selected,await f.data.options.authorize());assert.equal(origin,f.runtime.origin);
+ assert.equal(f.requested.some(name=>/workspace/.test(name)),false,'No workspace startup, contract or provider is ever loaded');
+ assert.equal(f.data.journal.active.catalogSequence,1,'The public channel prepared and committed');
+ assert.equal(f.spawned.length,1);const args=f.spawned[0].args;assert.ok(args.includes('--desktop-module-input'));assert.equal(args.includes('--desktop-workspace-input'),false);
+ assert.equal(Object.hasOwn(f.frame,'workspaceInput')||Object.hasOwn(f.frame,'publicInput'),false,'The backend input is the plain public frame');
+ assert.equal(Object.hasOwn(f.frame,'workspaceBinding'),false);assert.ok(f.frame.binding&&f.frame.launchNonce);
+ assert.ok(f.calls.indexOf('preparing')<f.calls.indexOf('spawn'));assert.ok(f.calls.indexOf('pipe')<f.calls.indexOf('health'));
+ assert.equal(await f.runtime.verifyModuleHealth(f.frame.binding),true);assert.deepEqual(f.selected,original);
+ assert.equal(f.runtime.child!==null,true);
+});
+function fixture(t,{appId='mentat',healthChange=null,onPipe=null,onSpawn=null,rendererFactory=null,beforeConstruct=null,workspace=false,noWorkspaceKey=false}={}){
  const data=environment(appId),resources=path.join(data.temporary,'installed'),sources=path.join(resources,'sources'),bootstrap=path.join(resources,'bootstrap');
  fs.mkdirSync(sources,{recursive:true});fs.mkdirSync(bootstrap);fs.writeFileSync(path.join(sources,'app.py'),'# Generated fixture consumer\n');fs.writeFileSync(path.join(bootstrap,'desktop_backend.py'),'# Generated fixture bootstrap\n');
  const programFiles=[['source','app.py',sources],['bootstrap','desktop_backend.py',bootstrap]].map(([root,name,base])=>{const raw=fs.readFileSync(path.join(base,name));return{root,path:name,bytes:raw.length,sha256:sha(raw)};});
@@ -57,7 +71,7 @@ function fixture(t,{appId='mentat',healthChange=null,onPipe=null,onSpawn=null,re
  const workspaceData=workspace?environment(appId):null;
  if(workspaceData){const remote=signed(appId,{keys:data.remote.keys});remote.value.purpose=appId+'-full-workspace-data';remote.manifest.purpose=remote.value.purpose+'sets';remote.rebind();workspaceData.remote=remote;}
  const workspaceContract=workspace?{...contract,contractId:appId+'.workspace.v1',registry:workspaceData.remote.registry,publicReaders:['fixture.workspace-reader']}:null;
- const calls=[],spawned=[],messages=[];let selected=data.selected,frame,child,runtime;
+ const calls=[],spawned=[],messages=[],requested=[];let selected=data.selected,frame,child,runtime;
  const runtimeFile=path.join(__dirname,'..','runtime.cjs'),realRequire=createRequire(runtimeFile),module={exports:{}};
  const dependencies={
   './backend-command.cjs':{backendCommand:()=>({binary:path.join(resources,'python.exe'),runtime:resources,args:['synthetic-bootstrap']}),backendEnvironment:()=>({})},
@@ -76,10 +90,10 @@ function fixture(t,{appId='mentat',healthChange=null,onPipe=null,onSpawn=null,re
  };
  vm.runInNewContext(fs.readFileSync(runtimeFile,'utf8'),{module,require:name=>Object.hasOwn(dependencies,name)?dependencies[name]:realRequire(name),structuredClone,process:{platform:'win32'},URL,setTimeout,clearTimeout},{filename:runtimeFile});
  runtime=new module.exports.Runtime(appId,data.profile,resources,{authorize:data.options.authorize,rendererFactory});
- const context={standaloneMode:false,definition:{id:appId},userData:data.profile,runtime,resources,refuseModuleDataSettings:module.exports.refuseModuleDataSettings,applicationConfig:{desktopWorkspaceData:workspace?{[appId]:'workspace-v1'}:{},desktopAccessTrust:{updatePublicKeysByApp:{[appId]:data.remote.publicKeys}}},app:{getAppPath:()=>resources},path,process:{execPath:path.join(resources,'desktop.exe')},
+ const context={standaloneMode:false,definition:{id:appId},userData:data.profile,runtime,resources,refuseModuleDataSettings:module.exports.refuseModuleDataSettings,applicationConfig:{...(noWorkspaceKey?{}:{desktopWorkspaceData:workspace?{[appId]:'workspace-v1'}:{}}),desktopAccessTrust:{updatePublicKeysByApp:{[appId]:data.remote.publicKeys}}},app:{getAppPath:()=>resources},path,process:{execPath:path.join(resources,'desktop.exe')},
   updateStatus:message=>{assert.equal(message,workspace?'Opening your workspace from verified GitHub data.':'Preparing reviewed public data. Larger sources can take several minutes.');calls.push('preparing');},loadingStatus:async()=>{},readerDiagnostic:()=>{},read:()=>selected,ensureAccess:async()=>({authorize:data.options.authorize}),accessLifecycle:{generation:0,suspended:false},askingClose:false,closing:false,
   window:{isDestroyed:()=>false,webContents:{send:(_name,state)=>messages.push(state)}},powerSaveBlocker:{start:()=>1,stop(){}},
-  require:name=>{
+  require:name=>{requested.push(name);
    if(name==='./module-data-startup.cjs')return{ModuleDataStartup,withCompiledApplicationContract:(_appId,_context,construct)=>native.withVerifiedProgramConstruction(runtime,contract,proof=>construct(proof?contract:null,proof||undefined)),withCompiledWorkspaceApplicationContract:(_appId,_context,construct)=>native.withVerifiedProgramConstruction(runtime,workspaceContract,proof=>construct(proof?workspaceContract:null,proof||undefined))};
    if(name==='./workspace-data-startup.cjs')return require('../workspace-data-startup.cjs');
    if(name==='./workspace-data-contract.cjs')return require('../workspace-data-contract.cjs');
@@ -93,7 +107,7 @@ function fixture(t,{appId='mentat',healthChange=null,onPipe=null,onSpawn=null,re
  fs.openSync=function(file,...args){if(file===path.join(sources,'app.py')||file===path.join(bootstrap,'desktop_backend.py'))constructionReads.push(file);return open.call(this,file,...args);};
  try{beforeConstruct?.({sources,bootstrap});startup=context.createModuleDataStartup();}finally{fs.openSync=open;}
  t.after(async()=>{await startup.shutdown();await runtime.stop();workspaceData?.cleanup();data.cleanup();});
- return{data,workspaceData,contract,workspaceContract,runtime,startup,calls,spawned,messages,context,sources,bootstrap,constructionReads,get frame(){return frame;},get selected(){return selected;},set selected(value){selected=value;}};
+ return{data,workspaceData,contract,workspaceContract,runtime,startup,calls,spawned,messages,requested,context,sources,bootstrap,constructionReads,get frame(){return frame;},get selected(){return selected;},set selected(value){selected=value;}};
 }
 function constructionBoundary(f,proof,overrides={}){return native.createRuntimeModuleBoundary({appId:f.contract.appId,profile:f.data.profile,publicKeys:f.data.remote.publicKeys,
  contract:f.contract,getRuntime:()=>f.runtime,getSelected:()=>f.selected,authorize:f.data.options.authorize,constructionProof:proof,...overrides});}
