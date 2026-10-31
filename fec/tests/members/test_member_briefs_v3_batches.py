@@ -83,9 +83,9 @@ def env(tmp_path):
 
 
 def broken(brief=None):
-    """A schema failure (do needs 4 items); it stays out of the cross-member repetition check."""
+    """A schema failure (do needs at least one item); it stays out of the cross-member repetition check."""
     b = dict(brief or T.good_brief())
-    b["do"] = b["do"][:3]
+    b["do"] = []
     return b
 
 
