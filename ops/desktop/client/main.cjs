@@ -360,8 +360,8 @@ async function finishClose(){
 function createModuleDataStartup(){
  if(!['melange','mentat'].includes(definition.id))return null;
  // Existing owner-selected analytical workspaces retain the pre-workspace
- // launch path. Empty first-use roots still receive automatic signed data.
- if(standaloneMode&&require('./local-workspace.cjs').hasLocalWorkspace(definition.id,read('settings.json')))return null;
+ // launch path. Default app data roots still receive automatic signed data.
+ if(standaloneMode&&require('./local-workspace.cjs').hasLocalWorkspace(definition.id,read('settings.json'),{defaultDataDirectory:path.join(userData,'data')}))return null;
  if(applicationConfig.desktopWorkspaceData?.[definition.id]==='workspace-v1')return createWorkspaceDataStartup();
  const {ModuleDataStartup,withCompiledApplicationContract}=require('./module-data-startup.cjs');
  // Reject untrusted source markers before installed-program or provider I/O.
