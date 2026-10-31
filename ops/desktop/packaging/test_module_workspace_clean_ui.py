@@ -50,6 +50,19 @@ class CleanRoutes(unittest.TestCase):
         for name, content in ASSETS.items():
             self.assertEqual(hashlib.sha256(content.encode()).hexdigest(), ASSET_PROVENANCE[name]['sha256'])
 
+    def test_people_font_import_cannot_block_scripts_and_other_css_bytes_are_unchanged(self):
+        workspace = self.fixture()
+        declaration = '@import url("https://use.typekit.net/ayd3qhz.css");'
+        self.assertEqual(ASSETS['staffer-live.css'].count(declaration), 1)
+        status, raw, content_type = workspace.response(PREFIX + 'staffer-live.css')
+        self.assertEqual(status, 200)
+        self.assertEqual(raw, ASSETS['staffer-live.css'].replace(declaration, '', 1).encode())
+        self.assertNotIn(b'@import', raw)
+        self.assertTrue(content_type.startswith('text/css'))
+        self.assertIn('https://use.typekit.net/ayd3qhz.css', ASSETS['mlk-boot.js'])
+        self.assertIn('FONT_WAIT = 1500', ASSETS['mlk-boot.js'])
+        self.assertEqual(workspace.response(PREFIX + 'app.css')[1], ASSETS['app.css'].encode())
+
     def test_freshness_distinguishes_analytical_and_brief_delivery_dates(self):
         context = {'roles': {'member-profiles': {'sha256': 'a' * 64, 'bytes': 100}},
                    'sourceDigest': 'b' * 64, 'releaseTag': 'module-data-2026-10-31-workspace-v1'}

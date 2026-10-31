@@ -196,6 +196,11 @@ class CleanWorkspace:
         value = self.documents.get(name)
         if value is None and name in ASSETS and name != 'people-source.html':
             value = ASSETS[name]
+            if name == 'staffer-live.css':
+                # The approved boot loader already loads this kit separately,
+                # with a bounded render wait and local-font fallback. A CSS
+                # import would also block People scripts on a stalled network.
+                value = replace_once(value, '@import url("https://use.typekit.net/ayd3qhz.css");', '')
         if value is None:
             return (404, b'Not found', 'text/plain; charset=utf-8')
         content_type = 'text/css' if name.endswith('.css') else 'text/javascript' if name.endswith('.js') else 'text/html'
