@@ -638,8 +638,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 51262,
-        "sha256": "6e6ef73d13c792bb97bd5bb8ba004711a9ef4c3d9427766e858e622dd4bb1717"
+        "bytes": 51326,
+        "sha256": "018aeb10666d5f2f2a577aa60a8974e92a4b737b0ad266a905a97af8e04ada52"
       },
       {
         "root": "bootstrap",
@@ -716,8 +716,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_application_contracts.py",
-        "bytes": 23842,
-        "sha256": "9f74f066e9b112e6f4543fefe25c37a97ee0317e4aae06a7c85ccfd4f664939f"
+        "bytes": 23935,
+        "sha256": "cabbb8d04f8c0aae2c515707d6f308adf18b14e30d51fb5ac53444415dd7272d"
       },
       {
         "root": "bootstrap",
@@ -854,8 +854,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 21082,
-        "sha256": "7d41a2545a466d59c2d7d7862f9232df2f6a16d282d9693b286d2c6e3b47dbe3"
+        "bytes": 22450,
+        "sha256": "596103ee18a72659f79611972422165e33acfd1e8b805eef694a0bc66f12410a"
       },
       {
         "root": "bootstrap",
@@ -878,8 +878,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/access_stats.py",
-        "bytes": 14211,
-        "sha256": "476450c00af77bba256d41bbec701a360bbc75580d59ab8d3c454d903a446542"
+        "bytes": 14297,
+        "sha256": "b849a26514e989b81e62119a46f27c377ce6bbcd09a57dc4c99e9cbc595f6f47"
       },
       {
         "root": "source",
@@ -1454,8 +1454,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/runtime_paths.py",
-        "bytes": 6851,
-        "sha256": "777159ac4b4aab4029a324c96f23a962f9efdde84df4fe2d0eca6748da01421e"
+        "bytes": 7201,
+        "sha256": "6641ca9d52d7ef595ad38609a44f180e37ba0be4424545ca0a69830228c712bf"
       },
       {
         "root": "source",
@@ -1466,8 +1466,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/server.py",
-        "bytes": 235643,
-        "sha256": "d48502d9c77e5ae9925a37e8556b845936bf75f91774f87146c01826373f21cf"
+        "bytes": 231869,
+        "sha256": "f2e254ea23c509620fb29a2834726ab0ef9029ed0f39cf8b38279e9fde210767"
       },
       {
         "root": "source",
@@ -2250,7 +2250,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "c7a4cc9bbfe6d9340271cc4894141d694b979e65d1d3a24dc41af727ade561b3",
+    "programFingerprint": "ffb2af325ef971d636a66f0315ffd71f0134ced9225dc136b3389b817b743494",
     "requiredKinds": [
       "mentat.public-fec-tables.v1"
     ],
@@ -2909,8 +2909,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 51262,
-        "sha256": "6e6ef73d13c792bb97bd5bb8ba004711a9ef4c3d9427766e858e622dd4bb1717"
+        "bytes": 51326,
+        "sha256": "018aeb10666d5f2f2a577aa60a8974e92a4b737b0ad266a905a97af8e04ada52"
       },
       {
         "root": "bootstrap",
@@ -2987,8 +2987,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "module_application_contracts.py",
-        "bytes": 23842,
-        "sha256": "9f74f066e9b112e6f4543fefe25c37a97ee0317e4aae06a7c85ccfd4f664939f"
+        "bytes": 23935,
+        "sha256": "cabbb8d04f8c0aae2c515707d6f308adf18b14e30d51fb5ac53444415dd7272d"
       },
       {
         "root": "bootstrap",
@@ -3125,8 +3125,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 21082,
-        "sha256": "7d41a2545a466d59c2d7d7862f9232df2f6a16d282d9693b286d2c6e3b47dbe3"
+        "bytes": 22450,
+        "sha256": "596103ee18a72659f79611972422165e33acfd1e8b805eef694a0bc66f12410a"
       },
       {
         "root": "bootstrap",
@@ -3149,8 +3149,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/access_stats.py",
-        "bytes": 14211,
-        "sha256": "476450c00af77bba256d41bbec701a360bbc75580d59ab8d3c454d903a446542"
+        "bytes": 14297,
+        "sha256": "b849a26514e989b81e62119a46f27c377ce6bbcd09a57dc4c99e9cbc595f6f47"
       },
       {
         "root": "source",
@@ -3725,8 +3725,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/runtime_paths.py",
-        "bytes": 6851,
-        "sha256": "777159ac4b4aab4029a324c96f23a962f9efdde84df4fe2d0eca6748da01421e"
+        "bytes": 7201,
+        "sha256": "6641ca9d52d7ef595ad38609a44f180e37ba0be4424545ca0a69830228c712bf"
       },
       {
         "root": "source",
@@ -3737,8 +3737,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "source",
         "path": "mentat/app/server.py",
-        "bytes": 235643,
-        "sha256": "d48502d9c77e5ae9925a37e8556b845936bf75f91774f87146c01826373f21cf"
+        "bytes": 231869,
+        "sha256": "f2e254ea23c509620fb29a2834726ab0ef9029ed0f39cf8b38279e9fde210767"
       },
       {
         "root": "source",
@@ -4521,7 +4521,7 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "c7a4cc9bbfe6d9340271cc4894141d694b979e65d1d3a24dc41af727ade561b3",
+    "programFingerprint": "ffb2af325ef971d636a66f0315ffd71f0134ced9225dc136b3389b817b743494",
     "requiredKinds": [
       "mentat.aggregate-forecast-core.v1",
       "mentat.report-analysis.v1"
