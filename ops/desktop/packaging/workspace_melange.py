@@ -78,25 +78,25 @@ def prepare(snapshot,*,source,profile,program_fingerprint,is_cancelled=lambda:Fa
             data={'loader':validate_payroll(snapshot)}
         elif snapshot.kind==INDUSTRY_PAGES_KIND:
             lease=extract_archive(snapshot,profile,'pages',is_cancelled=is_cancelled);resources.append(lease)
-            data={'lease':lease,'pages':{name.removesuffix('.json'):_json(path) for name,path in lease.paths.items() if name!='derivation.json'},
+            data={'lease':lease,'pages':{name.removesuffix('.json'):lease.take_json(name) for name in lease.paths if name!='derivation.json'},
                   'derivation':lease.derivation}
         else:
             lease=extract_archive(snapshot,profile,'records',is_cancelled=is_cancelled);resources.append(lease)
-            references=_json(lease.paths['identity/references.json'])
-            directory=_json(lease.paths['contacts/directory.json'])
+            references=lease.take_json('identity/references.json')
+            directory=lease.take_json('contacts/directory.json')
             _data(references.get('schemaVersion')==1 and references.get('kind')=='melange-analytical-references-v1'
                   and references.get('privateIdentityGroupsIncluded') is False
                   and set(references)=={'schemaVersion','kind','evidence','inventory','ldaEmployment','ldaSidecar','reconciliation','privateIdentityGroupsIncluded'}
                   and isinstance(references['inventory'],dict) and isinstance(references['evidence'],dict)
                   and directory.get('kind')=='melange-professional-contacts-v1' and isinstance(directory.get('records'),list))
-            receipts={family:_json(lease.paths[family+'/receipt.json']) for family in ('source','lda','activity')}
+            receipts={family:lease.take_json(family+'/receipt.json') for family in ('source','lda','activity')}
             for family,receipt in receipts.items():
                 _data(receipt.get('schema')=='melange-staffer-analytical-projection-v1'
                       and receipt.get('family')==family and receipt.get('status')=='PASS'
                       and isinstance(receipt.get('parent',{}).get('receipt'),dict))
             data={'lease':lease,'references':references,'directory':directory,'receipts':receipts,
-                  'profileReceipt':_json(lease.paths['profiles/receipt.json']),
-                  'profileCheckpoint':_json(lease.paths['profiles/checkpoint.json'])}
+                  'profileReceipt':lease.take_json('profiles/receipt.json'),
+                  'profileCheckpoint':lease.take_json('profiles/checkpoint.json')}
             _data(data['profileReceipt'].get('kind')=='melange-factual-profiles-v1'
                   and data['profileReceipt'].get('status')=='PASS')
         content=MelangeComponentContent(snapshot,data,resources)

@@ -108,6 +108,66 @@ class CacheTests(unittest.TestCase):
             self.open()
         self.assertEqual(file.read_bytes(), raw)
 
+    def test_validated_json_is_decoded_once_and_transferred_without_shared_mutation(self):
+        self.make()
+        with patch.object(cache, 'parse', wraps=cache.parse) as parse:
+            with self.open() as prepared:
+                calls = parse.call_count
+                self.assertNotIn('derivation.json', prepared._decoded_json)
+                self.assertEqual(set(prepared._decoded_json), set(cache.INDUSTRY_MEMBERS) - {'derivation.json'})
+                first = prepared.take_json('champions.json')
+                self.assertEqual(first, {'fixture': True})
+                first['fixture'] = 'consumer-owned mutation'
+                with self.assertRaises(DataIntakeBlocked):
+                    prepared.take_json('champions.json')
+                self.assertEqual(parse.call_count, calls)
+                self.assertEqual(json.loads(prepared.paths['champions.json'].read_bytes()), {'fixture': True})
+                self.assertTrue(prepared.verify())
+        with self.open() as other:
+            fresh = other.take_json('champions.json')
+            self.assertEqual(fresh, {'fixture': True})
+            self.assertIsNot(first, fresh)
+
+    def test_json_transfer_refuses_tampered_and_closed_leases_and_close_drops_cache(self):
+        self.make()
+        with self.open() as prepared:
+            self.assertIn('champions.json', prepared._decoded_json)
+            file = prepared.paths['champions.json']
+            before = file.stat()
+            file.write_bytes(file.read_bytes().replace(b'true', b'null'))
+            os.utime(file, ns=(before.st_atime_ns, before.st_mtime_ns))
+            with self.assertRaises(DataIntakeBlocked):
+                prepared.take_json('champions.json')
+        self.assertEqual(prepared._decoded_json, {})
+        with self.assertRaises(DataIntakeBlocked):
+            prepared.take_json('forecast.json')
+
+    def test_native_melange_factory_consumes_validated_pages_without_reparsing(self):
+        from module_data_snapshot import Snapshot
+        import workspace_melange
+        self.make()
+        source, snapshot = self.base/'code', self.base/'snapshot'
+        source.mkdir()
+        archive = snapshot/'industry/pages.data.zip'
+        archive.parent.mkdir(parents=True)
+        shutil.copy2(self.archive, archive)
+        size = archive.stat().st_size
+        request = {'appId':self.app, 'kind':self.kind, 'sourceRoot':str(source),
+            'snapshotRoot':str(snapshot), 'files':{'pages':str(archive)},
+            'objects':[{'role':'pages', 'bytes':size, 'sha256':self.sha,
+                        'segments':[{'asset':'fixture.zip','bytes':size,'sha256':self.sha}]}]}
+        with patch.object(workspace_melange, '_json', side_effect=AssertionError('duplicate JSON decode')):
+            component = workspace_melange.prepare(Snapshot(request), source={'appId':'melange'},
+                profile=str(self.profile), program_fingerprint='a'*64)
+        try:
+            self.assertTrue(component.verify())
+            pages = component.content.data['pages']
+            self.assertEqual(set(pages), {'champions','forecast','bills','screen','interactions'})
+            self.assertTrue(all(value == {'fixture':True} for value in pages.values()))
+            self.assertNotIn('champions.json', component.content.resources[0]._decoded_json)
+        finally:
+            component.close()
+
     def test_unknown_cached_marker_and_hardlinks_cannot_confer_authority(self):
         self.make()
         with self.open() as prepared:
