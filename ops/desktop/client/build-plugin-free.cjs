@@ -5,7 +5,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const {spawnSync} = require('node:child_process');
+const {isDeepStrictEqual} = require('node:util');
 const asar = require('@electron/asar');
+const {NtExecutable, NtExecutableResource} = require('resedit');
 const {appDefinition} = require('./apps.cjs');
 const layout = require('./install-layout.cjs');
 
@@ -53,6 +55,21 @@ function payloadFiles(program, executable) {
   return files;
 }
 const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+// The EnableEmbeddedAsarIntegrityValidation fuse makes Electron refuse to start
+// unless the main EXE names exactly this Windows-relative key for this header.
+// Same contract as verify_native_release.py verify_asar_integrity, checked
+// before compiling so a hand-patched EXE (e.g. "resourcesapp.asar") fails fast.
+function requireAsarIntegrity(executable, archive) {
+  const value = crypto.createHash('sha256').update(asar.getRawHeader(archive).headerString).digest('hex');
+  const entries = NtExecutableResource.from(NtExecutable.from(fs.readFileSync(executable), {ignoreCert:true})).entries
+    .filter(entry => entry.type === 'INTEGRITY' && entry.id === 'ELECTRONASAR');
+  let actual = null;
+  try { actual = entries.length === 1 ? JSON.parse(Buffer.from(entries[0].bin).toString('utf8')) : null; } catch {}
+  if (!isDeepStrictEqual(actual, [{file:'resources\\app.asar', alg:'SHA256', value}])) {
+    throw new Error('Main executable ASAR integrity differs from the selected app.asar: ' +
+      (entries.length === 1 ? Buffer.from(entries[0].bin).toString('utf8') : entries.length + ' integrity resources'));
+  }
+}
 const stamp = file => {
   const value=fs.lstatSync(physical(file),{bigint:true});
   return [value.dev,value.ino,value.mode,value.nlink,value.size,value.mtimeNs,value.ctimeNs].join(':');
@@ -207,6 +224,7 @@ function build({appId, version, program, output, makensis, appExecutable, appAsa
       metadata.desktopAppConfig?.appId !== app.id || metadata.desktopAppConfig?.desktopUninstaller !== false) {
     throw new Error('Selected ASAR must match the requested app/version and no-uninstaller contract');
   }
+  requireAsarIntegrity(appExecutable, appAsar);
   if (overlayManifest && (layout.isUnder(path.resolve(overlayManifest), program) ||
       layout.isUnder(program, path.dirname(path.resolve(overlayManifest))))) throw new Error('Source overlay must be outside the retained base');
   const retainedFiles=payloadFiles(program, executable);
@@ -298,7 +316,7 @@ function argumentsFor(argv) {
   return {appId:args.app, version:args.version, program:args.program, output:args.output, makensis:args.makensis,
     appExecutable:args['app-executable'], appAsar:args['app-asar'], sourceOverlay:args['source-overlay'], compression:args.compression || 'lzma'};
 }
-module.exports = {build, argumentsFor, payloadFiles, sourceOverlay, payloadInclude};
+module.exports = {build, argumentsFor, payloadFiles, sourceOverlay, payloadInclude, requireAsarIntegrity};
 if (require.main === module) {
   try { console.log(JSON.stringify(build(argumentsFor(process.argv.slice(2))))); }
   catch (error) { console.error(error); process.exitCode = 1; }
