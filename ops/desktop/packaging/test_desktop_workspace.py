@@ -104,7 +104,8 @@ class WorkspaceTests(unittest.TestCase):
                 with self.assertRaises(HTTPError) as error:
                     urlopen(Request(origin + WORKSPACE_PATH, headers=headers, method='POST'))
                 self.assertEqual(error.exception.code, 405)
-                self.assertIn(b'Melange data workspace', urlopen(Request(origin + '/', headers=headers)).read())
+                # Melange 1.0.38: an empty first-use root keeps the normal first-run page at '/'; the workspace page is menu-only.
+                self.assertEqual(urlopen(Request(origin + '/', headers=headers)).read(), b'existing application route')
                 (root / 'Moneyball.html').write_bytes(b'user-owned dashboard')
                 self.assertEqual(urlopen(Request(origin + '/', headers=headers)).read(), b'existing application route')
             self.assertEqual((root / 'Moneyball.html').read_bytes(), b'user-owned dashboard')

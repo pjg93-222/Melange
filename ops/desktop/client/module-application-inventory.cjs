@@ -23,8 +23,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 50867,
+        "sha256": "4a6ccd9826e0b3420669f5769ea8924dd7fc7f4acb2c2a0ec1f6dd5121e215f5"
       },
       {
         "root": "bootstrap",
@@ -585,7 +585,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "481b43c026004fe3bf53f0a333a3c0041a3033066180f3bdd05d0723b8be33d3",
+    "programFingerprint": "1db5383056665d448815254f77a7aab51d454983edae41df2ad77e232328dce7",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -620,8 +620,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 50867,
+        "sha256": "4a6ccd9826e0b3420669f5769ea8924dd7fc7f4acb2c2a0ec1f6dd5121e215f5"
       },
       {
         "root": "bootstrap",
@@ -2226,7 +2226,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "c93ec064e07a7bd6ebbd271d8d0c82f3f928fbc9248fb22fb8696ac3651617a5",
+    "programFingerprint": "d6af911b2d8990acbe2f0a95d92151155378852a066b75bebc6e5ea723587641",
     "requiredKinds": [
       "mentat.public-fec-tables.v1"
     ],
@@ -2266,8 +2266,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 50867,
+        "sha256": "4a6ccd9826e0b3420669f5769ea8924dd7fc7f4acb2c2a0ec1f6dd5121e215f5"
       },
       {
         "root": "bootstrap",
@@ -2828,7 +2828,7 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "481b43c026004fe3bf53f0a333a3c0041a3033066180f3bdd05d0723b8be33d3",
+    "programFingerprint": "1db5383056665d448815254f77a7aab51d454983edae41df2ad77e232328dce7",
     "requiredKinds": [
       "melange.dashboard-pages.v1",
       "melange.staffer-display-graph.v1",
@@ -2867,8 +2867,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 50867,
+        "sha256": "4a6ccd9826e0b3420669f5769ea8924dd7fc7f4acb2c2a0ec1f6dd5121e215f5"
       },
       {
         "root": "bootstrap",
@@ -4473,7 +4473,7 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
         "sha256": "85725351bf3c05a1958bccff40df7d0d9c4277b82f1327e02ec2210772a1366c"
       }
     ],
-    "programFingerprint": "c93ec064e07a7bd6ebbd271d8d0c82f3f928fbc9248fb22fb8696ac3651617a5",
+    "programFingerprint": "d6af911b2d8990acbe2f0a95d92151155378852a066b75bebc6e5ea723587641",
     "requiredKinds": [
       "mentat.aggregate-forecast-core.v1",
       "mentat.report-analysis.v1"
@@ -4509,8 +4509,8 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "desktop_backend.py",
-        "bytes": 50920,
-        "sha256": "57752f538955133056a4a8f96dab98aab06cf23dc5f5772a542ca5b0aa3a830b"
+        "bytes": 50867,
+        "sha256": "4a6ccd9826e0b3420669f5769ea8924dd7fc7f4acb2c2a0ec1f6dd5121e215f5"
       },
       {
         "root": "bootstrap",
@@ -5923,7 +5923,7 @@ const DISTRICT_PROGRAM_SPECS=freeze({
         "sha256": "2bf4e7a744568b9f18fdac2ff080f36e293d3cce044d869744cc0f701b05e64a"
       }
     ],
-    "programFingerprint": "ab7b25144852d52adcb1ed439d053509b5664aa455ed78a7a08fadc74e542afc"
+    "programFingerprint": "c34fd62a0c59dc0df440f1dc1c2e38b8cf1817261e948a30f943d1f7b22e8c13"
   }
 });
 module.exports=Object.freeze({APPLICATION_SPECS,WORKSPACE_APPLICATION_SPECS,DISTRICT_PROGRAM_SPECS});

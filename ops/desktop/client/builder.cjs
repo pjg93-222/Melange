@@ -27,9 +27,8 @@ if(!['legacy','paged-v1'].includes(publicDataMode)||(publicDataMode==='paged-v1'
 const desktopPublicData=publicDataMode==='paged-v1'?{melange:'paged-v1'}:{};
 const workspaceDataMode=process.env.DESKTOP_WORKSPACE_DATA_MODE||'disabled';
 if(!['disabled','workspace-v1'].includes(workspaceDataMode))throw new Error('Unsupported workspace data mode');
-// Melange only: an empty first-use root needs workspace-v1 or it lands on "Application workspace not connected"
-// (1.0.37 regression). Existing local folders keep the fast launch path (main.cjs createModuleDataStartup). Mentat and Terrier stay {}.
-const desktopWorkspaceData=workspaceDataMode==='workspace-v1'&&selected.id==='melange'?{melange:'workspace-v1'}:{};
+// No app ships the workspace-v1 channel (about 55 s per launch; Melange 1.0.31 never had it). The mode is still validated above.
+const desktopWorkspaceData={};
 if(!fs.existsSync(icon))throw new Error('Original application icon is missing.');
 require('./backend-command.cjs').backendCommand(__dirname,selected.id,process.platform,runtimeRoot);
 const releaseSigning=require('./release-signing.cjs').options(selected,{withoutUninstaller:true,builtinInstaller:true});
