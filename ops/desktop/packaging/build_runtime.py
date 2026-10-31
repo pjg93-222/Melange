@@ -27,12 +27,18 @@ DENIED_SUFFIXES = ('.sqlite', '.sqlite3', '.sqlite-wal', '.sqlite-shm', '.sqlite
 POCKET_TEMPLATE = 'mentat/tools/pocket/mentat-pocket.html'
 POCKET_PATTERN = re.compile(r'(/\*__DATA_START__\*/).*?(/\*__DATA_END__\*/)', re.S)
 BOOTSTRAP_FILES = (
-    'desktop_backend.py', 'desktop_audit.py', 'native_credentials.py', 'native_access_state.py',
-    'melange_bootstrap.py', 'melange_data_paths.py', 'mentat_layout.py', 'desktop_migrations.py',
-    'terrier_owner.py', 'terrier_district.py', 'desktop_figure_renderer.py',
+    'desktop_backend.py', 'native_windows_signature.py', 'desktop_audit.py', 'native_credentials.py', 'native_access_state.py',
+    'melange_bootstrap.py', 'desktop_workspace.py', 'melange_data_paths.py', 'mentat_layout.py', 'desktop_migrations.py',
+    'terrier_owner.py', 'terrier_district.py', 'terrier_runtime_handoff.py', 'terrier_github_snapshot.py', 'terrier_standalone.py', 'desktop_credentials.py', 'desktop_figure_renderer.py',
     'module_data_snapshot.py', 'melange_module_data.py', 'mentat_module_data.py',
     'module_data_launch.py', 'module_application_contracts.py', 'module_application_inventory.py', 'module_data_handoff.py',
-    'module_public_input_installers.py', 'data_release_fetch.py',
+    'module_public_input_installers.py', 'module_catalogue_cache.py', 'module_workspace_handoff.py',
+    'workspace_data_contract.py', 'data_release_fetch.py',
+    'workspace_archive.py', 'workspace_sqlite.py', 'workspace_graph.py', 'workspace_cache.py',
+    'module_workspace_inputs.py', 'workspace_melange.py', 'workspace_mentat.py', 'module_workspace_installers.py',
+    'module_workspace_render.py', 'module_workspace_ui_templates.py',
+    'module_workspace_clean_ui.py', 'module_workspace_clean_assets.py',
+    'module_workspace_combined_ui.py', 'module_workspace_industry_ui.py',
     'melange_public_provenance.py', 'melange_public_payroll_normalize.py', 'melange_public_payroll_projection.py',
 )
 

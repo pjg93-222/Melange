@@ -21,6 +21,10 @@ const MESSAGES=Object.freeze({
  error:'The module data check could not be completed. Existing files were preserved.',
  unsupported:'GitHub preload is not available for this component.'
 });
+const MENTAT_MESSAGES=Object.freeze({
+ ready:'Verified public FEC tables are cached locally. Industry reports and forecasts use separate local files.',
+ offline:'Using verified cached public FEC tables while GitHub is unavailable. Industry reports and forecasts use separate local files.'
+});
 const ERROR_MESSAGES=Object.freeze({
  authorization:'Current existing-owner approval is required.',
  integrity:'Module data verification failed.',
@@ -29,11 +33,20 @@ const ERROR_MESSAGES=Object.freeze({
  unreachable:'GitHub module data is unavailable.',
  timeout:'The module data check timed out.',
  rate_limited:'GitHub module data is temporarily unavailable.',
+ proxy:'The network proxy is unavailable.',
+ program:'The installed application could not be verified or started.',
  context:'The selected workspace changed.',
  transition:'Module data activation is unavailable.'
 });
 function failure(code){const error=new Error(ERROR_MESSAGES[code]||ERROR_MESSAGES.integrity);error.code=error.reason=Object.hasOwn(ERROR_MESSAGES,code)?code:'integrity';return error;}
-function safeFailure(error){return failure(typeof error?.reason==='string'?error.reason:typeof error?.code==='string'?error.code:'integrity');}
+function safeFailure(error){
+ const safe=failure(typeof error?.reason==='string'?error.reason:typeof error?.code==='string'?error.code:'integrity');
+ if(error?.retryableNetwork===true&&['timeout','unreachable','proxy','rate_limited'].includes(safe.code)){
+  safe.retryableNetwork=true;
+  if(Number.isSafeInteger(error.retryAfterMs)&&error.retryAfterMs>=1000&&error.retryAfterMs<=3600000)safe.retryAfterMs=error.retryAfterMs;
+ }
+ return safe;
+}
 function appRepository(appId){if(!Object.hasOwn(REPOSITORIES,appId))throw new Error('Unsupported module data application.');return REPOSITORIES[appId];}
 function timestamp(value){return typeof value==='string'&&value.length===24&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString()===value;}
 function freeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}
@@ -44,7 +57,7 @@ function sanitizeModuleStatus(appId,value,{canRefresh=false}={}){
     (value.appId!==undefined&&value.appId!==appId)||
     (value.repository!==undefined&&(typeof value.repository!=='string'||value.repository.toLowerCase()!==repository)))return null;
  const phase=PHASES.has(value.phase)?value.phase:'error';
- const result={provider:'github',appId,repository,phase,cached:value.cached===true,canRefresh:canRefresh===true&&phase!=='unsupported',message:MESSAGES[phase]};
+ const result={provider:'github',appId,repository,phase,cached:value.cached===true,canRefresh:canRefresh===true&&phase!=='unsupported',message:appId==='mentat'&&MENTAT_MESSAGES[phase]||MESSAGES[phase]};
  if(typeof value.releaseTag==='string'&&TAG.test(value.releaseTag))result.releaseTag=value.releaseTag;
  if(Number.isSafeInteger(value.catalogueSequence)&&value.catalogueSequence>0)result.catalogueSequence=value.catalogueSequence;
  for(const key of ['checkedAt','verifiedAt'])if(timestamp(value[key]))result[key]=value[key];
@@ -56,7 +69,7 @@ function sanitizeModuleStatus(appId,value,{canRefresh=false}={}){
 
 class GitHubModuleController{
  constructor({appId,getSelected,createProvider,authorize,canStage=()=>false,canCommit=()=>false,
-              keepAwake=()=>()=>{},onStatus=()=>{},intervalMs=5*60*1000,
+              keepAwake=()=>()=>{},onStatus=()=>{},intervalMs=15*60*1000,
               setInterval:setIntervalFn=setInterval,clearInterval:clearIntervalFn=clearInterval}){
   this.appId=appId;this.repository=appRepository(appId);
   for(const callback of [getSelected,createProvider,authorize,canStage,canCommit,keepAwake,onStatus,setIntervalFn,clearIntervalFn])if(typeof callback!=='function')throw new Error('Native module data callbacks are required.');
@@ -71,7 +84,7 @@ class GitHubModuleController{
   let selected;
   try{selected=structuredClone(this.getSelected());}catch{throw failure('authorization');}
   if(!selected||typeof selected!=='object'||Array.isArray(selected)||
-     ['ownerGitHubData','ownerGitHubModuleData','githubModuleData','effectiveConfiguration','snapshotRoot'].some(key=>Object.hasOwn(selected,key)))throw failure('authorization');
+     ['ownerGitHubData','ownerGitHubModuleData','ownerGitHubWorkspaceData','githubModuleData','effectiveConfiguration','snapshotRoot'].some(key=>Object.hasOwn(selected,key)))throw failure('authorization');
   let fingerprint;try{fingerprint=canonical(selected);}catch{throw failure('authorization');}
   return {selected:freeze(selected),fingerprint,epoch:this.epoch};
  }

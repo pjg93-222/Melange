@@ -42,6 +42,13 @@ test('an arbitrary input flag does not enable GitHub mode for ordinary validated
  assert.equal(f.spawns[0].args.includes('--github-district-data'),false);assert.equal(runtime.roots.data,f.data);assert.equal(runtime.roots.state,f.data);
  f.exit();assert.equal(runtime.configuration,null,'an exited backend cannot remain a warm effective configuration');
 });
+
+test('a late healthy response cannot mark an already exited backend ready',async t=>{
+ const f=fixture(t,'mentat'),runtime=f.make(),opening=runtime.start({dataDirectory:f.data});
+ const rejected=assert.rejects(opening,/Backend stopped \(exit 1\)/);
+ await f.pending();f.exit();f.ready();await rejected;
+ assert.equal(runtime.child,null);assert.equal(runtime.configuration,null);assert.equal(runtime.launchPath,'/');
+});
 test('denied authorization and cancellation never retain an effective configuration',async t=>{
  const f=fixture(t),runtime=f.make();f.authorized=false;await assert.rejects(runtime.start(f.effective),/approval/);assert.equal(runtime.configuration,null);assert.equal(f.spawns.length,0);
  f.authorized=true;const opening=runtime.start(f.effective);await f.pending();await runtime.stop();f.ready();await assert.rejects(opening,/cancelled/);assert.equal(runtime.configuration,null);assert.equal(runtime.child,null);

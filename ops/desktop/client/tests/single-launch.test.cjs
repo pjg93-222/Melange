@@ -9,3 +9,8 @@ test('failed launch clears pending state and permits one deliberate retry',async
  let starts=0;const launch=singleLaunch(async()=>{if(++starts===1)throw new Error('fixture failure');return 'recovered';});
  const first=launch();await assert.rejects(first,/fixture failure/);assert.equal(await launch(),'recovered');assert.equal(starts,2);
 });
+test('OS resume can drain a cancelled launch before starting its replacement',async()=>{
+ let starts=0,complete;const launch=singleLaunch(()=>{starts++;return new Promise(resolve=>{complete=resolve;});});
+ await launch.whenIdle();assert.equal(starts,0);const first=launch();assert.equal(launch.whenIdle(),first);await new Promise(resolve=>setImmediate(resolve));complete('cancelled');await launch.whenIdle();
+ const replacement=launch();assert.notEqual(replacement,first);await new Promise(resolve=>setImmediate(resolve));assert.equal(starts,2);complete('resumed');assert.equal(await replacement,'resumed');
+});

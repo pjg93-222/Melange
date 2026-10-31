@@ -9,7 +9,7 @@ test('native launcher uses only the selected app bundled interpreter and never h
   fs.writeFileSync(path.join(runtime,'python','python.exe'),'fixture');
   assert.throws(()=>backendCommand(root,'terrier','win32'),/runtime is not installed/);
   fs.writeFileSync(path.join(runtime,'bootstrap','desktop_backend.py'),'fixture');
-  const command=backendCommand(root,'terrier','win32');assert.equal(command.binary,path.join(runtime,'python','python.exe'));assert.deepEqual(command.args,['-E','-s','-u',path.join(runtime,'bootstrap','desktop_backend.py')]);
+  const command=backendCommand(root,'terrier','win32');assert.equal(command.binary,path.join(runtime,'python','python.exe'));assert.deepEqual(command.args,['-B','-E','-s','-u',path.join(runtime,'bootstrap','desktop_backend.py')]);
   assert.throws(()=>backendCommand(root,'mentat','win32'),/runtime is not installed/);
 });
 

@@ -8,8 +8,9 @@ import sys
 import hashlib
 import types
 import unittest
+from unittest.mock import patch
 
-from mentat_layout import prepare_workspace, load_connections, workspace_path, bind_analytics_paths, CODE_DIRS, DATA_DIRS
+from mentat_layout import prepare_workspace, load_connections, workspace_path, canonical_root, bind_analytics_paths, CODE_DIRS, DATA_DIRS
 
 
 class MentatLayoutTests(unittest.TestCase):
@@ -91,7 +92,52 @@ class MentatLayoutTests(unittest.TestCase):
                 self.assertEqual((workspace/name).resolve(), (data/name).resolve())
                 self.assertEqual((other_workspace/name).resolve(), (other_data/name).resolve())
             if os.name == 'nt':
-                self.assertEqual(workspace_path(str(data).upper(), state), workspace)
+                self.assertEqual(workspace_path(str(code).upper(), str(data).upper(), state), workspace)
+
+    def test_upgrade_preserves_legacy_workspace_and_selected_data(self):
+        with tempfile.TemporaryDirectory(prefix='mentat-upgrade-layout-') as folder:
+            root = Path(folder).resolve()
+            old_code, new_code = root/'installed-1.0.27', root/'installed-1.0.28'
+            data, state = root/'selected-data', root/'profile/state'
+            for code in (old_code, new_code):
+                for name in (*CODE_DIRS, 'inputs'):
+                    (code/name).mkdir(parents=True)
+                (code/'mentat.R').write_text(code.name, encoding='utf-8')
+                for name in ('fec_receipt_rules.json', 'fec_transaction_types.json'):
+                    (code/'inputs'/name).write_text('{}', encoding='utf-8')
+            previous = prepare_workspace(old_code, data, state)
+            # Reproduce the data-only cache left by an older installed version.
+            legacy = previous.parent/hashlib.sha256(canonical_root(data).encode('utf-8')).hexdigest()[:24]
+            self.assertTrue(previous.is_relative_to(root))
+            self.assertEqual(legacy.parent, previous.parent)
+            if previous != legacy:
+                previous.rename(legacy)
+            marker = legacy/'preserved.txt'
+            marker.write_text('legacy workspace', encoding='utf-8')
+            private_file = data/'state/private.txt'
+            private_file.write_text('selected data', encoding='utf-8')
+            rules = data/'inputs/fec_receipt_rules.json'
+            rules.write_text('{"user":"preserved"}', encoding='utf-8')
+
+            previous = prepare_workspace(old_code, data, state)
+            current = prepare_workspace(new_code, data, state)
+            self.assertEqual(len({legacy, previous, current}), 3)
+            self.assertEqual(prepare_workspace(new_code, data, state), current)
+            self.assertEqual(prepare_workspace(old_code, data, state), previous)
+            for workspace, code in ((legacy, old_code), (previous, old_code), (current, new_code)):
+                for name in CODE_DIRS:
+                    self.assertEqual((workspace/name).resolve(), (code/name).resolve())
+                for name in DATA_DIRS:
+                    self.assertEqual((workspace/name).resolve(), (data/name).resolve())
+                self.assertEqual((workspace/'mentat.R').read_text(encoding='utf-8'), code.name)
+            # Even a conflicting existing cache must fail closed, never repoint links.
+            with patch('mentat_layout.workspace_path', return_value=previous):
+                with self.assertRaisesRegex(ValueError, 'unexpected target: app'):
+                    prepare_workspace(new_code, data, state)
+            self.assertEqual((previous/'app').resolve(), (old_code/'app').resolve())
+            self.assertEqual(marker.read_text(encoding='utf-8'), 'legacy workspace')
+            self.assertEqual(private_file.read_text(encoding='utf-8'), 'selected data')
+            self.assertEqual(json.loads(rules.read_text(encoding='utf-8')), {'user':'preserved'})
 
     def test_explicit_connections_reject_wrong_selection_and_binary_overlap(self):
         with tempfile.TemporaryDirectory(prefix='mentat-connection-test-') as folder:

@@ -6,6 +6,8 @@ const {canonical}=require('./access-client.cjs');
 const {exact}=require('./dataset-protocol.cjs');
 const protocol=require('./github-module-protocol.cjs');
 const {physicalPath}=require('./runtime-roots.cjs');
+const {withSnapshotValidation}=require('./module-data-adapters.cjs');
+const {CHANNEL:WORKSPACE_CHANNEL}=require('./workspace-data-contract.cjs');
 const SOURCE_FIELDS=['schemaVersion','appId','repository','catalogSequence','releaseTag','releaseCommit','pointerDigest','manifestSha256','cacheRoot'];
 const {requireValue,fail}=protocol;
 function canceled(signal){if(signal?.aborted)throw fail('cancelled','Module binding verification cancelled');}
@@ -62,7 +64,9 @@ class ReadView{
    requireValue(inside(this.root,await fsp.realpath(file)),'Module binding file leaves its cache');
    if(bytes!==undefined)requireValue(before.size===BigInt(bytes),'Module binding file size differs');
    const hash=crypto.createHash('sha256'),chunks=[];let received=0;
-   const buffer=Buffer.alloc(64*1024);
+   // Keep large-table reads bounded without paying a Windows I/O round trip
+   // for every 64 KiB; tiny metadata still allocates only its actual size.
+   const buffer=Buffer.alloc(Math.max(1,Math.min(4*1024*1024,Number(before.size))));
    while(true){
     canceled(this.signal);const result=await handle.read(buffer,0,buffer.length,null);if(result.bytesRead===0)break;
     received+=result.bytesRead;requireValue(BigInt(received)<=before.size,'Module binding file grew during verification');
@@ -92,18 +96,21 @@ class ReadView{
   await walk(root);requireValue(expectedFiles.size===0&&expectedDirectories.size===0,'Module binding snapshot is incomplete');
  }
 }
-async function validateModuleBinding({appId,profile,configuration,publicKeys,registry,requiredKinds=Object.keys(registry||{}),signal,protectedRoots=[]}){
+async function validateModuleBinding({appId,profile,configuration,publicKeys,registry,requiredKinds=Object.keys(registry||{}),signal,protectedRoots=[],channel='public-v1'}){
  try{
-  canceled(signal);const app=protocol.configuration(appId);protocol.checkedRegistry(appId,registry,requiredKinds);
+  requireValue(['public-v1',WORKSPACE_CHANNEL.id].includes(channel),'Unsupported compiled module channel');
+  const cacheName=channel===WORKSPACE_CHANNEL.id?WORKSPACE_CHANNEL.cacheName:'github-module-data',sourceField=channel===WORKSPACE_CHANNEL.id?WORKSPACE_CHANNEL.sourceField:'ownerGitHubModuleData';
+  canceled(signal);const app=protocol.configuration(appId,channel);protocol.checkedRegistry(appId,registry,requiredKinds,channel);
   requireValue(configuration&&typeof configuration==='object'&&!Array.isArray(configuration)&&typeof configuration.dataDirectory==='string'&&path.isAbsolute(configuration.dataDirectory),'Original module workspace is required');
   requireValue(!Object.hasOwn(configuration,'ownerGitHubData'),'Unexpected module workspace override');
+  requireValue(!Object.hasOwn(configuration,channel===WORKSPACE_CHANNEL.id?'ownerGitHubModuleData':WORKSPACE_CHANNEL.sourceField),'Mixed module binding channels refused');
   requireValue(typeof profile==='string'&&path.isAbsolute(profile)&&Array.isArray(protectedRoots)&&protectedRoots.every(root=>typeof root==='string'&&path.isAbsolute(root)),'Native module boundaries are required');
-  const original=structuredClone(configuration),source=original.ownerGitHubModuleData;exact(source,SOURCE_FIELDS);
+  const original=structuredClone(configuration),source=original[sourceField];exact(source,SOURCE_FIELDS);
   requireValue(source.schemaVersion===1&&source.appId===appId&&source.repository===app.repository&&protocol.integer(source.catalogSequence)&&source.catalogSequence>0&&protocol.hash(source.pointerDigest)&&protocol.hash(source.manifestSha256)&&typeof source.cacheRoot==='string'&&path.isAbsolute(source.cacheRoot),'Invalid native module source binding');
   const profileStat=await fsp.lstat(profile);requireValue(profileStat.isDirectory()&&!profileStat.isSymbolicLink(),'Native module profile is unsafe');
   // Only independently checked fixed choices can grant a physical cache root.
   const nativeProfile=fs.realpathSync.native(profile),localBase=process.env.LOCALAPPDATA?fs.realpathSync.native(path.resolve(process.env.LOCALAPPDATA)):null;
-  const choices=[{base:nativeProfile,root:path.join(nativeProfile,'packs','github-module-data')},...(localBase?[{base:localBase,root:path.join(localBase,'MelangeData',appId,'github-module-data')}]:[])];
+  const choices=[{base:nativeProfile,root:path.join(nativeProfile,'packs',cacheName)},...(localBase?[{base:localBase,root:path.join(localBase,'MelangeData',appId,cacheName)}]:[])];
   let selected;
   for(const choice of choices){
    let root;try{root=checkedNativeCacheRoot(choice.base,choice.root);}catch(error){if(error.code==='ENOENT')continue;throw error;}
@@ -114,19 +121,21 @@ async function validateModuleBinding({appId,profile,configuration,publicKeys,reg
   for(const protectedRoot of [original.dataDirectory,path.join(nativeProfile,'state'),...protectedRoots])requireValue(!overlaps(cacheRoot,protectedRoot),'Module binding cache overlaps original or protected state');
   const view=new ReadView(base,cacheRoot,signal);await view.directory(cacheRoot);
   const envelope=protocol.parseJson(await view.read(path.join(cacheRoot,'pointers',source.pointerDigest+'.json'),32768,{retain:true}));
-  const checked=protocol.pointer(appId,envelope,publicKeys);
+  const checked=protocol.pointer(appId,envelope,publicKeys,{},channel);
   const expected={schemaVersion:1,appId,repository:app.repository,catalogSequence:checked.value.catalogSequence,releaseTag:checked.value.releaseTag,releaseCommit:checked.value.releaseCommit,pointerDigest:checked.digest,manifestSha256:checked.value.manifest.sha256,cacheRoot};
   requireValue(canonical(source)===canonical(expected),'Native module source differs from signed metadata');
-  const manifest=protocol.manifest(appId,await view.read(path.join(cacheRoot,'manifests',source.manifestSha256+'.json'),protocol.MAX_MANIFEST,{bytes:checked.value.manifest.bytes,sha256:source.manifestSha256,retain:true}),checked,registry,requiredKinds);
+  const manifest=protocol.manifest(appId,await view.read(path.join(cacheRoot,'manifests',source.manifestSha256+'.json'),protocol.MAX_MANIFEST,{bytes:checked.value.manifest.bytes,sha256:source.manifestSha256,retain:true}),checked,registry,requiredKinds,channel);
   const snapshotRoot=path.join(cacheRoot,'snapshots',manifest.sha256),datasets=[],expectedFiles=new Set(),expectedDirectories=new Set();await view.directory(snapshotRoot);
   for(const dataset of manifest.value.datasets){
    canceled(signal);const adapter=registry[dataset.kind],root=path.join(snapshotRoot,dataset.datasetId),files={};await view.directory(root);
+   await withSnapshotValidation(adapter,{signal},async validate=>{
    for(const object of dataset.objects){
     const relative=dataset.datasetId+'/'+adapter.roles[object.role].path,file=path.join(snapshotRoot,...relative.split('/'));
     await view.read(file,object.bytes,{bytes:object.bytes,sha256:object.sha256});files[object.role]=file;expectedFiles.add(relative);
     let parent=path.posix.dirname(relative);while(parent!=='.'){expectedDirectories.add(parent);parent=path.posix.dirname(parent);}
    }
-   requireValue(await adapter.validateSnapshot({dataset:structuredClone(dataset),root,files:{...files},signal})===true,'Compiled module reader rejected binding');
+   requireValue(await validate({dataset:structuredClone(dataset),root,files:{...files},signal})===true,'Compiled module reader rejected binding');
+   });
    datasets.push({kind:dataset.kind,datasetId:dataset.datasetId,revisionId:dataset.revisionId,root,files,objects:structuredClone(dataset.objects)});
   }
   await view.closure(snapshotRoot,expectedFiles,expectedDirectories);await view.unchanged();canceled(signal);

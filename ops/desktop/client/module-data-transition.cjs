@@ -1,9 +1,10 @@
 'use strict';
 // A native startup lease, not a backend controller or a hot-update mechanism.
 const {canonical}=require('./access-client.cjs');
+const {isDataStartupFailure}=require('./startup-failure.cjs');
 const MESSAGES=Object.freeze({cancelled:'Module startup was cancelled.',context:'The selected workspace changed.',authorization:'Application access changed during startup.',transition:'Module startup is unavailable.'});
 function failure(code='transition'){const error=new Error(MESSAGES[code]||MESSAGES.transition);error.code=error.reason=Object.hasOwn(MESSAGES,code)?code:'transition';return error;}
-function safe(error){return failure(Object.hasOwn(MESSAGES,error?.reason)?error.reason:error?.code);}
+function safe(error){return isDataStartupFailure(error)?error:failure(Object.hasOwn(MESSAGES,error?.reason)?error.reason:error?.code);}
 function freeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}
 function fingerprint(value){try{return canonical(structuredClone(value));}catch{throw failure('context');}}
 

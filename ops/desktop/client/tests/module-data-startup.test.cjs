@@ -4,6 +4,10 @@ const {compiledApplicationContract}=require('../module-data-startup.cjs');
 const {startupFixture}=require('./fixtures/module-startup-fixture.cjs');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function deferred(){let resolve;const promise=new Promise(done=>{resolve=done;});return {promise,resolve};}
+test('a packaged required installed contract cannot fall back to unverified ordinary startup',async t=>{
+ const f=startupFixture(t,{production:true,changeOptions:options=>{options.requireInstalledContract=true;}});
+ await assert.rejects(f.startup.start(f.selected,null),{code:'program'});assert.deepEqual(f.events,[]);assert.equal(f.runtime.child,null);
+});
 
 for(const appId of ['melange','mentat']){
  test(`${appId} production gate preserves ordinary startup and reports unsupported without data/auth/provider work`,async t=>{

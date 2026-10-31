@@ -22,7 +22,7 @@ test('installer no longer imports the certificate; it only keeps an offline roll
   const install=nsis.slice(nsis.indexOf('!macro customInstall'),nsis.indexOf('!macroend'));
   assert.match(install,/\$\{IfNot\} \$\{isUpdated\}\s+\$\{AndIfNot\} \$\{Silent\}\s+\$\{AndIf\} \$installMode == "CurrentUser"/,'per-user installs only');
   assert.ok(install.includes('CopyFiles /SILENT "$EXEPATH" "$LOCALAPPDATA\\${APP_ID}\\baseline\\${VERSION}\\$EXEFILE"'));
-  assert.ok(nsis.slice(nsis.indexOf('!macro customUnInstall')).includes('RMDir /r "$LOCALAPPDATA\\${APP_ID}\\baseline"'));
+  assert.ok(!nsis.includes('!macro customUnInstall'),'the installer has no uninstaller or baseline deletion hook');
   assert.ok(fs.readFileSync(path.join(root,'builder.cjs'),'utf8').includes("{from:path.join(__dirname,'"+CERTIFICATE+"'),to:'"+CERTIFICATE+"'}"));
   const launcher=fs.readFileSync(path.join(root,'turn-on-updates.cmd'),'ascii');
   assert.equal(launcher.split('\n').length,launcher.split('\r\n').length,'CRLF only');

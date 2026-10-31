@@ -77,3 +77,8 @@ test('a held Terrier password response cannot reuse a sign-in window ticket afte
  const logouts=f.logout,replacement=await f.lifecycle.prepareAuthentication();assert.equal(f.logout,logouts+1);assert.equal(await f.lifecycle.terrierAuthenticated(),false);assert.equal(f.lifecycle.requiresFreshPassword,true);await assert.rejects(f.lifecycle.resume(f.approved),/Fresh/);
  assert.notEqual(replacement.generation,ticket.generation);f.setAuthenticated(true);await f.lifecycle.resume(f.approved,{freshPassword:true,expectedGeneration:replacement.generation});assert.equal(f.runtime.requestsAllowed,true);
 });
+test('an older suspension cannot reopen its boundary after a newer generation resumed',async()=>{
+ const f=fixture(),pending=[];let boundaries=0;f.lifecycle.onSuspend=()=>new Promise(resolve=>pending.push(resolve));f.lifecycle.showBoundary=async()=>{boundaries++;};
+ const older=f.lifecycle.suspend('locked'),newer=f.lifecycle.suspend('locked');pending[1]();await newer;assert.equal(boundaries,1);
+ await f.lifecycle.resume(f.approved);pending[0]();await older;assert.equal(boundaries,1);assert.equal(f.runtime.requestsAllowed,true);assert.equal(f.lifecycle.suspended,false);
+});

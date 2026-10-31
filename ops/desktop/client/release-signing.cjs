@@ -24,7 +24,8 @@ async function signPool(files,task){
  // Drain every in-flight operation before returning failure or releasing a phase.
  if(failed)throw failure;
 }
-async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
+async function signFile(file,root,{verify=false,owned=false,execute=run,processExecutionPolicy=false}={}){
+ if(typeof processExecutionPolicy!=='boolean')throw new Error('Explicit boolean process signing policy required');
  const requestedFile=path.resolve(file),requestedRoot=path.resolve(root);
  if(!within(requestedRoot,requestedFile))throw new Error('Refusing binary outside private build root');
  const snapshot=(target,directory)=>{
@@ -42,7 +43,7 @@ async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
   }
  };
  checkIdentity();
- const args=['-NoProfile','-NonInteractive','-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
+ const args=['-NoProfile','-NonInteractive',...(processExecutionPolicy?['-ExecutionPolicy','Bypass']:[]),'-File',path.join(__dirname,'sign-staged-binary.ps1'),'-File',file,'-Root',root,'-Mode',verify?'Verify':'Sign',...(owned?['-RequirePublisher']:[])];
  const {stdout}=await execute(String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,args,{windowsHide:true,timeout:300000,maxBuffer:1024*1024});
  checkIdentity();
  const result=JSON.parse(stdout.replace(/^\uFEFF/,''));
@@ -51,19 +52,30 @@ async function signFile(file,root,{verify=false,owned=false,execute=run}={}){
  checkIdentity();
  return {...result,path:requestedFile,verifiedPath:result.path};
 }
-function options(app,{env=process.env,platform=process.platform,sign=signFile,toolset}={}){
+function options(app,{env=process.env,platform=process.platform,sign=signFile,toolset,withoutUninstaller=false,builtinInstaller=false}={}){
+ if(typeof withoutUninstaller!=='boolean')throw new Error('Explicit boolean uninstaller contract required');
+ if(typeof builtinInstaller!=='boolean'||(builtinInstaller&&!withoutUninstaller))throw new Error('Built-in installer signing requires the no-uninstaller contract');
  const configured=env.DESKTOP_SIGNING_CERT_SHA1;
  if(!configured)return {};
+ const processPolicy=env.DESKTOP_SIGNING_PROCESS_EXECUTION_POLICY||'';
+ if(!['','Bypass'].includes(processPolicy))throw new Error('Unsupported process signing policy');
  if(platform!=='win32'||configured!==THUMBPRINT||env.WINDOWS_PUBLISHER_NAME!==SUBJECT||!env.DESKTOP_SIGNING_ROOT||!path.isAbsolute(env.DESKTOP_SIGNING_ROOT)||!env.DESKTOP_DIST_ROOT||!within(path.resolve(env.DESKTOP_SIGNING_ROOT),path.resolve(env.DESKTOP_DIST_ROOT)))throw new Error('Release signing requires the approved certificate and a private build/dist root');
  if(env.CSC_LINK||env.WIN_CSC_LINK||env.CSC_KEY_PASSWORD||env.WIN_CSC_KEY_PASSWORD||env.ELECTRON_BUILDER_OFFLINE==='true')throw new Error('Release signing uses only the existing CurrentUser certificate and online timestamps');
  // A cached executable can bypass the sign hook and omits fuses from its key.
  env.ELECTRON_BUILDER_DISABLE_BUILD_CACHE='true';
- const root=path.resolve(env.DESKTOP_SIGNING_ROOT),records=[];let ready=false,appDirectory;
+ const root=path.resolve(env.DESKTOP_SIGNING_ROOT),records=[],compilerFiles=[];let ready=false,appDirectory;
  ancestors(root,true);
  const identity=file=>path.resolve(file).toLowerCase();
  const owned=file=>path.basename(file)===app.name+'.exe'||/__uninstaller\.exe$/i.test(file)||new RegExp('^'+app.name+'-[0-9]+\\.[0-9]+\\.[0-9]+.*\\.exe$').test(path.basename(file))||(appDirectory&&identity(file)===identity(path.join(appDirectory,'resources','elevate.exe')));
- const record=async(file,verify=false,forceOwned=owned(file))=>{const result=await sign(file,root,{verify,owned:forceOwned});records.push(result);return result;};
+ const record=async(file,verify=false,forceOwned=owned(file))=>{const result=await sign(file,root,{verify,owned:forceOwned,processExecutionPolicy:processPolicy==='Bypass'});records.push(result);return result;};
  const verifyToolCopies=()=>{
+  if(builtinInstaller){
+   const current=tree(path.join(root,'nsis'));
+   if(current.length!==compilerFiles.length)throw new Error('Private NSIS compiler file set changed');
+   for(const file of current){const expected=compilerFiles.find(row=>identity(row.path)===identity(file));
+    if(!expected||hash(file)!==expected.sha256)throw new Error('Private NSIS compiler changed after staging');}
+   return;
+  }
   for(const directory of ['nsis','nsis-resources'])for(const file of tree(path.join(root,directory)).filter(file=>!stub(file)&&isPE(file)))
    if(!records.some(row=>row.path.toLowerCase()===file.toLowerCase()&&row.sha256===hash(file)&&row.status==='Valid'))throw new Error('Private NSIS binary changed after signing');
  };
@@ -72,19 +84,33 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
   win:{signtoolOptions:{publisherName:SUBJECT,signingHashAlgorithms:['sha256'],sign:async configuration=>{if(!ready)throw new Error('Private signing tools were not prepared');await record(configuration.path);}}},
   beforePack:async context=>{
    if(context.electronPlatformName!=='win32'||ready||!within(root,path.resolve(context.appOutDir)))throw new Error('Release signing supports one fresh private Windows package per build');
+   if(withoutUninstaller&&context.packager.config?.extraMetadata?.desktopAppConfig?.desktopUninstaller!==false)throw new Error('No-uninstaller signing requires matching application metadata');
    if(env.ELECTRON_BUILDER_NSIS_DIR||env.ELECTRON_BUILDER_NSIS_RESOURCES_DIR)throw new Error('Release signing refuses inherited NSIS tool overrides');
    const tools=toolset||require('app-builder-lib/out/toolsets/windows.js');
-   const compiler=await tools.getMakeNsisPath(),plugins=await tools.getNsisPluginsPath();
+   const compiler=await tools.getMakeNsisPath();
    const source=compiler.env?.NSISDIR;
    if(!source||!fs.existsSync(path.join(source,'Bin','makensis.exe')))throw new Error('Expected pinned legacy NSIS layout');
-   const copies=[{source,destination:path.join(root,'nsis')},{source:path.dirname(plugins),destination:path.join(root,'nsis-resources')}];
+   const copies=[{source,destination:path.join(root,'nsis')}];
+   if(!builtinInstaller){const plugins=await tools.getNsisPluginsPath();copies.push({source:path.dirname(plugins),destination:path.join(root,'nsis-resources')});}
    const originals=[];
-   for(const copy of copies){if(fs.existsSync(copy.destination))throw new Error('Private NSIS staging already exists');for(const file of tree(copy.source))originals.push({file,sha256:hash(file)});fs.cpSync(copy.source,copy.destination,{recursive:true,errorOnExist:true,force:false});}
-   await signPool(copies.flatMap(copy=>tree(copy.destination).filter(file=>!stub(file)&&isPE(file))),file=>record(file,false,false));
+   for(const copy of copies){
+    if(fs.existsSync(copy.destination))throw new Error('Private NSIS staging already exists');
+    const included=file=>!builtinInstaller||path.relative(copy.source,file).split(path.sep)[0].toLowerCase()!=='plugins';
+    for(const file of tree(copy.source).filter(included))originals.push({file,sha256:hash(file)});
+    fs.cpSync(copy.source,copy.destination,{recursive:true,errorOnExist:true,force:false,filter:included});
+    if(builtinInstaller)for(const file of tree(copy.destination)){
+     const sourceFile=path.join(copy.source,path.relative(copy.destination,file));
+     const expected=originals.find(row=>identity(row.file)===identity(sourceFile));
+     if(!expected||hash(file)!==expected.sha256)throw new Error('Private NSIS compiler differs from its cached input');
+     compilerFiles.push({path:file,sha256:expected.sha256});
+    }
+   }
+   if(!builtinInstaller)await signPool(copies.flatMap(copy=>tree(copy.destination).filter(file=>!stub(file)&&isPE(file))),file=>record(file,false,false));
    for(const original of originals)if(hash(original.file)!==original.sha256)throw new Error('Shared NSIS tool cache changed');
    const userPlugins=path.join(context.packager.info.buildResourcesDir,'x86-unicode');
    if(fs.existsSync(userPlugins))throw new Error('Unreviewed custom NSIS plugins override the signed private toolset');
-   env.ELECTRON_BUILDER_NSIS_DIR=copies[0].destination;env.ELECTRON_BUILDER_NSIS_RESOURCES_DIR=copies[1].destination;
+   env.ELECTRON_BUILDER_NSIS_DIR=copies[0].destination;
+   if(!builtinInstaller)env.ELECTRON_BUILDER_NSIS_RESOURCES_DIR=copies[1].destination;
    ready=true;verifyToolCopies();
   },
   afterSign:async context=>{
@@ -102,13 +128,18 @@ function options(app,{env=process.env,platform=process.platform,sign=signFile,to
    const verifyCurrent=async(file,forceOwned=owned(file))=>{const result=await record(file,true,forceOwned);current.set(identity(file),result);};
    await signPool(tree(appDirectory).filter(file=>isPE(file)),file=>verifyCurrent(file));
    await verifyCurrent(event.file,true);verifyToolCopies();
-   for(const file of [path.join(appDirectory,app.name+'.exe'),path.join(appDirectory,'resources','elevate.exe'),path.resolve(event.file)]){
+   const required=[path.join(appDirectory,app.name+'.exe'),...(!builtinInstaller?[path.join(appDirectory,'resources','elevate.exe')]:[]),path.resolve(event.file)];
+   for(const file of required){
     const result=current.get(identity(file));
     if(!result||identity(result.path)!==identity(file)||result.status!=='Valid'||result.thumbprint!==THUMBPRINT||result.timestamped!==true)throw new Error('Current application, elevation helper or installer signature evidence is missing');
     ancestors(file);if(result.sha256!==hash(file))throw new Error('Current application, elevation helper or installer changed after verification');
    }
-   if(!records.some(row=>/__uninstaller\.exe$/i.test(row.path)&&row.status==='Valid'&&row.thumbprint===THUMBPRINT&&row.timestamped===true))throw new Error('Staged uninstaller signature evidence is missing');
-   const receipt={schemaVersion:1,appId:app.id,certificateThumbprint:THUMBPRINT,installer:path.resolve(event.file),files:records,currentFiles:[...current.values()],uninstallerEvidence:'staged-history-only'};
+   if(withoutUninstaller){
+    const uninstaller=file=>{const name=path.basename(file).toLowerCase();return name.endsWith('.exe')&&(name.startsWith('unins')||name.endsWith('__uninstaller.exe')||name==='old-uninstaller.exe');};
+    if(records.some(row=>uninstaller(row.path))||tree(appDirectory).some(uninstaller))throw new Error('No-uninstaller release contains uninstaller evidence or files');
+   }else if(!records.some(row=>/__uninstaller\.exe$/i.test(row.path)&&row.status==='Valid'&&row.thumbprint===THUMBPRINT&&row.timestamped===true))throw new Error('Staged uninstaller signature evidence is missing');
+   const receipt={schemaVersion:1,appId:app.id,certificateThumbprint:THUMBPRINT,installer:path.resolve(event.file),files:records,currentFiles:[...current.values()],desktopUninstaller:!withoutUninstaller,uninstallerEvidence:withoutUninstaller?'intentionally-absent':'staged-history-only'};
+   if(builtinInstaller)Object.assign(receipt,{installerFormat:'builtin-nsis-v1',installerPlugins:[],compilerFiles});
    fs.writeFileSync(event.file+'.signatures.json',JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   }
  };

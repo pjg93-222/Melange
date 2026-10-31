@@ -21,8 +21,9 @@ def canonical_root(path):
     return os.path.normcase(str(Path(path).resolve()))
 
 
-def workspace_path(data, state):
-    identity = hashlib.sha256(canonical_root(data).encode('utf-8')).hexdigest()[:24]
+def workspace_path(code, data, state):
+    roots = json.dumps([canonical_root(code), canonical_root(data)], ensure_ascii=False, separators=(',', ':'))
+    identity = hashlib.sha256(roots.encode('utf-8')).hexdigest()[:24]
     return Path(state).resolve().parent / 'runtime-workspaces' / identity
 
 
@@ -112,9 +113,9 @@ def prepare_workspace(code, data, state):
     code, data, state = Path(code).resolve(), Path(data).resolve(), Path(state).resolve()
     if code == data or code.is_relative_to(data) or data.is_relative_to(code):
         raise ValueError('Mentat code and writable data must be separate trees')
-    # Selecting another data directory must not rewrite a live session's links.
-    # Legacy runtime-workspace directories are preserved, never repointed.
-    workspace = workspace_path(data, state)
+    # A new installation or data selection must not rewrite a live session's links.
+    # Legacy data-only workspace keys are preserved, never repointed or reused.
+    workspace = workspace_path(code, data, state)
     workspace.mkdir(parents=True, exist_ok=True)
     pairs = []
     for name in CODE_DIRS:
@@ -134,10 +135,10 @@ def prepare_workspace(code, data, state):
         else:
             missing.append({'path': str(link), 'target': str(target)})
     if missing and os.name == 'nt':
-        environment = dict(os.environ, MENTAT_DESKTOP_LINKS=json.dumps(missing))
-        script = "$ErrorActionPreference='Stop'; foreach($link in ($env:MENTAT_DESKTOP_LINKS | ConvertFrom-Json)) { New-Item -ItemType Junction -Path $link.path -Target $link.target | Out-Null }"
-        subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script], env=environment,
-                       capture_output=True, timeout=45, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        # Direct junction creation: work PCs block powershell.exe launched by the app.
+        import _winapi
+        for item in missing:
+            _winapi.CreateJunction(item['target'], item['path'])
     elif missing:
         for item in missing:
             Path(item['path']).symlink_to(item['target'], target_is_directory=True)

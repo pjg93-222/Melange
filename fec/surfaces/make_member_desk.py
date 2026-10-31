@@ -1044,6 +1044,21 @@ if _NARR_DOC and not _NARR_ACTIVE:
                   _NARR_DOC.get('schema'), _NARR_DOC.get('status'),
                   len(_NARR_DOC.get('members') or {})))
 NARR = (_NARR_DOC.get('members') or {}) if _NARR_ACTIVE else {}
+# ---- v3 member briefs (Paul 2026-10-20): replace the "Suggested approach" block ---------------
+# The publication reader verifies the receipt and packets, then marks only the
+# affected brief stale when its packet no longer matches current evidence.
+import members.validate_member_briefs_v3 as BV3
+_BRIEF_V3_ERRORS, BRIEFS_V3, _BRIEF_V3_SUMMARY = BV3.load_publication(Path(B))
+if _BRIEF_V3_ERRORS and os.path.exists(os.path.join(B, 'data', 'members', 'member_briefs_v3.json')):
+    print('  !! member_briefs_v3.json REJECTED; v3 briefs WITHHELD: %s' % '; '.join(_BRIEF_V3_ERRORS[:4]))
+elif BRIEFS_V3:
+    print('  v3 briefs: %d shown, %d flagged for rewrite, %d departed' % (
+        len(BRIEFS_V3), len(_BRIEF_V3_SUMMARY['stale']), len(_BRIEF_V3_SUMMARY['departed'])))
+    for _flagged, _why in sorted(_BRIEF_V3_SUMMARY['reasons'].items())[:25]:
+        print('    %s: %s' % (_flagged, _why))
+    if _BRIEF_V3_SUMMARY['basis_withheld']:
+        print('  v3 Basis lines withheld: %s' % _BRIEF_V3_SUMMARY['basis_withheld'])
+
 # Voice-ES remains retired. Negative-affect expression is retained below as a literal public-text
 # measure and is never presented as holistic Neuroticism or as an independent composure measure.
 

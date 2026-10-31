@@ -20,8 +20,8 @@ import time
 from types import MappingProxyType
 import weakref
 
-from module_application_contracts import (ApplicationContract, ModuleInputError,
-    application_contract, canonical, require, verify_program)
+from module_application_contracts import (ApplicationContract, ModuleInputError, DataIntakeBlocked,
+    application_contract, canonical, require, verify_generation, verify_program)
 
 MAX_FRAME = 64 * 1024
 _SOURCE_FIELDS = frozenset(('schemaVersion', 'appId', 'repository', 'catalogSequence', 'releaseTag',
@@ -47,7 +47,7 @@ def _read_exact(stream, size):
     return b''.join(chunks)
 
 
-def read_frame(stream, *, timeout=5.0, is_cancelled=lambda: False):
+def read_frame(stream, *, timeout=5.0, is_cancelled=lambda: False, maximum=MAX_FRAME):
     """Read length+payload+EOF with a finite wait even on a blocked Windows pipe.
 
     A timed-out daemon may remain in read until the candidate exits; it cannot
@@ -56,12 +56,13 @@ def read_frame(stream, *, timeout=5.0, is_cancelled=lambda: False):
     """
     require(type(timeout) in (int, float) and math.isfinite(timeout) and 0 < timeout <= 30
             and callable(is_cancelled) and hasattr(stream, 'read'))
+    require(type(maximum) is int and MAX_FRAME <= maximum <= 2 * 1024**2)
     require(not is_cancelled())
     result = queue.Queue(maxsize=1)
     def collect():
         try:
             size, = struct.unpack('>I', _read_exact(stream, 4))
-            require(2 <= size <= MAX_FRAME)
+            require(2 <= size <= maximum)
             raw = _read_exact(stream, size)
             require(stream.read(1) == b'')
             result.put((raw, True))
@@ -81,7 +82,7 @@ def read_frame(stream, *, timeout=5.0, is_cancelled=lambda: False):
             pass
 
 
-def _parse(raw):
+def _parse(raw, *, maximum=MAX_FRAME):
     def pairs(items):
         value = {}
         for key, child in items:
@@ -91,7 +92,8 @@ def _parse(raw):
     def invalid(_value):
         raise ModuleInputError()
     try:
-        require(type(raw) is bytes and 2 <= len(raw) <= MAX_FRAME)
+        require(type(maximum) is int and MAX_FRAME <= maximum <= 2 * 1024**2)
+        require(type(raw) is bytes and 2 <= len(raw) <= maximum)
         value = json.loads(raw.decode('utf-8', errors='strict'), object_pairs_hook=pairs,
                            parse_constant=invalid, parse_float=invalid)
         nodes = 0
@@ -249,17 +251,18 @@ def complete_server_installation(latch, server):
     state['installed'], state['server'] = installed, server
 
 
-def server_installed_health(latch, server):
+def server_installed_health(latch, server, *, full=True):
     require(type(latch) is ServerInstallation and latch in _SERVER_INSTALLATIONS)
     state = _SERVER_INSTALLATIONS[latch]
     require(state['installed'] is not None and state['server'] is server)
-    return installed_health(state['installed'])
+    return installed_health(state['installed'], full=full)
 
 
 def prepare_handoff(stream, *, app_id, profile_root, source_root, original_data_root, state_root,
                     bootstrap_root, timeout=5.0, is_cancelled=lambda: False, lookup=None):
     """lookup is a native test/compiled dependency, never a payload field."""
     prepared = None
+    intake_context = None
     try:
         value = _parse(read_frame(stream, timeout=timeout, is_cancelled=is_cancelled))
         _exact(value, _FIELDS)
@@ -296,6 +299,9 @@ def prepare_handoff(stream, *, app_id, profile_root, source_root, original_data_
         require(not is_cancelled())
         verify_program(contract, source_root=source_root, bootstrap_root=bootstrap_root)
         require(not is_cancelled())
+        intake_context = {'schemaVersion': 1, 'appId': app_id, 'launchNonce': nonce,
+                          'programFingerprint': contract.program_fingerprint,
+                          'sourceDigests': {'public': source['manifestSha256']}}
         prepared = contract.prepare_readers(app_id=app_id, profile=str(profile_root), source_root=str(source_root),
             original_data_root=str(original_data_root), state_root=str(state_root), source=dict(source),
             native_verified=True, required_kinds=contract.required_kinds, is_cancelled=is_cancelled)
@@ -309,7 +315,7 @@ def prepare_handoff(stream, *, app_id, profile_root, source_root, original_data_
         require(not is_cancelled())
         return PreparedHandoff(contract, MappingProxyType(dict(source)), MappingProxyType(roots),
             MappingProxyType(dict(prepared['readers'])), MappingProxyType(binding), nonce, str(bootstrap_root), plans)
-    except Exception:
+    except Exception as error:
         if type(prepared) is dict and type(prepared.get('readers')) is dict:
             for bound in prepared['readers'].values():
                 reader = bound.get('reader') if type(bound) is dict else None
@@ -318,7 +324,36 @@ def prepare_handoff(stream, *, app_id, profile_root, source_root, original_data_
                         reader.close()
                     except Exception:
                         pass
+        if type(error) is DataIntakeBlocked and intake_context is not None:
+            # A program replacement/import failure must never be disguised as a
+            # recoverable cached-data error, even if data failed first.
+            verify_program(contract, source_root=source_root, bootstrap_root=bootstrap_root)
+            error.native_status = {**intake_context, 'reason': error.reason}
+            raise
         raise ModuleInputError() from None
+
+
+def emit_data_blocked(error, stream):
+    """One bounded native diagnostic, containing no paths or exception text."""
+    if type(error) is not DataIntakeBlocked or type(error.native_status) is not dict:
+        return False
+    value = error.native_status
+    fields = {'schemaVersion', 'appId', 'launchNonce', 'programFingerprint', 'sourceDigests', 'reason'}
+    if (set(value) != fields or type(value['schemaVersion']) is not int or value['schemaVersion'] != 1
+            or value['appId'] not in ('melange', 'mentat') or value['reason'] not in ('integrity', 'storage')
+            or type(value['launchNonce']) is not str or re.fullmatch(r'[A-Za-z0-9_-]{43}', value['launchNonce']) is None
+            or type(value['programFingerprint']) is not str or re.fullmatch(r'[a-f0-9]{64}', value['programFingerprint']) is None
+            or type(value['sourceDigests']) is not dict
+            or set(value['sourceDigests']) not in ({'public'}, {'public', 'workspace'})
+            or any(type(digest) is not str or re.fullmatch(r'[a-f0-9]{64}', digest) is None
+                   for digest in value['sourceDigests'].values())):
+        return False
+    raw = canonical(value)
+    if len(raw) > 2048:
+        return False
+    stream.write('DESKTOP_DATA_BLOCKED ' + raw.decode('utf-8') + '\n')
+    stream.flush()
+    return True
 
 
 def install_handoff(prepared, server, original_private_contexts):
@@ -339,27 +374,44 @@ def install_handoff(prepared, server, original_private_contexts):
                 and type(result.private_boundaries) is dict and set(result.private_boundaries) == set(originals)
                 and all(result.private_boundaries[key] is original_private_contexts[key] is originals[key] for key in originals)
                 and callable(result.verify) and result.verify() is True)
-        verify_program(prepared.contract, source_root=prepared.roots['sourceRoot'], bootstrap_root=prepared.bootstrap_root)
+        _verify_generation(prepared, full=True)
         installed = _InstalledHandoff(result.application)
         coverage = {'publicReaders': sorted(result.public_readers), 'privateBoundaries': sorted(originals)}
         _INSTALLED[installed] = {'prepared': prepared, 'verify': result.verify,
             'health': {**prepared.binding, 'schemaVersion': 1, 'launchNonce': prepared.launch_nonce,
                 'coverageDigest': hashlib.sha256(canonical(coverage)).hexdigest()}}
         return installed
-    except Exception:
+    except Exception as error:
+        if type(error) is DataIntakeBlocked and type(prepared) is PreparedHandoff:
+            recheck_original_roots(prepared)
+            verify_program(prepared.contract, source_root=prepared.roots['sourceRoot'], bootstrap_root=prepared.bootstrap_root)
+            raise
         raise ModuleInputError() from None
 
 
-def installed_health(installed):
+def _verify_generation(prepared, *, full):
+    source, boot = prepared.roots['sourceRoot'], prepared.bootstrap_root
+    key = ('module', prepared.launch_nonce, prepared.contract.program_fingerprint,
+           os.path.normcase(source), os.path.normcase(boot))
+    return verify_generation(key, (source, boot),
+        lambda: verify_program(prepared.contract, source_root=source, bootstrap_root=boot), full=full, kind='module')
+
+
+def installed_health(installed, *, full=True):
     """Fresh scalar copy; paths, reader objects and capabilities never reach HTTP."""
+    prepared = None
     try:
         require(type(installed) is _InstalledHandoff and installed in _INSTALLED)
         record = _INSTALLED[installed]
-        require(record['verify']() is True)
         prepared = record['prepared']
-        verify_program(prepared.contract, source_root=prepared.roots['sourceRoot'], bootstrap_root=prepared.bootstrap_root)
+        require(record['verify']() is True)
+        _verify_generation(prepared, full=full)
         return dict(record['health'])
-    except Exception:
+    except Exception as error:
+        if type(error) is DataIntakeBlocked and type(prepared) is PreparedHandoff:
+            recheck_original_roots(prepared)
+            verify_program(prepared.contract, source_root=prepared.roots['sourceRoot'], bootstrap_root=prepared.bootstrap_root)
+            raise
         raise ModuleInputError() from None
 
 

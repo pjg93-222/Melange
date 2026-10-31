@@ -44,6 +44,22 @@ test('provider failure releases sleep protection and the queue permits a later v
  await assert.rejects(f.controller.ensure(configuration),/verification/);assert.equal(f.controller.busy,false);assert.equal(f.calls.at(-1),'release');
  f.provider.ensure=async config=>config;assert.equal(await f.controller.ensure(configuration),configuration);
 });
+
+test('public cache retirement waits for ongoing provider work and checks authorization again',async()=>{
+ const selected={district:'co-05',dataDirectory:'fixture',standaloneGitHubData:{schemaVersion:2}},f=fixture();
+ let allowed=true,finish,retired=0;
+ const local={mode:'standalone',identity:{schemaVersion:1,appId:'terrier',deviceId:'11111111-1111-4111-8111-111111111111',accountId:'22222222-2222-4222-8222-222222222222',accountIdentity:'local_user'},principal:{mode:'standalone',districtId:'co-05'}};
+ f.controller.authorize=async()=>allowed?local:null;await f.controller.ensure(selected);
+ f.provider.retireInactive=async()=>{retired++;};f.provider.discover=async()=>new Promise(resolve=>{finish=resolve;});
+ const discovery=f.controller.discover(selected);await new Promise(resolve=>setImmediate(resolve));const retirement=f.controller.retire(selected);assert.equal(retired,0);
+ allowed=false;finish();await discovery;assert.equal(await retirement,null);assert.equal(retired,0);
+ allowed=true;await f.controller.retire(selected);assert.equal(retired,1);
+});
+test('post-ready cache retirement declines when a district switch starts during authorization',async()=>{
+ const f=fixture();await f.controller.ensure(configuration);let canRetire=true,retired=false;
+ f.provider.retireInactive=async()=>{retired=true;};f.controller.authorize=async()=>{canRetire=false;return approval();};
+ assert.equal(await f.controller.retire({...configuration,standaloneGitHubData:{schemaVersion:2}},{canRetire:()=>canRetire}),null);assert.equal(retired,false);
+});
 test('runtime IPC denies untrusted frames before reads or refresh and ignores renderer arguments',async()=>{
  const handlers=new Map(),trusted={},calls=[];
  registerDistrictDataIPC({handle:(name,callback)=>handlers.set(name,callback)},{runtimeOnly:event=>{if(event!==trusted)throw new Error('Untrusted application request');},info:()=>{calls.push('info');return {phase:'ready'};},refresh:()=>{calls.push('refresh');return {phase:'update-ready'};},canRefresh:()=>true});
@@ -61,10 +77,13 @@ test('preload exposes a read, argument-free refresh and a removable data status 
  assert.deepEqual(calls,[['desktop:district-data'],['desktop:district-data-refresh']]);let received;
  const remove=exposed.onDistrictData(value=>{received=value;});const state={phase:'ready'};listeners.get('desktop:district-data-status')({},state);assert.equal(received,state);remove();assert.equal(listeners.size,0);
 });
-test('owner data failures stay on the loading boundary and cannot mark a binary update as failed',async()=>{
+test('known owner data failures defer without raw errors while unknown program failures stay fatal',async()=>{
  const source=fs.readFileSync(path.join(__dirname,'..','main.cjs'),'utf8');
  const start=source.indexOf('async function prepareDistrictData(){'),end=source.indexOf('// Learned revocation:',start);assert.ok(start>0&&end>start);
- const notices=[],settings={...configuration},context={read:()=>settings,prepareOwnerDistrict:async()=>{throw new Error('private/path and private response');},closing:false,downloads:{signal:{aborted:false}},districtLog:text=>notices.push(text),loadingStatus:text=>notices.push(text)};
+ const notices=[],settings={...configuration},failure=require('../startup-failure.cjs'),protocol=require('../github-district-protocol.cjs');let error=new protocol.DistrictDataError('private/path and private response');
+ const context={runtime:{},standaloneMode:false,read:()=>settings,prepareOwnerDistrict:async()=>{throw error;},closing:false,downloads:{signal:{aborted:false}},districtLog:text=>notices.push(text),loadingStatus:text=>notices.push(text),require:name=>name==='./district-data-probe.cjs'?{verifyDistrictProgram:()=>{}}:require(path.join(__dirname,'..',name))};
  vm.createContext(context);vm.runInContext(source.slice(start,end)+';globalThis.prepare=prepareDistrictData;',context);
- assert.equal(await context.prepare(),false);assert.equal(notices.length,2);assert.match(notices[1],/Existing files were preserved/);assert.doesNotMatch(notices.join(' '),/private\/path|private response/);
+ await assert.rejects(context.prepare(),value=>failure.isDataStartupFailure(value)&&value.dataReason==='integrity'&&!value.message.includes('private/path'));
+ error=Object.assign(new Error('synthetic socket timeout'),{retryableNetwork:true,reason:'timeout'});await assert.rejects(context.prepare(),value=>failure.isDataStartupFailure(value)&&value.retryable);
+ error=new TypeError('synthetic installed code failure');await assert.rejects(context.prepare(),value=>value===error);assert.deepEqual(notices,[]);
 });

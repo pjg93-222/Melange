@@ -50,10 +50,16 @@ class BoundaryTests(unittest.TestCase):
             with self.assertRaises(ValueError):regular(target)
     def test_node_and_python_compiled_roles_agree(self):
         from module_data_snapshot import KINDS
+        from workspace_data_contract import WORKSPACE_KINDS
         client=Path(__file__).resolve().parents[1]/'client/module-data-adapters.cjs'
-        output=subprocess.run(['node','-e','const m=require(process.argv[1]);process.stdout.write(JSON.stringify({...m.ROLE_MAPS,...m.PUBLIC_ROLES,...m.PAGED_ROLES}))',str(client)],capture_output=True,check=True,timeout=20)
+        output=subprocess.run(['node','-e',"const m=require(process.argv[1]),w=require(require('node:path').join(require('node:path').dirname(process.argv[1]),'workspace-data-contract.cjs'));process.stdout.write(JSON.stringify({public:{...m.ROLE_MAPS,...m.PUBLIC_ROLES,...m.PAGED_ROLES},workspace:w.roleMaps()}))",str(client)],capture_output=True,check=True,timeout=20)
         actual=json.loads(output.stdout)
-        expected={kind:{role:{'path':value[0],'maxBytes':value[1]} for role,value in roles.items()} for kind,(_app,roles) in KINDS.items()}
+        public=('melange.staffer-graph-core.v1','melange.payroll-identity-core.v1','mentat.aggregate-forecast-core.v1',
+                'melange.official-payroll-observations.v1','melange.official-payroll-pages.v1','mentat.public-fec-tables.v1')
+        workspace=set(kind for kinds in WORKSPACE_KINDS.values() for kind in kinds)
+        self.assertEqual(set(KINDS),set(public)|workspace)
+        expected={mode:{kind:{role:{'path':value[0],'maxBytes':value[1]} for role,value in KINDS[kind][1].items()}
+                        for kind in kinds} for mode,kinds in (('public',public),('workspace',workspace))}
         self.assertEqual(actual,expected)
 
 if __name__=='__main__':unittest.main()

@@ -43,7 +43,14 @@ function world(districts){
   refresh:async()=>{w.refreshes++;return {phase:'ready'};},client:{trust,accepted:async()=>({grant,revoked:false}),secrets:{read:async()=>({tokens:{[grant.grantId]:token}})}}};
  return w;
 }
-function journalStore(dir){const file=path.join(dir,'fixture-journal.json');return {read:async()=>fs.existsSync(file)?JSON.parse(fs.readFileSync(file,'utf8')):null,write:async value=>{fs.writeFileSync(file+'.tmp',JSON.stringify(value));fs.renameSync(file+'.tmp',file);}};}
+function journalStore(dir){const file=path.join(dir,'fixture-journal.json');return {read:async()=>fs.existsSync(file)?JSON.parse(fs.readFileSync(file,'utf8')):null,write:async value=>{
+ const temporary=file+'.'+crypto.randomUUID()+'.tmp';fs.writeFileSync(temporary,JSON.stringify(value),{flag:'wx'});
+ try{for(let attempt=0;;attempt++){try{fs.renameSync(temporary,file);break;}catch(error){
+  // Only this real Windows journal rename may wait: at most620ms total.
+  if(attempt>=5||error.syscall!=='rename'||error.path!==temporary||error.dest!==file||!['EPERM','EBUSY','EACCES'].includes(error.code))throw error;
+  await new Promise(resolve=>setTimeout(resolve,20*2**attempt));
+ }}}finally{try{fs.unlinkSync(temporary);}catch(error){if(error.code!=='ENOENT')throw error;}}
+ }};}
 function options(dir,w,extra={}){
  return {root:path.join(dir,'packs'),settings:{district:'co-05'},journal:journalStore(dir),request:w.request,sleep:async ms=>{w.sleeps.push(ms);},onStatus:text=>w.statuses.push(text),statfs:async()=>({bavail:1e12,bsize:1}),
   check:async(directory,id)=>{w.checked.push({id,files:fs.readdirSync(directory).sort()});return true;},...extra};
@@ -220,7 +227,7 @@ test('ENOSPC and EBUSY are reported as themselves, never as a failed verificatio
  for(const [code,reported] of [['ENOSPC',stopsForSpace],['EBUSY',error=>error instanceof DistrictDataStop&&/in use by another program/.test(error.message)]]){
   // while unzipping or verifying
   const dir=sandbox(t),w=world(['co-05']),fail=Object.assign(new Error('fixture '+code),{code});
-  await assert.rejects(ensureDistrictData(w.gate,options(dir,w,{check:async()=>{throw fail;}})),error=>reported(error)&&!/verification|discarded/.test(error.message)&&error.cause===fail,code);
+  await assert.rejects(ensureDistrictData(w.gate,options(dir,w,{check:async()=>{throw fail;}})),error=>{const accepted=reported(error)&&!/verification|discarded/.test(error.message)&&error.cause===fail;assert.ok(accepted,JSON.stringify({expectedCode:code,name:error.name,code:error.code,message:error.message,causeCode:error.cause?.code,causeMessage:error.cause?.message,sameInjectedCause:error.cause===fail}));return true;},code);
   const fetched=rangeCalls(w).length;assert.equal(fs.existsSync(place(dir,'co-05')),false);assert.equal(fs.existsSync(path.join(dir,'packs','staging',w.revisions[0].revisionId)),false);
   assert.equal(Object.keys(JSON.parse(fs.readFileSync(path.join(dir,'fixture-journal.json'),'utf8')).revisions).length,1,code+': not forgotten');assert.ok(cached(dir).length>0,code+': cache kept');
   assert.deepEqual((await ensureDistrictData(w.gate,options(dir,w))).downloaded,['co-05']);assert.equal(rangeCalls(w).length,fetched,code+': resumed from the cache');

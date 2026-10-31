@@ -3,10 +3,23 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const {GitHubModules,fileDigest}=require('../github-modules.cjs');
 const {fail}=require('../github-module-protocol.cjs');
+const {networkFailure}=require('../network-transport.cjs');
 const {environment,signed,sha,redirectedLocalCache}=require('./fixtures/github-module-fixture.cjs');
 function fixture(t){const f=environment();t.after(()=>f.cleanup());return f;}
 function roleFile(candidate,f){return path.join(candidate.snapshotRoot,f.remote.manifest.datasets[0].datasetId,'models','aggregate.json');}
 function next(f,sequence=2,bytes=Buffer.from('{"aggregate":42,"revision":2}')){f.remote=signed('mentat',{keys:f.remote.keys,sequence,bytes});}
+
+for(const mode of ['success','hash failure','cancel','drain mutation'])test(`module prewarm provider ${mode} preserves the hash and final mutation barriers`,async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),candidate=await p.prepare(f.selected),file=roleFile(candidate,f),adapter=f.options.registry['mentat.fixture.v1'],read=adapter.validateSnapshot,controller=new AbortController(),events=[],before=structuredClone(f.journal);
+ const stream=fs.createReadStream;t.mock.method(fs,'createReadStream',function(target,...options){const result=stream.call(this,target,...options);if(target===file){events.push('hash');result.once('end',()=>events.push('hashed'));}return result;});
+ adapter.prepareSnapshot=async options=>{assert.deepEqual(Object.keys(options),['signal']);assert.equal(options.signal,controller.signal);events.push('prewarm');if(mode==='cancel')controller.abort();return {
+  validateSnapshot:async input=>{assert.equal(events.at(-1),'hashed');events.push('reader');return read(input);},
+  cancel:async()=>{events.push('drain');if(mode==='drain mutation')fs.writeFileSync(file,Buffer.alloc(f.remote.bytes.length,120));}
+ };};
+ if(mode==='hash failure')fs.writeFileSync(file,Buffer.alloc(f.remote.bytes.length,120));
+ const result=p.stage(f.selected,{signal:controller.signal});if(mode==='success'){await result;assert.deepEqual(events,['prewarm','hash','hashed','reader','drain']);}else{await assert.rejects(result);assert.equal(events.at(-1),'drain');assert.equal(events.includes('reader'),mode==='drain mutation');}
+ assert.equal(events[0],'prewarm');assert.deepEqual(f.journal,before);
+});
 
 test('a fixed transparently redirected native cache adopts one physical root before metadata, segments and snapshot checks',async t=>{
  const f=fixture(t),local=path.join(fs.realpathSync.native(f.temporary),'local');fs.mkdirSync(local);const redirect=redirectedLocalCache(t,local);
@@ -214,6 +227,66 @@ test('background checks stage newer data while preserving active and do not inve
  assert.equal(second.status.phase,'update-ready');assert.equal(second.status.updateAvailable,true);assert.equal(f.journal.active.catalogSequence,1);assert.equal(f.journal.staged.catalogSequence,2);
  await p.commitActive(second,f.selected);assert.equal(f.journal.active.catalogSequence,2);
 });
+for(const appId of ['melange','mentat'])test(`${appId} unchanged staged checks validate once while startup activation still verifies independently`,async t=>{
+ const f=environment(appId);t.after(()=>f.cleanup());const p=new GitHubModules(f.options),first=await p.prepare(f.selected);await p.commitActive(first,f.selected);
+ const before=structuredClone(f.journal),selected=structuredClone(f.selected),account=path.join(f.original,'account.fixture');fs.writeFileSync(account,'owner state');
+ const validate=t.mock.method(p,'validateSnapshot'),adapter=t.mock.method(f.options.registry[appId+'.fixture.v1'],'validateSnapshot'),write=t.mock.method(f.store,'write');
+ f.requests.length=0;const unchanged=await p.stage(f.selected);
+ assert.equal(unchanged.status.phase,'ready');assert.equal(unchanged.status.updateAvailable,undefined);assert.equal(validate.mock.callCount(),1);assert.equal(adapter.mock.callCount(),1);assert.equal(write.mock.callCount(),1);
+ assert.deepEqual(f.requests,['pointer']);assert.deepEqual(f.journal,before);assert.deepEqual(f.selected,selected);assert.equal(fs.readFileSync(account,'utf8'),'owner state');
+ const prepared=await p.prepare(f.selected);assert.equal(validate.mock.callCount(),2);assert.equal(adapter.mock.callCount(),2);const requests=f.requests.length;
+ await p.commitActive(prepared,f.selected);assert.equal(validate.mock.callCount(),3);assert.equal(adapter.mock.callCount(),3);assert.equal(f.requests.length,requests);assert.deepEqual(f.journal,before);
+});
+test('a protected accepted binding avoids repeated REST, while loose cached metadata and a changed owner do not',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.prepare(f.selected);assert.equal(f.requests.filter(value=>value==='release').length,1);
+ f.requests.length=0;await new GitHubModules(f.options).prepare(f.selected);assert.deepEqual(f.requests,['pointer']);
+ await f.store.write({...f.journal,accepted:null});f.requests.length=0;await p.prepare(f.selected);assert(f.requests.includes('release'));assert(f.requests.includes('manifest'));
+ f.grant.accountIdentity='second-approved-owner@example.invalid';f.requests.length=0;await p.prepare(f.selected);assert(f.requests.includes('release'),'A different owner cannot inherit the prior REST attestation');
+});
+test('a different signed key epoch cannot reuse an accepted binding even when payload digest is unchanged',async t=>{
+ const crypto=require('node:crypto'),f=fixture(t),p=new GitHubModules(f.options);await p.prepare(f.selected);const before=structuredClone(f.journal),keys=crypto.generateKeyPairSync('ed25519');
+ const envelope={...f.remote.envelope,keyId:'rotated-test',signature:crypto.sign(null,Buffer.from(f.remote.envelope.payload,'base64'),keys.privateKey).toString('base64')};
+ p.publicKeys['rotated-test']=keys.publicKey.export({format:'der',type:'spki'}).subarray(-32).toString('base64');f.transport.currentPointer=async()=>Buffer.from(JSON.stringify(envelope));f.requests.length=0;
+ await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');assert(f.requests.includes('release'));assert.deepEqual(f.journal,before,'The immutable old envelope is retained rather than relabeled as the new epoch');
+});
+test('a restarted provider revalidates a staged newer snapshot once without activating or downloading it again',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options);await p.commitActive(await p.prepare(f.selected),f.selected);next(f);await p.stage(f.selected);
+ const before=structuredClone(f.journal),restarted=new GitHubModules(f.options),validate=t.mock.method(restarted,'validateSnapshot'),write=t.mock.method(f.store,'write');f.requests.length=0;
+ const repeated=await restarted.stage(f.selected);assert.equal(repeated.status.phase,'update-ready');assert.equal(repeated.status.updateAvailable,true);assert.equal(validate.mock.callCount(),1);assert.equal(write.mock.callCount(),1);
+ assert.deepEqual(f.requests,['pointer']);assert.deepEqual(f.journal,before);assert.equal(f.journal.active.catalogSequence,1);assert.equal(f.journal.staged.catalogSequence,2);
+});
+for(const [field,value] of Object.entries({catalogSequence:1,pointerDigest:'1'.repeat(64),manifestSha256:'2'.repeat(64),releaseTag:'module-data-2026-10-21-other',releaseCommit:'b'.repeat(40),identityDigest:'3'.repeat(64)}))test(`a different staged ${field} cannot skip materialization`,async t=>{
+ const f=fixture(t);next(f);const p=new GitHubModules(f.options);await p.prepare(f.selected);const expected=structuredClone(f.journal.staged),state=structuredClone(f.journal);state.staged={...state.staged,[field]:value};await f.store.write(state);
+ const materialize=t.mock.method(p,'materialize'),validate=t.mock.method(p,'validateSnapshot');await p.stage(f.selected);
+ assert.equal(materialize.mock.callCount(),1);assert.equal(validate.mock.callCount(),2);assert.deepEqual(f.journal.staged,expected);assert.equal(f.journal.active,null);
+});
+test('an exact staged record with a missing snapshot rematerializes from verified segments',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected),before=structuredClone(f.journal);fs.renameSync(first.snapshotRoot,path.join(f.temporary,'removed-snapshot'));
+ const materialize=t.mock.method(p,'materialize');f.requests.length=0;const recovered=await p.prepare(f.selected);
+ assert.equal(materialize.mock.callCount(),1);assert.deepEqual(fs.readFileSync(roleFile(recovered,f)),f.remote.bytes);assert.deepEqual(f.requests,['pointer']);assert.deepEqual(f.journal,before);
+});
+for(const mutation of ['bytes','extra','junction','hardlink','missing-role','reader'])test(`an exact staged record still refuses ${mutation} snapshot corruption`,async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected);await p.commitActive(first,f.selected);const before=structuredClone(f.journal),file=roleFile(first,f),backup=path.join(f.temporary,'original-snapshot');
+ if(mutation==='bytes')fs.writeFileSync(file,Buffer.alloc(f.remote.bytes.length,120));
+ if(mutation==='extra')fs.writeFileSync(path.join(first.snapshotRoot,'foreign'),'preserve');
+ if(mutation==='junction'){fs.renameSync(first.snapshotRoot,backup);fs.symlinkSync(backup,first.snapshotRoot,process.platform==='win32'?'junction':'dir');}
+ if(mutation==='hardlink'){const original=path.join(f.original,'original-role');fs.renameSync(file,original);fs.linkSync(original,file);}
+ if(mutation==='missing-role')fs.renameSync(file,path.join(f.temporary,'missing-role'));
+ if(mutation==='reader')f.options.registry['mentat.fixture.v1'].validateSnapshot=async()=>false;
+ const materialize=t.mock.method(p,'materialize');await assert.rejects(p.stage(f.selected),error=>error.reason===(mutation==='missing-role'?'storage':'integrity'));
+ assert.equal(materialize.mock.callCount(),0);assert.deepEqual(f.journal,before);if(mutation==='extra')assert.equal(fs.readFileSync(path.join(first.snapshotRoot,'foreign'),'utf8'),'preserve');
+ if(mutation==='junction')assert.equal(fs.lstatSync(first.snapshotRoot).isSymbolicLink(),true);if(mutation==='hardlink')assert.equal(fs.statSync(file).nlink,2);
+});
+test('an exact staged record retains the final byte check after a reader mutation with identical observed timestamps',async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected);await p.commitActive(first,f.selected);const before=structuredClone(f.journal);equalObservedTimes(t);let reached=false;
+ f.options.registry['mentat.fixture.v1'].validateSnapshot=async({files})=>{reached=true;fs.writeFileSync(files.aggregate,Buffer.alloc(f.remote.bytes.length,120));return true;};
+ await assert.rejects(p.stage(f.selected),/Owned module file integrity/);assert.equal(reached,true);assert.deepEqual(f.journal,before);
+});
+for(const mutation of ['bytes','revoked','cancelled'])test(`an exact staged record refuses ${mutation} after accepted-state persistence`,async t=>{
+ const f=fixture(t),p=new GitHubModules(f.options),first=await p.prepare(f.selected);await p.commitActive(first,f.selected);const before=structuredClone(f.journal),controller=new AbortController(),write=f.store.write;let reached=false;
+ f.store.write=async value=>{await write(value);reached=true;if(mutation==='bytes')fs.writeFileSync(roleFile(first,f),Buffer.alloc(f.remote.bytes.length,120));if(mutation==='revoked')f.revoked=true;if(mutation==='cancelled')controller.abort();};
+ await assert.rejects(p.stage(f.selected,{signal:controller.signal}),error=>error.reason===({bytes:'integrity',revoked:'authorization',cancelled:'cancelled'})[mutation]);assert.equal(reached,true);assert.deepEqual(f.journal,before);
+});
 test('interrupted transfers retain bounded partial bytes and resume with the exact offset',async t=>{
  const f=fixture(t),original=f.transport.segment;let interrupted=false;
  f.transport.segment=async(tag,item,options)=>{if(!interrupted){interrupted=true;await options.onChunk(f.remote.objects.get(item.asset).subarray(0,3));throw fail('unreachable','Synthetic interruption');}return original(tag,item,options);};
@@ -225,6 +298,17 @@ test('offline fallback requires a previously active fully reverified snapshot',a
  f.network=null;await p.commitActive(prepared,f.selected);f.network='timeout';const offline=await p.prepare(f.selected);assert.equal(offline.status.phase,'offline');assert.equal(offline.status.cached,true);
  fs.writeFileSync(roleFile(offline,f),'corrupt');await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');assert.equal(f.journal.active.catalogSequence,1);
 });
+
+test('a real transport cooldown reuses only active matching-owner data and still refuses corrupt bytes',async t=>{
+ const {EventEmitter}=require('node:events'),{Readable}=require('node:stream'),{GitHubModuleTransport}=require('../github-module-transport.cjs');
+ const f=fixture(t),initial=new GitHubModules(f.options),prepared=await initial.prepare(f.selected);let requests=0;
+ const request=(_url,_options,callback)=>{requests++;const req=new EventEmitter();req.destroy=()=>{};req.end=()=>queueMicrotask(()=>{const res=Readable.from(['secondary rate limit']);res.statusCode=403;res.headers={'x-ratelimit-remaining':'24','retry-after':'120'};callback(res);});return req;};
+ const transport=new GitHubModuleTransport('mentat',{request,now:()=>1700000000000,random:()=>0}),p=new GitHubModules({...f.options,transport});
+ await assert.rejects(p.prepare(f.selected),error=>error.reason==='rate_limited','A staged-only cache cannot supply offline activation');assert.equal(requests,1);
+ await initial.commitActive(prepared,f.selected);const offline=await p.prepare(f.selected);assert.equal(offline.status.phase,'offline');assert.equal(requests,1);
+ f.revoked=true;await assert.rejects(p.prepare(f.selected),error=>error.reason==='authorization');assert.equal(requests,1);f.revoked=false;
+ fs.writeFileSync(roleFile(offline,f),'corrupt');await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');assert.equal(requests,1);
+});
 test('bad signatures, lower sequences and equivocation never become an offline success',async t=>{
  const f=fixture(t),p=new GitHubModules(f.options);await p.commitActive(await p.prepare(f.selected),f.selected);
  const valid=f.remote.envelope;f.remote.envelope={...valid,signature:Buffer.alloc(64).toString('base64')};await assert.rejects(p.prepare(f.selected),error=>error.reason==='integrity');
@@ -232,13 +316,13 @@ test('bad signatures, lower sequences and equivocation never become an offline s
 });
 test('a failed higher revision keeps active usable without lowering the accepted high-water',async t=>{
  const f=fixture(t),p=new GitHubModules(f.options);await p.commitActive(await p.prepare(f.selected),f.selected);next(f);
- f.transport.segment=async()=>{throw fail('unreachable','Synthetic segment unavailable');};const old=await p.prepare(f.selected);
+ f.transport.segment=async()=>{throw networkFailure('unreachable','Synthetic segment unavailable');};const old=await p.prepare(f.selected);
  assert.equal(old.status.phase,'offline');assert.equal(old.catalogueSequence,1);assert.equal(f.journal.highwater.catalogSequence,2);assert.equal(f.journal.active.catalogSequence,1);
  next(f,1);await assert.rejects(p.prepare(f.selected),/rollback/);
 });
 test('revocation is checked when queued work actually begins and again after network work',async t=>{
  const f=fixture(t),p=new GitHubModules(f.options);let release,entered;
- const waiting=new Promise(resolve=>{entered=resolve;});f.transport.resolveMain=async()=>{f.requests.push('held-main');entered();await new Promise(resolve=>{release=resolve;});return 'b'.repeat(40);};
+ const originalPointer=f.transport.currentPointer;const waiting=new Promise(resolve=>{entered=resolve;});f.transport.currentPointer=async()=>{f.requests.push('held-main');entered();await new Promise(resolve=>{release=resolve;});return originalPointer();};
  const first=p.prepare(f.selected);await waiting;const queued=p.stage(f.selected);f.revoked=true;release();
  await assert.rejects(first,error=>error.reason==='authorization');await assert.rejects(queued,error=>error.reason==='authorization');assert.equal(f.journal,null);assert.equal(f.requests.filter(x=>x==='held-main').length,1);
 });

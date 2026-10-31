@@ -98,3 +98,21 @@ test('invitation startup metadata requires authenticated health with matching ap
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const origin='http://127.0.0.1:'+server.address().port;
   try{assert.deepEqual(await health(origin,'launch-secret','terrier'),{launchPath:payload.launchPath});payload={...payload,appId:'mentat'};assert.equal(await health(origin,'launch-secret','terrier'),null);payload={appId:'terrier',launchPath:'//attacker.test/'};assert.equal(await health(origin,'launch-secret','terrier'),null);}finally{await new Promise(resolve=>server.close(resolve));}
 });
+
+test('native health accepts a verified response that needs more than one second', {timeout:15000}, async t=>{
+  const server=http.createServer((request,response)=>{
+    assert.equal(request.headers['x-desktop-token'],'isolated-health-token');
+    const timer=setTimeout(()=>{response.writeHead(200);response.end(JSON.stringify({appId:'mentat'}));},1500);
+    response.once('close',()=>clearTimeout(timer));
+  });
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  t.after(()=>{server.closeAllConnections();return new Promise(resolve=>server.close(resolve));});
+  assert.deepEqual(await health('http://127.0.0.1:'+server.address().port,'isolated-health-token','mentat'),{launchPath:'/'});
+});
+
+test('native health still bounds an unresponsive local backend', {timeout:15000}, async t=>{
+  const server=http.createServer(()=>{});
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  t.after(()=>{server.closeAllConnections();return new Promise(resolve=>server.close(resolve));});
+  assert.equal(await health('http://127.0.0.1:'+server.address().port,'isolated-health-token','mentat'),null);
+});

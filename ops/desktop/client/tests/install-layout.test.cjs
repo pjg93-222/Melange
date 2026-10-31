@@ -105,7 +105,7 @@ test('legacy cleanup is a no-op outside Downloads mode (the Documents installati
   const s=state(t),legacy=path.join(s.documents,'MelangeApplications','Melange');program(legacy,'Melange');
   const documentsExec=path.join(legacy,'Melange.exe');
   const result=await layout.sweepLayout({...s.args,execPath:documentsExec});
-  assert.deepEqual(result,{pruned:[],setupRemoved:[],legacyRemoved:[]});
+  assert.deepEqual(result,{pruned:[],setupRemoved:[],legacyRemoved:[],installersRemoved:[]});
   assert.ok(fs.existsSync(documentsExec));
 });
 
@@ -200,7 +200,7 @@ test('the sweep never deletes the running folder, a linked version folder, or an
 
 test('an unreadable root or a sweep with nothing to do does not throw',async t=>{
   const s=state(t);fs.rmSync(s.root,{recursive:true});
-  assert.deepEqual(await layout.sweepLayout({...s.args,execPath:path.join(s.root,'Melange-1.0.20','Melange.exe')}),{pruned:[],setupRemoved:[],legacyRemoved:[]});
+  assert.deepEqual(await layout.sweepLayout({...s.args,execPath:path.join(s.root,'Melange-1.0.20','Melange.exe')}),{pruned:[],setupRemoved:[],legacyRemoved:[],installersRemoved:[]});
 });
 
 test('downloadsWarnings: redirect, OneDrive, Storage Sense and policy, each naming the resolved path',()=>{
@@ -266,7 +266,7 @@ test('L3: nothing is pruned when the Downloads root itself is a junction',async 
   fs.mkdirSync(path.join(elsewhere,'updates','melange-1.0.17-setup'),{recursive:true});
   fs.rmSync(s.root,{recursive:true});fs.symlinkSync(elsewhere,s.root,'junction');
   const result=await layout.sweepLayout({...s.args,execPath:path.join(s.root,'Melange-1.0.19','Melange.exe'),current:'1.0.19'});
-  assert.deepEqual(result,{pruned:[],setupRemoved:[],legacyRemoved:[]});
+  assert.deepEqual(result,{pruned:[],setupRemoved:[],legacyRemoved:[],installersRemoved:[]});
   assert.equal(fs.readdirSync(elsewhere).length,4);
 });
 

@@ -27,8 +27,12 @@
     CopyFiles /SILENT "$EXEPATH" "$LOCALAPPDATA\${APP_ID}\baseline\${VERSION}\$EXEFILE"
     ClearErrors
   ${EndIf}
-  ; Downloads layout: the uninstaller must run in place (_?= last), so the old uninstaller of an update never copies itself to the
-  ; (possibly blocked) temp folder. Rewritten after registryAddInstallInfo; electron-builder's GetInQuotes still extracts the quoted exe.
+  ; customInstall runs only after extraction and install registration succeeded.
+  ; A silent update need not launch immediately, but its next-login receiver must use this version.
+  ${If} $installMode == "CurrentUser"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${APP_ID}" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" --desktop-updater'
+  ${EndIf}
+  ; The shared Downloads container has no recursive removal action.
   Push $R0
   Push $R1
   Push $R2
@@ -36,8 +40,6 @@
   !insertmacro dlRoot
   !insertmacro dlInstdirUnderRoot
   ${If} $R1 == "1"
-    WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" UninstallString '"$INSTDIR\${UNINSTALL_FILENAME}" /currentuser _?=$INSTDIR'
-    WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" QuietUninstallString '"$INSTDIR\${UNINSTALL_FILENAME}" /currentuser /S _?=$INSTDIR'
     FileOpen $R2 "$R0\README - do not delete.txt" w
     FileWrite $R2 "This folder holds Melange Systems apps and their updates. Do not delete it while an app is installed.$\r$\n"
     FileClose $R2
@@ -47,52 +49,7 @@
   Pop $R1
   Pop $R0
 !macroend
-!macro customUnInstall
-  ${IfNot} ${isUpdated}
-    ; Remove only this application's login task and its cached installers (rollback baseline and updater cache;
-    ; update state lives in the profile). Keep user data and credentials. The release certificate stays trusted:
-    ; all three apps share it.
-    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${APP_ID}"
-    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run" "${APP_ID}"
-    RMDir /r "$LOCALAPPDATA\${APP_ID}\baseline"
-    RMDir /r "$LOCALAPPDATA\${APP_ID}\updater"
-    RMDir "$LOCALAPPDATA\${APP_ID}"
-    ; Terrier's privately downloaded district data and its district state (district-packs.cjs storeRoot()). Only a real uninstall removes it;
-    ; an update runs the old uninstaller, which must keep it (hence the isUpdated guard around this whole block).
-    ${If} "${APP_ID}" == "org.melange.desktop.terrier"
-      RMDir /r "$LOCALAPPDATA\MelangeData\terrier"
-      RMDir "$LOCALAPPDATA\MelangeData"
-    ${EndIf}
-    ; Downloads layout: the updater cache and the empty containers only. Never RMDir /r the root or any <App>-* sibling folder.
-    Push $R0
-    Push $R1
-    Push $R2
-    Push $R3
-    !insertmacro dlRoot
-    RMDir /r "$R0\${DL_UPDATES_NAME}\${DL_CACHE_FOLDER}"
-    RMDir "$R0\${DL_UPDATES_NAME}"
-    ; The README and the root are shared by all apps: remove them only when nothing else is left in the root.
-    StrCpy $R3 "0"
-    FindFirst $R1 $R2 "$R0\*.*"
-    ${DoWhile} $R2 != ""
-      ${If} $R2 != "."
-      ${AndIf} $R2 != ".."
-      ${AndIf} $R2 != "README - do not delete.txt"
-        StrCpy $R3 "1"
-      ${EndIf}
-      FindNext $R1 $R2
-    ${Loop}
-    FindClose $R1
-    ${If} $R3 == "0"
-      Delete "$R0\README - do not delete.txt"
-      RMDir "$R0"
-    ${EndIf}
-    Pop $R3
-    Pop $R2
-    Pop $R1
-    Pop $R0
-  ${EndIf}
-!macroend
+
 ; $R0 <- <Downloads>\${DL_ROOT_NAME}. Plugin-free: User Shell Folders + ExpandEnvStrings (the value Windows' Known Folder API reads), fallback $PROFILE\Downloads.
 !macro dlRoot
   !ifdef DL_TEST_ROOT
@@ -115,74 +72,38 @@
     StrCpy $R1 "1"
   ${EndIf}
 !macroend
-; $R9 <- "1" when the installer itself runs from the pending cache under $R0 (an update or rollback installer always runs from <root>\updates\<app>\pending).
-; $EXEDIR is a built-in, so this is plugin-free. Needs only $R0.
-!macro dlExedirUnderRoot
-  StrLen $R2 "$R0\${DL_UPDATES_NAME}\${DL_CACHE_FOLDER}\"
-  StrCpy $R3 "$EXEDIR" $R2
-  StrCpy $R9 "0"
-  ${If} $R3 == "$R0\${DL_UPDATES_NAME}\${DL_CACHE_FOLDER}\"
-    StrCpy $R9 "1"
-  ${EndIf}
-!macroend
 ; Runs first in .onInit, before any plugin. Never runs in electron-builder's build-time uninstaller pass (it would run on the build PC).
 !macro preInit
   !ifndef BUILD_UNINSTALLER
     !insertmacro dlRoot
-    !insertmacro dlInstdirUnderRoot
-    !insertmacro dlExedirUnderRoot
-    ${GetParameters} $R4
-    ClearErrors
-    ${GetOptions} $R4 "--updated" $R5
-    ; Move TEMP unless this is an old-layout in-place update (--updated, not from the Downloads layout): D-6, an app that stays in Documents.
-    ${If} $R1 == "1"
-    ${OrIf} $R9 == "1"
-    ${OrIf} ${Errors}
-      StrCpy $R6 "$R0\${DL_UPDATES_NAME}\${DL_SETUP_FOLDER}"
-      StrLen $R7 $R6
-      ${If} $R7 <= ${DL_MAX_SETUP}
-        CreateDirectory $R6
-        UnsafeStrCpy $TEMP $R6
-        InitPluginsDir
-        System::Call 'kernel32::SetEnvironmentVariable(t "TEMP", t "$TEMP")'
-        System::Call 'kernel32::SetEnvironmentVariable(t "TMP", t "$TEMP")'
-      ${EndIf}
-    ${EndIf}
-  !endif
-!macroend
-; Chooses $INSTDIR (needs plugins, so only after the temp folder moved). Shared by customInit and the post-mode-page re-force.
-;  - update/rollback installer running from the Downloads layout: <root>\${DL_APP_FOLDER} (no /D: Node quotes a spaced /D and NSIS 3.04 ignores it);
-;    if that path is too long, keep the registry location;
-;  - update from anywhere else (old-layout app, Paul's PC): keep $INSTDIR (the registry InstallLocation);
-;  - manual or first install outside the root: force <root>\${DL_APP_FOLDER}, or refuse when it is too long.
-!macro dlDecideInstdir
-  Push $R0
-  Push $R1
-  Push $R2
-  Push $R3
-  Push $R9
-  !insertmacro dlRoot
-  !insertmacro dlInstdirUnderRoot
-  !insertmacro dlExedirUnderRoot
-  ${If} ${isUpdated}
-    ${If} $R9 == "1"
-      StrLen $R2 "$R0\${DL_APP_FOLDER}"
-      ${If} $R2 <= ${DL_MAX_DIR}
-        StrCpy $INSTDIR "$R0\${DL_APP_FOLDER}"
-      ${EndIf}
-    ${EndIf}
-  ${ElseIf} $R1 != "1"
-    StrCpy $INSTDIR "$R0\${DL_APP_FOLDER}"
-    StrLen $R2 "$INSTDIR"
-    ${If} $R2 > ${DL_MAX_DIR}
-      MessageBox MB_OK|MB_ICONSTOP "The install folder path is too long for Windows:$\r$\n$INSTDIR$\r$\nUse a shorter Windows user name or Downloads location, or tell IT this path." /SD IDOK
+    StrCpy $R6 "$R0\${DL_UPDATES_NAME}\${DL_SETUP_FOLDER}"
+    StrLen $R7 $R6
+    ${If} $R7 > ${DL_MAX_SETUP}
+      MessageBox MB_OK|MB_ICONSTOP "The installer working folder path is too long:$\r$\n$R6" /SD IDOK
+      SetErrorLevel 2
       Quit
     ${EndIf}
+    CreateDirectory $R6
+    UnsafeStrCpy $TEMP $R6
+    InitPluginsDir
+    System::Call 'kernel32::SetEnvironmentVariable(t "TEMP", t "$TEMP")'
+    System::Call 'kernel32::SetEnvironmentVariable(t "TMP", t "$TEMP")'
+  !endif
+!macroend
+; Every first install, update and rollback chooses this installer's version folder.
+; No old program folder is uninstalled or recursively deleted. Profiles and access state remain outside it.
+!macro dlDecideInstdir
+  Push $R0
+  Push $R2
+  !insertmacro dlRoot
+  StrCpy $INSTDIR "$R0\${DL_APP_FOLDER}"
+  StrLen $R2 "$INSTDIR"
+  ${If} $R2 > ${DL_MAX_DIR}
+    MessageBox MB_OK|MB_ICONSTOP "The install folder path is too long for Windows:$\r$\n$INSTDIR$\r$\nUse a shorter Downloads location or tell IT this path." /SD IDOK
+    SetErrorLevel 2
+    Quit
   ${EndIf}
-  Pop $R9
-  Pop $R3
   Pop $R2
-  Pop $R1
   Pop $R0
 !macroend
 ; Runs after initMultiUser (installer.nsi), so plugins (loaded from the moved temp) may be used.

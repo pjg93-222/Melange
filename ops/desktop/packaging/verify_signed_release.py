@@ -17,8 +17,10 @@ Any other difference fails. Standard library only; run with `python -I`.
 """
 from __future__ import annotations
 import argparse
+import base64
 import datetime
 import hashlib
+import importlib.util
 import io
 import json
 import os
@@ -452,15 +454,23 @@ ConvertTo-Json -InputObject @($rows) -Depth 4 | Set-Content -LiteralPath $Output
 '''
 
 
-def signatures(items, output):
+def signatures(items, output, *, preserve_execution_policy=False):
     script, paths, receipt = output / "inspect-signatures.ps1", output / "signature-inputs.json", output / "signatures.json"
     script.write_text(PS, encoding="utf-8")
     write_json(paths, [{"id": key, "path": str(path)} for key, path in items.items()])
     powershell = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32/WindowsPowerShell/v1.0/powershell.exe"
     env = dict(os.environ, PSModulePath=r"C:\Windows\System32\WindowsPowerShell\v1.0\Modules;C:\Program Files\WindowsPowerShell\Modules")
-    # Process-only policy for this generated, read-only inspection script. It does not
-    # change machine or user policy and executes no extracted application code.
-    run([powershell, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", script, "-InputList", paths, "-OutputFile", receipt], timeout=1800, env=env)
+    # Preserve the historical standalone verifier's invocation by default. Native
+    # inspection uses the identical PS body as an ordinary command, so Restricted
+    # policy need not allow an unsigned script file. Paths remain data, never code.
+    if preserve_execution_policy:
+        command = "& {\n" + PS + "\n} -InputList $env:DESKTOP_SIGNATURE_INPUT_LIST -OutputFile $env:DESKTOP_SIGNATURE_OUTPUT_FILE"
+        encoded = base64.b64encode(command.encode("utf-16le")).decode("ascii")
+        env.update(DESKTOP_SIGNATURE_INPUT_LIST=str(paths), DESKTOP_SIGNATURE_OUTPUT_FILE=str(receipt))
+        invocation = ["-EncodedCommand", encoded]
+    else:
+        invocation = ["-ExecutionPolicy", "Bypass", "-File", script, "-InputList", paths, "-OutputFile", receipt]
+    run([powershell, "-NoProfile", "-NonInteractive", *invocation], timeout=1800, env=env)
     rows = json.loads(receipt.read_text(encoding="utf-8-sig"))
     if len(rows) != len(items) or {x["id"] for x in rows} != set(items):
         raise Refused("Signature census incomplete")
@@ -499,6 +509,9 @@ def bound_outputs(*documents):
 
 def verify(args, report):
     candidate, baseline, output, seven = map(Path, (args.installer, args.baseline, args.output, args.seven_zip))
+    without_uninstaller = bool(getattr(args, "without_uninstaller", False))
+    if getattr(args, "signing_receipt", None) and not without_uninstaller:
+        raise Refused("--signing-receipt requires --without-uninstaller")
     repo = str(Path(args.repo).resolve())
     report.update({"appId": APP, "expectedVersion": NEW, "baselineVersion": OLD,
                    "candidate": str(candidate), "candidateSha256": digest(candidate), "candidateBytes": candidate.stat().st_size,
@@ -555,11 +568,35 @@ def verify(args, report):
     old_plugins, new_plugins = tree(old_nsis / "$PLUGINSDIR"), tree(new_nsis / "$PLUGINSDIR")
     if {x for x in old_plugins if x.endswith(".dll")} != PLUGINS or {x for x in new_plugins if x.endswith(".dll")} != PLUGINS:
         raise Refused("Unexpected NSIS plugin closure")
+    old_asar_hash, old_asar = asar(old_files["resources/app.asar"])
+    new_asar_hash, new_asar = asar(new_files["resources/app.asar"])
+    if any(m["head"][:2] == b"MZ" for m in new_asar.values()):
+        raise Refused("ASAR carries a PE candidate member")
+    old_outer, new_outer = tree(old_nsis), tree(new_nsis)
     old_uninstaller, new_uninstaller = list(old_nsis.rglob("Uninstall " + APP_NAME + ".exe")), list(new_nsis.rglob("Uninstall " + APP_NAME + ".exe"))
-    if len(old_uninstaller) != 1 or len(new_uninstaller) != 1:
+    if len(old_uninstaller) != 1 or (not without_uninstaller and len(new_uninstaller) != 1):
         raise Refused("Generated uninstaller missing/ambiguous")
+    contract = None
+    if without_uninstaller:
+        # Load this explicit sibling even under Python -I; no caller-controlled
+        # module search path is added. Bind the helper to the same release HEAD.
+        implementation = Path(__file__).with_name("no_uninstaller_contract.py")
+        implementation_hash = digest(implementation)
+        if implementation_hash != head_files.get("ops/desktop/packaging/no_uninstaller_contract.py"):
+            raise Refused("No-uninstaller contract helper differs from release HEAD")
+        spec = importlib.util.spec_from_file_location("native_no_uninstaller_contract", implementation)
+        helper = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(helper)
+        contract = helper.verify_without_uninstaller(installer=candidate,
+            package_json=new_asar["package.json"]["json"], nsis_files=new_outer, app_files=new_files,
+            asar_members=new_asar, signing_receipt=getattr(args, "signing_receipt", None))
+        contract["implementationSha256"] = implementation_hash
+    elif (new_asar["package.json"]["json"].get("desktopAppConfig") or {}).get("desktopUninstaller") is False:
+        raise Refused("Candidate declares no uninstaller; explicit --without-uninstaller is required")
     items = {"candidate/installer": candidate, "baseline/installer": baseline,
-             "candidate/uninstaller": new_uninstaller[0], "baseline/uninstaller": old_uninstaller[0]}
+             "baseline/uninstaller": old_uninstaller[0]}
+    if not without_uninstaller:
+        items["candidate/uninstaller"] = new_uninstaller[0]
     for label, files in (("baseline", old_files), ("candidate", new_files)):
         items.update({label + "/app/" + rel: files[rel] for rel in sorted(new_pes)})
     for label, files in (("baseline", old_plugins), ("candidate", new_plugins)):
@@ -570,15 +607,12 @@ def verify(args, report):
         if sig["baseline/app/" + rel]["sha256"] != old_hashes[rel] or sig["candidate/app/" + rel]["sha256"] != new_hashes[rel]:
             raise Refused("PE changed between byte census and signature inspection: " + rel)
     main_name = APP_NAME + ".exe"
-    for key in ("candidate/installer", "candidate/uninstaller", "candidate/app/" + main_name, "candidate/app/resources/elevate.exe"):
+    uninstaller_keys = [] if without_uninstaller else ["candidate/uninstaller"]
+    for key in ["candidate/installer", "candidate/app/" + main_name, "candidate/app/resources/elevate.exe", *uninstaller_keys]:
         required_owner(sig[key])
-    for key in ("candidate/installer", "candidate/uninstaller", "candidate/app/" + main_name):
+    for key in ["candidate/installer", "candidate/app/" + main_name, *uninstaller_keys]:
         if sig[key]["fileVersion"] not in (NEW, NEW + ".0") or sig[key]["productVersion"] not in (NEW, NEW + ".0"):
             raise Refused("New executable version missing: " + key)
-    old_asar_hash, old_asar = asar(old_files["resources/app.asar"])
-    new_asar_hash, new_asar = asar(new_files["resources/app.asar"])
-    if any(m["head"][:2] == b"MZ" for m in new_asar.values()):
-        raise Refused("ASAR carries a PE candidate member")
     config_keys = asar_config_keys(git(repo, "show", head + ":ops/desktop/client/builder.cjs").decode("utf-8"))
     added_config = check_package(old_asar["package.json"]["json"], new_asar["package.json"]["json"], config_keys)
     asar_rows = source_bound({k: v["sha256"] for k, v in old_asar.items() if k != "package.json"},
@@ -611,14 +645,24 @@ def verify(args, report):
         required_owner(sig["candidate/plugin/" + rel])
         if sig["candidate/plugin/" + rel]["sha256"] != sig["baseline/plugin/" + rel]["sha256"]:
             compare_signed_pe(old_plugins[rel], new_plugins[rel])
-    old_outer, new_outer = tree(old_nsis), tree(new_nsis)
-    skip = lambda rel: rel.endswith("/app-64.7z") or rel.endswith("/Uninstall " + APP_NAME + ".exe") or rel.startswith("$PLUGINSDIR/") and rel.rsplit("/", 1)[-1] in PLUGINS
-    outer_rows = source_bound({k: digest(v) for k, v in old_outer.items() if not skip(k)},
-                              {k: digest(v) for k, v in new_outer.items() if not skip(k)},
+    # Exclude only the exact observed legacy uninstaller; the opt-in contract
+    # has already refused every candidate uninstaller path, including payload/ASAR.
+    old_uninstaller_names = {value.relative_to(old_nsis).as_posix() for value in old_uninstaller}
+    new_uninstaller_names = {value.relative_to(new_nsis).as_posix() for value in new_uninstaller}
+    skip = lambda rel, uninstallers: rel in uninstallers or rel.endswith("/app-64.7z") or rel.startswith("$PLUGINSDIR/") and rel.rsplit("/", 1)[-1] in PLUGINS
+    outer_rows = source_bound({k: digest(v) for k, v in old_outer.items() if not skip(k, old_uninstaller_names)},
+                              {k: digest(v) for k, v in new_outer.items() if not skip(k, new_uninstaller_names)},
                               changes, head_files, lambda _: None, label="NSIS")
     if (digest(candidate) != report["candidateSha256"] or digest(baseline) != BASE_SHA or
             digest(build_inputs_path) != report["buildInputsSha256"] or digest(build_result_path) != report["buildResultSha256"]):
         raise Refused("Installer or build receipt changed during inspection")
+    if contract and (digest(contract["signingReceipt"]) != contract["signingReceiptSha256"]
+                     or digest(implementation) != contract["implementationSha256"]):
+        raise Refused("No-uninstaller contract evidence changed during inspection")
+    gate_checks = {key: True for key in GATES}
+    if without_uninstaller:
+        del gate_checks["mainElevateUninstallerOuterApprovedAndTimestamped"]
+        gate_checks.update(mainElevateOuterApprovedAndTimestamped=True, uninstallerIntentionallyAbsent=True)
     report.update({"status": "passed", "payloadPeCount": len(new_pes), "newlySignedOrResignedPayloadPeCount": signed,
                    "approvedByteIdenticalPeCount": owned_identical, "unchangedVendorPeCount": preserved,
                    "nsisPluginCount": len(PLUGINS), "payloadFileCount": len(new_files),
@@ -627,10 +671,11 @@ def verify(args, report):
                    "candidateAsarSha256": new_hashes["resources/app.asar"], "candidateMainSha256": new_hashes[main_name],
                    "boundBuildOutputs": bound, "sourceBoundPayloadChanges": payload_rows, "sourceBoundAsarChanges": asar_rows,
                    "sourceBoundNsisChanges": outer_rows, "payloadPeChecks": checks,
-                   "generatedUninstaller": sig["candidate/uninstaller"], "outerInstaller": sig["candidate/installer"],
+                   "generatedUninstaller": sig.get("candidate/uninstaller"), "outerInstaller": sig["candidate/installer"],
+                   "uninstallerContract": contract,
                    "maxExtractionBytes": MAX_EXPANDED, "extractedBytes": MAX_EXPANDED - budget,
-                   "checks": {key: True for key in GATES}, "gateSemantics": GATE_SEMANTICS,
-                   "generatedPackagingException": "Outer NSIS and generated uninstaller are rebuilt, not byte-equal to baseline. Their approved signer, timestamp and new version are verified.",
+                   "checks": gate_checks, "gateSemantics": GATE_SEMANTICS,
+                   "generatedPackagingException": ("Outer NSIS is rebuilt and its approved signer, timestamp and new version are verified. The candidate uninstaller is intentionally absent under the explicit native contract." if without_uninstaller else "Outer NSIS and generated uninstaller are rebuilt, not byte-equal to baseline. Their approved signer, timestamp and new version are verified."),
                    "runtimeExecution": "not performed", "recipientPolicyAcceptance": "not tested"})
 
 
@@ -643,6 +688,8 @@ def main(argv=None):
     parser.add_argument("--head", required=True, help="Release HEAD; must equal build-inputs packagingSource")
     parser.add_argument("--build-inputs")
     parser.add_argument("--seven-zip", required=True)
+    parser.add_argument("--without-uninstaller", action="store_true", help="Require the explicit native no-uninstaller ASAR/signing contract and zero candidate uninstallers; all legacy baseline/source/PE pins remain")
+    parser.add_argument("--signing-receipt", help="No-uninstaller receipt, default <installer>.signatures.json; requires --without-uninstaller")
     args = parser.parse_args(argv)
     output = Path(args.output).absolute()
     if output.exists():
