@@ -227,3 +227,43 @@ The 1.0.39 client repair commit `6625901e0` remains an ancestor. The older-insta
 replacement, junction-aware roots, and installer-cleanup implementation are
 preserved. The standard bootstrap inventory check reports no drift: this
 follow-up changes client startup and its tests, not native runtime source bytes.
+
+## Terrier sleep/wake with an active signed district
+
+The Windows sleep path retained the running backend, but warm Runtime.start
+required the already-consumed one-use district launch capability again. This
+raised the generic application verification/startup failure before authorizing
+the resumed Windows session. It was not duplicate-instance replacement.
+
+Runtime now retains private authority only after native active-health validation
+and protected activation commit. A warm start requires the same child object,
+generation, exact configuration, physical roots, account, token, installed
+program fingerprint and authenticated native district health. Stop and matching
+child exit clear that record. Every new backend still requires a fresh one-use
+capability; the original capability and file handles are closed normally.
+
+The retained snapshot is intentionally exact: native PreparedSnapshot.health
+returns its immutable self.key and rejects an active snapshot different from
+that key. Public and paired workspace bindings already retain their own active
+child authority; those paths were not changed.
+
+97 focused tests passed with ordinary client dependencies available:
+
+```text
+node --test ops/desktop/client/tests/district-warm-runtime.test.cjs ops/desktop/client/tests/full-main-sleep.test.cjs ops/desktop/client/tests/terrier-owner-resume.test.cjs ops/desktop/client/tests/full-main-startup.test.cjs
+node --test ops/desktop/client/tests/runtime-configuration.test.cjs ops/desktop/client/tests/runtime-stop.test.cjs ops/desktop/client/tests/district-runtime-input.test.cjs ops/desktop/client/tests/district-runtime-wiring.test.cjs ops/desktop/client/tests/module-runtime-boundary.test.cjs ops/desktop/client/tests/workspace-data-startup.test.cjs
+```
+
+The first command passed 34 tests; the second passed 63. The 15 new tests
+reproduced four failures against unmodified dea7b30f3ed5c3e480aad1225e886eb40eca846f
+by setting LIFECYCLE_BASELINE_ROOT to that checkout's client directory. They
+cover delayed suspension drain, rapid sleep/lock/resume/unlock, changed Windows
+identity, stale settings/child, native health mismatches, installed-program
+changes, stop/exit requiring fresh authority, and stop during warm health.
+
+These execute real Runtime, one-use district binding, Windows gate and complete
+main lexical scope. Host process creation, native program census, HTTP, Electron
+windows and power events are doubles. The exact production power-registration
+block is replayed in that scope. They do not establish a packaged GUI pass or
+physical work-PC sleep/resume verification. No installed app or Windows session
+was stopped, locked or suspended during these tests.
