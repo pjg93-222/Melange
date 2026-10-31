@@ -906,6 +906,112 @@ class CompiledModuleBridgeFixture(unittest.TestCase):
         with self.assertRaisesRegex(n.Refused, "Missing or redirected"):
             n.asar_member_bytes(archive, "missing.cjs")
 
+    def current_tables(self):
+        workspaces = copy.deepcopy(self.specs)
+        for app, spec in workspaces.items():
+            spec["contractId"] = app + ".workspace.v1"
+            spec["requiredKinds"] = [app + ".workspace-data.v1"]
+        return {"APPLICATION_SPECS": copy.deepcopy(self.specs), "WORKSPACE_APPLICATION_SPECS": workspaces,
+                "DISTRICT_PROGRAM_SPECS": {"terrier": {"schemaVersion": 1, "appId": "terrier",
+                    "programFiles": copy.deepcopy(self.rows), "programFingerprint": self.fingerprint(self.rows)}}}
+
+    @staticmethod
+    def current_encoded(tables, python_tables=None):
+        # The reviewed generator's complete preamble, not an executed JS fixture.
+        preamble = ("'use strict';\n"
+            "// Compiled, reviewed program identities; never loaded from data or settings.\n"
+            "// This literal declaration is the sole recursive native table exclusion.\n"
+            "function freeze(value){if(value&&typeof value==='object'){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}\n")
+        js = preamble + "".join("const " + name + "=freeze(" + json.dumps(table) + ");\n" for name, table in tables.items())
+        js += "module.exports=Object.freeze({" + ",".join(tables) + "});\n"
+        py = ('"""Literal installed-program declarations. No data, factories or downloaded selectors."""\n'
+              'from types import MappingProxyType\n')
+        py += "".join(name + "=MappingProxyType(" + repr(table) + ")\n" for name, table in (python_tables or tables).items())
+        return js.encode(), py.encode()
+
+    def current_check(self, tables=None, python_tables=None, *, javascript=None, python=None):
+        js, py = self.current_encoded(tables or self.current_tables(), python_tables)
+        return n.compiled_module_tables(app="mentat", javascript=javascript if javascript is not None else js,
+            python=python if python is not None else py, program_map=self.mapping,
+            config={"desktopWorkspaceData": {"mentat": "workspace-v1"}})
+
+    def test_current_generated_three_tables_validate_and_select_workspace(self):
+        result = self.current_check()
+        self.assertEqual(result["compiledTableNames"], list(self.current_tables()))
+        self.assertEqual(result["workspaceDataMode"], "workspace-v1")
+        self.assertEqual(result["workspaceContractId"], "mentat.workspace.v1")
+        self.assertEqual(result["programFileCount"], 2)
+
+    def test_every_added_table_is_compared_across_languages(self):
+        for name, app in (("WORKSPACE_APPLICATION_SPECS", "mentat"), ("DISTRICT_PROGRAM_SPECS", "terrier")):
+            with self.subTest(table=name):
+                changed = self.current_tables()
+                changed[name][app]["programFingerprint"] = "a" * 64
+                with self.assertRaisesRegex(n.Refused, "tables disagree"):
+                    self.current_check(python_tables=changed)
+
+    def test_all_table_schemas_descriptors_and_fingerprints_are_consumed(self):
+        for name, app in (("APPLICATION_SPECS", "melange"), ("WORKSPACE_APPLICATION_SPECS", "mentat"),
+                          ("DISTRICT_PROGRAM_SPECS", "terrier")):
+            for mutation in ("schema", "descriptor", "fingerprint", "extra_field"):
+                with self.subTest(table=name, mutation=mutation):
+                    tables = self.current_tables()
+                    spec = tables[name][app]
+                    if mutation == "schema": spec["schemaVersion"] = True
+                    if mutation == "descriptor": spec["programFiles"][0]["path"] = "../escape.py"
+                    if mutation == "fingerprint": spec["programFingerprint"] = "a" * 64
+                    if mutation == "extra_field": spec["newSelector"] = "unreviewed"
+                    with self.assertRaises(n.Refused): self.current_check(tables)
+
+    def test_workspace_rows_are_checked_against_actual_payload_and_public_union(self):
+        tables = self.current_tables()
+        spec = tables["WORKSPACE_APPLICATION_SPECS"]["mentat"]
+        row = {**self.rows[0], "path": "extra.py"}
+        spec["programFiles"].append(row)
+        spec["programFingerprint"] = self.fingerprint(spec["programFiles"])
+        with self.assertRaisesRegex(n.Refused, "descriptor differs from actual packaged bytes"):
+            self.current_check(tables)
+        self.mapping["resources/runtime/mentat/sources/extra.py"] = {"size": row["bytes"], "sha256": row["sha256"]}
+        with self.assertRaisesRegex(n.Refused, "workspace/public program tables disagree"):
+            self.current_check(tables)
+
+    def test_extra_javascript_or_unreviewed_preamble_is_refused(self):
+        js, _ = self.current_encoded(self.current_tables())
+        variants = (b"doNotExecute();\n" + js, js + b"doNotExecute();",
+            js.replace(b"const WORKSPACE", b"doNotExecute();\nconst WORKSPACE"),
+            js.replace(b"return value;", b"doNotExecute();return value;"))
+        for bad in variants:
+            with self.subTest(javascript=bad[:45]):
+                with self.assertRaises(n.Refused): self.current_check(javascript=bad)
+
+    def test_extra_python_statements_and_import_aliases_are_refused(self):
+        _, py = self.current_encoded(self.current_tables())
+        for bad in (b"doNotExecute()\n" + py, py + b"doNotExecute()\n",
+                    py.replace(b"import MappingProxyType", b"import MappingProxyType as replacement")):
+            with self.subTest(python=bad[:45]):
+                with self.assertRaises(n.Refused): self.current_check(python=bad)
+
+    def test_duplicate_extra_missing_and_malformed_tables_are_refused(self):
+        js, py = self.current_encoded(self.current_tables())
+        duplicate_python_key = py.replace(b"'schemaVersion': 1", b"'schemaVersion': 1, 'schemaVersion': 1", 1)
+        with self.assertRaisesRegex(n.Refused, "duplicate or invalid keys"):
+            self.current_check(python=duplicate_python_key)
+        for bad in (js.replace(b'"schemaVersion": 1', b'"schemaVersion": 1, "schemaVersion": 1', 1),
+                    js.replace(b"const WORKSPACE_APPLICATION_SPECS", b"const APPLICATION_SPECS"),
+                    js.replace(b"const DISTRICT_PROGRAM_SPECS", b"const UNREVIEWED_SPECS"),
+                    js.replace(b"freeze({", b"freeze(unreviewed({", 1),
+                    js.replace(b'"schemaVersion": 1', b'"schemaVersion": NaN', 1)):
+            with self.subTest(javascript=bad[-60:]):
+                with self.assertRaises(n.Refused): self.current_check(javascript=bad)
+        tables = self.current_tables()
+        del tables["DISTRICT_PROGRAM_SPECS"]
+        with self.assertRaises(n.Refused): self.current_check(tables)
+
+    def test_workspace_mode_requires_current_authority(self):
+        js, py = self.encoded()
+        with self.assertRaisesRegex(n.Refused, "workspace mode has no compiled authority"):
+            self.current_check(javascript=js, python=py)
+
 
 if __name__ == "__main__":
     unittest.main()

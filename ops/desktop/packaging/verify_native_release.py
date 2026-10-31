@@ -704,14 +704,39 @@ def asar_member_bytes(archive, name):
         return raw
 
 
-def compiled_module_tables(*, app, javascript, python, program_map, config):
-    """Join both compiled authorities to the actual packaged program, not its source inventory."""
-    text = javascript.decode("utf-8-sig")
-    matches = list(re.finditer(r"\bconst\s+APPLICATION_SPECS\s*=\s*freeze\(\s*", text))
-    require(len(matches) == 1, "Compiled JavaScript module table is missing or ambiguous")
-    js, end = json.JSONDecoder().raw_decode(text, matches[0].end())
-    require(re.fullmatch(r"\s*\);\s*module\.exports\s*=\s*Object\.freeze\(\{APPLICATION_SPECS\}\);\s*",
-                         text[end:]), "Compiled JavaScript module table is not a closed literal")
+def compiled_inventory_literals(javascript, python):
+    """Parse the legacy/current generator grammar without executing either authority."""
+    names = ("APPLICATION_SPECS", "WORKSPACE_APPLICATION_SPECS", "DISTRICT_PROGRAM_SPECS")
+    preamble = ("'use strict';\n"
+        "// Compiled, reviewed program identities; never loaded from data or settings.\n"
+        "// This literal declaration is the sole recursive native table exclusion.\n"
+        "function freeze(value){if(value&&typeof value==='object'){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}")
+    text = javascript.decode("utf-8-sig").replace("\r\n", "\n").strip()
+    if text.startswith(preamble):
+        text = text[len(preamble):].lstrip()
+    def pairs(rows):
+        require(len({key for key, _ in rows}) == len(rows), "Compiled JavaScript module table has duplicate keys")
+        return dict(rows)
+    def invalid_constant(value):
+        raise Refused("Compiled JavaScript module table contains an invalid constant")
+    decoder = json.JSONDecoder(object_pairs_hook=pairs, parse_constant=invalid_constant)
+    js = {}
+    while text.startswith("const"):
+        match = re.match(r"const\s+([A-Z_]+)\s*=\s*freeze\(\s*", text)
+        require(match is not None and len(js) < len(names) and match[1] == names[len(js)],
+                "Compiled JavaScript module table is missing or ambiguous")
+        try:
+            value, end = decoder.raw_decode(text, match.end())
+        except (ValueError, RecursionError) as exc:
+            raise Refused("Compiled JavaScript module table is not a closed literal") from exc
+        close = re.match(r"\s*\);\s*", text[end:])
+        require(close is not None, "Compiled JavaScript module table is not a closed literal")
+        js[match[1]] = value
+        text = text[end + close.end():]
+    require(tuple(js) in (names[:1], names), "Compiled JavaScript module table is missing or ambiguous")
+    exports = r"\s*,\s*".join(js)
+    require(re.fullmatch(r"module\.exports\s*=\s*Object\.freeze\(\{\s*" + exports + r"\s*\}\);\s*", text),
+            "Compiled JavaScript module table is not a closed literal")
     def literal(node):
         if isinstance(node, ast.Call):
             require(isinstance(node.func, ast.Name) and node.func.id == "MappingProxyType"
@@ -728,43 +753,97 @@ def compiled_module_tables(*, app, javascript, python, program_map, config):
         if isinstance(node, ast.Constant) and type(node.value) in (str, int, bool, type(None)):
             return node.value
         raise Refused("Compiled Python module table is not a closed literal")
-    assignments = [node.value for node in ast.parse(python.decode("utf-8-sig")).body
-                   if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)
-                       and target.id == "APPLICATION_SPECS" for target in node.targets)]
-    require(len(assignments) == 1, "Compiled Python module table is missing or ambiguous")
-    py = literal(assignments[0])
-    require(js == py and isinstance(js, dict) and set(js) == {"melange", "mentat"},
+    try:
+        nodes = ast.parse(python.decode("utf-8-sig")).body
+    except (SyntaxError, ValueError, RecursionError) as exc:
+        raise Refused("Compiled Python module table is not a closed literal") from exc
+    if nodes and isinstance(nodes[0], ast.Expr) and isinstance(nodes[0].value, ast.Constant):
+        require(nodes[0].value.value == "Literal installed-program declarations. No data, factories or downloaded selectors.",
+                "Compiled Python module table is not a closed literal")
+        nodes.pop(0)
+    if nodes and isinstance(nodes[0], ast.ImportFrom):
+        imported = nodes.pop(0)
+        require(imported.module == "types" and imported.level == 0 and len(imported.names) == 1
+                and imported.names[0].name == "MappingProxyType" and imported.names[0].asname is None,
+                "Compiled Python module table contains executable selectors")
+    py = {}
+    for node in nodes:
+        require(isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                and len(py) < len(names) and node.targets[0].id == names[len(py)],
+                "Compiled Python module table is not a closed literal")
+        py[node.targets[0].id] = literal(node.value)
+    require(js == py, "Packaged JavaScript/Python compiled module tables disagree")
+    return js
+
+
+def compiled_module_tables(*, app, javascript, python, program_map, config):
+    """Join both compiled authorities to the actual packaged program, not its source inventory."""
+    tables = compiled_inventory_literals(javascript, python)
+    js = tables["APPLICATION_SPECS"]
+    require(isinstance(js, dict) and set(js) == {"melange", "mentat"},
             "Packaged JavaScript/Python compiled module tables disagree")
     spec = js[app]
     fields = {"schemaVersion", "appId", "contractId", "programFingerprint", "programFiles",
               "requiredKinds", "publicReaders", "privateBoundaries", "startupTimeoutMs"}
-    require(isinstance(spec, dict) and set(spec) == fields and type(spec["schemaVersion"]) is int
-            and spec["schemaVersion"] == 1 and spec["appId"] == app
-            and spec["contractId"] == app + ".public-data.v1", "Invalid compiled application identity")
-    files = spec["programFiles"]
-    require(isinstance(files, list) and 0 < len(files) <= 512, "Invalid compiled program table")
-    seen, total = set(), 0
-    for row in files:
-        require(isinstance(row, dict) and set(row) == {"root", "path", "bytes", "sha256"}
-                and row["root"] in ("source", "bootstrap") and isinstance(row["path"], str)
-                and 0 < len(row["path"]) <= 400
-                and all(re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9._-]{0,127}", part)
-                        and not part.endswith(".") for part in row["path"].split("/"))
-                and type(row["bytes"]) is int and 0 <= row["bytes"] <= 16 * 1024**2
-                and isinstance(row["sha256"], str) and re.fullmatch(r"[a-f0-9]{64}", row["sha256"]),
-                "Invalid compiled program descriptor")
-        key = row["root"] + "/" + row["path"].lower()
-        require(key not in seen and not row["path"].endswith(("module_application_inventory.py", "module-application-inventory.cjs")),
-                "Duplicate or recursive compiled program descriptor")
-        seen.add(key)
-        total += row["bytes"]
-        prefix = "resources/runtime/" + app + ("/sources/" if row["root"] == "source" else "/bootstrap/")
-        require(program_map.get(prefix + row["path"]) == {"size": row["bytes"], "sha256": row["sha256"]},
-                "Compiled program descriptor differs from actual packaged bytes: " + key)
-    require(total <= 64 * 1024**2, "Compiled program table exceeds native budget")
-    ordered = sorted(files, key=lambda row: (row["root"], row["path"]))
-    fingerprint = hashlib.sha256(json.dumps(ordered, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-    require(fingerprint == spec["programFingerprint"], "Compiled program fingerprint differs from its literal table")
+    def validate(identity, declaration, *, district=False, workspace=False):
+        expected_fields = {"schemaVersion", "appId", "programFiles", "programFingerprint"} if district else fields
+        require(isinstance(declaration, dict) and set(declaration) == expected_fields
+                and type(declaration["schemaVersion"]) is int and declaration["schemaVersion"] == 1
+                and declaration["appId"] == identity, "Invalid compiled application identity")
+        if not district:
+            require(declaration["contractId"] == identity + (".workspace.v1" if workspace else ".public-data.v1")
+                    and type(declaration["startupTimeoutMs"]) is int and 0 < declaration["startupTimeoutMs"] <= 3600000,
+                    "Invalid compiled application identity")
+            for field in ("requiredKinds", "publicReaders", "privateBoundaries"):
+                values = declaration[field]
+                require(isinstance(values, list) and 0 < len(values) <= 128
+                        and all(isinstance(value, str) and re.fullmatch(re.escape(identity) + r"\.[A-Za-z0-9._-]{1,160}", value) for value in values)
+                        and len(set(values)) == len(values), "Invalid compiled application selectors")
+        files = declaration["programFiles"]
+        require(isinstance(files, list) and 0 < len(files) <= 512, "Invalid compiled program table")
+        seen, total = set(), 0
+        for row in files:
+            require(isinstance(row, dict) and set(row) == {"root", "path", "bytes", "sha256"}
+                    and row["root"] in ("source", "bootstrap") and isinstance(row["path"], str)
+                    and 0 < len(row["path"]) <= 400
+                    and all(re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9._-]{0,127}", part)
+                            and not part.endswith(".") for part in row["path"].split("/"))
+                    and type(row["bytes"]) is int and 0 <= row["bytes"] <= 16 * 1024**2
+                    and isinstance(row["sha256"], str) and re.fullmatch(r"[a-f0-9]{64}", row["sha256"]),
+                    "Invalid compiled program descriptor")
+            key = row["root"] + "/" + row["path"].lower()
+            require(key not in seen and not row["path"].endswith(("module_application_inventory.py", "module-application-inventory.cjs")),
+                    "Duplicate or recursive compiled program descriptor")
+            seen.add(key)
+            total += row["bytes"]
+            if identity == app:
+                prefix = "resources/runtime/" + app + ("/sources/" if row["root"] == "source" else "/bootstrap/")
+                require(program_map.get(prefix + row["path"]) == {"size": row["bytes"], "sha256": row["sha256"]},
+                        "Compiled program descriptor differs from actual packaged bytes: " + key)
+        require(total <= 64 * 1024**2, "Compiled program table exceeds native budget")
+        ordered = sorted(files, key=lambda row: (row["root"], row["path"]))
+        fingerprint = hashlib.sha256(json.dumps(ordered, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        require(fingerprint == declaration["programFingerprint"], "Compiled program fingerprint differs from its literal table")
+        return {"programFileCount": len(files), "programBytes": total, "programFingerprint": fingerprint}
+    validated = {identity: validate(identity, declaration) for identity, declaration in js.items()}
+    if "WORKSPACE_APPLICATION_SPECS" in tables:
+        workspaces, districts = tables["WORKSPACE_APPLICATION_SPECS"], tables["DISTRICT_PROGRAM_SPECS"]
+        require(isinstance(workspaces, dict) and set(workspaces) == set(js)
+                and isinstance(districts, dict) and set(districts) in (set(), {"terrier"}),
+                "Invalid compiled workspace/district identities")
+        for identity, declaration in workspaces.items():
+            validate(identity, declaration, workspace=True)
+            require(declaration["programFiles"] == js[identity]["programFiles"]
+                    and declaration["programFingerprint"] == js[identity]["programFingerprint"],
+                    "Compiled workspace/public program tables disagree")
+        for identity, declaration in districts.items():
+            validate(identity, declaration, district=True)
+    workspace_modes = config.get("desktopWorkspaceData", {})
+    require(isinstance(workspace_modes, dict) and workspace_modes.get(app) in (None, "workspace-v1"),
+            "Unsupported packaged workspace data mode")
+    workspace_mode = workspace_modes.get(app)
+    require(not workspace_mode or "WORKSPACE_APPLICATION_SPECS" in tables,
+            "Packaged workspace mode has no compiled authority")
     modes = config.get("desktopPublicData", {})
     require(isinstance(modes, dict), "Packaged public data mode is invalid")
     mode = modes.get(app)
@@ -776,13 +855,14 @@ def compiled_module_tables(*, app, javascript, python, program_map, config):
     require(access_mode in ("standalone", "managed") and authentication in ("windows", "password")
             and (authentication != "windows" or access_mode == "standalone"),
             "Invalid packaged module authentication mode")
-    return {"status": "passed", "appId": app, "programFingerprint": fingerprint,
-            "programFileCount": len(files), "programBytes": total,
+    return {"status": "passed", "appId": app, **validated[app],
             "javascriptSha256": hashlib.sha256(javascript).hexdigest(),
             "pythonSha256": hashlib.sha256(python).hexdigest(),
             "publicDataMode": mode, "accessMode": access_mode, "authentication": authentication,
             "contractId": "melange.public-data.pages.v1" if paged else spec["contractId"],
             "requiredKinds": ["melange.official-payroll-pages.v1"] if paged else spec["requiredKinds"],
+            "compiledTableNames": list(tables), "workspaceDataMode": workspace_mode,
+            "workspaceContractId": tables["WORKSPACE_APPLICATION_SPECS"][app]["contractId"] if workspace_mode else None,
             "literalTablesEqual": True, "matchesActualPackagedProgram": True}
 
 
