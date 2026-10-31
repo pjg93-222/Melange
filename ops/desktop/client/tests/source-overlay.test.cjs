@@ -168,13 +168,19 @@ test('duplicate JSON properties cannot acquire a producer receipt',t=>{
   const f=fixture(t);fs.writeFileSync(f.manifest,'{"schemaVersion":1,'+JSON.stringify(f.value).slice(1));
   assert.throws(f.run,/canonical JSON/);
 });
-async function compilerFixture(t,mutation){
+// Minimal PE carrying only the Electron ASAR integrity resource for the given archive.
+function integrityExe(archive,file='resources\\app.asar'){
+  const asar=require('@electron/asar'),{NtExecutable,NtExecutableResource}=require('resedit'),pe=NtExecutable.createEmpty(),resources=NtExecutableResource.from(pe);
+  resources.entries.push({type:'INTEGRITY',id:'ELECTRONASAR',lang:1033,codepage:0,bin:Buffer.from(JSON.stringify([{file,alg:'SHA256',value:hash(asar.getRawHeader(archive).headerString)}]))});
+  resources.outputResource(pe);return Buffer.from(pe.generate());
+}
+async function compilerFixture(t,mutation,integrityFile){
   const f=fixture(t),asar=require('@electron/asar'),vm=require('node:vm'),{createRequire}=require('node:module');
-  f.write(f.program,'Terrier.exe','inert main fixture');
   f.write(f.program,'resources/runtime/terrier/python/python.exe','inert backend interpreter fixture');
   const client=path.join(f.root,'client');fs.mkdirSync(client);
   fs.writeFileSync(path.join(client,'package.json'),JSON.stringify({name:'terrier-desktop',version:'1.0.31',desktopAppConfig:{appId:'terrier',desktopUninstaller:false}}));
   await asar.createPackage(client,path.join(f.program,'resources/app.asar'));
+  f.write(f.program,'Terrier.exe',integrityExe(path.join(f.program,'resources/app.asar'),integrityFile));
   const compiler=f.write(f.root,'nsis/Bin/makensis.exe','never executed');
   f.write(f.root,'nsis/Contrib/Language files/English.nlf','fixture');
   const output=path.join(f.root,'release/fixture.exe'),filename=require.resolve('../build-plugin-free.cjs'),localRequire=createRequire(filename);
@@ -199,6 +205,15 @@ test('producer rechecks its closed overlay and exact generated include after com
   const c=await compilerFixture(t),before=fs.readFileSync(c.f.base),result=c.run();
   assert.equal(c.calls(),1);assert.ok(result.sourceOverlay);assert.equal(result.inputFileCount,5);
   assert.deepEqual(fs.readFileSync(c.f.base),before);assert.equal(result.payloadIncludeSha256,hash(fs.readFileSync(result.payloadInclude)));
+});
+test('producer refuses a main EXE whose ASAR integrity key or hash differs, before compiling',async t=>{
+  // 1.0.37 attempt 1: 'resources\app.asar' in a JS literal became 'resourcesapp.asar'; Electron's fuse then refuses to start.
+  const lost=await compilerFixture(t,undefined,'resourcesapp.asar');assert.throws(lost.run,/ASAR integrity differs.*resourcesapp\.asar/);assert.equal(lost.calls(),0);
+  const slash=await compilerFixture(t,undefined,'resources/app.asar');assert.throws(slash.run,/ASAR integrity differs/);assert.equal(slash.calls(),0);
+  // A re-packed app.asar after the EXE was patched (stale header hash) is refused the same way.
+  const stale=await compilerFixture(t),client=path.join(stale.f.root,'client');fs.writeFileSync(path.join(client,'extra.js'),'changed header');
+  await require('@electron/asar').createPackage(client,path.join(stale.f.program,'resources/app.asar'));
+  assert.throws(stale.run,/ASAR integrity differs/);assert.equal(stale.calls(),0);
 });
 test('producer refuses a payload without the backend interpreter the installer guard probes',async t=>{
   const c=await compilerFixture(t);fs.rmSync(path.join(c.f.program,'resources/runtime/terrier/python/python.exe'));
