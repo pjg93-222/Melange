@@ -9,7 +9,9 @@ const {spawnSync}=require('node:child_process');
 // Each app updates from its own public repository; the variable, when set, overrides it (2026-10-15 correction).
 const EXPECTED={melange:'pjg93-222/melange',mentat:'pjg93-222/mentat',terrier:'pjg93-222/geo'};
 
-test('no app ships the workspace-v1 channel in its compiled config; unknown workspace modes are still refused',()=>{
+// Melange 1.0.38: an empty first-use Melange root needs the workspace-v1 channel or it lands on the
+// "Application workspace not connected" page (the 1.0.37 regression). Existing local folders skip it (main.cjs createModuleDataStartup).
+test('only Melange carries the workspace-v1 channel, and only in workspace-v1 mode; unknown workspace modes are still refused',()=>{
  const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-workspace-build-'));
  try{
   for(const appId of Object.keys(EXPECTED)){
@@ -18,7 +20,7 @@ test('no app ships the workspace-v1 channel in its compiled config; unknown work
    for(const mode of ['disabled','workspace-v1','renderer-path']){
     const child=spawnSync(process.execPath,['-e',"const config=require('./builder.cjs');process.stdout.write(JSON.stringify(config.extraMetadata.desktopAppConfig.desktopWorkspaceData))"],{cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env:{...process.env,DESKTOP_APP_ID:appId,DESKTOP_RUNTIME_ROOT:fixture,DESKTOP_ACCESS_TRUST:'',DESKTOP_WORKSPACE_DATA_MODE:mode}});
     if(mode==='renderer-path'){assert.notEqual(child.status,0);assert.match(child.stderr,/workspace/);}
-    else{assert.equal(child.status,0,child.stderr);assert.deepEqual(JSON.parse(child.stdout),{},'No app carries a workspace channel in its asar config');}
+    else{assert.equal(child.status,0,child.stderr);assert.deepEqual(JSON.parse(child.stdout),mode==='workspace-v1'&&appId==='melange'?{melange:'workspace-v1'}:{},appId+' '+mode);}
    }
   }
  }finally{assert.equal(path.dirname(fixture),path.resolve(os.tmpdir()));assert.ok(path.basename(fixture).startsWith('desktop-workspace-build-'));fs.rmSync(fixture,{recursive:true,force:true});}
