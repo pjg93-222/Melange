@@ -234,6 +234,7 @@ class MelangeBinding:
               and isinstance(receipt.get('profiles'),dict))
         rows=[];row_digests=[];contracts={};offset=0;line_ends=[]
         try:
+            receipt_sha=hashlib.sha256(lease.paths['profiles/receipt.json'].read_bytes()).hexdigest()
             with lease.paths['profiles/records.ndjson'].open('rb') as stream:
                 for line in stream:
                     row=parse(line);uuid=row.get('profile_uuid')
@@ -248,7 +249,7 @@ class MelangeBinding:
                         'raw_line_sha256':raw_sha,'byte_start':spec['byteStart'],'byte_end':spec['byteEnd'],
                         'source_path':str(lease.paths['profiles/records.ndjson']),'path':str(lease.paths['profiles/records.ndjson']),
                         'verification_receipt':str(lease.paths['profiles/receipt.json']),
-                        'receipt_sha256':hashlib.sha256(lease.paths['profiles/receipt.json'].read_bytes()).hexdigest(),
+                        'receipt_sha256':receipt_sha,
                         'sha256':content,'sha256_scope':'CANONICAL_PUBLISHED_FACTUAL_PROFILE_CONTENT',
                         'parent_profile_content_sha256':spec.get('parentContentSha256'),
                         'collection_integrity':'PARENT_COLLECTION_VERIFIED_PUBLISHED_FACTUAL_PROJECTION',
@@ -265,7 +266,7 @@ class MelangeBinding:
         profile.profile_revision=hashlib.sha256(json.dumps(profile.profile_digests,sort_keys=True,separators=(',',':')).encode()).hexdigest()
         profile.profile_changes={'added':[],'changed':[],'removed':[],'unchanged_count':len(rows)}
         profile.state=checkpoint;profile.receipt=profile.accepted_receipt=view
-        profile.accepted_receipt_digest=hashlib.sha256(lease.paths['profiles/receipt.json'].read_bytes()).hexdigest()
+        profile.accepted_receipt_digest=receipt_sha
         profile.accepted_prefix_sha256=receipt['sha256'];profile.verified_byte_binding=('published-factual',receipt['sha256'])
         profile.line_end_offsets=line_ends
         profile.errors=[];profile.partial_line=False;profile.exceptions=sum(not profile.eligible(row) for row in rows)
