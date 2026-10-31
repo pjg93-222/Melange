@@ -463,7 +463,8 @@ def run(options, token, *, module_inputs=None, district_input=None, workspace_in
                           MENTAT_APP_DATA_ROOT=str(connections['app_data']), MENTAT_FORECAST_DATA_ROOT=str(data / 'forecast'),
                           MENTAT_REPORT_CACHE_ROOT=str(data / '.cache' / 'industry-report'),
                           MENTAT_RECEIPT_ROOTS=json.dumps(connections['receipt_roots']),
-                          MENTAT_PREWARM='0', MENTAT_CROSS_REFERENCE_ROOT=str(data / 'state/cross-reference'),
+                          MENTAT_PREWARM='0', MENTAT_RUNTIME_STATE_ROOT=str(state),
+                          MENTAT_CROSS_REFERENCE_ROOT=str(data / 'state/cross-reference'),
                           MENTAT_ACCEPTED_SOURCE_ROOT=str(data / 'state/accepted-report-sources'),
                           MENTAT_PYTHON=sys.executable, MENTAT_XLSX_WRITER='openpyxl')
         native = source.parent / 'native'

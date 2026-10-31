@@ -91,5 +91,60 @@ class BackendInputsTests(unittest.TestCase):
         with self.assertRaises(HTTPError) as error:request()
         self.assertEqual(error.exception.code,503)
 
+    def test_mentat_lazy_runtime_state_uses_authenticated_state_before_native_imports(self):
+        import sqlite3
+        from http.server import BaseHTTPRequestHandler
+        fixture=fixtures.InstallerTests();fixture.setUp();self.addCleanup(fixture.doCleanups)
+        prepared,_,_=fixture.make('mentat')
+        roots=fixture.roots
+        options=SimpleNamespace(app='mentat',source_root=roots['source'],data_root=roots['data'],
+            state_root=roots['state'],profile_root=roots['profile'],port=2000)
+        code=roots['source']/'mentat'
+        before={str(p.relative_to(roots['source'])):p.read_bytes() for p in roots['source'].rglob('*') if p.is_file()}
+        observed=[]
+        real_import=backend.importlib.import_module
+        server=fixture.module
+        server.Handler=type('FixtureHandler',(BaseHTTPRequestHandler,),{})
+        def native_main(**_options):
+            # Model the first request's late import and SQLite connection. The
+            # real native runtime-path/default-path regression runs separately.
+            target=Path(os.environ['MENTAT_RUNTIME_STATE_ROOT'])/'prewarm/access.sqlite'
+            target.parent.mkdir(parents=True,exist_ok=True)
+            with sqlite3.connect(target) as connection:
+                connection.execute('CREATE TABLE fixture (value TEXT)')
+            observed.append(target)
+        server.main=native_main
+        def native_import(name):
+            if name in ('figure_pdf','server','contribution_data'):
+                self.assertEqual(os.environ['MENTAT_RUNTIME_STATE_ROOT'],str(roots['state']))
+                self.assertEqual(os.environ['MENTAT_PREWARM'],'0')
+                return server if name=='server' else SimpleNamespace()
+            return real_import(name)
+        connections={'reports':roots['data']/'reports','console':roots['state']/'console',
+                     'app_data':roots['state']/'app-data','receipt_roots':[]}
+        with (patch.dict(os.environ,{'MENTAT_RUNTIME_STATE_ROOT':str(code/'state'),'ACCESS_ENFORCE':'0','CU_DEPLOYMENT':''}),
+              patch('sys.path',list(__import__('sys').path)),patch('sys.argv',['fixture']),
+              patch('mentat_layout.load_connections',return_value=connections),
+              patch('mentat_layout.prepare_workspace',return_value=roots['data']/'workspace'),
+              patch('mentat_layout.bind_analytics_paths'),patch('desktop_figure_renderer.install'),
+              patch.object(backend,'start_data_release'),patch.object(backend,'relocate_mentat_modules'),
+              patch.object(backend.importlib,'import_module',side_effect=native_import)):
+            backend.run(options,'x'*32,module_inputs=prepared)
+        self.assertEqual(observed,[roots['state']/'prewarm/access.sqlite'])
+        self.assertFalse((code/'state').exists())
+        self.assertFalse((roots['data']/'prewarm/access.sqlite').exists())
+        self.assertEqual(before,{str(p.relative_to(roots['source'])):p.read_bytes() for p in roots['source'].rglob('*') if p.is_file()})
+
+    def test_forged_runtime_state_option_fails_before_native_import_or_state_override(self):
+        fixture=fixtures.InstallerTests();fixture.setUp();self.addCleanup(fixture.doCleanups)
+        prepared,_,_=fixture.make('mentat')
+        options=SimpleNamespace(app='mentat',source_root=fixture.roots['source'],data_root=fixture.roots['data'],
+            state_root=fixture.base/'unapproved-state',profile_root=fixture.roots['profile'],port=2000)
+        with patch.dict(os.environ,{'MENTAT_RUNTIME_STATE_ROOT':'unchanged-sentinel'}),patch.object(backend.importlib,'import_module') as native_import:
+            with self.assertRaises(ModuleInputError):backend.run(options,'x'*32,module_inputs=prepared)
+            self.assertEqual(os.environ['MENTAT_RUNTIME_STATE_ROOT'],'unchanged-sentinel')
+            native_import.assert_not_called()
+        self.assertFalse(options.state_root.exists())
+
 
 if __name__=='__main__':unittest.main()
