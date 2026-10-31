@@ -27,7 +27,24 @@ catch(error){if(error.code!=='ISOLATED_PROFILE_REFUSED')throw error;isolationRef
 if(isolationRefused){const message=isolationRefused.message+' Nothing was started; no production profile, login item or update installation was used.';process.stderr.write('[melange-desktop] Isolated test profile refused: '+message+'\n');dialog.showErrorBox(definition.name+' isolated test profile refused',message);app.exit(2);}else{
 app.setAppUserModelId(profile.applicationUserModelId);
 app.setPath('userData',profile.directory);
-if(!app.requestSingleInstanceLock()){app.quit();}else{
+const instanceRecord=path.join(app.getPath('userData'),'running-instance.json');
+const olderVersion=(a,b)=>{const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<3;i++)if((x[i]||0)!==(y[i]||0))return (x[i]||0)<(y[i]||0);return false;};
+// An older copy holding the lock answers this launch with its own old code, so replace it.
+async function replaceOlderInstance(other){
+ try{
+  if(other)process.kill(other.pid);
+  else await new Promise((resolve,reject)=>require('node:child_process').execFile(path.join(process.env.SystemRoot||'C:\Windows','System32','taskkill.exe'),['/F','/T','/IM',path.basename(process.execPath),'/FI','PID ne '+process.pid],{windowsHide:true},error=>error?reject(error):resolve()));
+  for(let attempt=0;attempt<20;attempt++){await new Promise(resolve=>setTimeout(resolve,500));if(app.requestSingleInstanceLock()){app.relaunch();app.exit(0);return;}}
+ }catch{}
+ dialog.showErrorBox(definition.name,'An older copy of '+definition.name+' is still running. In Task Manager, open the Details tab, end every '+path.basename(process.execPath)+', then open '+definition.name+' again.');app.exit(1);
+}
+if(!app.requestSingleInstanceLock()){
+ let other=null;try{other=JSON.parse(fs.readFileSync(instanceRecord,'utf8'));process.kill(other.pid,0);}catch{other=null;}
+ // Records exist from this version on; no live record means a pre-record (older) copy holds the lock.
+ if(other&&!olderVersion(other.version,app.getVersion()))app.quit();else replaceOlderInstance(other);
+}else{
+try{fs.writeFileSync(instanceRecord,JSON.stringify({pid:process.pid,version:app.getVersion()}));}catch{}
+
 if(profile.isolated){
  const notice='[melange-desktop] Isolated test profile active: '+profile.directory+' (AppUserModelId '+profile.applicationUserModelId+'). Login startup, OS registration and native update installation are disabled; access, trust, enrollment and signature checks are unchanged.';
  process.stdout.on('error',()=>{});try{process.stdout.write(notice+'\n');}catch{}try{fs.mkdirSync(path.join(profile.directory,'logs'),{recursive:true,mode:0o700});fs.appendFileSync(path.join(profile.directory,'logs','isolated-profile.log'),new Date().toISOString()+' '+notice+'\n',{mode:0o600});}catch{}

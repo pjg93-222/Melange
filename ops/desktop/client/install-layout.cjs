@@ -119,7 +119,7 @@ async function realDirectory(fs,target){
   try{const info=await fs.promises.lstat(target);return info.isDirectory()&&!info.isSymbolicLink();}catch{return false;}
 }
 async function sweepLayout({fs=require('node:fs'),downloads,documents,home,localAppData,product,app,applicationId,current,execPath,userData,state={},log=()=>{}}){
-  const result={pruned:[],setupRemoved:[],legacyRemoved:[]};
+  const result={pruned:[],setupRemoved:[],legacyRemoved:[],installersRemoved:[]};
   if(!downloadsMode({execPath,downloads}))return result;
   const base=root(downloads),executable=win.dirname(execPath);
   if(!await realDirectory(fs,base))return result; // a junctioned root (or none) is never swept
@@ -147,6 +147,16 @@ async function sweepLayout({fs=require('node:fs'),downloads,documents,home,local
       if(await remove(target,{recursive:true,force:false}))result.setupRemoved.push(target);
     }
   }catch(error){if(error.code!=='ENOENT')log('[layout] setup sweep skipped: '+error.message);}
+  // downloaded installers: keep only this version's exact file; older versions and (1)-style duplicates go
+  try{
+    const installer=new RegExp('^'+escape(app)+'-('+VERSION+')-win32-x64(?: \\(\\d+\\))?\\.exe$','i'),keep=(app+'-'+current+'-win32-x64.exe').toLowerCase();
+    for(const name of await fs.promises.readdir(downloads)){
+      if(!installer.test(name)||name.toLowerCase()===keep)continue;
+      const target=win.join(downloads,name);
+      try{if(!(await fs.promises.lstat(target)).isFile())continue;}catch{continue;}
+      if(await remove(target,{force:false}))result.installersRemoved.push(target);
+    }
+  }catch(error){if(error.code!=='ENOENT')log('[layout] installer sweep skipped: '+error.message);}
   // 2.6 legacy program folders
   const guarded=[executable,userData,documents&&win.join(documents,'MelangeApplicationState'),home&&win.join(home,'Documents','MelangeApplicationState'),
     localAppData&&win.join(localAppData,'MelangeData'),localAppData&&applicationId&&win.join(localAppData,applicationId),base].filter(Boolean);
