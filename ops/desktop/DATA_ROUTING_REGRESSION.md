@@ -25,6 +25,38 @@ Three defects are addressed:
 Application binary updates and signed analysis-data downloads are separate
 mechanisms. Successful binary updating alone does not establish data readiness.
 
+## Build configuration follow-up
+
+The release 1.0.40-r31 package had no `desktopWorkspaceData` setting. The common
+builder also defaulted to disabled and ignored Mentat even when workspace-v1
+was explicitly requested. This prevented the paired report/model receiver
+from being selected, independently of the route defects above.
+
+Normal standalone GitHub Mentat builds now default to
+`desktopWorkspaceData: {mentat: 'workspace-v1'}`. An explicit
+`DESKTOP_WORKSPACE_DATA_MODE=disabled` remains supported. Explicit workspace-v1
+selects the channel for Melange or Mentat; Melange's default, managed-build
+defaults and Terrier behavior are unchanged. Windows sign-in and each app's
+binary update repository are unchanged. Existing explicitly selected local
+workspaces still use the earlier startup selection rules.
+
+For normal builds, `builder.cjs`'s `extraMetadata.desktopAppConfig`, consumed
+by `build-native.cjs`, is authoritative. The historical per-release
+`prepare-client.cjs` overlay copies `previous.desktopAppConfig` from an older
+ASAR and therefore bypasses the new builder default. Any custom overlay
+release must deliberately adopt the reviewed builder configuration and
+inspect the final packaged metadata; copying the 1.0.40-r31 configuration
+would retain the missing feed. This change does not modify old installers.
+
+The builder regression matrix covers each application, standalone/managed
+access and unset, empty, disabled, workspace-v1 and invalid modes. Run:
+
+```text
+node --test ops/desktop/client/tests/builder-update-source.test.cjs
+```
+
+All **3 builder tests passed**, including the 30-case workspace mode matrix.
+
 ## Evidence
 
 From `ops/desktop/packaging`, with `MENTAT_TEST_RUNTIME` explicitly set to the

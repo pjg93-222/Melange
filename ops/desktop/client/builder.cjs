@@ -25,9 +25,12 @@ if(desktopAccessMode==='standalone'&&(updateProvider!=='github'||desktopScrapeBr
 const publicDataMode=process.env.DESKTOP_PUBLIC_DATA_MODE||'legacy';
 if(!['legacy','paged-v1'].includes(publicDataMode)||(publicDataMode==='paged-v1'&&selected.id!=='melange'))throw new Error('Unsupported public data mode for this application');
 const desktopPublicData=publicDataMode==='paged-v1'?{melange:'paged-v1'}:{};
-const workspaceDataMode=process.env.DESKTOP_WORKSPACE_DATA_MODE||'disabled';
+// Normal standalone Mentat builds need the paired report/model channel, not
+// only public FEC tables. Keep an explicit disabled override for limited builds.
+const workspaceDataMode=process.env.DESKTOP_WORKSPACE_DATA_MODE||
+  (selected.id==='mentat'&&desktopAccessMode==='standalone'&&updateProvider==='github'?'workspace-v1':'disabled');
 if(!['disabled','workspace-v1'].includes(workspaceDataMode))throw new Error('Unsupported workspace data mode');
-const desktopWorkspaceData=workspaceDataMode==='workspace-v1'&&selected.id==='melange'?{melange:'workspace-v1'}:{};
+const desktopWorkspaceData=workspaceDataMode==='workspace-v1'&&['melange','mentat'].includes(selected.id)?{[selected.id]:'workspace-v1'}:{};
 if(!fs.existsSync(icon))throw new Error('Original application icon is missing.');
 require('./backend-command.cjs').backendCommand(__dirname,selected.id,process.platform,runtimeRoot);
 const releaseSigning=require('./release-signing.cjs').options(selected,{withoutUninstaller:true,builtinInstaller:true});

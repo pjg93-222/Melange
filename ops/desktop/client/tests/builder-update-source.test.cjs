@@ -9,17 +9,27 @@ const {spawnSync}=require('node:child_process');
 // Each app updates from its own public repository; the variable, when set, overrides it (2026-10-15 correction).
 const EXPECTED={melange:'pjg93-222/melange',mentat:'pjg93-222/mentat',terrier:'pjg93-222/geo'};
 
-test('workspace distribution is an explicit compiled Melange-only mode; Mentat ships the public-only 1.0.32 config; Terrier and unknown values cannot select it',()=>{
+test('standalone Mentat builds carry the full workspace feed by default, with explicit modes and unchanged Melange/Terrier behavior',()=>{
  const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-workspace-build-'));
  try{
   for(const appId of Object.keys(EXPECTED)){
    fs.mkdirSync(path.join(fixture,appId,'bootstrap'),{recursive:true});fs.mkdirSync(path.join(fixture,appId,'python','bin'),{recursive:true});
    fs.writeFileSync(path.join(fixture,appId,'bootstrap','desktop_backend.py'),'');fs.writeFileSync(path.join(fixture,appId,'python','python.exe'),'');fs.writeFileSync(path.join(fixture,appId,'python','bin','python3'),'');
-   for(const mode of ['disabled','workspace-v1','renderer-path']){
-    const child=spawnSync(process.execPath,['-e',"const config=require('./builder.cjs');process.stdout.write(JSON.stringify(config.extraMetadata.desktopAppConfig.desktopWorkspaceData))"],{cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env:{...process.env,DESKTOP_APP_ID:appId,DESKTOP_RUNTIME_ROOT:fixture,DESKTOP_ACCESS_TRUST:'',DESKTOP_WORKSPACE_DATA_MODE:mode}});
+   for(const accessMode of ['standalone','managed'])for(const mode of [undefined,'','disabled','workspace-v1','renderer-path']){
+    const env={...process.env,DESKTOP_APP_ID:appId,DESKTOP_RUNTIME_ROOT:fixture,DESKTOP_ACCESS_TRUST:'',
+     DESKTOP_ACCESS_MODE:accessMode,DESKTOP_UPDATE_PROVIDER:'github',DESKTOP_SHARED_SCRAPE:'0',DESKTOP_PUBLIC_DATA_MODE:'legacy'};
+    delete env.DESKTOP_AUTHENTICATION;delete env.DESKTOP_GITHUB_REPOSITORY;delete env.DESKTOP_WORKSPACE_DATA_MODE;
+    if(mode!==undefined)env.DESKTOP_WORKSPACE_DATA_MODE=mode;
+    const child=spawnSync(process.execPath,['-e',"const config=require('./builder.cjs');process.stdout.write(JSON.stringify(config.extraMetadata.desktopAppConfig))"],{cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env});
     if(mode==='renderer-path'){assert.notEqual(child.status,0);assert.match(child.stderr,/workspace/);}
-    else{assert.equal(child.status,0,child.stderr);assert.deepEqual(JSON.parse(child.stdout),mode==='workspace-v1'&&appId==='melange'?{melange:'workspace-v1'}:{});
-     if(appId==='mentat')assert.deepEqual(JSON.parse(child.stdout),{},'Mentat never carries a workspace channel in its asar config');}
+    else{assert.equal(child.status,0,child.stderr);const config=JSON.parse(child.stdout);
+     const enabled=mode==='workspace-v1'||(!mode&&appId==='mentat'&&accessMode==='standalone');
+     assert.deepEqual(config.desktopWorkspaceData,enabled&&appId!=='terrier'?{[appId]:'workspace-v1'}:{},appId+' '+accessMode+' '+mode);
+     assert.equal(config.desktopAccessMode,accessMode);
+     assert.equal(config.desktopAuthentication,accessMode==='standalone'?'windows':'password');
+     assert.deepEqual(config.desktopUpdateSource,{provider:'github',repository:EXPECTED[appId]});
+     assert.deepEqual(config.desktopPublicData,{});
+     assert.equal(config.desktopUninstaller,false);}
    }
   }
  }finally{assert.equal(path.dirname(fixture),path.resolve(os.tmpdir()));assert.ok(path.basename(fixture).startsWith('desktop-workspace-build-'));fs.rmSync(fixture,{recursive:true,force:true});}
