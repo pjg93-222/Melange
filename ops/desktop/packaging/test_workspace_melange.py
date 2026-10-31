@@ -119,6 +119,7 @@ class NativeActivity(unittest.TestCase):
             def activity(nodes):
                 calls.append('native-activity');return SimpleNamespace(receipt={'counts':{'source_person_ids':7}})
             binding.activity_index=activity;service._desktop_workspace_inputs=binding
+            binding.public_capabilities=lambda:{'mode':'signed-public-read-only'}
         with patch.object(module,'CATALOG',Missing()),patch.object(module,'LDA_CATALOG',Missing()), \
              patch.object(module,'load_evidence',return_value={}),patch.object(module,'load_inventory',return_value={}), \
              patch.object(module,'IdentityWebIndex',return_value=None):

@@ -346,9 +346,19 @@ class LiveService:
                                    'stages': {}, 'earlier': []}
         threading.Thread(target=self._run, daemon=True, name='staffer-live-readonly').start()
 
+    def _native_workspace(self):
+        """Only the installed, authenticated native binding grants public mode."""
+        binding = getattr(self, '_desktop_workspace_inputs', None)
+        if binding is not None:
+            from workspace_melange import MelangeBinding
+            if type(binding) is not MelangeBinding or binding.service is not self:
+                raise ValueError('The analytical input binding is not a native workspace capability')
+        return binding
+
     def _run(self):
         started = time.perf_counter()
         try:
+            native_inputs = self._native_workspace()
             self.static.load()
             if self.static.errors:
                 raise ValueError('; '.join(self.static.errors))
@@ -417,18 +427,19 @@ class LiveService:
             self._cache_source_inventory()
             self._apply_inventory()
             self._index_identity_candidates()
-            self.identity_web = IdentityWebIndex(self.source_root)
-            self.stage = 'Consolidating source identities from references'
-            self._resolve_automatic_identities()
+            if native_inputs is None:
+                self.identity_web = IdentityWebIndex(self.source_root)
+                self.stage = 'Consolidating source identities from references'
+                self._resolve_automatic_identities()
+            else:
+                # The signed public projection excludes private decisions.
+                # Do not infer new merges without their keep-separate constraints.
+                self.identity_progress = native_inputs.public_capabilities()
             self.metrics['names'] = dict(Counter('unresolved' if 'UNRESOLVED' in n.get('name_status', '') else 'named' for n in self.static.nodes.values()))
             self.metrics['ambiguous_identity_links_kept_separate'] = len(set(self.evidence_exceptions))
             self.metrics['evidence_and_names_ms'] = round((time.perf_counter() - mark) * 1000, 2)
             self.stage = 'Checking the complete lobbying activity index'
-            native_inputs = getattr(self, '_desktop_workspace_inputs', None)
             if native_inputs is not None:
-                from workspace_melange import MelangeBinding
-                if type(native_inputs) is not MelangeBinding or native_inputs.service is not self:
-                    raise ValueError('The analytical input binding is not a native workspace capability')
                 mark = time.perf_counter()
                 self.activity_provider = native_inputs.activity_index(self.static.nodes)
                 self.metrics['activity_index_load_ms'] = round((time.perf_counter() - mark) * 1000, 2)
@@ -459,8 +470,9 @@ class LiveService:
             self.stage = 'Ready'
             self.metrics['initial_ready_ms'] = round((time.perf_counter() - started) * 1000, 2)
             self._start_prewarm()
-            threading.Thread(target=self.run_identity_reconciliation_loop, daemon=True, name='staffer-reference-resolver').start()
-            threading.Thread(target=self.run_identity_apply_loop, daemon=True, name='staffer-profile-verifier').start()
+            if native_inputs is None:
+                threading.Thread(target=self.run_identity_reconciliation_loop, daemon=True, name='staffer-reference-resolver').start()
+                threading.Thread(target=self.run_identity_apply_loop, daemon=True, name='staffer-profile-verifier').start()
         except Exception as exc:
             self.startup_error = str(exc)
             self.errors.append(self.startup_error)
@@ -562,7 +574,9 @@ class LiveService:
         self.static.reindex()
 
     def _index_identity_candidates(self):
-        self.identity_resolution = load_identity_resolution(self.source_root, self.static, self.evidence.get('episodes', []))
+        native = self._native_workspace()
+        self.identity_resolution = (native.public_identity_review() if native is not None else
+            load_identity_resolution(self.source_root, self.static, self.evidence.get('episodes', [])))
         candidates = defaultdict(list)
         for group in self.identity_resolution.get('candidate_groups', []):
             for ident in {i for pair in group.get('candidate_pairs', []) for i in pair}:
@@ -661,6 +675,8 @@ class LiveService:
         return merged
 
     def _resolve_automatic_identities(self):
+        if self._native_workspace() is not None:
+            return  # The public model grants no new private-dependent identity decisions.
         if not self.identity_web:
             return
         started = time.perf_counter()
@@ -912,6 +928,8 @@ class LiveService:
                     break
 
     def assertion_decision(self, payload):
+        if self._native_workspace() is not None:
+            raise ValueError('Private relationship statements are unavailable in the signed public workspace; no private decisions are loaded.')
         with self.lock:
             if not self.ready or self._assertion_update_pending:
                 raise ValueError('Wait for the current update to finish')
@@ -937,6 +955,8 @@ class LiveService:
                 self.stage = 'Relationship update needs attention'
 
     def identity_decision(self, primary_id, alias_ids, decision):
+        if self._native_workspace() is not None:
+            raise ValueError('Private identity decisions are unavailable in the signed public workspace; no private decisions are loaded.')
         with self.lock:
             if not self.ready or self._assertion_update_pending:
                 raise ValueError('An identity update is already running; retry when the view is ready')
@@ -957,6 +977,8 @@ class LiveService:
             return {'ok': True, 'status': 'reindexing', 'decision': result['decision']}
 
     def _rebuild_identity(self):
+        if self._native_workspace() is not None:
+            raise ValueError('Identity rebuilding is unavailable in the signed public workspace.')
         with self.refresh_lock:
             try:
                 # Build a replacement off-request. Searches and paths keep using
@@ -1043,6 +1065,8 @@ class LiveService:
         return value
 
     def _user_episodes(self):
+        if self._native_workspace() is not None:
+            return []  # No private statement contributes an episode in public mode.
         episodes = []
         for assertion in self.evidence.get('user_assertions', []):
             hub = 'routing:user-stated-current-team:' + digest(assertion.get('person_ids', []))[:16]
@@ -1082,6 +1106,15 @@ class LiveService:
 
     def _update_profile_progress(self, captured):
         digests = captured['digests']
+        if self._native_workspace() is not None:
+            self.identity_progress['politico_ingestion'] = {
+                'status': 'signed_factual_profiles_only', 'validated_profiles': len(digests),
+                'identity_checked_profiles': None, 'pending_profiles': None,
+                'accepted_revision': captured['revision'],
+                'receipt_sha256': captured['receipt_sha256'],
+                'accepted_prefix_sha256': captured['prefix_sha256'],
+                'note': 'Receipt-verified public factual profiles; new identity discovery and private decisions are not loaded.'}
+            return
         checked = sum(self._identity_profile_digests.get(ident) == value for ident, value in digests.items())
         pending = len(digests) - checked
         # Membership in the last identity pass is not a per-profile match outcome; report the outcomes too.
@@ -1132,7 +1165,8 @@ class LiveService:
     def _refresh_profiles_locked(self, force=False):
         started = time.perf_counter()
         as_of = local_date()
-        assertions = load_coworker_assertions()
+        native = self._native_workspace()
+        assertions = None if native is not None else load_coworker_assertions()
         assertion_revision = digest(assertions)
         self.evidence['user_assertions'] = assertions
         with self.profile_lock:
@@ -1504,6 +1538,9 @@ class LiveService:
     def _current_metadata(self):
         """Stored poll metadata with the freshness age and stale flag evaluated now, not at the last poll."""
         metadata = self.metadata
+        native = self._native_workspace()
+        if native is not None:
+            metadata = {**metadata, 'workspace_capabilities': native.public_capabilities()}
         if 'freshness' not in metadata:
             return metadata
         return {**metadata, 'freshness': freshness_now(metadata.get('freshness'))}

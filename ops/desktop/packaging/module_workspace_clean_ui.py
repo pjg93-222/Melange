@@ -23,6 +23,38 @@ MOUNTED = {'desk': 'body.dsk-v2', 'industry': 'html.ind-v2',
     'research-bills': '', 'cu-fintech': '', 'people': 'nav.ppl-tabs',
     'network': 'html.mlk-v8'}
 COLOR_VALUE = re.compile(r'^(#[0-9a-fA-F]{3,8}|(rgba?|hsla?)\([^)]*\))$')
+PEOPLE_DAYS_UNAVAILABLE = {
+    'schema':'melange-people-days-v1','label':'Days on the record','available':False,
+    'capability':'not_in_signed_public_workspace',
+    'reason':'Days on the record is unavailable: its approved calculation requires an identity-resolution receipt excluded from this signed public workspace.'}
+
+
+def public_people_asset(name, value):
+    """Narrow capability handling over unchanged canonical presentation assets."""
+    if name == 'staffer-live.js':
+        return replace_once(value, 'out.replaceChildren();if(!info)return;const queued=',
+            "out.replaceChildren();if(!info)return;if(info.mode==='signed-public-read-only'){text(out,'p','Signed public records','detail-value');text(out,'p',info.notice,'note');return;}const queued=")
+    if name == 'staffer-assertions.js':
+        return replace_once(value, "if (!response.ok) throw new Error('Could not load your statements');",
+            "if (response.status === 409) { const capability = await response.json(); panel.replaceChildren(); status.textContent = capability.error; return; }\n      if (!response.ok) throw new Error('Could not load your statements');")
+    if name != 'people-ui.js':
+        return value
+    replacements = (
+        ("if (S.dm.status === 'loading' || (S.dm.status === 'ok' && !force)) return;",
+         "if (S.dm.status === 'unavailable' || S.dm.status === 'loading' || (S.dm.status === 'ok' && !force)) return;"),
+        ("if (!meta || meta.available !== true || !(Number(meta.shards) > 0)) throw Error((meta && meta.reason) || 'This build has no day counts');",
+         "if (meta && meta.available === false && meta.capability === 'not_in_signed_public_workspace') { S.dm = {status: 'unavailable', error: meta.reason}; return; }\n        if (!meta || meta.available !== true || !(Number(meta.shards) > 0)) throw Error((meta && meta.reason) || 'This build has no day counts');"),
+        ("if (S.dm.status !== 'ok') return S.dm.status === 'error' ? {status: 'error', error: S.dm.error} : {status: 'loading'};",
+         "if (S.dm.status === 'unavailable') return S.dm;\n    if (S.dm.status !== 'ok') return S.dm.status === 'error' ? {status: 'error', error: S.dm.error} : {status: 'loading'};"),
+        ("function daysCell(p, st) {", "function daysCell(p, st) {\n    if (st.status === 'unavailable') return '<span class=\"ppl-days-none\" title=\"' + esc(st.error) + '\" aria-label=\"Days on the record unavailable\">&mdash;</span>';"),
+        ("const canSortDays = st.status !== 'error';", "const canSortDays = st.status === 'ok' || st.status === 'payload';"),
+        ("if (st.status === 'error')\n        html +=", "if (st.status === 'unavailable') html += '<p class=\"ppl-more ppl-days-unavailable\" role=\"status\">' + esc(st.error) + '</p>';\n      else if (st.status === 'error')\n        html +="),
+        ("if (S.dm.status === 'ok' && S.dm.meta.definition) html += '<p id=\"ppl-days-note\">' + esc(S.dm.meta.definition) + '</p>';",
+         "if (S.dm.status === 'ok' && S.dm.meta.definition) html += '<p id=\"ppl-days-note\">' + esc(S.dm.meta.definition) + '</p>';\n      else if (S.dm.status === 'unavailable') html += '<p id=\"ppl-days-note\">' + esc(S.dm.error) + '</p>';"),
+    )
+    for before, after in replacements:
+        value = replace_once(value, before, after)
+    return value
 
 
 def css(*names):
@@ -85,6 +117,10 @@ def frames(main, pages, context, derivation):
             raise RuntimeError('Compiled people presentation asset is unavailable')
         people = people.replace('"' + asset + '"', '"' + PREFIX + asset + '"')
     people = replace_once(people, '<head>', '<head><base href="/staffer-live/">')
+    people = replace_once(people, '<span id="connection"',
+        '<span id="mlk-public-capability" class="ppl-chip" role="status" style="margin-left:12px" '
+        'title="Signed public model. Private identity decisions and relationship statements are not loaded. Private editing and new identity discovery are unavailable.">'
+        'Public model &middot; private decisions not loaded</span><span id="connection"')
     people = replace_once(people, '</head>', css('ui-kit', 'restored-people', *OVERLAYS['people']) + '</head>')
     people = replace_once(people, '</body>', scripts('restored-links', 'ui-kit', *OVERLAYS['people']) + '</body>')
     documents['people.html'] = boot(people, 'people')
@@ -193,7 +229,8 @@ class CleanWorkspace:
             'colors': colour_maps(self.documents), 'bills': main['members']['bill_live'],
             'champions': industry['champions'], 'forecasts': industry['forecast'],
             'research-bills': industry['bills'], 'cu-fintech': industry['screen'],
-            'interactions': industry['interactions'], 'industry': main['industry']}
+            'interactions': industry['interactions'], 'industry': main['industry'],
+            'people-days/index': PEOPLE_DAYS_UNAVAILABLE}
         from datetime import date
         generated = main['members'].get('freshness', {}).get('generated_at', '')
         try:
@@ -243,7 +280,7 @@ class CleanWorkspace:
                 return (200, json.dumps(value, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode(), 'application/json; charset=utf-8')
         value = self.documents.get(name)
         if value is None and name in ASSETS and name != 'people-source.html':
-            value = ASSETS[name]
+            value = public_people_asset(name, ASSETS[name])
             if name == 'staffer-live.css':
                 # The approved boot loader already loads this kit separately,
                 # with a bounded render wait and local-font fallback. A CSS

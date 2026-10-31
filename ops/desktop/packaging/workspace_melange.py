@@ -89,6 +89,9 @@ def prepare(snapshot,*,source,profile,program_fingerprint,is_cancelled=lambda:Fa
                   and set(references)=={'schemaVersion','kind','evidence','inventory','ldaEmployment','ldaSidecar','reconciliation','privateIdentityGroupsIncluded'}
                   and isinstance(references['inventory'],dict) and isinstance(references['evidence'],dict)
                   and directory.get('kind')=='melange-professional-contacts-v1' and isinstance(directory.get('records'),list))
+            _data(references['inventory'].get('identity_groups') == []
+                  and references['inventory'].get('identity_aliases') == {}
+                  and references['evidence'].get('user_assertions') == [])
             receipts={family:lease.take_json(family+'/receipt.json') for family in ('source','lda','activity')}
             for family,receipt in receipts.items():
                 _data(receipt.get('schema')=='melange-staffer-analytical-projection-v1'
@@ -174,9 +177,7 @@ class MelangeBinding:
             return deepcopy(refs['evidence'])
         def inventory(root,graph):
             require(Path(root).resolve()==Path(self._original_root).resolve())
-            result=deepcopy(refs['inventory']);result['raw_nodes']=dict(result['nodes'])
-            module.apply_identity_overlay(result,graph.nodes)
-            return result
+            return self.public_inventory(graph)
         module.load_evidence,module.load_inventory=evidence,inventory
         module.SourceCatalog=lambda:self._catalogue('source')
         module.LdaCatalog=lambda:self._catalogue('lda')
@@ -199,6 +200,35 @@ class MelangeBinding:
         self._bind_profiles()
         self._installed_functions={name:getattr(module,name) for name in
             ('load_evidence','load_inventory','SourceCatalog','LdaCatalog','ActivityIndex','ContactIndex')}
+
+    def public_capabilities(self):
+        _data(self.verify())
+        return {'mode':'signed-public-read-only',
+            'privateOverlay':{'status':'excluded_from_signed_workspace','loaded':False,'validated':False},
+            'supported':{'publicModelRead':True,'peopleSearch':True,'groups':True,
+                'datedEvidenceRoutes':True,'factualProfiles':True},
+            'unavailable':{'privateIdentityDecisions':True,'privateRelationshipStatements':True,
+                'newIdentityDiscovery':True},
+            'workspaceManifestSha256':self.prepared.source['manifestSha256'],
+            'notice':'Signed public model. Private decisions are not loaded; identity editing, relationship statements and new identity discovery are unavailable.'}
+
+    def public_inventory(self,graph):
+        _data(self.verify())
+        inventory=self.analytics.content.data['references']['inventory']
+        _data(inventory.get('identity_groups')==[] and inventory.get('identity_aliases')=={})
+        result=deepcopy(inventory);result['raw_nodes']=dict(result['nodes'])
+        # Apply only the signed public projection, without claiming to load or
+        # validate private decisions and without reading their filesystem path.
+        self._module.apply_identity_overlay(result,graph.nodes,identity_groups=inventory['identity_groups'])
+        return result
+
+    def public_identity_review(self):
+        capabilities=self.public_capabilities()
+        return {'status':'unavailable_in_signed_public_workspace',
+            'candidate_groups':[],'records':{},'sources':[],'errors':[],
+            'counts':{'candidate_groups':None,'user_confirmed_aliases':None,
+                'status':'not_computed_private_decisions_excluded'},
+            'capabilities':capabilities}
 
     def _slot(self,family):
         lease=self.analytics.content.data['lease'];receipt=deepcopy(self.analytics.content.data['receipts'][family])
@@ -312,6 +342,16 @@ class MelangeBinding:
     def handle_request(self,handler):
         _data(self.verify())
         url=urlsplit(handler.path);path=unquote(url.path)
+        if path in ('/api/staffer-capabilities','/api/staffer-assertions'):
+            capability=self.public_capabilities()
+            value=(capability if path=='/api/staffer-capabilities' else
+                {'code':'private_overlay_unavailable','assertions':None,
+                 'error':capability['notice'],'workspace_capabilities':capability})
+            raw=json.dumps(value,separators=(',',':')).encode('utf-8')
+            handler.send_response(200 if path=='/api/staffer-capabilities' else 409)
+            handler.send_header('Content-Type','application/json; charset=utf-8')
+            handler.send_header('Content-Length',str(len(raw)));handler.send_header('Cache-Control','no-store')
+            handler.send_header('X-Content-Type-Options','nosniff');handler.end_headers();handler.wfile.write(raw);return True
         if path=='/' or path.startswith('/staffer-live/approved/'):
             status,raw,content_type=self._clean_workspace().response(path)
             handler.send_response(status);handler.send_header('Content-Type',content_type)

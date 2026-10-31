@@ -4,10 +4,31 @@ import json
 import unittest
 
 from module_workspace_clean_assets import ASSETS, ASSET_PROVENANCE
-from module_workspace_clean_ui import CleanWorkspace, PREFIX, shell, catalog
+from module_workspace_clean_ui import CleanWorkspace, PREFIX, shell, catalog, public_people_asset, PEOPLE_DAYS_UNAVAILABLE
 
 
 class CleanRoutes(unittest.TestCase):
+    def test_public_people_days_reports_unavailable_and_served_assets_disable_numeric_sort_and_private_edits(self):
+        self.assertFalse(PEOPLE_DAYS_UNAVAILABLE['available'])
+        self.assertNotIn('counts',PEOPLE_DAYS_UNAVAILABLE)
+        self.assertIn('identity-resolution receipt',PEOPLE_DAYS_UNAVAILABLE['reason'])
+        workspace=self.fixture();workspace.values['people-days/index']=PEOPLE_DAYS_UNAVAILABLE
+        status,raw,_=workspace.response(PREFIX+'data/people-days/index.json')
+        self.assertEqual(status,200);self.assertEqual(json.loads(raw),PEOPLE_DAYS_UNAVAILABLE)
+        original=ASSETS['people-ui.js'];served=public_people_asset('people-ui.js',original)
+        self.assertIn("S.dm = {status: 'unavailable', error: meta.reason}",served)
+        self.assertIn("const canSortDays = st.status === 'ok' || st.status === 'payload';",served)
+        self.assertIn('aria-label="Days on the record unavailable">&mdash;',served)
+        self.assertIn('ppl-days-unavailable',served)
+        assertions=public_people_asset('staffer-assertions.js',ASSETS['staffer-assertions.js'])
+        self.assertIn('response.status === 409',assertions)
+        self.assertIn('status.textContent = capability.error; return;',assertions)
+        self.assertEqual(public_people_asset('network.js',ASSETS['network.js']),ASSETS['network.js'])
+        identity=public_people_asset('staffer-live.js',ASSETS['staffer-live.js'])
+        inserted="if(info.mode==='signed-public-read-only'){text(out,'p','Signed public records','detail-value');text(out,'p',info.notice,'note');return;}"
+        self.assertEqual(identity.replace(inserted,''),ASSETS['staffer-live.js'])
+        self.assertLess(identity.index(inserted),identity.index('Checks every person'))
+
     def catalog_fixture(self):
         base = {'members': [{'name': 'One', 'honors': {'member_id': 'B000001'}},
                             {'name': 'Two', 'honors': {'member_id': 'C000002'}}],
