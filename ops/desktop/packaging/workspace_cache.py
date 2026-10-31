@@ -20,11 +20,20 @@ from types import MappingProxyType
 from module_application_contracts import DataIntakeBlocked
 from module_data_snapshot import parse, regular, safe_root
 from workspace_archive import DomainArchive, identity, stamp
-from workspace_data_contract import ARCHIVE_MEMBERS, REPORT_ANALYSIS_KIND, STAFFER_ANALYSIS_KIND, MiB
+from workspace_data_contract import (ARCHIVE_MEMBERS, INDUSTRY_PAGES_KIND, INDUSTRY_MEMBERS,
+    REPORT_ANALYSIS_KIND, STAFFER_ANALYSIS_KIND, MiB)
 from workspace_sqlite import readonly
 
 BLOCK = 4 * MiB
 HEX = re.compile(r'[0-9a-f]{64}')
+# Only JSON trees the fixed Melange preparation immediately consumes. Other
+# archive types and unconsumed metadata retain their original memory behavior.
+JSON_CONSUMERS = MappingProxyType({
+    ('melange', INDUSTRY_PAGES_KIND, 'pages'): frozenset(INDUSTRY_MEMBERS) - {'derivation.json'},
+    ('melange', STAFFER_ANALYSIS_KIND, 'records'): frozenset((
+        'identity/references.json', 'contacts/directory.json', 'source/receipt.json',
+        'lda/receipt.json', 'activity/receipt.json', 'profiles/receipt.json', 'profiles/checkpoint.json')),
+})
 
 
 def require(value):
@@ -98,7 +107,9 @@ def validate_type(path, member, family, limit):
             pass
     elif member.endswith('.json'):
         require(path.stat().st_size <= limit)
-        require(type(parse(path.read_bytes())) in (dict, list))
+        value = parse(path.read_bytes())
+        require(type(value) in (dict, list))
+        return value
     elif member.endswith('.ndjson'):
         with path.open('rb') as stream:
             count = 0
@@ -118,11 +129,12 @@ def validate_type(path, member, family, limit):
 
 
 class DerivedArchive:
-    def __init__(self, root, source, derivation, expected, namespace_seals, families, limits):
+    def __init__(self, root, source, derivation, expected, namespace_seals, families, limits, *, retain_json=()):
         self.root, self._source = root, source
         self._derivation, self._expected = derivation, expected
         self.paths = MappingProxyType({name: root / name for name in expected})
         self._directories, self._files, self._closed = {}, [], False
+        self._decoded_json = {}
         try:
             self._directories = {**namespace_seals, **inventory(root, expected)}
             for member, spec in expected.items():
@@ -139,7 +151,9 @@ class DerivedArchive:
                     require(not source.cancelled())
                     digest.update(block)
                 require(digest.hexdigest() == spec['sha256'])
-                validate_type(path, member, families[member], limits[member])
+                decoded = validate_type(path, member, families[member], limits[member])
+                if member in retain_json and type(decoded) in (dict, list):
+                    self._decoded_json[member] = decoded
             require(self.verify())
         except BaseException:
             self.close()
@@ -148,6 +162,15 @@ class DerivedArchive:
     @property
     def derivation(self):
         return copy.deepcopy(self._derivation)
+
+    def take_json(self, member):
+        """Transfer one validated JSON tree to its sole native consumer.
+
+        The same open lease must still verify. Pop rather than share mutable
+        trees between consumers, and never retain decoded data across leases.
+        """
+        require(member in self._decoded_json and self.verify())
+        return self._decoded_json.pop(member)
 
     def verify(self):
         if self._closed:
@@ -170,6 +193,7 @@ class DerivedArchive:
         if self._closed:
             return
         self._closed = True
+        self._decoded_json.clear()
         for _path, held, _named, _opened in self._files:
             held.close()
         self._source.close()
@@ -265,7 +289,8 @@ def prepare_cache(*, profile_root, app_id, kind, role, archive_path,
         namespace_seals = {path: directory_id(path) for path in (profile, packs, namespace)}
         target = namespace / expected_sha256
         if target.exists() or target.is_symlink():
-            result = DerivedArchive(target, source, derivation, expected, namespace_seals, families, limits)
+            result = DerivedArchive(target, source, derivation, expected, namespace_seals, families, limits,
+                                    retain_json=JSON_CONSUMERS.get((app_id, kind, role), ()))
             source = None
             return result
         if shutil.disk_usage(namespace).free < sum(row['bytes'] for row in expected.values()) + 64 * MiB:
@@ -310,7 +335,8 @@ def prepare_cache(*, profile_root, app_id, kind, role, archive_path,
         except OSError as error:
             if error.errno not in (errno.EEXIST, errno.ENOTEMPTY) and not isinstance(error, FileExistsError):
                 raise
-        result = DerivedArchive(target, source, derivation, expected, namespace_seals, families, limits)
+        result = DerivedArchive(target, source, derivation, expected, namespace_seals, families, limits,
+                                retain_json=JSON_CONSUMERS.get((app_id, kind, role), ()))
         source = None
         return result
     except DataIntakeBlocked:
