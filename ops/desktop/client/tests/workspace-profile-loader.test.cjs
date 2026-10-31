@@ -8,7 +8,8 @@ assert.equal(require('node:crypto').createHash('sha256').update(carrier).digest(
 const compiled=JSON.parse(require('node:child_process').execFileSync('python',['-B','-c',"import json,sys;sys.path.insert(0,sys.argv[1]);from module_workspace_ui_templates import TEMPLATES,GIT_ORIGINS;print(json.dumps({'template':TEMPLATES['make_member_desk_00.tpl'],'origin':GIT_ORIGINS['fec/surfaces/templates/make_member_desk_00.tpl']}))",packaging],{encoding:'utf8',maxBuffer:1024**2,timeout:20000}));
 const template=compiled.template,templateBytes=Buffer.from(template);
 assert.equal(templateBytes.length,compiled.origin.bytes);assert.equal(require('node:crypto').createHash('sha256').update(templateBytes).digest('hex'),compiled.origin.sha256);
-assert.equal(compiled.origin.commit,'541e7272b724925aa68b090813e5362ed8ea839c');assert.equal(require('node:crypto').createHash('sha1').update(Buffer.concat([Buffer.from('blob '+templateBytes.length+'\0'),templateBytes])).digest('hex'),compiled.origin.gitBlob);
+assert.equal(compiled.origin.commit,'8316ec04a92bed07c3499da0123d0537128cb8fc');assert.equal(require('node:crypto').createHash('sha1').update(Buffer.concat([Buffer.from('blob '+templateBytes.length+'\0'),templateBytes])).digest('hex'),compiled.origin.gitBlob);
+assert.match(template,/function briefV3HTML\(B\)/);assert.match(template,/Evidence updated after this brief was written/);
 const start=template.indexOf('window.__melangeProfileMerge=function(D2){'),end=template.indexOf('\n};',start)+3,stockMerge=template.slice(start,end);
 const fields=['articles','bills','bio','community','cook_pvi','district_brief','electoral','employers','financial','industry','partners','personal','psy','refs','staffdir'];
 const settle=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};

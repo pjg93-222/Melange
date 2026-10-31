@@ -1,8 +1,31 @@
 'use strict';
-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const {spawnSync}=require('node:child_process');
 const {fullMain}=require('./fixtures/full-main-fixture.cjs');
 const {dataStartupFailure}=require('../startup-failure.cjs');
 const {networkFailure}=require('../network-transport.cjs');
+
+test('a normal Melange build config reaches the full workspace startup before renderer reveal',t=>{
+ const runtimeRoot=fs.mkdtempSync(path.join(os.tmpdir(),'melange-workspace-build-main-'));
+ t.after(()=>{assert.equal(path.dirname(runtimeRoot),os.tmpdir());assert.ok(path.basename(runtimeRoot).startsWith('melange-workspace-build-main-'));fs.rmSync(runtimeRoot,{recursive:true,force:true});});
+ fs.mkdirSync(path.join(runtimeRoot,'melange','bootstrap'),{recursive:true});
+ fs.mkdirSync(path.join(runtimeRoot,'melange','python','bin'),{recursive:true});
+ fs.writeFileSync(path.join(runtimeRoot,'melange','bootstrap','desktop_backend.py'),'');
+ fs.writeFileSync(path.join(runtimeRoot,'melange','python','python.exe'),'');
+ fs.writeFileSync(path.join(runtimeRoot,'melange','python','bin','python3'),'');
+ const env={...process.env,DESKTOP_APP_ID:'melange',DESKTOP_RUNTIME_ROOT:runtimeRoot,DESKTOP_ACCESS_TRUST:'',
+  DESKTOP_ACCESS_MODE:'standalone',DESKTOP_UPDATE_PROVIDER:'github'};
+ delete env.DESKTOP_WORKSPACE_DATA_MODE;delete env.DESKTOP_GITHUB_REPOSITORY;
+ const built=spawnSync(process.execPath,['-e',"const c=require('./builder.cjs');process.stdout.write(JSON.stringify(c.extraMetadata.desktopAppConfig))"],
+  {cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env});
+ assert.equal(built.status,0,built.stderr);
+ const packagedConfig=JSON.parse(built.stdout);assert.deepEqual(packagedConfig.desktopWorkspaceData,{melange:'workspace-v1'});
+ const main=fullMain({appId:'melange'});t.after(()=>main.dispose());main.configure(packagedConfig);
+ const startup={channel:'workspace-v1'};let calls=0;main.install({workspaceFactory:()=>{calls++;return startup;}});
+ assert.equal(main.createModuleDataStartup(),startup);assert.equal(calls,1,'the packaged default selects the verified workspace data receiver');
+ main.configure({desktopWorkspaceData:{}});assert.notEqual(main.createModuleDataStartup(),startup,'an explicit limited/offline package does not select the workspace receiver');
+ assert.equal(calls,1,'the disabled mode does not construct another workspace receiver');
+});
 
 test('whole main owns its real retry coordinator across deferred startup and retry',async t=>{
  const main=fullMain({appId:'mentat',imports:{'./access-gate.cjs':{authorizeAvailable:gate=>gate.authorize()}}});t.after(()=>main.dispose());

@@ -34,14 +34,21 @@ builder also defaulted to disabled and ignored Mentat even when workspace-v1
 was explicitly requested. This prevented the paired report/model receiver
 from being selected, independently of the route defects above.
 
-Normal standalone GitHub Mentat builds now default to
-`desktopWorkspaceData: {mentat: 'workspace-v1'}`. An explicit
-`DESKTOP_WORKSPACE_DATA_MODE=disabled` remains supported. Explicit workspace-v1
-selects the channel for Melange or Mentat; Melange's default, managed-build
-defaults and Terrier behavior are unchanged. Windows sign-in and each app's
-binary update repository are unchanged. Selecting a local data directory does
-not disable a configured workspace-v1 feed. Original directories and user
-records remain in place; the paired reader binds separate verified inputs.
+Normal standalone GitHub builds for Melange and Mentat now default to their
+matching `desktopWorkspaceData: {<app>: 'workspace-v1'}` channel. An explicit
+`DESKTOP_WORKSPACE_DATA_MODE=disabled` remains supported for limited or offline
+builds. Managed builds, Terrier, Windows sign-in, each app's binary update
+repository, and the separate `desktopPublicData` setting are unchanged. Selecting
+a local data directory does not disable a configured workspace-v1 feed. Original
+directories and user records remain in place; the paired reader binds separate
+verified inputs before the backend is shown.
+
+For Melange, this channel stages the signed dashboard, graph, payroll, industry,
+and staffer-analysis workspace at startup, then renders the native dashboard
+from the verified snapshot. The current public snapshot's asset payload is about
+2.21 GiB, with about 5.60 GiB of archive expansion; first launch therefore needs
+several GiB of free disk and a working GitHub connection. Later launches reuse
+the verified cache. It does not load the full archive payload into memory.
 
 For normal builds, `builder.cjs`'s `extraMetadata.desktopAppConfig`, consumed
 by `build-native.cjs`, is authoritative. The historical per-release
@@ -52,7 +59,9 @@ inspect the final packaged metadata; copying the 1.0.40-r31 configuration
 would retain the missing feed. This change does not modify old installers.
 
 The builder regression matrix covers each application, standalone/managed
-access and unset, empty, disabled, workspace-v1 and invalid modes. Run:
+access and unset, empty, disabled, workspace-v1 and invalid modes. It also
+passes the normal Melange build metadata into the real main-process dispatch to
+confirm the workspace receiver is selected before renderer reveal. Run:
 
 ```text
 node --test ops/desktop/client/tests/builder-update-source.test.cjs

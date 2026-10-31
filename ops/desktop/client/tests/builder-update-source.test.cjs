@@ -9,7 +9,7 @@ const {spawnSync}=require('node:child_process');
 // Each app updates from its own public repository; the variable, when set, overrides it (2026-10-15 correction).
 const EXPECTED={melange:'pjg93-222/melange',mentat:'pjg93-222/mentat',terrier:'pjg93-222/geo'};
 
-test('standalone Mentat builds carry the full workspace feed by default, with explicit modes and unchanged Melange/Terrier behavior',()=>{
+test('standalone Melange and Mentat builds carry the full workspace feed by default, with explicit modes and unchanged Terrier behavior',()=>{
  const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'desktop-workspace-build-'));
  try{
   for(const appId of Object.keys(EXPECTED)){
@@ -23,7 +23,7 @@ test('standalone Mentat builds carry the full workspace feed by default, with ex
     const child=spawnSync(process.execPath,['-e',"const config=require('./builder.cjs');process.stdout.write(JSON.stringify(config.extraMetadata.desktopAppConfig))"],{cwd:path.resolve(__dirname,'..'),encoding:'utf8',windowsHide:true,env});
     if(mode==='renderer-path'){assert.notEqual(child.status,0);assert.match(child.stderr,/workspace/);}
     else{assert.equal(child.status,0,child.stderr);const config=JSON.parse(child.stdout);
-     const enabled=mode==='workspace-v1'||(!mode&&appId==='mentat'&&accessMode==='standalone');
+     const enabled=mode==='workspace-v1'||(!mode&&['melange','mentat'].includes(appId)&&accessMode==='standalone');
      assert.deepEqual(config.desktopWorkspaceData,enabled&&appId!=='terrier'?{[appId]:'workspace-v1'}:{},appId+' '+accessMode+' '+mode);
      assert.equal(config.desktopAccessMode,accessMode);
      assert.equal(config.desktopAuthentication,accessMode==='standalone'?'windows':'password');
