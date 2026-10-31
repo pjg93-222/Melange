@@ -93,7 +93,7 @@ def guarded_handler(handler, token, app_id, *, module_installation=None, workspa
                 from urllib.parse import urlsplit
                 from desktop_workspace import WORKSPACE_PATH
                 path = urlsplit(self.path).path
-                if path == WORKSPACE_PATH or (path == '/' and workspace.replaces_empty_root()):
+                if path == WORKSPACE_PATH:
                     if self.command != 'GET':
                         self.send_error(405, 'Workspace page requires GET')
                         return False
