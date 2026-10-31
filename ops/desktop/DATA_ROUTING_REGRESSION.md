@@ -106,8 +106,8 @@ this refresh tool.
 ## Remaining scope
 
 No installer build, publication, work-PC test or full desktop acceptance was
-performed for this candidate. Comparison and cross-reference routes still
-use local-source paths and are separate gaps. Activity and estimate modes
+performed for this candidate. Cross-reference still requires separate local
+reconciliation evidence and is not supplied by the signed report feed. Activity and estimate modes
 retain their native evidence availability checks. The graph adapter retains
 native calculation caching, but does not add the ordinary server's HTTP ETag
 wrapper or access telemetry; the renderer accepts uncached responses.
@@ -163,3 +163,24 @@ stable on repeat generation, and the 14 inventory tests passed again.
 Release assembly must include the reviewed native commit as well as this
 common-client branch: the inventories now pin its server bytes. No runtime,
 installer or release was produced by these integration changes.
+
+## Advanced comparison integration
+
+`/api/comparison` and `/api/comparison-flows` now select the same fixed signed
+workbooks as Graph and invoke the unchanged native `comparison_subjects` and
+`comparison_flows` readers. Returned workbook hashes must match signed
+receipts. Missing committee-activity evidence retains the native
+`issues`/`unavailable_activity_cycles` output; no evidence is synthesized.
+Hosted person-selection refusal and person-subject redaction are preserved.
+
+The access attributes are available before the workspace route executes:
+native `Handler.access_cfg` is initialized on the class and set by `main`
+before server creation. `AccessMixin.parse_request` authenticates and assigns
+`access_user` before returning to the desktop adapter's `parse_request`.
+
+The reader regression command above now passes **9 tests**, including actual
+native subjects/flows parity, invalid selectors/hash changes and the native
+person-redaction helpers. Both comparison endpoints fall through on the
+previous adapter. The standard bootstrap-only inventory refresh was repeated
+and reports no drift. This completes Advanced comparison routing; the
+Cross-reference tab still needs its separate saved reconciliation run/digest.

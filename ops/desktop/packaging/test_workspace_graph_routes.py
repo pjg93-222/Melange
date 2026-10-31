@@ -2,14 +2,17 @@
 
 Set MENTAT_TEST_RUNTIME to a packaged runtime containing bootstrap and sources.
 """
+import ast
 import hashlib
 import importlib.util
 import os
+import re
 from pathlib import Path
 import sys
 import tempfile
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 from urllib.parse import urlencode
 
 if not os.environ.get('MENTAT_TEST_RUNTIME'):
@@ -22,15 +25,24 @@ spec = importlib.util.spec_from_file_location('candidate_workspace_mentat',
 candidate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(candidate)
 import graph_data
+import comparison_data
 import snapshot_registry
 from report_insights import stamp, report_freshness, worksheet_data
 from module_application_contracts import DataIntakeBlocked
 from openpyxl import Workbook
 
+policy_names = {'donor_rows_allowed', 'names_person_subject', 'without_person_subjects'}
+policy_tree = ast.parse((RUNTIME / 'sources/mentat/app/server.py').read_text(encoding='utf-8'))
+policy = {'os': os, 're': re}
+exec(compile(ast.Module(body=[node for node in policy_tree.body
+    if isinstance(node, ast.FunctionDef) and node.name in policy_names], type_ignores=[]),
+    '<native-comparison-policy>', 'exec'), policy)
+
 
 class Handler:
     command = 'GET'
     headers = {}
+    access_cfg = SimpleNamespace(enforced=False)
     def __init__(self, server, path):
         self.server, self.path, self.result, self.status = server, path, None, None
     def valid_host(self):
@@ -50,9 +62,10 @@ class WorkspaceGraphRoutes(unittest.TestCase):
         for _ in range(3):
             sheet.append([''])
         sheet.append(['company', 'employee_tier', 'amount', 'include_in_analysis',
-                      'recipient_category', 'fact_type', 'recipient_key', 'recipient'])
+                      'recipient_category', 'fact_type', 'recipient_key', 'recipient', 'person_key', 'contributor'])
         sheet.append(['Test Bank', 'Employee', 125, 'yes', 'Company PAC', 'Master', '', ''])
         sheet.append(['Test Bank', 'Employee', 125, 'yes', 'Company PAC', 'Recipient', 'C00000001', 'Test PAC'])
+        sheet.append(['Test Bank', 'Employee', 125, 'yes', 'Company PAC', 'Employee', '', '', 'test-person', 'Test Person'])
         book.save(self.path)
         book.close()
         self.digest = hashlib.sha256(self.path.read_bytes()).hexdigest()
@@ -61,7 +74,12 @@ class WorkspaceGraphRoutes(unittest.TestCase):
         binding.console = SimpleNamespace(report_directory=Path(self.temp.name) / 'empty-local-reports')
         binding.module = SimpleNamespace(graph_schema=graph_data.graph_schema, stamp=stamp,
                                          graph_view=graph_data.graph_view, report_freshness=report_freshness,
-                                         worksheet_data=worksheet_data)
+                                         worksheet_data=worksheet_data,
+                                         comparison_subjects=comparison_data.subjects,
+                                         comparison_flows=comparison_data.flows)
+        for name in policy_names:
+            setattr(binding.module, name, policy[name])
+        binding.module.HOSTED_PERSON_LEVEL_REFUSED = 'Person-level fields are not available to this account on the hosted console.'
         binding.books = {'banking': self.path}
         binding.analysis = SimpleNamespace(facts={'banking': {'receipt': {'projectedWorkbookSha256': self.digest}}})
         binding.sources = [{'id': 'Banking', 'industry': 'Banking', 'workbook': self.path,
@@ -132,6 +150,42 @@ class WorkspaceGraphRoutes(unittest.TestCase):
         self.assertEqual(selected.result, worksheet_data(stamp(self.path), '2023-2024', 4))
         self.assertEqual(self.request('/api/report-data', id='published-reports', index=index,
                                      sheet='not-a-sheet', header=4).status, 400)
+
+    def test_advanced_comparison_uses_native_subjects_and_flows(self):
+        for route, engine in (('/api/comparison', comparison_data.subjects),
+                              ('/api/comparison-flows', comparison_data.flows)):
+            with self.subTest(route=route):
+                expected = engine([self.path], 'Banking')
+                actual = self.request(route, id='published-reports', industry='banking')
+                self.assertEqual(actual.status, 200)
+                for key, value in expected.items():
+                    self.assertEqual(actual.result[key], value)
+                self.assertEqual(actual.result['workspace_source_digest'], 'a' * 64)
+                self.assertEqual(actual.result['reports'][0]['sha256'], self.digest)
+                self.assertFalse(self.binding.console.report_directory.exists())
+
+    def test_advanced_comparison_rejects_unknown_selectors_and_changed_workbooks(self):
+        for route in ('/api/comparison', '/api/comparison-flows'):
+            with self.subTest(route=route):
+                self.assertEqual(self.request(route, id='other', industry='Banking').status, 400)
+                self.assertEqual(self.request(route, id='published-reports', industry='../Banking').status, 400)
+                self.binding.analysis.facts['banking']['receipt']['projectedWorkbookSha256'] = '0' * 64
+                with self.assertRaises(DataIntakeBlocked):
+                    self.request(route, id='published-reports', industry='Banking')
+                self.binding.analysis.facts['banking']['receipt']['projectedWorkbookSha256'] = self.digest
+
+    def test_advanced_comparison_preserves_native_hosted_person_policy(self):
+        self.assertTrue(any(row['kind'] == 'Person' for row in comparison_data.subjects([self.path], 'Banking')['subjects']))
+        with patch.dict(os.environ, {'MENTAT_DONOR_ROW_EMAILS': ''}):
+            handler = Handler(self.binding.server, '/api/comparison?id=published-reports&industry=Banking')
+            handler.access_cfg = SimpleNamespace(enforced=True)
+            handler.access_user = 'viewer@example.test'
+            self.assertTrue(self.binding.handle_request(handler))
+            self.assertEqual(handler.status, 200)
+            self.assertFalse(any(row['kind'] == 'Person' for row in handler.result['subjects']))
+            handler.path += '&kind=Person'
+            self.assertTrue(self.binding.handle_request(handler))
+            self.assertEqual(handler.status, 403)
 
 
 if __name__ == '__main__':

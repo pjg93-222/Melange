@@ -388,12 +388,26 @@ class MentatBinding:
                       workspace_source_digest=self.prepared.binding['sourceDigest'])
         return result
 
+    def _comparison(self, identifier, industry, *, flows=False):
+        catalog = self._graph_catalog(identifier)
+        slug = next((slug for slug in self.books if industry in (slug, REPORTS[slug][0])), None)
+        if slug is None or not any(item['name'] == REPORTS[slug][0] for item in catalog['industries']):
+            raise ValueError('Choose an industry with completed reports.')
+        path, (label, filename) = self.books[slug], REPORTS[slug]
+        engine = self.module.comparison_flows if flows else self.module.comparison_subjects
+        result = copy.deepcopy(engine([path], label))
+        data_require(len(result.get('reports', [])) == 1 and result['reports'][0].get('sha256')
+                     == self.analysis.facts[slug]['receipt']['projectedWorkbookSha256'])
+        result['reports'][0]['name'] = filename
+        result['workspace_source_digest'] = self.prepared.binding['sourceDigest']
+        return result
+
     def handle_request(self, handler):
         require(handler.server is self.server and self.verify())
         parsed = urlsplit(handler.path)
         gets = {'/api/contributions/session', '/api/contributions/catalog', '/api/insights/catalog',
                 '/api/forecast/pac', '/api/forecast/catalog', '/api/reports', '/api/report-sources', '/api/report', '/api/report-data',
-                '/api/graph-catalog', '/api/graph'}
+                '/api/graph-catalog', '/api/graph', '/api/comparison', '/api/comparison-flows'}
         posts = {'/api/contributions/query', '/api/contributions/records', '/api/insights/query', '/api/insights/records', '/api/forecast/project'}
         if parsed.path not in gets | posts:
             return False
@@ -436,7 +450,17 @@ class MentatBinding:
             query = parse_qs(parsed.query, keep_blank_values=True)
             if any(len(values) != 1 for values in query.values()):
                 raise ValueError('Duplicate request selector.')
-            if parsed.path == '/api/graph-catalog':
+            if parsed.path in ('/api/comparison', '/api/comparison-flows'):
+                redact = (parsed.path == '/api/comparison' and handler.access_cfg.enforced
+                          and not self.module.donor_rows_allowed(handler.access_user))
+                if redact and self.module.names_person_subject(query):
+                    handler.send({'error': self.module.HOSTED_PERSON_LEVEL_REFUSED}, 403)
+                    return True
+                result = self._comparison(query.get('id', [''])[0], query.get('industry', [''])[0],
+                                          flows=parsed.path.endswith('-flows'))
+                if redact:
+                    result = self.module.without_person_subjects(result)
+            elif parsed.path == '/api/graph-catalog':
                 result = self._graph_catalog(query.get('id', [''])[0])
             elif parsed.path == '/api/graph':
                 result = self._graph(query.get('id', [''])[0], query.get('industry', [''])[0],
