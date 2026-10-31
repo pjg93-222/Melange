@@ -257,8 +257,8 @@ const APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 22142,
-        "sha256": "781666677f24a47abc92f21a90b0d3948d765cdd72eb25a1712f5d899c36c2a4"
+        "bytes": 22450,
+        "sha256": "596103ee18a72659f79611972422165e33acfd1e8b805eef694a0bc66f12410a"
       },
       {
         "root": "bootstrap",
@@ -603,7 +603,7 @@ const APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "8de289914a21830795230bf1e9086f7906da86113b9e90d5e709f07d306afd8b",
+    "programFingerprint": "ef3f0ba3565a0948fa892a8c3dd399eb3a21c8dab205ff7f645c282576f07da3",
     "requiredKinds": [
       "melange.official-payroll-observations.v1"
     ],
@@ -2524,8 +2524,8 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 22142,
-        "sha256": "781666677f24a47abc92f21a90b0d3948d765cdd72eb25a1712f5d899c36c2a4"
+        "bytes": 22450,
+        "sha256": "596103ee18a72659f79611972422165e33acfd1e8b805eef694a0bc66f12410a"
       },
       {
         "root": "bootstrap",
@@ -2870,7 +2870,7 @@ const WORKSPACE_APPLICATION_SPECS=freeze({
         "sha256": "c2b7735d3a949d8599a0355500c04efface0903144bc8ad7523fdee81ac2dee0"
       }
     ],
-    "programFingerprint": "8de289914a21830795230bf1e9086f7906da86113b9e90d5e709f07d306afd8b",
+    "programFingerprint": "ef3f0ba3565a0948fa892a8c3dd399eb3a21c8dab205ff7f645c282576f07da3",
     "requiredKinds": [
       "melange.dashboard-pages.v1",
       "melange.staffer-display-graph.v1",
@@ -4797,8 +4797,8 @@ const DISTRICT_PROGRAM_SPECS=freeze({
       {
         "root": "bootstrap",
         "path": "workspace_melange.py",
-        "bytes": 22142,
-        "sha256": "781666677f24a47abc92f21a90b0d3948d765cdd72eb25a1712f5d899c36c2a4"
+        "bytes": 22450,
+        "sha256": "596103ee18a72659f79611972422165e33acfd1e8b805eef694a0bc66f12410a"
       },
       {
         "root": "bootstrap",
@@ -5989,7 +5989,7 @@ const DISTRICT_PROGRAM_SPECS=freeze({
         "sha256": "2bf4e7a744568b9f18fdac2ff080f36e293d3cce044d869744cc0f701b05e64a"
       }
     ],
-    "programFingerprint": "74636917ecad587d944ab433a73235dc0b02614d738bdf1087f6e4ccdf125473"
+    "programFingerprint": "b6e5a8e470b96e7d0e3ef2b99a3c8970104821b12879d51fbba701daf102f95a"
   }
 });
 module.exports=Object.freeze({APPLICATION_SPECS,WORKSPACE_APPLICATION_SPECS,DISTRICT_PROGRAM_SPECS});

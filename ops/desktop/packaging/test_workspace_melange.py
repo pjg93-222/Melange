@@ -31,21 +31,30 @@ class Routes(unittest.TestCase):
         handler=Handler(path);self.assertTrue(binding.handle_request(handler));return handler.result
 
     def test_exact_member_and_staffer_tabs_keep_encoded_selector(self):
-        cases={'/cu-member-desk.html?m=A%26B':'/Moneyball.html?m=A%26B',
-               '/cu-member-desk.html':'/Moneyball.html?v=desk',
-               '/staffer-network.html?s=A%20B':'/Moneyball.html?v=staffer&s=A+B',
-               '/staffer-network.html':'/Moneyball.html?v=staffer',
-               '/Moneyball%20Dashboard.html':'/Moneyball.html'}
+        cases={'/cu-member-desk.html?m=A%26B':'/?view=profile&m=A%26B',
+               '/cu-member-desk.html':'/?view=members',
+               '/staffer-network.html?s=A%20B':'/?view=people&s=A+B',
+               '/staffer-network.html':'/?view=people',
+               '/Moneyball%20Dashboard.html':'/?view=influence',
+               '/Moneyball.html':'/',
+               '/Moneyball.html?m=A%26B':'/?m=A%26B',
+               '/Moneyball.html?v=staffer&s=A%20B':'/?v=staffer&s=A+B',
+               '/Moneyball.html?v=industry':'/?v=industry'}
         for request,target in cases.items():
             with self.subTest(request=request):
                 result=self.invoke(request);self.assertEqual(result['status'],302);self.assertEqual(result['Location'],target)
 
     def test_selector_cannot_change_redirect_origin_or_smuggle_headers(self):
         result=self.invoke('/staffer-network.html?s=https%3A%2F%2Fevil%2Fx%0D%0AX-Test%3Ayes')
-        self.assertTrue(result['Location'].startswith('/Moneyball.html?v=staffer&s='))
+        self.assertTrue(result['Location'].startswith('/?view=people&s='))
         self.assertNotIn('\r',result['Location']);self.assertNotIn('\n',result['Location'])
         self.assertEqual(self.invoke('/cu-member-desk.html?m=A&m=B')['status'],400)
         self.assertEqual(self.invoke('/staffer-network.html?s='+'a'*257)['status'],400)
+        self.assertEqual(self.invoke('/Moneyball.html?m=A&m=B')['status'],400)
+        self.assertEqual(self.invoke('/Moneyball.html?v=A&v=B')['status'],400)
+        legacy=self.invoke('/Moneyball.html?m=https%3A%2F%2Fevil%2Fx%0D%0AX-Test%3Ayes')
+        self.assertTrue(legacy['Location'].startswith('/?m='))
+        self.assertNotIn('\r',legacy['Location']);self.assertNotIn('\n',legacy['Location'])
 
     def test_role_path_view_cannot_select_an_uncompiled_sibling_or_write(self):
         slot=_InputPath(Path('fixed.sqlite'),Path('receipt.json'),{})

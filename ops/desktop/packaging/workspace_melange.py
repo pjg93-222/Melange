@@ -318,17 +318,21 @@ class MelangeBinding:
             handler.send_header('Content-Length',str(len(raw)));handler.send_header('Cache-Control','no-store')
             handler.send_header('X-Content-Type-Options','nosniff');handler.send_header('Referrer-Policy','no-referrer');handler.end_headers()
             handler.wfile.write(raw);return True
-        aliases={'/Moneyball Dashboard.html':None,'/cu-member-desk.html':'m','/staffer-network.html':'s'}
+        aliases={'/Moneyball Dashboard.html':None,'/cu-member-desk.html':'m','/staffer-network.html':'s',
+                 '/Moneyball.html':'legacy'}
         if path in aliases:
             field=aliases[path]
             try:query=parse_qs(url.query,keep_blank_values=True,max_num_fields=4)
             except ValueError:handler.send_error(400);return True
-            if field and (len(query.get(field,[]))>1 or any(len(value)>256 for value in query.get(field,[]))):
+            selected=('m','v','s') if field=='legacy' else (field,) if field else ()
+            if any(len(query.get(key,[]))>1 or any(len(value)>256 for value in query.get(key,[])) for key in selected):
                 handler.send_error(400);return True
-            selector=query.get(field,[''])[0] if field else ''
-            values=({'v':'staffer',**({'s':selector} if selector else {})} if field=='s'
-                    else {'m':selector} if field=='m' and selector else {'v':'desk'} if field=='m' else {})
-            location='/Moneyball.html'+('?' + urlencode(values) if values else '')
+            selector=query.get(field,[''])[0] if field and field!='legacy' else ''
+            values=({key:query[key][0] for key in selected if key in query} if field=='legacy'
+                    else {'view':'people',**({'s':selector} if selector else {})} if field=='s'
+                    else {'view':'profile','m':selector} if field=='m' and selector
+                    else {'view':'members'} if field=='m' else {'view':'influence'})
+            location='/'+('?' + urlencode(values) if values else '')
             handler.send_response(302);handler.send_header('Location',location)
             handler.send_header('Cache-Control','no-store');handler.send_header('Content-Length','0');handler.end_headers();return True
         if path=='/__desktop/workspace/member-profiles.json':
