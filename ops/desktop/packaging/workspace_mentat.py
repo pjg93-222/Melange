@@ -355,11 +355,45 @@ class MentatBinding:
     def _catalog(self):
         return self.semantics.catalog(self.console.report_directory, self.sources)
 
+    def _graph_catalog(self, identifier):
+        if identifier != 'published-reports':
+            raise ValueError('Choose a verified workspace report.')
+        industries = []
+        for slug, path in self.books.items():
+            if self.module.graph_schema(self.module.stamp(path)):
+                label, filename = REPORTS[slug]
+                industries.append({'name': label,
+                    'indices': [int(hashlib.sha256(filename.encode()).hexdigest()[:12], 16)]})
+        return {'industries': sorted(industries, key=lambda item: item['name']),
+                'unavailable_reports': [], 'report_directory': 'Verified GitHub workspace',
+                'message': '' if industries else 'No supported reports are available in the verified workspace.'}
+
+    def _graph(self, identifier, industry, filters):
+        catalog = self._graph_catalog(identifier)
+        slug = next((slug for slug in self.books if industry in (slug, REPORTS[slug][0])), None)
+        if slug is None or not any(item['name'] == REPORTS[slug][0] for item in catalog['industries']):
+            raise ValueError('Choose an industry with completed reports.')
+        path, (label, filename) = self.books[slug], REPORTS[slug]
+        # Use the installed graph engine and its source/cache guards unchanged.
+        # Only the fixed, verified workbook selection differs from local mode.
+        result = copy.deepcopy(self.module.graph_view([path], filters))
+        receipt = self.analysis.facts[slug]['receipt']
+        data_require(len(result.get('reports', [])) == 1
+                     and result['reports'][0].get('sha256') == receipt['projectedWorkbookSha256'])
+        registry = self.programs['snapshot_registry'].registry(self.console.report_directory, self.sources)
+        entry = next(item for item in registry['snapshots'] if item['industry'] == label)
+        result['reports'][0].update(name=filename, source_directory='Verified GitHub workspace',
+                                   build_stamp=entry['build_stamp'], freshness=self.module.report_freshness(path))
+        result.update(industry=label, report_directory='Verified GitHub workspace',
+                      workspace_source_digest=self.prepared.binding['sourceDigest'])
+        return result
+
     def handle_request(self, handler):
         require(handler.server is self.server and self.verify())
         parsed = urlsplit(handler.path)
         gets = {'/api/contributions/session', '/api/contributions/catalog', '/api/insights/catalog',
-                '/api/forecast/pac', '/api/forecast/catalog', '/api/reports', '/api/report-sources', '/api/report', '/api/report-data'}
+                '/api/forecast/pac', '/api/forecast/catalog', '/api/reports', '/api/report-sources', '/api/report', '/api/report-data',
+                '/api/graph-catalog', '/api/graph'}
         posts = {'/api/contributions/query', '/api/contributions/records', '/api/insights/query', '/api/insights/records', '/api/forecast/project'}
         if parsed.path not in gets | posts:
             return False
@@ -402,7 +436,12 @@ class MentatBinding:
             query = parse_qs(parsed.query, keep_blank_values=True)
             if any(len(values) != 1 for values in query.values()):
                 raise ValueError('Duplicate request selector.')
-            if parsed.path == '/api/forecast/pac':
+            if parsed.path == '/api/graph-catalog':
+                result = self._graph_catalog(query.get('id', [''])[0])
+            elif parsed.path == '/api/graph':
+                result = self._graph(query.get('id', [''])[0], query.get('industry', [''])[0],
+                                     {key: values[0] for key, values in query.items()})
+            elif parsed.path == '/api/forecast/pac':
                 result = self.forecast.models['pac'].catalog()
             elif parsed.path == '/api/forecast/catalog':
                 result = self.forecast.models['giving'].catalog()
@@ -431,7 +470,7 @@ class MentatBinding:
                 if parsed.path == '/api/report':
                     handler.send(path.read_bytes(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                     return True
-                result = self.module.worksheet_data(path, query.get('sheet', [''])[0], int(query.get('header', ['0'])[0]))
+                result = self.module.worksheet_data(self.module.stamp(path), query.get('sheet', [''])[0], int(query.get('header', ['0'])[0]))
             require(self.verify())
             handler.send(result)
             return True
