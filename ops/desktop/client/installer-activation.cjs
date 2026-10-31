@@ -1,6 +1,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const {execFile}=require('node:child_process');
+const {desktopProbe}=require('./desktop-probe.cjs');
+const {verifyProbeRuntime}=require('./signature-probe-runtime.cjs');
 const {appDefinition}=require('./apps.cjs');
 const MAX_AMBIGUOUS_MS=30*60*1000,MAX_RECEIPT_BYTES=8192;
 const TOKEN=/^[0-9a-f]{64}$/;
@@ -38,26 +39,16 @@ function bindDispatch(updater,attempt){
   return()=>{if(updater.spawnLog===wrapped)updater.spawnLog=original;};
 }
 
-// Fixed PowerShell source; paths and the attempt token are JSON on stdin. Only
-// the bounded identity projection is returned, never process command lines.
-const PROCESS_SCRIPT=String.raw`$ErrorActionPreference='Stop'; $ProgressPreference='SilentlyContinue';
-$inputData=[Console]::In.ReadToEnd() | ConvertFrom-Json;
-$expected=[IO.Path]::GetFullPath($inputData.installerPath);
-$pattern='(?:^|\s)"?'+[regex]::Escape('--desktop-activation='+$inputData.token)+'"?(?:\s|$)';
-$rows=@(Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -and [IO.Path]::GetFullPath($_.ExecutablePath).Equals($expected,[StringComparison]::OrdinalIgnoreCase) -and $_.CommandLine -match $pattern } | ForEach-Object {
-  [ordered]@{pid=[int]$_.ProcessId; startedAt=$_.CreationDate.ToUniversalTime().ToString('o'); installerPath=$_.ExecutablePath}
-}); ConvertTo-Json -InputObject $rows -Compress`;
-async function inspectProcesses(attempt,{execute=execFile,platform=process.platform}={}){
-  if(platform!=='win32')throw new Error('Windows installer observation unavailable');
-  const root=process.env.SystemRoot||'C:\\Windows',executable=path.join(root,'System32','WindowsPowerShell','v1.0','powershell.exe');
-  return new Promise((resolve,reject)=>{
-    const child=execute(executable,['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(PROCESS_SCRIPT,'utf16le').toString('base64')],
-      {windowsHide:true,timeout:10000,maxBuffer:32768,env:{...process.env,PSModulePath:path.join(root,'System32','WindowsPowerShell','v1.0','Modules')}},(error,stdout,stderr)=>{
-        if(error||stderr)return reject(new Error('Windows installer observation unavailable'));
-        try{const rows=JSON.parse(stdout);if(!Array.isArray(rows)||rows.length>8)throw new Error();resolve(rows);}catch{reject(new Error('Invalid Windows installer observation'));}
-      });
-    child.stdin.on('error',()=>{});child.stdin.end(JSON.stringify({installerPath:attempt.installerPath,token:attempt.token}));
-  });
+// Only the authenticated, fixed native observer sees process command lines;
+// it returns matching path/token/creation-time identities, never raw arguments.
+async function inspectProcesses(attempt,{resources,appId,probe=desktopProbe,verify=verifyProbeRuntime,platform=process.platform}={}){
+  if(platform!=='win32'||!TOKEN.test(attempt?.token)||!path.isAbsolute(attempt?.installerPath||''))throw new Error('Windows installer observation unavailable');
+  const command=verify(resources,appId);
+  const rows=await probe(command,'--desktop-installer-processes',{installerPath:attempt.installerPath,token:attempt.token},{timeout:10000,limit:32768});
+  if(!Array.isArray(rows)||rows.length>8||rows.some(row=>!row||Object.keys(row).sort().join('|')!=='installerPath|pid|startedAt'||
+      !Number.isSafeInteger(row.pid)||row.pid<=0||typeof row.startedAt!=='string'||!Number.isFinite(Date.parse(row.startedAt))||!samePath(row.installerPath,attempt.installerPath)))
+    throw new Error('Invalid Windows installer observation');
+  return rows;
 }
 function readReceipt(attempt,{readFile=fs.readFileSync,lstat=fs.lstatSync,realpath=fs.realpathSync.native}={}){
   const filename=receiptPath(attempt);let stat;
@@ -97,4 +88,4 @@ async function observeAttempt(attempt,{appId,version,nativeFiles,target,activate
     return {status:bounded?'unknown':'abandoned'};
   }catch{return {status:bounded?'unknown':'abandoned'};}
 }
-module.exports={createAttempt,bindDispatch,observeAttempt,inspectProcesses,readReceipt,receiptPath,MAX_AMBIGUOUS_MS,PROCESS_SCRIPT};
+module.exports={createAttempt,bindDispatch,observeAttempt,inspectProcesses,readReceipt,receiptPath,MAX_AMBIGUOUS_MS};

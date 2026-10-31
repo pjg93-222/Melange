@@ -27,7 +27,7 @@ DENIED_SUFFIXES = ('.sqlite', '.sqlite3', '.sqlite-wal', '.sqlite-shm', '.sqlite
 POCKET_TEMPLATE = 'mentat/tools/pocket/mentat-pocket.html'
 POCKET_PATTERN = re.compile(r'(/\*__DATA_START__\*/).*?(/\*__DATA_END__\*/)', re.S)
 BOOTSTRAP_FILES = (
-    'desktop_backend.py', 'desktop_audit.py', 'native_credentials.py', 'native_access_state.py',
+    'desktop_backend.py', 'native_windows_signature.py', 'desktop_audit.py', 'native_credentials.py', 'native_access_state.py',
     'melange_bootstrap.py', 'desktop_workspace.py', 'melange_data_paths.py', 'mentat_layout.py', 'desktop_migrations.py',
     'terrier_owner.py', 'terrier_district.py', 'terrier_runtime_handoff.py', 'terrier_github_snapshot.py', 'terrier_standalone.py', 'desktop_credentials.py', 'desktop_figure_renderer.py',
     'module_data_snapshot.py', 'melange_module_data.py', 'mentat_module_data.py',
