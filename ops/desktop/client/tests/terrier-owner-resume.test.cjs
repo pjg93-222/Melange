@@ -1,7 +1,8 @@
 'use strict';
-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const test=require('node:test'),assert=require('node:assert/strict'),path=require('node:path');
 const client=process.env.LIFECYCLE_BASELINE_ROOT||path.resolve(__dirname,'..');
 const {AccessLifecycle}=require(path.join(client,'access-lifecycle.cjs'));
+const {fullMain}=require('./fixtures/full-main-fixture.cjs');
 
 function fixture({owner=true}={}){
  const approved={accepted:{grant:{appId:'terrier',serverId:'server',deviceId:'device',principalId:'principal',accountIdentity:'approved-account',role:'local_administrator',districtIds:['or-05']},revoked:false},
@@ -19,23 +20,19 @@ function fixture({owner=true}={}){
  return {approved,runtime,counts,gate,lifecycle};
 }
 
-function mainLaunch(f){
- const source=fs.readFileSync(path.join(client,'main.cjs'),'utf8');
- const start=source.indexOf('async function launchAuthorized(fromAccess){');
- const end=source.indexOf('// Terrier: the chosen district',start);
- assert.ok(start>=0&&end>start,'Use the actual published/candidate main launch function');
- const context={URL,background:false,closing:false,openingAccess:false,portable:true,packs:null,definition:{id:'terrier'},
-  accessLifecycle:f.lifecycle,accessGate:f.gate,runtime:f.runtime,runtimePartition:{},districtSwitch:null,
-  refuseModuleDataSettings(){},moduleDataStartup:null,loadingStatus:async()=>{},updater:{markApplicationReady(){},markApplicationFailed:async()=>{}},ensureAccess:async()=>f.gate,settleDistrict:async()=>{},read:()=>f.runtime.configuration,bundleNotice(){},
-  window:{hide(){},show(){f.counts.show++;},webContents:{getURL:()=>f.runtime.origin+'/',}},
-  accessWindow:{close(){f.counts.closeAccess++;}},showAccess:async()=>{},showSetup:async()=>{},updateStatus(){},
-  showTerrierSignIn:async()=>{f.counts.signin++;await f.lifecycle.prepareAuthentication();},
-  require(name){
-   if(name==='./access-gate.cjs')return {authorizeAvailable:gate=>gate.authorize()};
-   if(name==='./access-lifecycle.cjs')return {terrierSession:async()=>{f.counts.session++;return true;}};
-   throw new Error('Unexpected fixture import: '+name);
-  }};
- return vm.runInNewContext('('+source.slice(start,end)+')',context)(true);
+async function mainLaunch(f){
+ const main=fullMain({client,appId:'terrier',settings:f.runtime.configuration,imports:{
+  './access-gate.cjs':{authorizeAvailable:gate=>gate.authorize()},
+  './access-lifecycle.cjs':{terrierSession:async()=>{f.counts.session++;return true;}}
+ }});
+ let url=f.runtime.origin+'/';
+ main.install({runtime:f.runtime,gate:f.gate,lifecycle:f.lifecycle,
+  updater:{markApplicationReady(){},markApplicationFailed:async()=>{}},
+  window:{hide(){},show(){f.counts.show++;},loadURL:async value=>{url=value;},isDestroyed:()=>false,isVisible:()=>true,webContents:{getURL:()=>url,send(){}}},
+  accessWindow:{close(){f.counts.closeAccess++;}},showSetup:async()=>{},
+  showTerrierSignIn:async()=>{f.counts.signin++;await f.lifecycle.prepareAuthentication();}});
+ try{assert.equal(main.startupRetry.constructor.name,'StartupRetry');return await main.launch(true);}
+ finally{main.dispose();}
 }
 
 test('warm main recovers the stale owner latch without logout or a sign-in window',async()=>{

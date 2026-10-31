@@ -1,8 +1,8 @@
 'use strict';
-// Production downloads explicitly use the previously deployed Node HTTPS path.
+// Production downloads use Electron's network stack after app readiness so the
+// configured Windows proxy/PAC and system trust are honored.
 // TLS validation, anonymous requests and signed artifact checks remain required.
-// The native adapter remains available for explicit transport tests; no request
-// silently changes transport after a failure.
+// Headless tooling may select Node HTTPS; no request silently changes transport.
 const https=require('node:https'),{EventEmitter}=require('node:events'),{PassThrough}=require('node:stream');
 let configured=null;
 const RETRYABLE=new Set(['timeout','unreachable','proxy','rate_limited']);

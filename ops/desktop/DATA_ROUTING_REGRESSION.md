@@ -11,7 +11,9 @@ Three defects are addressed:
 1. Files created in the default desktop data directory could satisfy the local
    workspace heuristic and prevent any GitHub data startup. The default root
    now retains GitHub startup, including physical aliases and Windows case
-   variations. Custom local directories retain their previous behavior.
+   variations. A configured workspace-v1 feed now also takes precedence for
+   used/custom directories; limited builds without that channel retain their
+   previous local-workspace behavior.
 2. Signed GitHub report downloads were exposed by `/api/report-sources`, but
    `/api/graph-catalog` and `/api/graph` fell through to the empty local report
    folder. Both now select signed workbooks and invoke the existing native
@@ -37,8 +39,9 @@ Normal standalone GitHub Mentat builds now default to
 `DESKTOP_WORKSPACE_DATA_MODE=disabled` remains supported. Explicit workspace-v1
 selects the channel for Melange or Mentat; Melange's default, managed-build
 defaults and Terrier behavior are unchanged. Windows sign-in and each app's
-binary update repository are unchanged. Existing explicitly selected local
-workspaces still use the earlier startup selection rules.
+binary update repository are unchanged. Selecting a local data directory does
+not disable a configured workspace-v1 feed. Original directories and user
+records remain in place; the paired reader binds separate verified inputs.
 
 For normal builds, `builder.cjs`'s `extraMetadata.desktopAppConfig`, consumed
 by `build-native.cjs`, is authoritative. The historical per-release
@@ -184,3 +187,43 @@ person-redaction helpers. Both comparison endpoints fall through on the
 previous adapter. The standard bootstrap-only inventory refresh was repeated
 and reports no drift. This completes Advanced comparison routing; the
 Cross-reference tab still needs its separate saved reconciliation run/digest.
+
+## Used profiles, native transport and retry scope
+
+Follow-up review of Claude commit `41631706884b93cd848da60f18615f3f2098877f`
+confirmed two remaining startup selection issues. The configured workspace-v1
+branch now precedes local-cache detection for both supported applications.
+Explicit disabled builds keep their existing limited/local selection; no new
+per-profile override was invented. Production downloads select the existing
+Electron network adapter after `app.whenReady()`, allowing system proxy/PAC
+resolution. TLS, fixed-host redirects, anonymous requests and signed-data
+verification remain enforced; unresolved proxy authentication still defers.
+
+The reported `startupRetry` ReferenceError came from a test that extracted
+`launchAuthorized` without its enclosing declaration (and omitted
+`windowsAuthentication`). The production declaration was already in the same
+lexical block before any ready/IPC launch. Its code was not changed. The owner
+resume test now executes the complete main module with an Electron host double,
+its real retry coordinator, and the original lifecycle implementation. A new
+whole-main regression covers deferred startup/retry, network readiness, and
+configured feeds with populated custom directories while preserving user files.
+
+The following **113 tests passed** (with ordinary client dependencies available):
+
+```text
+node --test ops/desktop/client/tests/full-main-startup.test.cjs ops/desktop/client/tests/terrier-owner-resume.test.cjs ops/desktop/client/tests/local-workspace.test.cjs ops/desktop/client/tests/network-transport.test.cjs ops/desktop/client/tests/main-module-lifecycle.test.cjs ops/desktop/client/tests/main-module-preflight.test.cjs
+```
+
+A separate real Electron **44.7.2** run of
+`tests/network-transport-electron.cjs --package=<prepared-package.json>` used an
+isolated temporary profile and the actual native adapter. Both public and
+workspace signed pointers verified, and their 3,937/4,766-byte manifest hashes
+matched. System proxy resolution completed. This checks actual metadata
+transport, not a corporate proxy deployment or full data activation. No data
+payloads were downloaded in that check. Full packaged application/data/UI
+acceptance remains required for the revised artifact.
+
+The 1.0.39 client repair commit `6625901e0` remains an ancestor. The older-instance
+replacement, junction-aware roots, and installer-cleanup implementation are
+preserved. The standard bootstrap inventory check reports no drift: this
+follow-up changes client startup and its tests, not native runtime source bytes.

@@ -17,7 +17,7 @@ for(const appId of ['melange','mentat']){
   assert.equal(hasLocalWorkspace(appId,{dataDirectory:external},{defaultDataDirectory:dataDirectory}),true);
  });
 
- test(appId+' actual main factory retains GitHub startup for default data and preserves an external workspace',t=>{
+ test(appId+' configured feed stays active for both default and used external roots',t=>{
   const userData=root(t),dataDirectory=path.join(userData,'data');seedWorkspace(appId,dataDirectory);
   const original=path.join(userData,'selected-original');seedWorkspace(appId,original);
   const file=path.join(__dirname,'..','main.cjs'),source=fs.readFileSync(file,'utf8'),start=source.indexOf('function createModuleDataStartup()'),end=source.indexOf('\nfunction createWorkspaceDataStartup()',start);
@@ -27,7 +27,8 @@ for(const appId of ['melange','mentat']){
    createWorkspaceDataStartup:()=>{workspaceStarts++;return startup;},require:name=>{assert.equal(name,'./local-workspace.cjs');return require('../local-workspace.cjs');}};
   vm.runInNewContext(source.slice(start,end),context,{filename:file});
   assert.equal(context.createModuleDataStartup(),startup);assert.equal(workspaceStarts,1);
-  configuration={dataDirectory:original};assert.equal(context.createModuleDataStartup(),null);assert.equal(workspaceStarts,1);
+  configuration={dataDirectory:original};assert.equal(context.createModuleDataStartup(),startup);assert.equal(workspaceStarts,2);
+  context.applicationConfig.desktopWorkspaceData={};assert.equal(context.createModuleDataStartup(),null);assert.equal(workspaceStarts,2);
  });
 }
 
